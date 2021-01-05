@@ -1,2 +1,4 @@
 *.pyc
 araalictl
+araalictl.darwin-amd64_v*
+araalictl.linux-amd64_v*
