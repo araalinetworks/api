@@ -16,10 +16,14 @@ def fetch():
         url = darwin_url
     else:
         raise Usage("only linux and mac are currently supported")
-    print("Fetching araalictl ...")
-    r = requests.get(url, allow_redirects=True)
-    open('araalictl', 'wb').write(r.content)
-    os.chmod('araalictl', 0o777)
+    if not os.path.exists("araalictl"):
+        print("Fetching araalictl ...")
+        r = requests.get(url, allow_redirects=True)
+        open('araalictl', 'wb').write(r.content)
+        os.chmod('araalictl', 0o777)
+    else:
+        print("upgrading araalictl ...")
+        run_command("sudo ./araalictl upgrade")
 
 
 def help():
