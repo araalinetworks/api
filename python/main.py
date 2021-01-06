@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
 """
+
+from __future__ import print_function
+
 __author__ = "Abhishek R. Singh <abhishek@araalinetworks.com>"
 __date__ = "5 Jan 2020"
 __version__ = "1.0"
