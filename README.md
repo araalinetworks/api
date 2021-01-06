@@ -1,8 +1,8 @@
 # Getting Started
 ```
 mkdir araalinetworks
-git clone https://github.com/araalinetworks/policy.git
-cd policy/python
+git clone https://github.com/araalinetworks/api.git
+cd api/python
 
 # install/upgrade
 python araalictl.py
