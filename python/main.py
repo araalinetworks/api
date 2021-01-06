@@ -9,11 +9,11 @@ __credits__ = "Guido van Rossum, for an excellent programming language."
 import atexit
 import getopt
 import inspect
+from io import StringIO
 import os
 import pydoc
 import readline
 import rlcompleter  # pylint: disable=W0611
-import StringIO
 import shlex
 import subprocess
 import sys
@@ -34,6 +34,11 @@ class ModGlobals:
 mod_globals = ModGlobals()  # pylint: disable=C0103
 
 
+def eprint(*args, **kwargs):
+    args = [a.decode() for a in args]
+    print(*args, file=sys.stderr, **kwargs)
+
+
 def run_command(command, result=False, debug=False, env=os.environ):
     def collect_output(ret, output):
         if output:
@@ -41,7 +46,7 @@ def run_command(command, result=False, debug=False, env=os.environ):
             if result:
                 ret.append(output)
             else:
-                print >>sys.stderr, output
+                eprint(output)
 
     if debug:
     	print(command, result)
@@ -74,7 +79,7 @@ def help(*args):  # pylint: disable=W0622
                          inspect.isfunction(x) and
                          [a for a in args if x.__name__.startswith(a)]]
     if 0:
-        print [x.__name__ for x in all_functions]
+        print([x.__name__ for x in all_functions])
 
     doc_strings = [(i.__name__, i.__doc__) for i in all_functions]
     doc_strings.sort(key=lambda x: x[0], reverse=0)
@@ -82,7 +87,7 @@ def help(*args):  # pylint: disable=W0622
     doc_strings = ['  %-16s\t%s\n' % (i, j) for i, j in doc_strings if
                    j is not None]
 
-    print "".join(doc_strings)
+    print("".join(doc_strings))
 h = help  # pylint: disable=C0103
 
 
@@ -107,15 +112,15 @@ def onecmd(cmd):
     sys.stdout = StringIO.StringIO()
 
     if 0:
-        print args[0]
+        print(args[0])
 
     try:
         eval("%s%s" % (args[0], tuple(args[1:])))
-    except Usage, err:
+    except Usage as err:
         if err.msg:
-            print "***", err.msg
+            print("***", err.msg)
     except:
-        print sys.exc_info()
+        print(sys.exc_info())
         traceback.print_exc(file=sys.stderr)
 
     ostr = sys.stdout.getvalue()
@@ -128,7 +133,7 @@ def onecmd(cmd):
         for outmod in cmd[1:]:
             if debug:
                 # pylint: disable=C0323
-                print >>sys.stderr, "processing OM", outmod
+                eprint("processing OM", outmod)
             outmod = shlex.split(outmod)
 
             # this will make sure only last pager request will persist
@@ -137,8 +142,7 @@ def onecmd(cmd):
                 use_pager = 1
             if debug:
                 # pylint: disable=C0323
-                print >>sys.stderr, "pager:", use_pager, outmod[0].strip(),
-                print >>sys.stderr, outmod
+                eprint("pager:", use_pager, outmod[0].strip(), outmod)
 
             mypipe = subprocess.Popen(outmod, bufsize=0, stdin=subprocess.PIPE,
                                       stdout=subprocess.PIPE)
@@ -156,7 +160,7 @@ def onecmd(cmd):
 
     if debug:
         # pylint: disable=C0323
-        print >>sys.stderr, "final output:", len(ostr)
+        eprint("final output:", len(ostr))
 
 
 def cli(prompt):
@@ -191,8 +195,8 @@ def _usage():
     global mod_globals
 
     # pylint: disable=C0323
-    print >>sys.stderr, "Usage: " + mod_globals.progname + \
-        " [-v <verbose>] <filename>"
+    eprint("Usage: " + mod_globals.progname + \
+        " [-v <verbose>] <filename>")
 
 
 def main(argv=None):
@@ -211,7 +215,7 @@ def main(argv=None):
 
         try:
             optlist, args = getopt.getopt(argv[1:], 'v:')
-        except getopt.GetoptError, cause:
+        except getopt.GetoptError as cause:
             _usage()
             raise Usage(cause)
 
@@ -235,7 +239,7 @@ def main(argv=None):
                                        ".%s_history" % prompt))
         except:  # pylint: disable=W0702
             if 0:
-                print sys.exc_info()
+                print(sys.exc_info())
                 traceback.print_exc(file=sys.stderr)
 
         if not args:
@@ -244,9 +248,9 @@ def main(argv=None):
             onecmd(" ".join(args))
         return 0
 
-    except Usage, err:
+    except Usage as err:
         if err.msg:
-            print "***", err.msg
+            print("***", err.msg)
         return 1
 
 if __name__ == '__main__':
