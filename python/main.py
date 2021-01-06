@@ -44,7 +44,7 @@ def run_command(command, result=False, debug=False, env=os.environ):
         if output:
             output = output.strip()
             if result:
-                ret.append(output)
+                ret.append(output.decode())
             else:
                 eprint(output)
 
