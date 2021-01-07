@@ -16,6 +16,7 @@ python araalictl.py
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/testing-your-ssh-connection
 
 # Policy acceptance
+```
 ap = AppPolicy("dev", "cassandra")
 for link in ap.iterlinks():
   if something or link.lstate != "DEFINED_POLICY":
@@ -23,8 +24,10 @@ for link in ap.iterlinks():
   if something: # based on some side information
     link.snooze()
 ap.commit()
+```
 
 # Policy relocation
+```
 ap2 = ap.relocate()
 for link in ap2.iterlinks():
   # accept is the default thing on relocation
@@ -33,3 +36,4 @@ for link in ap2.iterlinks():
   link.client.relocate(...)
   link.server.relocate(...)
 ap2.commit()
+```
