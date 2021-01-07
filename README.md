@@ -23,6 +23,7 @@ for link in ap.iterlinks():
     link.accept() # based on some side information
   if something: # based on some side information
     link.snooze()
+ap.review()
 ap.commit()
 ```
 
@@ -35,5 +36,6 @@ for link in ap2.iterlinks():
   # relocate either client or server for the link's that need change
   link.client.relocate(...)
   link.server.relocate(...)
+ap2.review()
 ap2.commit()
 ```
