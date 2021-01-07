@@ -17,7 +17,7 @@ python araalictl.py
 
 # Accept policies
 ```
-ap = AppPolicy("dev", "cassandra")
+ap = AppPolicy(zone, app)
 for link in ap.iterlinks():
   if something or link.lstate != "DEFINED_POLICY":
     link.accept() # based on some side information
@@ -29,7 +29,7 @@ ap.commit()
 
 # Relocate Policies
 ```
-ap2 = ap.relocate()
+ap2 = ap.relocate(new_zone, new_app)
 for link in ap2.iterlinks():
   # accept is the default thing on relocation
   link.snooze() # snooze the ones you dont like
