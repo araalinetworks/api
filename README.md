@@ -14,3 +14,22 @@ python araalictl.py
 * https://www.araalinetworks.com/signup
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/testing-your-ssh-connection
+
+# Policy acceptance
+ap = AppPolicy("dev", "cassandra")
+for link in ap.iterlinks():
+  if something or link.lstate != "DEFINED_POLICY":
+    link.accept() # based on some side information
+  if something: # based on some side information
+    link.snooze()
+ap.commit()
+
+# Policy relocation
+ap2 = ap.relocate()
+for link in ap2.iterlinks():
+  # accept is the default thing on relocation
+  link.snooze() # snooze the ones you dont like
+  # relocate either client or server for the link's that need change
+  link.client.relocate(...)
+  link.server.relocate(...)
+ap2.commit()
