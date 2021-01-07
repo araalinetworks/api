@@ -41,7 +41,7 @@ app2.review() # reivew what we will be committing
 app2.commit()
 ```
 
-# Navigation
+# Navigation and Drilldown
 ```
 run = Runtime()
 run.iterstats() # dump summary stats
