@@ -75,5 +75,5 @@ for link in run.iterzones("dev").iterapps("cassandra").iterlinks(afilter=True):
     print(link)
     link.accept()
 run.iterzones("dev").iterapps("cassandra").review()
-run.iterzones("dev").iterapps("cassandra").commit
+run.iterzones("dev").iterapps("cassandra").commit()
 ```
