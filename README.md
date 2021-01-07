@@ -69,4 +69,11 @@ for link in run.iterzones("nightly").iterapps("bendvm").iterlinks():
     link.snooze()
 run.iterzones("nightly").iterapps("bendvm").review() # review what will get committed
 run.iterzones("nightly").iterapps("bendvm").commit()
+
+# accept all open alerts for dev/cassandra
+for link in run.iterzones("dev").iterapps("cassandra").iterlinks(afilter=True):
+    print(link)
+    link.accept()
+run.iterzones("dev").iterapps("cassandra").review()
+run.iterzones("dev").iterapps("cassandra").commit
 ```
