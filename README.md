@@ -31,8 +31,9 @@ ap.commit()
 ```
 ap2 = ap.relocate(new_zone, new_app)
 for link in ap2.iterlinks():
-  # accept is the default thing on relocation
+  # accept is the default thing on relocation for all accepted policies in ap, rest is snoozed by default
   link.snooze() # snooze the ones you dont like
+  link.accept() # if you want to accept a snoozed on in original
   # relocate either client or server for the link's that need change
   link.client.relocate(...)
   link.server.relocate(...)
