@@ -15,7 +15,7 @@ python araalictl.py
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/testing-your-ssh-connection
 
-# Policy acceptance
+# Accept policies
 ```
 ap = AppPolicy("dev", "cassandra")
 for link in ap.iterlinks():
@@ -26,7 +26,7 @@ for link in ap.iterlinks():
 ap.commit()
 ```
 
-# Policy relocation
+# Relocate Policies
 ```
 ap2 = ap.relocate()
 for link in ap2.iterlinks():
