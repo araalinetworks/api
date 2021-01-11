@@ -34,17 +34,17 @@ for link in app2.iterlinks():
   # accept is the default thing on relocation for all accepted policies in ap, rest is snoozed by default
   link.snooze() # snooze the ones you dont like
   link.accept() # if you want to accept a snoozed on in original
-  # relocate either client or server for the link's that need change
+  # edit/generalize using regex: client or server for the link's that need change
   link.client.change("binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker")
   link.server.change("binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker")
 app2.review() # reivew what we will be committing
 app2.commit()
 ```
 
-# Navigation and Drilldown
+# Navigation and Drilldown - organized by hierarchies
 ```
 run = Runtime()
-run.iterstats() # dump summary stats
+run.stats() # dump summary stats
 run.to_data() # dump all relevant data
 
 for zone in run.iterzones(): # all the zones
@@ -76,4 +76,52 @@ for link in run.iterzones("dev").iterapps("cassandra").iterlinks(afilter=True):
     link.accept()
 run.iterzones("dev").iterapps("cassandra").review()
 run.iterzones("dev").iterapps("cassandra").commit()
+```
+
+# Table with filters - all the world's a flat filtered table
+```
+run = Runtime()
+
+stats = Table(run.stats(all=False))
+sum([a["Num Links"] for a in stats.to_data()])
+
+f = LinkTable.Filter
+
+# all the links in your runtime, arbitrarly chain lambdas as filters)
+linkTable = LinkTable(run.iterlinks(),
+          #f.endpoint("zone", "prod"),
+          #f.endpoint("app", "^bendvm.bend.web"),
+          #f.endpoint("dns_pattern", "169"),
+          #f.endpoint("dns_pattern", "api.snapcraft.io"),
+          #f.neg(f.endpoint("dns_pattern", None, who="server")),
+          #f.endpoint("network", None, who="server"),
+          #f.endpoint("network", None, who="client"),
+          #f.endpoint("network", "169.254.169.254", who="server")
+          #f.neg(f.endpoint("process", ansible", re.IGNORECASE)),
+          f.endpoint("binary_name", "/snap/amazon-ssm-agent"), #/2996/ssm-agent-worker")
+          #f.neg(f.endpoint("process", "cassandra", re.IGNORECASE)),
+          #f.endpoint("process", ["sshd", "haproxy"], who="server"),
+          #f.endpoint("network", None, who="server"), # perimeter
+          #f.neg(f.endpoint("dns_pattern", None, who="server")),
+          #f.neg(f.endpoint("network", None, who="server")), # perimeter          
+          #f.ltype("NAE"),
+          #f.lstate("BASELINE_ALERT"),
+          #f.speculative(False),
+          #f.lstate("DEFINED_POLICY"),
+          #f.neg(f.server_non_ip),
+          #f.server_non_ip,
+          #f.perimeter,
+          #f.neg(f.same_zone),
+          #f.same_zone
+         )
+         
+linkTable.snooze() # EITHER, snooze all links that pass the filter
+linkTable.accept() # OR, accept all links that pass the filter
+
+# multi-link editing: assuming all links are homogeneous
+linkTable.change("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker")
+
+# done with all filtering and editing
+run.review()
+run.commit()
 ```
