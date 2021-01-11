@@ -55,27 +55,29 @@ for zone in run.iterzones(): # all the zones
         break
     break
     
-# all apps in a zone
-run.iterzones("nightly").stats()
+# stats for all apps in a zone
+run.iterzones("zone").stats()
 
-# all links in an app
-run.iterzones("nightly").iterapps("bendvm").stats()
+# stats for all links in an app
+run.iterzones("zone").iterapps("app").stats()
 
 # edit policies for an app
-for link in run.iterzones("nightly").iterapps("bendvm").iterlinks():
+for link in run.iterzones("zone").iterapps("app").iterlinks():
   if something or link.lstate != "DEFINED_POLICY":
     link.accept() # based on some side information
   if something: # based on some side information
     link.snooze()
-run.iterzones("nightly").iterapps("bendvm").review() # review what will get committed
-run.iterzones("nightly").iterapps("bendvm").commit()
+run.iterzones("zone").iterapps("app").review() # review what will get committed
+run.iterzones("zone").iterapps("app").commit()
 
-# accept all open alerts for dev/cassandra
-for link in run.iterzones("dev").iterapps("cassandra").iterlinks(afilter=True):
+# accept all open alerts for zone/app
+for link in run.iterzones("zone").iterapps("app").iterlinks(afilter=True):
     print(link)
     link.accept()
-run.iterzones("dev").iterapps("cassandra").review()
-run.iterzones("dev").iterapps("cassandra").commit()
+    
+# review changes before commit
+run.iterzones("zone").iterapps("app").review()
+run.iterzones("zone").iterapps("app").commit()
 ```
 
 # Table with filters - all the world's a flat filtered table
