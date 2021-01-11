@@ -35,8 +35,8 @@ for link in app2.iterlinks():
   link.snooze() # snooze the ones you dont like
   link.accept() # if you want to accept a snoozed on in original
   # relocate either client or server for the link's that need change
-  link.client.relocate(...)
-  link.server.relocate(...)
+  link.client.change("binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker")
+  link.server.change("binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker")
 app2.review() # reivew what we will be committing
 app2.commit()
 ```
