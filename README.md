@@ -85,8 +85,9 @@ run.iterzones("zone").iterapps("app").commit()
 run = Runtime()
 
 stats = Table(run.stats(all=False))
-sum([a["Num Links"] for a in stats.to_data()])
+total_alerts = sum([a["Num Links"] for a in stats.to_data()])
 
+# library of commonly used filters
 f = LinkTable.Filter
 
 # all the links in your runtime, arbitrarly chain lambdas as filters)
@@ -100,14 +101,14 @@ linkTable = LinkTable(run.iterlinks(),
           #f.endpoint("network", None, who="client"),
           #f.endpoint("network", "169.254.169.254", who="server")
           #f.neg(f.endpoint("process", ansible", re.IGNORECASE)),
-          f.endpoint("binary_name", "/snap/amazon-ssm-agent"), #/2996/ssm-agent-worker")
+          #f.endpoint("binary_name", "/snap/amazon-ssm-agent"), #/2996/ssm-agent-worker")
           #f.neg(f.endpoint("process", "cassandra", re.IGNORECASE)),
           #f.endpoint("process", ["sshd", "haproxy"], who="server"),
           #f.endpoint("network", None, who="server"), # perimeter
           #f.neg(f.endpoint("dns_pattern", None, who="server")),
           #f.neg(f.endpoint("network", None, who="server")), # perimeter          
           #f.ltype("NAE"),
-          #f.lstate("BASELINE_ALERT"),
+          f.lstate("BASELINE_ALERT"),
           #f.speculative(False),
           #f.lstate("DEFINED_POLICY"),
           #f.neg(f.server_non_ip),
