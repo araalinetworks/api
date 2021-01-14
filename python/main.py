@@ -42,10 +42,11 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def run_command(command, result=False, debug=False, env=os.environ):
+def run_command(command, result=False, strip=True, debug=False, env=os.environ):
     def collect_output(ret, output):
         if output:
-            output = output.strip()
+            if strip:
+                output = output.strip()
             if result:
                 ret.append(output.decode())
             else:

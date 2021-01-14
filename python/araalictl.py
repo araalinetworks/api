@@ -3,6 +3,7 @@ import os
 import requests
 import sys
 from sys import platform
+import yaml
 
 from main import Usage, run_command
 
@@ -28,6 +29,13 @@ def fetch():
 
 def help():
     print(run_command("./araalictl -h", result=True, debug=False)[1])
+
+def get_links(zone, app):
+    rc = run_command("./araalictl policy-fetch -zone %s -app %s -links" % (
+        zone, app), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 
 if __name__ == '__main__':
     sys.exit(fetch())
