@@ -14,6 +14,18 @@ python araalictl.py
 * https://www.araalinetworks.com/signup
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 * https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/testing-your-ssh-connection
+* https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+# notebook with conda install (mac example)
+```
+# use conda link above for mac instructions
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O ~/miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda
+~/miniconda/bin/conda init
+source ~/.bash_profile
+conda install -c conda-forge notebook
+jupyter notebook
+```
 
 # Accept policies
 ```
