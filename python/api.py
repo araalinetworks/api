@@ -728,6 +728,19 @@ class MpMotd:
             ]),
     ]
 
+class MpMonitoring:                                                                                                                                  
+    policies = [                                                                
+        api.AcceptLink(filters=[                                                    
+                api.f.endpoint("app", "^monitoring\."),               
+                api.f.ltype("NAE"),                                                 
+                api.f.endpoint("process", "grafana-server", who="client"),              
+                api.f.endpoint("dns_pattern", [":stats.grafana.org:", 
+                                               ":secure.gravatar.com:",
+                                              ], who="server"),
+            ], changes=[                                                        
+            ]),                                                                                                                                
+    ]
+
 class MpAwsEks:
     policies = [
         AcceptLink(filters=[
@@ -878,7 +891,7 @@ mpr.add(
         MpToMetadataSvc, MpSSMagentToSSM, MpCassandra, MpDynamo, MpS3, MpGtor,
         MpSnapdToSnapcraft, MpMotd, MpAwsEks, MpPerimeter, MpGrpcHealthProbe,
         MpAmznLinux, MpCheckHealth, MpHbCheck, MpHealthCheck, MpHaproxyClient,
-        MpHaproxyServer, MpPrometheus, MpAlertMgr,
+        MpHaproxyServer, MpPrometheus, MpAlertMgr, MpMonitoring,
         MpKubeletClient,
 )
 
