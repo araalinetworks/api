@@ -24,6 +24,11 @@ import traceback
 
 readline.parse_and_bind("tab: complete")
 
+try:
+    raw_input = input
+except NameError:
+    pass
+
 class ModGlobals:
     """
     Global variables used in this module

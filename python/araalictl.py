@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Wrappers for araalictl for python use
+"""
 import os
 import requests
 import sys
@@ -8,6 +11,7 @@ import yaml
 from main import Usage, run_command
 
 def fetch():
+    """For downloading and upgrading araalictl"""
     linux_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64"
     darwin_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.darwin-amd64"
 
@@ -28,9 +32,11 @@ def fetch():
 
 
 def help():
+    """get araalictl help"""
     print(run_command("./araalictl -h", result=True, debug=False)[1])
 
 def get_links(zone, app):
+    """Get links for a zone and app"""
     rc = run_command("./araalictl policy-fetch -zone %s -app %s -links" % (
         zone, app), result=True, strip=False)
     assert rc[0] == 0, rc[1]
