@@ -652,14 +652,16 @@ class MpCassandra:
             ], changes=[                                                        
             ]), 
         AcceptLink(filters=[                                                    
-                f.endpoint("app", "cassandra"),                      
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "curl", who="client"),  
-                f.endpoint("process", "cassandra_monitoring.py", who="server"),            
+                f.endpoint("app", "cassandra"),
+                f.ltype("INT"),
+                f.endpoint("process", "curl", who="client"),
+                f.endpoint("process", "cassandra_monitoring.py", who="server"),
             ], changes=[                                                        
             ]), 
-        AcceptLink(filters=[                                               
+        AcceptLink(filters=[
                 f.endpoint("process", ["com.araalinetworks.LaunchKt", 
+                                       "araali_backend.py",
+                                       "service_processor.py",
                                        "com.araalinetworks.uiserver.UiServerKt",
                                        "/usr/bin/cqlsh.py", 
                                        "sshd"
