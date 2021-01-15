@@ -1,6 +1,8 @@
 import json
 import re
 
+import araalictl
+
 
 class Process(object):
     def __init__(self, data):
@@ -1025,16 +1027,7 @@ class App(object):
 
     def refresh(self):
         self.links = []
-        #start_time = (datetime.datetime.now(pytz.timezone(g_tz_selector.value)) -                            
-        #                datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
-        #print(start_time)
-        data = araali.backend.list_app(limit=1000, f=TableFilters(
-            start_time=start_time, zone=self.zone, app=self.app, rtype=7))
-        if araali.debug:
-            data = list(data)
-            print(data)
-
-        for link in data:
+        for link in araalictl.get_links(self.zone, self.app):
             self.links.append(Link(link, self.zone, self.app))
         return self
         
