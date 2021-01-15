@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 
@@ -180,7 +181,7 @@ class MetaPolicyRunner:
             self.args.append(a)
 
     def run(self, links):
-        self.links = links
+        self.links = list(links)
         for meta_policy in self.args:
             pname = meta_policy.__name__
             count = 0
