@@ -1,6 +1,13 @@
 import json
 import re
 
+try:
+    import pandas as pd
+    pd.set_option("display.max_colwidth", 400) # was 50
+    pd.set_option("display.max_rows", 1000)
+except:
+    pass
+
 import araalictl
 
 
