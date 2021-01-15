@@ -192,10 +192,13 @@ class MetaPolicyRunner:
             print("%-20s matched %s rows" % (pname, count))
         return self
 
-    def review(self):
+    def review(self, *filters):
+        filters = [a.__name__ for a in filters]
         def impl():
             for l in self.links:
                 if l.new_state == None:
+                    continue
+                if filters and l.meta_policy not in filters:
                     continue
                 obj = l.to_data()
                 obj["meta_policy"] = l.meta_policy
@@ -256,20 +259,41 @@ class LinkTable(Table):
         def all(r):
             return True
 
-        def neg(filter):
-            return lambda r: not filter(r)
+        def any(*filters):
+            def impl(r):
+                for f in filters:
+                    if f(r):
+                        return True
+                return False
+            return impl
+
+        def neg(*filters):
+            def impl(r):
+                for f in filters:
+                    if f(r):
+                        return False
+                return True
+            return impl
 
         def lstate(state):
             """Valid states are: NAI, NAE, INT, AIN, AEG"""
+            if isinstance(state, list):
+                return lambda r: r.get("lstate", None) in state
             return lambda r: r.get("lstate", None) == state
 
         def ltype(link_type):
+            if isinstance(link_type, list):
+                return lambda r: r.get("ltype", None) in link_type
             return lambda r: r.get("ltype", None) == link_type
 
         def nstate(state):
+            if isinstance(state, list):
+                return lambda r: r.get("nstate", None) in state
             return lambda r: r.get("nstate", None) == state
 
         def speculative(state):
+            if isinstance(state, list):
+                return lambda r: r.get("speculative", None) in state
             return lambda r: r.get("speculative", None) == state
 
         def endpoint(field, val, flags=0, who="either"):
@@ -354,17 +378,23 @@ class MpNAE:
                 f.endpoint("dns_pattern", ":people.canonical.com:", who="server"),
             ], changes=[
             ]),
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "dockerd", who="client"),                 
+        AcceptLink(filters=[
+                f.ltype("NAE"),
+                f.endpoint("process", "dockerd", who="client"),
                 f.endpoint("dns_pattern", [":quay.io:",
                                             ":production.cloudflare.docker.com:",
                                             ":auth.docker.io:registry-1.docker.io:",
                                             ":quayio-production-s3.s3.amazonaws.com:",
-                                            ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:",
-                                          ], who="server"),           
-            ], changes=[                                                        
-            ]),        
+                                          ], who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.ltype("NAE"),
+                f.endpoint("process", "dockerd", who="client"),
+                f.endpoint("dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:", who="server"),
+            ], changes=[
+                ("server", "dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:"),
+            ]),
         AcceptLink(filters=[                                                    
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "dockerd", who="client"),                 
@@ -463,6 +493,20 @@ class MpBendVm:
                 f.ltype("NAE"),
                 f.endpoint("process", "araaliweb", who="client"),
                 f.endpoint("dns_pattern", [":ipinfo.io:", ":metering.marketplace.us-east-1.amazonaws.com:"], who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.endpoint("app", "bend.applens.applens-generator"),
+                f.ltype("NAE"),
+                f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
+                f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:"], who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.endpoint("app", "bendvm.bend.backend"),
+                f.ltype("NAE"),
+                f.endpoint("process", "araali_backend.py", who="client"),
+                f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:", ":lambda.us-west-2.amazonaws.com:"], who="server"),
             ], changes=[
             ]),
         AcceptLink(filters=[
@@ -686,6 +730,14 @@ class MpMotd:
 
 class MpAwsEks:
     policies = [
+        AcceptLink(filters=[
+                f.endpoint("app", "kube-system.kube.kube-proxy"),
+                f.ltype("NAE"),
+                f.endpoint("process", "kube-proxy", who="client"),
+                f.endpoint("dns_pattern", ":.*\.eks\.amazonaws\.com:", who="server"),
+            ], changes=[
+                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
+            ]),
         AcceptLink(filters=[                                               
                 f.ltype("INT"),
                 f.endpoint("process", "aws-cni", who="client"),
