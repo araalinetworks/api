@@ -351,16 +351,24 @@ class MpNAE:
         AcceptLink(filters=[
                 f.ltype("NAE"),
                 f.endpoint("process", "/usr/local/bin/cvescan", who="client"),
-                f.endpoint("dns_pattern", "people.canonical.com", who="server"),
+                f.endpoint("dns_pattern", ":people.canonical.com:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":people\.canonical\.com:"),
             ]),
         AcceptLink(filters=[                                                    
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "dockerd", who="client"),                 
-                f.endpoint("dns_pattern", [
-                    "175118736976.dkr.ecr.us-west-2.amazonaws.com",
-                ], who="server"),           
+                f.endpoint("dns_pattern", [":quay.io:",
+                                            ":production.cloudflare.docker.com:",
+                                            ":auth.docker.io:registry-1.docker.io:",
+                                            ":quayio-production-s3.s3.amazonaws.com:",
+                                            ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:",
+                                          ], who="server"),           
+            ], changes=[                                                        
+            ]),        
+        AcceptLink(filters=[                                                    
+                f.ltype("NAE"),                                                 
+                f.endpoint("process", "dockerd", who="client"),                 
+                f.endpoint("dns_pattern", ":175118736976.dkr.ecr.us-west-2.amazonaws.com:", who="server"),           
             ], changes=[                                                        
                 ("server", "dns_pattern", ":175118736976\.dkr\.ecr\..*\.amazonaws\.com:"),
             ]),        
@@ -368,9 +376,9 @@ class MpNAE:
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "grafana-server", who="client"),                 
                 f.endpoint("dns_pattern", [
-                    "hooks.slack.com", 
-                    "grafana.com",
-                    "raw.githubusercontent.com",
+                    ":hooks.slack.com:", 
+                    ":grafana.com:",
+                    ":raw.githubusercontent.com:",
                 ], who="server"),           
             ], changes=[                                                        
             ]),
@@ -378,15 +386,15 @@ class MpNAE:
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "kubelet", who="client"),                 
                 f.endpoint("dns_pattern", [
-                    "ec2.us-west-2.amazonaws.com", 
-                    "api.ecr.us-west-2.amazonaws.com",
+                    ":ec2.us-west-2.amazonaws.com:", 
+                    ":api.ecr.us-west-2.amazonaws.com:",
                 ], who="server"),           
             ], changes=[                                                        
             ]),         
         AcceptLink(filters=[                                                    
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "kubelet", who="client"),                 
-                f.endpoint("dns_pattern", ".*.eks.amazonaws.com", who="server"),           
+                f.endpoint("dns_pattern", ":.*.eks.amazonaws.com:", who="server"),           
             ], changes=[                                                        
                 ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
             ]),        
@@ -394,26 +402,25 @@ class MpNAE:
                 f.endpoint("app", "cassandra"),                           
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "/usr/bin/pip3", who="client"),               
-                f.endpoint("dns_pattern", ["pypi.python.org",
-                                           "pypi.org",
-                                           "files.pythonhosted.org"], who="server"),           
+                f.endpoint("dns_pattern", [":pypi.python.org:",
+                                           ":pypi.org:",
+                                           ":files.pythonhosted.org:"], who="server"),           
             ], changes=[                                                        
             ]),                                                                 
         AcceptLink(filters=[                                                    
                 f.ltype("NAE"),                                                 
                 f.endpoint("process", "/usr/lib/ubuntu-release-upgrader/check-new-release", who="client"),                 
-                f.endpoint("dns_pattern", ["changelogs.ubuntu.com"], who="server"),           
+                f.endpoint("dns_pattern", [":changelogs.ubuntu.com:"], who="server"),           
             ], changes=[                                                        
-                ("server", "dns_pattern", ":changelogs\.ubuntu\.com:"),
             ]),
         AcceptLink(filters=[                                                    
                 f.ltype("NAE"),                                                 
                 f.endpoint("parent_process", "apt-get", who="client"),                 
-                f.endpoint("dns_pattern", ["us-west-2.ec2.archive.ubuntu.com",
-                                           "downloads.apache.org", 
-                                           "www.apache.org",
-                                           "security.ubuntu.com",
-                                           "dl.bintray.com"], who="server"),           
+                f.endpoint("dns_pattern", [":us-west-2.ec2.archive.ubuntu.com:",
+                                           ":downloads.apache.org:", 
+                                           ":www.apache.org:",
+                                           ":security.ubuntu.com:",
+                                           ":dl.bintray.com:"], who="server"),           
             ], changes=[                                                        
             ]),         
     ]  
@@ -452,32 +459,49 @@ class MpINT:
 class MpBendVm:
     policies = [
         AcceptLink(filters=[
+                f.endpoint("app", "bendvm.bend.web"),
+                f.ltype("NAE"),
+                f.endpoint("process", "araaliweb", who="client"),
+                f.endpoint("dns_pattern", [":ipinfo.io:", ":metering.marketplace.us-east-1.amazonaws.com:"], who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.endpoint("app", "bendvm.bend.visbot"),
+                f.ltype("NAE"),
+                f.endpoint("process", "main.py", who="client"),
+                f.endpoint("dns_pattern", [":email.us-west-2.amazonaws.com:", ":slack.com:"], who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.ltype("INT"),
+                f.endpoint("process", "araaliweb", who="client"),
+                f.endpoint("process", "docker-proxy", who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
+                f.ltype("INT"),
+                f.endpoint("process", "araali_backend.py", who="client"),
+                f.endpoint("process", "docker-proxy", who="server"),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[
                 f.ltype("INT"),
                 f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
                 f.endpoint("process", "scanner.py", who="server"),
             ], changes=[
             ]),
         AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.web"),
-                f.ltype("NAE"),
-                f.endpoint("process", "araaliweb", who="client"),
-                f.endpoint("dns_pattern", "ipinfo.io", who="server"),
-            ], changes=[
-                ("server", "dns_pattern", ":ipinfo\.io:"),
-            ]),
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.visbot"),
-                f.ltype("NAE"),
-                f.endpoint("process", "main.py", who="client"),
-                f.endpoint("dns_pattern", "slack.com", who="server"),
-            ], changes=[
-                ("server", "dns_pattern", ":slack\.com:"),
-            ]),
-        AcceptLink(filters=[
                 f.endpoint("app", "bendvm"),                        
                 f.ltype("INT"),                                                 
                 f.endpoint("process", "docker-proxy", who="client"),                 
                 f.endpoint("process", "main.py", who="server"),           
+            ], changes=[                                                        
+            ]),   
+        AcceptLink(filters=[
+                f.endpoint("app", "bendvm.bend.uiserver"),                        
+                f.ltype("INT"),                                                 
+                f.endpoint("process", "grpcwebproxy", who="client"),                 
+                f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="server"),           
             ], changes=[                                                        
             ]),   
         AcceptLink(filters=[
@@ -567,7 +591,7 @@ class MpSSMagentToSSM:
     policies = [
         AcceptLink(filters=[                                               
                 f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                f.endpoint("dns_pattern", "ssm.us-west-2.amazonaws.com", who="server"),
+                f.endpoint("dns_pattern", ":ssm.us-west-2.amazonaws.com:", who="server"),
             ], changes=[
                 ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
                 ("server", "dns_pattern", ":ssm\..*\.amazonaws\.com:"),
@@ -609,7 +633,7 @@ class MpDynamo:
                                        "com.araalinetworks.LaunchKt",
                                        "araaliweb",
                                       ], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", "dynamodb..*.amazonaws.com"),
+                f.endpoint("dns_pattern", ":dynamodb..*.amazonaws.com:"),
             ], changes=[
                 ("server", "dns_pattern", ":dynamodb\..*\.amazonaws\.com:"),
             ]),
@@ -621,9 +645,11 @@ class MpS3:
                 f.endpoint("process", ["service_processor.py", 
                                        "com.araalinetworks.uiserver.UiServerKt",
                                        "com.araalinetworks.LaunchKt",
+                                       "araali_backend.py",
+                                       "araaliweb",
                                        "/usr/local/bin/aws",
                                       ], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", "s3\..*\.amazonaws\.com"),
+                f.endpoint("dns_pattern", ":s3\..*\.amazonaws\.com:"),
             ], changes=[
                 ("server", "dns_pattern", ":s3\..*\.amazonaws\.com:"),
             ]),
@@ -633,7 +659,7 @@ class MpGtor:
     policies = [
         AcceptLink(filters=[                                               
                 f.endpoint("process", ["autok8s", "guarantor"], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", ".*.fog.aws.araalinetworks.com"),
+                f.endpoint("dns_pattern", ":.*.fog.aws.araalinetworks.com:"),
             ], changes=[
                 ("server", "dns_pattern", ":.*\.fog\.aws\.araalinetworks\.com:"),
             ]),
@@ -643,10 +669,9 @@ class MpSnapdToSnapcraft:
     policies = [
         AcceptLink(filters=[                                               
                 f.endpoint("binary_name", "/snap/core/[0-9]+/usr/lib/snapd/snapd", who="client"),
-                f.endpoint("dns_pattern", "api.snapcraft.io"),
+                f.endpoint("dns_pattern", ":api.snapcraft.io:"),
             ], changes=[
                 ("client", "binary_name", "/snap/core/[0-9]+/usr/lib/snapd/snapd"),
-                ("server", "dns_pattern", ":api\.snapcraft\.io:"),
             ]),
     ]
 
@@ -654,17 +679,22 @@ class MpMotd:
     policies = [
         AcceptLink(filters=[                                               
                 f.endpoint("parent_process", "50-motd-news", who="client"),
-                f.endpoint("dns_pattern", "motd.ubuntu.com"),
+                f.endpoint("dns_pattern", ":motd.ubuntu.com:"),
             ], changes=[
-                ("server", "dns_pattern", ":motd\.ubuntu\.com:"),
             ]),
     ]
 
-class MpAwsK8sAgent:
+class MpAwsEks:
     policies = [
         AcceptLink(filters=[                                               
+                f.ltype("INT"),
+                f.endpoint("process", "aws-cni", who="client"),
+                f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
+            ], changes=[
+            ]),
+        AcceptLink(filters=[                                               
                 f.endpoint("process", "aws-k8s-agent", flags=re.IGNORECASE, who="client"),
-                f.endpoint("dns_pattern", "ec2.us-west-2.amazonaws.com"),
+                f.endpoint("dns_pattern", ":ec2.us-west-2.amazonaws.com:"),
             ], changes=[
                 ("server", "dns_pattern", ":ec2\..*\.amazonaws\.com:"),
             ]),
@@ -693,7 +723,7 @@ class MpAmznLinux:
     policies = [
         AcceptLink(filters=[                                               
                 f.endpoint("process", ["/usr/bin/yum", "amazon_linux_extras"], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", "amazonlinux.us-west-2.amazonaws.com", who="server", flags=re.IGNORECASE),
+                f.endpoint("dns_pattern", ":amazonlinux.us-west-2.amazonaws.com:", who="server", flags=re.IGNORECASE),
             ], changes=[
                 ("server", "dns_pattern", ":amazonlinux\..*\.amazonaws\.com:"),
             ]),
@@ -763,7 +793,7 @@ class MpPrometheus:
         AcceptLink(filters=[                                               
                 f.same_zone,
                 f.endpoint("process", "prometheus", who="client"),
-                f.endpoint("process", ["araali_backend.py", "node_exporter", "prometheus", "kubelet", "kube-rbac-proxy", "com.araalinetworks.LaunchKt"], who="server", flags=re.IGNORECASE),
+                f.endpoint("process", ["alertmanager", "araali_backend.py", "node_exporter", "prometheus", "kubelet", "kube-rbac-proxy", "com.araalinetworks.LaunchKt"], who="server", flags=re.IGNORECASE),
             ], changes=[
             ]),
     ]
@@ -783,7 +813,7 @@ class MpKubeletClient:
         AcceptLink(filters=[                                               
                 f.same_zone,                     
                 f.endpoint("process", "kubelet", who="client"),
-                f.endpoint("process", ["grafana-server", "prometheus"], who="server", flags=re.IGNORECASE),
+                f.endpoint("process", ["alertmanager", "grafana-server", "prometheus"], who="server", flags=re.IGNORECASE),
             ], changes=[
             ]),
     ]
@@ -794,7 +824,7 @@ mpr.add(
         MpBendVm, MpNAE, MpINT,
         MpSSMagentToMeta,
         MpToMetadataSvc, MpSSMagentToSSM, MpCassandra, MpDynamo, MpS3, MpGtor,
-        MpSnapdToSnapcraft, MpMotd, MpAwsK8sAgent, MpPerimeter, MpGrpcHealthProbe,
+        MpSnapdToSnapcraft, MpMotd, MpAwsEks, MpPerimeter, MpGrpcHealthProbe,
         MpAmznLinux, MpCheckHealth, MpHbCheck, MpHealthCheck, MpHaproxyClient,
         MpHaproxyServer, MpPrometheus, MpAlertMgr,
         MpKubeletClient,
