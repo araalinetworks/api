@@ -877,9 +877,13 @@ class Link(object):
 class Runtime(object):
     zones = ["dev", "ops", "prod", "nightly", "prod-k8s", "nightly-k8s"]
     def __init__(self):
-        self.zones = [Zone(z) for z in Runtime.zones]
+        self.zones = None
 
     def refresh(self):
+        if self.zones == None:
+            self.zones = [Zone(z) for z in Runtime.zones]
+            return self
+
         for z in self.zones:
             z.refresh()
         return self
