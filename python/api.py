@@ -730,11 +730,11 @@ class MpMotd:
 
 class MpMonitoring:                                                                                                                                  
     policies = [                                                                
-        api.AcceptLink(filters=[                                                    
-                api.f.endpoint("app", "^monitoring\."),               
-                api.f.ltype("NAE"),                                                 
-                api.f.endpoint("process", "grafana-server", who="client"),              
-                api.f.endpoint("dns_pattern", [":stats.grafana.org:", 
+        AcceptLink(filters=[                                                    
+                f.endpoint("app", "^monitoring\."),               
+                f.ltype("NAE"),                                                 
+                f.endpoint("process", "grafana-server", who="client"),              
+                f.endpoint("dns_pattern", [":stats.grafana.org:", 
                                                ":secure.gravatar.com:",
                                               ], who="server"),
             ], changes=[                                                        
