@@ -771,6 +771,8 @@ class MpPerimeter:
     policies = [
         AcceptLink(filters=[                                               
                 f.perimeter,
+                f.endpoint("zone", ["prod", "nightly", "dev", "ops", "nightly-k8s"], who="server", flags=re.IGNORECASE),
+                f.endpoint("app", ["dmzvm", "cassandra", "k8s"], who="server", flags=re.IGNORECASE),
                 f.endpoint("process", ["sshd", "haproxy"], who="server", flags=re.IGNORECASE),
             ], changes=[
             ]),
