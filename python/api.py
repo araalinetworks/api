@@ -551,6 +551,12 @@ class Runtime(object):
     }
     zone_apps = None
 
+    def get_zone_apps(full=False):
+        Runtime.zone_apps = {}
+        for za in araalictl.get_zones():
+            Runtime.zone_apps[za["name"]] = za["apps"]
+        return Runtime.zone_apps
+
     def __init__(self):
         self.zones = None
 
@@ -563,9 +569,7 @@ class Runtime(object):
                 for z in self.zones:
                     z.refresh()
         else:
-            Runtime.zone_apps = {}
-            for za in araalictl.get_zones():
-                Runtime.zone_apps[za["name"]] = za["apps"]
+            Runtime.get_zone_apps()
             self.zones = [Zone(z) for z in Runtime.zone_apps.keys()]
 
         return self
