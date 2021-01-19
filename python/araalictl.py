@@ -35,9 +35,24 @@ def help():
     """get araalictl help"""
     print(run_command("./araalictl -h", result=True, debug=False)[1])
 
+def get_zones(full=False):
+    """Get zones and apps for tenant"""
+    rc = run_command("./araalictl api -fetch-zone-apps %s" % ("-full" if full else ""),
+            result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def update_links(zone, app, data):
+    """Update actions on a link"""
+    rc = run_command("""./araalictl api -zone %s -app %s -update-links <<EOF
+%s
+EOF""" % (yaml.dump(data), zone, app), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def get_links(zone, app):
     """Get links for a zone and app"""
-    rc = run_command("./araalictl policy-fetch -zone %s -app %s -links" % (
+    rc = run_command("./araalictl api -zone %s -app %s -fetch-links" % (
         zone, app), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)

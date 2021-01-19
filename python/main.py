@@ -63,14 +63,18 @@ def run_command(command, result=False, strip=True, debug=False, env=os.environ):
                                 stderr=subprocess.PIPE,
     				env=env)
     ret = []
-    while True:
-        rc = process.poll()
-        out = process.stdout.readline()
-        err =process.stderr.readline() 
-        if rc is not None and not out and not err:
-            return rc, "\n".join(ret)
-        collect_output(ret, out)
-        collect_output(ret, err)
+    if result:
+        outs, errs = process.communicate()
+        return 0, outs+errs
+    else:
+        while True:
+            rc = process.poll()
+            err = process.stderr.readline() 
+            out = process.stdout.readline()
+            if rc is not None and not out and not err:
+                return rc, "\n".join(ret)
+            collect_output(ret, out)
+            collect_output(ret, err)
 
 
 def help(*args):  # pylint: disable=W0622

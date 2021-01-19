@@ -111,7 +111,7 @@ class NonAraaliServer(object):
         else:
             self.dns_pattern = None
             self.subnet = data["subnet"]
-            self.net_mask = data["netmask"]
+            self.net_mask = data.get("netmask", 0)
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -172,18 +172,16 @@ class AcceptLink:
 
 class MetaPolicyRunner:
     def __init__(self, *args):
-        self.args = []
-        for a in args:
-            self.args.append(a)
+        self.mp_names = {}
+        self.add(*args)
 
     def add(self, *args):
         for a in args:
-            self.args.append(a)
+            self.mp_names[a.__name__] = a
 
     def run(self, links):
         self.links = list(links)
-        for meta_policy in self.args:
-            pname = meta_policy.__name__
+        for pname, meta_policy in self.mp_names.items():
             count = 0
             for policy in meta_policy.policies:
                 for l in policy.apply(self.links):
@@ -368,537 +366,15 @@ class LinkTable(Table):
             self.links[i].snooze()
         return self
 
+    def meta_policy(self, *args):
+        if not args:
+            args = range(len(self.links))
+        for i in args:
+            self.links[i].meta_policy()
+
 
 f = LinkTable.Filter
-class MpNAE:                                                                 
-    policies = [
-        AcceptLink(filters=[
-                f.ltype("NAE"),
-                f.endpoint("process", "/usr/local/bin/cvescan", who="client"),
-                f.endpoint("dns_pattern", ":people.canonical.com:", who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.ltype("NAE"),
-                f.endpoint("process", "dockerd", who="client"),
-                f.endpoint("dns_pattern", [":quay.io:",
-                                            ":production.cloudflare.docker.com:",
-                                            ":auth.docker.io:registry-1.docker.io:",
-                                            ":quayio-production-s3.s3.amazonaws.com:",
-                                          ], who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.ltype("NAE"),
-                f.endpoint("process", "dockerd", who="client"),
-                f.endpoint("dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:", who="server"),
-            ], changes=[
-                ("server", "dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:"),
-            ]),
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "dockerd", who="client"),                 
-                f.endpoint("dns_pattern", ":175118736976.dkr.ecr.us-west-2.amazonaws.com:", who="server"),           
-            ], changes=[                                                        
-                ("server", "dns_pattern", ":175118736976\.dkr\.ecr\..*\.amazonaws\.com:"),
-            ]),        
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "grafana-server", who="client"),                 
-                f.endpoint("dns_pattern", [
-                    ":hooks.slack.com:", 
-                    ":grafana.com:",
-                    ":raw.githubusercontent.com:",
-                ], who="server"),           
-            ], changes=[                                                        
-            ]),
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "kubelet", who="client"),                 
-                f.endpoint("dns_pattern", [
-                    ":ec2.us-west-2.amazonaws.com:", 
-                    ":api.ecr.us-west-2.amazonaws.com:",
-                ], who="server"),           
-            ], changes=[                                                        
-            ]),         
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "kubelet", who="client"),                 
-                f.endpoint("dns_pattern", ":.*.eks.amazonaws.com:", who="server"),           
-            ], changes=[                                                        
-                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
-            ]),        
-        AcceptLink(filters=[                                                    
-                f.endpoint("app", "cassandra"),                           
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "/usr/bin/pip3", who="client"),               
-                f.endpoint("dns_pattern", [":pypi.python.org:",
-                                           ":pypi.org:",
-                                           ":files.pythonhosted.org:"], who="server"),           
-            ], changes=[                                                        
-            ]),                                                                 
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "/usr/lib/ubuntu-release-upgrader/check-new-release", who="client"),                 
-                f.endpoint("dns_pattern", [":changelogs.ubuntu.com:"], who="server"),           
-            ], changes=[                                                        
-            ]),
-        AcceptLink(filters=[                                                    
-                f.ltype("NAE"),                                                 
-                f.endpoint("parent_process", "apt-get", who="client"),                 
-                f.endpoint("dns_pattern", [":us-west-2.ec2.archive.ubuntu.com:",
-                                           ":downloads.apache.org:", 
-                                           ":www.apache.org:",
-                                           ":security.ubuntu.com:",
-                                           ":dl.bintray.com:"], who="server"),           
-            ], changes=[                                                        
-            ]),         
-    ]  
-
-class MpINT:
-    policies = [
-        AcceptLink(filters=[
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "grafana-server", who="client"),                 
-                f.endpoint("process", "prometheus", who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "kube-rbac-proxy", who="client"),                 
-                f.endpoint("process", [
-                    "node_exporter",
-                    "kube-state-metrics"
-                ], who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "coredns", who="client"),                 
-                f.endpoint("process", "coredns", who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "kubelet", who="client"),                 
-                f.endpoint("process", "kubelet", who="server"),           
-            ], changes=[                                                        
-            ]),   
-    ]
-
-class MpBendVm:
-    policies = [
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.web"),
-                f.ltype("NAE"),
-                f.endpoint("process", "araaliweb", who="client"),
-                f.endpoint("dns_pattern", [":ipinfo.io:", ":metering.marketplace.us-east-1.amazonaws.com:"], who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.endpoint("app", "bend.applens.applens-generator"),
-                f.ltype("NAE"),
-                f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
-                f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:"], who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.backend"),
-                f.ltype("NAE"),
-                f.endpoint("process", "araali_backend.py", who="client"),
-                f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:", ":lambda.us-west-2.amazonaws.com:"], who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.visbot"),
-                f.ltype("NAE"),
-                f.endpoint("process", "main.py", who="client"),
-                f.endpoint("dns_pattern", [":email.us-west-2.amazonaws.com:", ":slack.com:"], who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.ltype("INT"),
-                f.endpoint("process", "araaliweb", who="client"),
-                f.endpoint("process", "docker-proxy", who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.ltype("INT"),
-                f.endpoint("process", "araali_backend.py", who="client"),
-                f.endpoint("process", "docker-proxy", who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.ltype("INT"),
-                f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
-                f.endpoint("process", "scanner.py", who="server"),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm"),                        
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "docker-proxy", who="client"),                 
-                f.endpoint("process", "main.py", who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.uiserver"),                        
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "grpcwebproxy", who="client"),                 
-                f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[
-                f.endpoint("app", "bendvm.bend.uiserver"),                        
-                f.ltype("INT"),                                                 
-                f.endpoint("parent_process", "check_health.sh", who="client"),                 
-                f.endpoint("process", "grpcwebproxy", who="server"),           
-            ], changes=[                                                        
-            ]),   
-        AcceptLink(filters=[                                                    
-                f.endpoint("app", "bendvm.bend.backend"),                        
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "prometheus", who="client"),                 
-                f.endpoint("process", "araali_backend.py", who="server"),           
-            ], changes=[                                                        
-            ]),         
-        AcceptLink(filters=[
-                f.same_zone,
-                f.ltype("AEG"),                                                 
-                f.endpoint("app", "dmzvm", who="client"),                        
-                f.endpoint("process", "/var/lib/haproxy/healthcheck.py", who="client"), 
-                f.endpoint("app", "bendvm.bend.backend", who="server"),                        
-                f.endpoint("process", "prometheus", who="server"),           
-            ], changes=[                                                        
-            ]),         
-        AcceptLink(filters=[
-                f.same_zone,
-                f.ltype("AEG"),                                                 
-                f.endpoint("app", "bendvm.bend.uiserver", who="client"),                        
-                f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="client"), 
-                f.endpoint("app", "dmzvm", who="server"),                        
-                f.endpoint("process", "haproxy", who="server"),           
-            ], changes=[                                                        
-            ]),        
-        AcceptLink(filters=[
-                f.same_zone,
-                f.ltype("AEG"),                                                 
-                f.endpoint("app", "dmzvm", who="client"),                        
-                f.endpoint("process", "haproxy", who="client"), 
-                f.endpoint("app", "bendvm.bend.web", who="server"),                        
-                f.endpoint("process", "araaliweb", who="server"),           
-            ], changes=[                                                        
-            ]),         
-        AcceptLink(filters=[
-                f.same_zone,
-                f.ltype("AEG"),                                                 
-                f.endpoint("app", "dmzvm", who="client"),                        
-                f.endpoint("process", "haproxy", who="client"), 
-                f.endpoint("app", "bendvm.bend.uiserver", who="server"),                        
-                f.endpoint("process", "grpcwebproxy", who="server"),           
-            ], changes=[                                                        
-            ]),        
-        AcceptLink(filters=[
-                f.same_zone,
-                f.ltype("AEG"),                                                 
-                f.endpoint("app", "dmzvm", who="client"),                        
-                f.endpoint("process", "haproxy", who="client"), 
-                f.endpoint("app", "bendvm.bend.backend", who="server"),                        
-                f.endpoint("process", "araali_backend.py", who="server"),           
-            ], changes=[                                                        
-            ]),           
-    ]
-
-class MpSSMagentToMeta:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                f.endpoint("network", "169.254.169.254", who="server"),
-            ], changes=[
-                ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
-            ]),
-    ]
-
-class MpToMetadataSvc:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("process", ["kubelet",
-                                        "aws-iam-authenticator",
-                                        "aws-k8s-agent",
-                                        "/usr/bin/yum"], who="client", flags=re.IGNORECASE),
-                f.endpoint("network", "169.254.169.254", who="server"),
-            ], changes=[
-            ]),
-    ]
-
-class MpSSMagentToSSM:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                f.endpoint("dns_pattern", ":ssm.us-west-2.amazonaws.com:", who="server"),
-            ], changes=[
-                ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
-                ("server", "dns_pattern", ":ssm\..*\.amazonaws\.com:"),
-            ]),
-    ]
-
-class MpCassandra:
-    policies = [
-        AcceptLink(filters=[                                                    
-                f.endpoint("app", "cassandra"),                      
-                f.ltype("INT"),                                                 
-                f.endpoint("process", "org.apache.cassandra.tools.NodeTool", who="client"),  
-                f.endpoint("process", "org.apache.cassandra.service.CassandraDaemon", who="server"),            
-            ], changes=[                                                        
-            ]), 
-        AcceptLink(filters=[                                                    
-                f.endpoint("app", "cassandra"),
-                f.ltype("INT"),
-                f.endpoint("process", "curl", who="client"),
-                f.endpoint("process", "cassandra_monitoring.py", who="server"),
-            ], changes=[                                                        
-            ]), 
-        AcceptLink(filters=[
-                f.endpoint("process", ["com.araalinetworks.LaunchKt", 
-                                       "araali_backend.py",
-                                       "service_processor.py",
-                                       "com.araalinetworks.uiserver.UiServerKt",
-                                       "/usr/bin/cqlsh.py", 
-                                       "sshd"
-                                      ], who="client", flags=re.IGNORECASE),
-                f.endpoint("process", "cassandra", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpDynamo:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("process", ["araali_backend.py", 
-                                       "com.araalinetworks.uiserver.UiServerKt",
-                                       "com.araalinetworks.LaunchKt",
-                                       "araaliweb",
-                                      ], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", ":dynamodb..*.amazonaws.com:"),
-            ], changes=[
-                ("server", "dns_pattern", ":dynamodb\..*\.amazonaws\.com:"),
-            ]),
-    ]
-
-class MpS3:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("process", ["service_processor.py", 
-                                       "com.araalinetworks.uiserver.UiServerKt",
-                                       "com.araalinetworks.LaunchKt",
-                                       "araali_backend.py",
-                                       "araaliweb",
-                                       "/usr/local/bin/aws",
-                                      ], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", ":s3\..*\.amazonaws\.com:"),
-            ], changes=[
-                ("server", "dns_pattern", ":s3\..*\.amazonaws\.com:"),
-            ]),
-    ]
-
-class MpGtor:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("process", ["autok8s", "guarantor"], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", ":.*.fog.aws.araalinetworks.com:"),
-            ], changes=[
-                ("server", "dns_pattern", ":.*\.fog\.aws\.araalinetworks\.com:"),
-            ]),
-    ]
-
-class MpSnapdToSnapcraft:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("binary_name", "/snap/core/[0-9]+/usr/lib/snapd/snapd", who="client"),
-                f.endpoint("dns_pattern", ":api.snapcraft.io:"),
-            ], changes=[
-                ("client", "binary_name", "/snap/core/[0-9]+/usr/lib/snapd/snapd"),
-            ]),
-    ]
-
-class MpMotd:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("parent_process", "50-motd-news", who="client"),
-                f.endpoint("dns_pattern", ":motd.ubuntu.com:"),
-            ], changes=[
-            ]),
-    ]
-
-class MpMonitoring:                                                                                                                                  
-    policies = [                                                                
-        AcceptLink(filters=[                                                    
-                f.endpoint("app", "^monitoring\."),               
-                f.ltype("NAE"),                                                 
-                f.endpoint("process", "grafana-server", who="client"),              
-                f.endpoint("dns_pattern", [":stats.grafana.org:", 
-                                               ":secure.gravatar.com:",
-                                              ], who="server"),
-            ], changes=[                                                        
-            ]),                                                                                                                                
-    ]
-
-class MpAwsEks:
-    policies = [
-        AcceptLink(filters=[
-                f.endpoint("app", "kube-system.kube.kube-proxy"),
-                f.ltype("NAE"),
-                f.endpoint("process", "kube-proxy", who="client"),
-                f.endpoint("dns_pattern", ":.*\.eks\.amazonaws\.com:", who="server"),
-            ], changes=[
-                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
-            ]),
-        AcceptLink(filters=[                                               
-                f.ltype("INT"),
-                f.endpoint("process", "aws-cni", who="client"),
-                f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-        AcceptLink(filters=[                                               
-                f.endpoint("process", "aws-k8s-agent", flags=re.IGNORECASE, who="client"),
-                f.endpoint("dns_pattern", ":ec2.us-west-2.amazonaws.com:"),
-            ], changes=[
-                ("server", "dns_pattern", ":ec2\..*\.amazonaws\.com:"),
-            ]),
-    ]
-    
-class MpPerimeter:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.perimeter,
-                f.endpoint("zone", ["prod", "nightly", "dev", "ops", "nightly-k8s"], who="server", flags=re.IGNORECASE),
-                f.endpoint("app", ["dmzvm", "cassandra", "k8s"], who="server", flags=re.IGNORECASE),
-                f.endpoint("process", ["sshd", "haproxy"], who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-    
-class MpGrpcHealthProbe:                                                              
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("process", "grpc-health-probe", who="client", flags=re.IGNORECASE),
-                f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-                                                                                
-class MpAmznLinux:                                                              
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("process", ["/usr/bin/yum", "amazon_linux_extras"], who="client", flags=re.IGNORECASE),
-                f.endpoint("dns_pattern", ":amazonlinux.us-west-2.amazonaws.com:", who="server", flags=re.IGNORECASE),
-            ], changes=[
-                ("server", "dns_pattern", ":amazonlinux\..*\.amazonaws\.com:"),
-            ]),
-    ]
-
-class MpCheckHealth:                                                              
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("parent_process", "check_health.sh", who="client"),
-                f.endpoint("process", "grpcwebproxy", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpHbCheck:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                f.endpoint("network", "169.254.169.254", who="server"),
-            ], changes=[
-                ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
-            ]),
-    ]
-
-    policies = [
-        AcceptLink(filters=[                                               
-                f.ltype("INT"),
-                f.endpoint("process", "heartbeat_check.py", who="client"),
-                f.endpoint("process", "com.araalinetworks.LaunchKt", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpHealthCheck:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("process", "/var/lib/haproxy/healthcheck.py", who="client"),
-                f.endpoint("process", "prometheus", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpHaproxyClient:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("process", "haproxy", who="client"),
-                f.endpoint("process", ['araali_backend.py', "grpcwebproxy", "araaliweb"], who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpHaproxyServer:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("process", ["com.araalinetworks.uiserver.UiServerKt", "araali_health_check.py"], who="client"),
-                f.endpoint("process", "haproxy", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpPrometheus:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,
-                f.endpoint("process", "prometheus", who="client"),
-                f.endpoint("process", ["alertmanager", "araali_backend.py", "node_exporter", "prometheus", "kubelet", "kube-rbac-proxy", "com.araalinetworks.LaunchKt"], who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpAlertMgr:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.ltype("INT"),
-                f.endpoint("process", "alertmanager", who="client"),
-                f.endpoint("process", "alertmanager", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpKubeletClient:
-    policies = [
-        AcceptLink(filters=[                                               
-                f.same_zone,                     
-                f.endpoint("process", "kubelet", who="client"),
-                f.endpoint("process", ["alertmanager", "grafana-server", "prometheus"], who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-
 mpr = MetaPolicyRunner()
-mpr.add(
-        MpBendVm, MpNAE, MpINT,
-        MpSSMagentToMeta,
-        MpToMetadataSvc, MpSSMagentToSSM, MpCassandra, MpDynamo, MpS3, MpGtor,
-        MpSnapdToSnapcraft, MpMotd, MpAwsEks, MpPerimeter, MpGrpcHealthProbe,
-        MpAmznLinux, MpCheckHealth, MpHbCheck, MpHealthCheck, MpHaproxyClient,
-        MpHaproxyServer, MpPrometheus, MpAlertMgr, MpMonitoring,
-        MpKubeletClient,
-)
-
 
 class Link(object):
     def __init__(self, data, zone, app):
@@ -968,6 +444,72 @@ class Link(object):
             policy_request.policy.app_ctx_policies[0].rank = 5000
         return policy_request
 
+    def meta_policy(self):
+        if self.ltype == "NAI":
+            print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.perimeter,
+                api.f.endpoint("zone", "%s", who="server"),
+                api.f.endpoint("app", "%s", who="server"),
+                api.f.endpoint("process", "%s", who="server"),
+            ], changes=[
+                ("client", "network", "0.0.0.0"),
+                ("client", "mask", 0),
+            ]),
+    ]
+""" % (self.server.zone, self.server.app, self.server.process)
+            return
+
+        if self.ltype == "NAE":
+            print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.ltype("NAE"),
+                api.f.endpoint("app", "%s"),
+                api.f.endpoint("process", "%s", who="client"),
+                api.f.endpoint("dns_pattern", "%s", who="server"),
+            ], changes=[
+                ("server", "dns_pattern", "%s"),
+            ]),
+    ]
+""" % (self.client.app, self.client.process, self.server.dns_pattern, self.server.dns_pattern.replace(".", "\.")))
+            return
+
+        if self.ltype in ["AIN", "AEG"]:
+            print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.ltype(["AEG", "AIN"]),
+                api.f.endpoint("zone", "%s", who="client"),
+                api.f.endpoint("app", "%s", who="client"),
+                api.f.endpoint("process", "%s", who="client"),
+                api.f.endpoint("zone", "%s", who="server"),
+                api.f.endpoint("app", "%s", who="server"),
+                api.f.endpoint("process", "%s", who="server"),
+            ], changes=[
+            ]),
+    ]
+""" % (self.client.zone, self.client.app, self.client.process, self.server.zone, self.server.app, self.server.process)
+            return
+
+        print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.ltype("INT"),
+                api.f.endpoint("app", "%s", who="client"),
+                api.f.endpoint("process", "%s", who="client"),
+                api.f.endpoint("app", "%s", who="server"),
+                api.f.endpoint("process", "%s", who="server"),
+            ], changes=[
+            ]),
+    ]
+""" % (self.client.app, self.client.process, self.server.app, self.server.process)
+
     def to_lib(self, zone, app):
         if self.ltype == "INT":
             self.client.to_lib(zone, app)
@@ -982,17 +524,33 @@ class Link(object):
 
 
 class Runtime(object):
-    zones = ["dev", "ops", "prod", "nightly", "prod-k8s", "nightly-k8s"]
+    zone2apps = {
+        "dev": ["cassandra"],
+        "ops": ["cassandra"],
+        "prod": ["dmzvm", "bendvm"],
+        "nightly": ["dmzvm", "bendvm"],
+        "prod-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
+        "nightly-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
+    }
+    zone_apps = None
+
     def __init__(self):
         self.zones = None
 
     def refresh(self):
-        if self.zones == None:
-            self.zones = [Zone(z) for z in Runtime.zones]
-            return self
+        if Runtime.zone2apps:
+            Runtime.zone_apps = Runtime.zone2apps
+            if self.zones == None:
+                self.zones = [Zone(z) for z in Runtime.zone2apps.keys()]
+            else:
+                for z in self.zones:
+                    z.refresh()
+        else:
+            Runtime.zone_apps = {}
+            for za in araalictl.get_zones():
+                Runtime.zone_apps[za["name"]] = za["apps"]
+            self.zones = [Zone(z) for z in Runtime.zone_apps.keys()]
 
-        for z in self.zones:
-            z.refresh()
         return self
 
     def iterzones(self, filter=None):
@@ -1053,18 +611,9 @@ class Runtime(object):
 
 
 class Zone(object):
-    zone2apps = {
-        "dev": ["cassandra"],
-        "ops": ["cassandra"],
-        "prod": ["dmzvm", "bendvm"],
-        "nightly": ["dmzvm", "bendvm"],
-        "prod-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
-        "nightly-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
-    }
-
     def __init__(self, name):
         self.zone = name
-        self.apps = [App(name, a) for a in Zone.zone2apps[name]]
+        self.apps = [App(name, a) for a in Runtime.zone_apps[name]]
 
     def refresh(self):
         for a in self.apps:
