@@ -459,7 +459,7 @@ class MpTest:
                 ("client", "mask", 0),
             ]),
     ]
-""" % (self.server.zone, self.server.app, self.server.process)
+""" % (self.server.zone, self.server.app, self.server.process))
             return
 
         if self.ltype == "NAE":
@@ -479,6 +479,23 @@ class MpTest:
             return
 
         if self.ltype in ["AIN", "AEG"]:
+            if self.client.zone == self.server.zone:
+                print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.ltype(["AEG", "AIN"]),
+                api.f.same_zone,
+                api.f.endpoint("app", "%s", who="client"),
+                api.f.endpoint("process", "%s", who="client"),
+                api.f.endpoint("app", "%s", who="server"),
+                api.f.endpoint("process", "%s", who="server"),
+            ], changes=[
+            ]),
+    ]
+""" % (self.client.zone, self.client.app, self.client.process, self.server.zone, self.server.app, self.server.process))
+                return
+
             print("""
 class MpTest:
     policies = [
@@ -493,7 +510,7 @@ class MpTest:
             ], changes=[
             ]),
     ]
-""" % (self.client.zone, self.client.app, self.client.process, self.server.zone, self.server.app, self.server.process)
+""" % (self.client.zone, self.client.app, self.client.process, self.server.zone, self.server.app, self.server.process))
             return
 
         print("""
@@ -508,7 +525,7 @@ class MpTest:
             ], changes=[
             ]),
     ]
-""" % (self.client.app, self.client.process, self.server.app, self.server.process)
+""" % (self.client.app, self.client.process, self.server.app, self.server.process))
 
     def to_lib(self, zone, app):
         if self.ltype == "INT":
