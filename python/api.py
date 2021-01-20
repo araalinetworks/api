@@ -160,12 +160,13 @@ class MetaPolicyRunner:
             print("%-20s matched %s rows" % (pname, count))
         return self
 
-    def review(self, todo=False, *filters):
+    def review(self, *filters, **kwargs):
+        todo = kwargs.get("todo", False)
         filters = [a.__name__ for a in filters]
         def impl():
             for l in self.links:
                 if todo:
-                    if l.nstate is not None:
+                    if l.state == "DEFINED_POLICY" or l.nstate is not None:
                         continue
                 else:
                     if l.nstate is None:
@@ -308,11 +309,11 @@ class LinkTable(Table):
             return match
 
         def perimeter(r):
-            return r.get("client", {}).get("network", None) != None
+            return r.get("client", {}).get("subnet", None) != None
 
         def server_non_ip(r):
             s = r.get("server", {})
-            return s.get("dns_pattern", "")[:3] != "ip-" and s.get("network", None) == None
+            return s.get("dns_pattern", "")[:3] != "ip-" and s.get("subnet", None) == None
 
         def same_zone(r):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
@@ -407,8 +408,8 @@ class MpTest:
                 api.f.endpoint("app", "%s", who="server"),
                 api.f.endpoint("process", "%s", who="server"),
             ], changes=[
-                ("client", "network", "0.0.0.0"),
-                ("client", "mask", 0),
+                ("client", "subnet", "0.0.0.0"),
+                ("client", "netmask", 0),
             ]),
     ]
 """ % (self.server.zone, self.server.app, self.server.process))

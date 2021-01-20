@@ -254,7 +254,7 @@ class MpSSMagentToMeta:
     policies = [
         api.AcceptLink(filters=[                                               
                 api.f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                api.f.endpoint("network", "169.254.169.254", who="server"),
+                api.f.endpoint("subnet", "169.254.169.254", who="server"),
             ], changes=[
                 ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
             ]),
@@ -267,7 +267,7 @@ class MpToMetadataSvc:
                                         "aws-iam-authenticator",
                                         "aws-k8s-agent",
                                         "/usr/bin/yum"], who="client", flags=re.IGNORECASE),
-                api.f.endpoint("network", "169.254.169.254", who="server"),
+                api.f.endpoint("subnet", "169.254.169.254", who="server"),
             ], changes=[
             ]),
     ]
@@ -453,7 +453,7 @@ class MpHbCheck:
     policies = [
         api.AcceptLink(filters=[                                               
                 api.f.endpoint("binary_name", "/snap/amazon-ssm-agent/.*/ssm-agent-worker", who="client"),
-                api.f.endpoint("network", "169.254.169.254", who="server"),
+                api.f.endpoint("subnet", "169.254.169.254", who="server"),
             ], changes=[
                 ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
             ]),
