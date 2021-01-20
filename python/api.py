@@ -15,9 +15,6 @@ import araalictl
 
 class Process(object):
     def __init__(self, data):
-        self.from_yaml(data)
-
-    def from_yaml(self, data):
         self.zone = data["zone"]
         self.app = data["app"]
         self.process = data["process"]
@@ -52,23 +49,6 @@ class Process(object):
         setattr(self, what, getattr(self, orig_str))
         return self
 
-    def to_policy(self, client=False, araali=False):
-        def set_selectors(app_selector):
-            app_selector.selectors["zone"].regex.reg_ex_str = "^%s$" % self.zone
-            app_selector.selectors["app"].regex.reg_ex_str = ".*:%s:.*" % self.app
-            app_selector.selectors["displayProcess"].regex.reg_ex_str = "^%s$" % self.process
-            app_selector.selectors["binaryName"].regex.reg_ex_str = "^%s$" % self.binary_name
-            app_selector.selectors["parentProcessName"].regex.reg_ex_str = "^%s$" % self.parent_process
-            app_selector.label = "%s--%s--%s--%s" % (self.zone, self.app, self.parent_process, self.process)
-        if client: # Always for araali to araali policy need to create araali policy
-            policy = policy_pb2.ServicePolicy()
-            set_selectors(policy.whitelist_match)
-            return policy
-        else:
-            policy = policy_pb2.AppCtxAwarePolicy() if araali else policy_pb2.NonAraaliPolicies()
-            set_selectors(policy.app_selector)
-            return policy
-
     def to_lib(self, zone, app):
         self.zone = zone
         self.app = app
@@ -77,9 +57,6 @@ class Process(object):
 class NonAraaliClient(object):
     def __init__(self, data):
         self.process = None
-        self.from_yaml(data)
-
-    def from_yaml(self, data):
         self.subnet = ipaddress.ip_address(data["subnet"])
         self.netmask = data.get("netmask", 0)
 
@@ -105,15 +82,6 @@ class NonAraaliClient(object):
                 obj[attr] = getattr(self, attr)
         return obj
 
-    def to_policy(self):
-        nap = policy_pb2.NonAraaliServicePolicy()
-        nap.addr_mask.ip_addr.v6_addr = self.subnet.packed
-        nap.addr_mask.mask_len = self.netmask
-        nap.low_port = 0
-        nap.high_port = (1 << 16) - 1
-        nap.label = "%s/%s" % (str(self.subnet), self.netmask)
-        return nap
-
     def to_lib(self, zone, app):
         pass
 
@@ -121,9 +89,6 @@ class NonAraaliClient(object):
 class NonAraaliServer(object):
     def __init__(self, data):
         self.process = None
-        self.from_yaml(data)
-
-    def from_yaml(self, data):
         self.dst_port = data["dst_port"]
         if "dns_pattern" in data:
             self.dns_pattern = data["dns_pattern"]
@@ -157,20 +122,6 @@ class NonAraaliServer(object):
             if "orig_" == attr[:len("orig_")]:
                 obj[attr] = getattr(self, attr)
         return obj
-
-    def to_policy(self):
-        nap = policy_pb2.NonAraaliServicePolicy()
-        if self.dns_pattern:
-            #nap.dns_pattern = re.sub(":", "|", self.dns_pattern)
-            label = self.dns_pattern
-        else:
-            nap.addr_mask.ip_addr.v6_addr = self.subnet.packed
-            nap.addr_mask.mask_len = self.netmask
-            label = "%s/%s" % (str(self.subnet), self.netmask)
-        nap.low_port = self.dst_port
-        nap.high_port = self.dst_port if self.dst_port != 0 else (1 << 16) - 1
-        nap.label = "%s:%s" % (label, nap.low_port if nap.low_port == nap.high_port else "[%s-%s]" % (nap.low_port, nap.high_port))
-        return nap
 
     def to_lib(self, zone, app):
         pass
@@ -322,29 +273,31 @@ class LinkTable(Table):
 
         def endpoint(field, val, flags=0, who="either"):
             """flags=re.IGNORECASE can be used"""
-            # examples:
-            #   f.endpoint("dns_pattern", "api.snapcraft.io"),
-            #   f.endpoint("network", "169.254.169.254", who="server")
-            #   f.neg(f.endpoint("process", ansible", re.IGNORECASE)),
-            #   f.endpoint("binary_name", "/snap/amazon-ssm-agent"), #/2996/ssm-agent-worker")
-            #   f.endpoint("process", "sshd", re.IGNORECASE),
-            #   f.endpoint("process", ["sshd", "haproxy"], who="server"),
-            #   f.endpoint("network", None, who="server"), # perimeter
-            #   f.neg(f.endpoint("network", None, who="server")), # perimeter
-
             def match_str(s, v):
                 return re.search(s, v, flags=flags)
 
+            def match_list(s, v):
+                return any([match_val(a, v) is not None for a in s])
+
             def match_nonstr(s, v):
-                if isinstance(s, list):
-                    return v in s
                 return s == v
 
-            match_val = match_str if isinstance(val, str) else match_nonstr
+            def match_val(s, v):
+                if isinstance(s, list):
+                    return match_list(s, v)
+                return match_str(s, v) if isinstance(v, str) else match_nonstr(s, v)
 
             def match(r):
-                c = r.get("client", {}).get(field, "" if isinstance(val, str) else None)
-                s = r.get("server", {}).get(field, "" if isinstance(val, str) else None)
+                def get_default():
+                    if isinstance(val, str):
+                        return ""
+                    if isinstance(val, list):
+                        if isinstance(val[0], str):
+                            return ""
+                    return None
+                defval = get_default()
+                c = r.get("client", {}).get(field, defval)
+                s = r.get("server", {}).get(field, defval)
                 if who == "client":
                     return match_val(val, c)
                 elif who == "server":
@@ -442,52 +395,6 @@ class Link(object):
 
     def snooze(self):
         self.nstate = "snooze"
-
-    def to_alert_info(self, alert_status):
-        alert_request = araali_ui_pb2.ManageAlertsRequest()
-        alert_request.tenant_id = 'meta-tap' # Fix me
-        alert_request.email = 'abhishek@araalinetworks.com'
-        alert_info = alert_request.alert_and_status.add()
-        alert_info.alert_id = self.unique_id
-        alert_info.status = alert_status
-        alert_info.timestamp = self.timestamp
-        if self.type == "AEG" or self.type == "NAE":
-            zone = self.client.zone
-            app = self.client.outer
-        else:
-            zone = self.server.zone
-            app = self.server.outer
-        alert_info.zone = zone
-        alert_info.app = app
-        return alert_request
-
-    def to_request(self):
-        policy_request = araali_ui_pb2.PolicyRequest()
-        if self.nstate == "DEFINED_POLICY":
-            policy_request.op = araali_ui_pb2.PolicyRequest.Op.ADD
-            if self.state == "BASELINE_ALERT":
-                policy_request.alert_request.CopyFrom(self.to_alert_info(flow_spec_pb2.AlertType.AlertStatus.CLOSE))
-
-        elif self.nstate == "snooze":
-            if self.state == "BASELINE_ALERT":
-                return self.to_alert_info(flow_spec_pb2.AlertType.AlertStatus.CLOSE)
-            policy_request.op = araali_ui_pb2.PolicyRequest.Op.DEL
-        else:
-            return None
-
-        if self.type == "NAI":
-            policy_request.policy.non_araali_policies.extend([self.server.to_policy()])
-            policy_request.policy.non_araali_policies[0].ingress_policies.extend([self.client.to_policy()])
-            policy_request.policy.non_araali_policies[0].rank = 5000
-        elif self.type == "NAE":
-            policy_request.policy.non_araali_policies.extend([self.client.to_policy()])
-            policy_request.policy.non_araali_policies[0].egress_policies.extend([self.server.to_policy()])
-            policy_request.policy.non_araali_policies[0].rank = 5000
-        else: # We always create ingress policies in case of araali to araali.
-            policy_request.policy.app_ctx_policies.extend([self.server.to_policy(client=False, araali=True)])
-            policy_request.policy.app_ctx_policies[0].ingress_policies.extend([self.client.to_policy(client=True, araali=True)])
-            policy_request.policy.app_ctx_policies[0].rank = 5000
-        return policy_request
 
     def meta_policy(self):
         if self.type == "NAI":
