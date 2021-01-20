@@ -44,11 +44,29 @@ def get_zones(full=False):
 
 def update_links(zone, app, data):
     """Update actions on a link"""
-    rc = run_command("""./araalictl api -zone %s -app %s -update-links <<EOF
+    ret_val = {}                                                                
+    for link in data:                                                           
+        if link["new_state"] == "DEFINED_POLICY":                                  
+            ret_val["policies"] = ret_val.get("policies", 0) + 1
+            if link["state"] == "BASELINE_ALERT":                                  
+                ret_val["alerts"] = ret_val.get("alerts", 0) + 1
+                                                                                
+        elif link["new_state"] == "SNOOZED_POLICY":                                
+            if link["state"] == "BASELINE_ALERT":                                  
+                ret_val["alerts"] = ret_val.get("alerts", 0) + 1
+            ret_val["policies"] = ret_val.get("policies", 0) + 1
+                                                                                
+    if not ret_val:                                                             
+        ret_val['empty'] = {"success": "Empty policy request"}                  
+    else:
+        print(yaml.dump(data))
+        rc = run_command("""./araalictl api -zone %s -app %s -update-links <<EOF
 %s
-EOF""" % (yaml.dump(data), zone, app), result=True, strip=False)
-    assert rc[0] == 0, rc[1]
-    return yaml.load(rc[1], yaml.SafeLoader)
+EOF""" % (zone, app, yaml.dump(data)), result=True, strip=False)
+        assert rc[0] == 0, rc[1]
+        print(rc[1])
+
+    return ret_val    
 
 def get_links(zone, app):
     """Get links for a zone and app"""

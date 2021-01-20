@@ -133,7 +133,7 @@ class AcceptLink:
         self.changes = changes                                                  
                                                                                 
     def apply(self, links):                                                     
-        l = LinkTable(links, f.state("BASELINE_ALERT"), f.nstate(None), *self.filters)                                     
+        l = LinkTable(links, f.state("BASELINE_ALERT"), f.new_state(None), *self.filters)                                     
         l.accept()                                                              
         for c in self.changes:                                                       
             l.change(*c)
@@ -166,10 +166,10 @@ class MetaPolicyRunner:
         def impl():
             for l in self.links:
                 if todo:
-                    if l.state == "DEFINED_POLICY" or l.nstate is not None:
+                    if l.state == "DEFINED_POLICY" or l.new_state is not None:
                         continue
                 else:
-                    if l.nstate is None:
+                    if l.new_state is None:
                         continue
                     if filters and l.meta_policy not in filters:
                         continue
@@ -262,10 +262,10 @@ class LinkTable(Table):
                 return lambda r: r.get("type", None) in link_type
             return lambda r: r.get("type", None) == link_type
 
-        def nstate(state):
+        def new_state(state):
             if isinstance(state, list):
-                return lambda r: r.get("nstate", None) in state
-            return lambda r: r.get("nstate", None) == state
+                return lambda r: r.get("new_state", None) in state
+            return lambda r: r.get("new_state", None) == state
 
         def speculative(state):
             if isinstance(state, list):
@@ -372,12 +372,12 @@ class Link(object):
         self.state = data["state"]
         self.timestamp = data["timestamp"]
         self.unique_id = data["unique_id"]
-        self.nstate = None
+        self.new_state = None
 
     def to_data(self):
         return {"client": self.client.to_data(), "server": self.server.to_data(),
                 "type": self.type, "state": self.state,
-                "nstate": self.nstate, "speculative": self.speculative}
+                "new_state": self.new_state, "speculative": self.speculative}
 
     def to_data(self):                                                          
         obj = {}                                                                
@@ -388,14 +388,14 @@ class Link(object):
         obj["state"] = self.state                                              
         obj["timestamp"] = self.timestamp                                       
         obj["unique_id"] = self.unique_id                                        
-        obj["nstate"] = self.nstate                                        
+        obj["new_state"] = self.new_state                                        
         return obj 
 
     def accept(self):
-        self.nstate = "DEFINED_POLICY"
+        self.new_state = "DEFINED_POLICY"
 
     def snooze(self):
-        self.nstate = "snooze"
+        self.new_state = "SNOOZED_POLICY"
 
     def meta_policy(self):
         if self.type == "NAI":
@@ -699,7 +699,7 @@ class App(object):
                     proc.append(l.server)
                 if pfilter and pfilter not in [a.process for a in proc]:
                     continue
-                if cfilter and l.nstate is None:
+                if cfilter and l.new_state is None:
                     continue
                 if afilter: # show only alerts
                      if l.state != "BASELINE_ALERT" or l.type == "NAI" and l.speculative:
