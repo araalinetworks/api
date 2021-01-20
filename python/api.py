@@ -285,7 +285,7 @@ class LinkTable(Table):
             def match_val(s, v):
                 if isinstance(s, list):
                     return match_list(s, v)
-                return match_str(s, v) if isinstance(v, str) else match_nonstr(s, v)
+                return match_str(s, v) if isinstance(s, str) else match_nonstr(s, v)
 
             def match(r):
                 def get_default():
