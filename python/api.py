@@ -1,4 +1,5 @@
 import copy
+import ipaddress
 import json
 import re
 
@@ -20,16 +21,18 @@ class Process(object):
         self.zone = data["zone"]
         self.app = data["app"]
         self.process = data["process"]
-        self.binary_name = data["binaryname"]
-        self.parent_process = data["parentprocess"]
+        self.binary_name = data["binary_name"]
+        self.parent_process = data["parent_process"]
 
     def __repr__(self):
         return json.dumps(self.to_data())
 
     def to_data(self):
         if self.zone:
-            obj = {"zone": self.zone, "app": self.app, "process": self.process,
-                    "parent_process": self.parent_process, "binary_name": self.binary_name}
+            obj = {"zone": self.zone, "app": self.app,                             
+                "process": self.process,                                        
+                "binary_name": self.binary_name,                                 
+                "parent_process": self.parent_process}  
             for attr in dir(self):
                 if "orig_" == attr[:len("orig_")]:
                     obj[attr] = getattr(self, attr)
@@ -77,41 +80,8 @@ class NonAraaliClient(object):
         self.from_yaml(data)
 
     def from_yaml(self, data):
-        self.subnet = data["subnet"]
-        self.net_mask = data["netmask"]
-
-    def __repr__(self):
-        return json.dumps(self.to_data())
-
-    def to_data(self):
-        return {"network": str(self.subnet), "mask": self.net_mask}
-
-    def to_policy(self):
-        nap = policy_pb2.NonAraaliServicePolicy()
-        nap.addr_mask.ip_addr.v6_addr = self.subnet.packed
-        nap.addr_mask.mask_len = self.net_mask
-        nap.low_port = 0
-        nap.high_port = (1 << 16) - 1
-        nap.label = "%s/%s" % (str(self.subnet), self.net_mask)
-        return nap
-
-    def to_lib(self, zone, app):
-        pass
-
-
-class NonAraaliServer(object):
-    def __init__(self, data):
-        self.process = None
-        self.from_yaml(data)
-
-    def from_yaml(self, data):
-        self.dst_port = data["dstport"]
-        if "dnsPattern" in data:
-            self.dns_pattern = data["dnsPattern"]
-        else:
-            self.dns_pattern = None
-            self.subnet = data["subnet"]
-            self.net_mask = data.get("netmask", 0)
+        self.subnet = ipaddress.ip_address(data["subnet"])
+        self.netmask = data.get("netmask", 0)
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -129,10 +99,59 @@ class NonAraaliServer(object):
         return self
 
     def to_data(self):
-        if self.dns_pattern:
-            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port}
+        obj = {"subnet": str(self.subnet), "netmask": self.netmask}
+        for attr in dir(self):
+            if "orig_" == attr[:len("orig_")]:
+                obj[attr] = getattr(self, attr)
+        return obj
+
+    def to_policy(self):
+        nap = policy_pb2.NonAraaliServicePolicy()
+        nap.addr_mask.ip_addr.v6_addr = self.subnet.packed
+        nap.addr_mask.mask_len = self.netmask
+        nap.low_port = 0
+        nap.high_port = (1 << 16) - 1
+        nap.label = "%s/%s" % (str(self.subnet), self.netmask)
+        return nap
+
+    def to_lib(self, zone, app):
+        pass
+
+
+class NonAraaliServer(object):
+    def __init__(self, data):
+        self.process = None
+        self.from_yaml(data)
+
+    def from_yaml(self, data):
+        self.dst_port = data["dst_port"]
+        if "dns_pattern" in data:
+            self.dns_pattern = data["dns_pattern"]
         else:
-            obj = {"network": str(self.subnet), "mask": self.net_mask, "dst_port": self.dst_port}
+            self.dns_pattern = None
+            self.subnet = ipaddress.ip_address(data["subnet"])
+            self.netmask = data.get("netmask", 0)
+
+    def __repr__(self):
+        return json.dumps(self.to_data())
+
+    def change(self, what, to):
+        orig_str = "orig_%s" % what
+        if not hasattr(self, orig_str):
+            setattr(self, orig_str, getattr(self, what))
+        setattr(self, what, to)
+        return self
+
+    def restore(self, what):
+        orig_str = "orig_%s" % what
+        setattr(self, what, getattr(self, orig_str))
+        return self
+
+    def to_data(self):
+        if self.dns_pattern:                                                    
+            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port}   
+        else:                                                                   
+            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port}
 
         for attr in dir(self):
             if "orig_" == attr[:len("orig_")]:
@@ -146,8 +165,8 @@ class NonAraaliServer(object):
             label = self.dns_pattern
         else:
             nap.addr_mask.ip_addr.v6_addr = self.subnet.packed
-            nap.addr_mask.mask_len = self.net_mask
-            label = "%s/%s" % (str(self.subnet), self.net_mask)
+            nap.addr_mask.mask_len = self.netmask
+            label = "%s/%s" % (str(self.subnet), self.netmask)
         nap.low_port = self.dst_port
         nap.high_port = self.dst_port if self.dst_port != 0 else (1 << 16) - 1
         nap.label = "%s:%s" % (label, nap.low_port if nap.low_port == nap.high_port else "[%s-%s]" % (nap.low_port, nap.high_port))
@@ -163,7 +182,7 @@ class AcceptLink:
         self.changes = changes                                                  
                                                                                 
     def apply(self, links):                                                     
-        l = LinkTable(links, f.lstate("BASELINE_ALERT"), f.nstate(None), *self.filters)                                     
+        l = LinkTable(links, f.state("BASELINE_ALERT"), f.nstate(None), *self.filters)                                     
         l.accept()                                                              
         for c in self.changes:                                                       
             l.change(*c)
@@ -190,19 +209,26 @@ class MetaPolicyRunner:
             print("%-20s matched %s rows" % (pname, count))
         return self
 
-    def review(self, *filters):
+    def review(self, todo=False, *filters):
         filters = [a.__name__ for a in filters]
         def impl():
             for l in self.links:
-                if l.new_state == None:
-                    continue
-                if filters and l.meta_policy not in filters:
-                    continue
+                if todo:
+                    if l.nstate is not None:
+                        continue
+                else:
+                    if l.nstate is None:
+                        continue
+                    if filters and l.meta_policy not in filters:
+                        continue
                 obj = l.to_data()
-                obj["meta_policy"] = l.meta_policy
+                del obj["unique_id"]
+                del obj["timestamp"]
+                if not todo:
+                    obj["meta_policy"] = l.meta_policy
                 yield obj
         ret = list(impl())
-        print("\nReviewing %s rows" % len(ret))
+        print("\nReviewing %s rows %s" % (len(ret), "that matched" if not todo else "that didn't match"))
         return Table(ret)
     
 
@@ -273,16 +299,16 @@ class LinkTable(Table):
                 return True
             return impl
 
-        def lstate(state):
+        def state(state):
             """Valid states are: NAI, NAE, INT, AIN, AEG"""
             if isinstance(state, list):
-                return lambda r: r.get("lstate", None) in state
-            return lambda r: r.get("lstate", None) == state
+                return lambda r: r.get("state", None) in state
+            return lambda r: r.get("state", None) == state
 
-        def ltype(link_type):
+        def type(link_type):
             if isinstance(link_type, list):
-                return lambda r: r.get("ltype", None) in link_type
-            return lambda r: r.get("ltype", None) == link_type
+                return lambda r: r.get("type", None) in link_type
+            return lambda r: r.get("type", None) == link_type
 
         def nstate(state):
             if isinstance(state, list):
@@ -338,6 +364,13 @@ class LinkTable(Table):
         def same_zone(r):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
 
+    def to_data(self):
+        def transform(obj):
+            del obj["unique_id"]
+            del obj["timestamp"]
+            return obj
+        return [transform(a.to_data()) for a in self.links]
+
     def change(self, what, field, to, *args):
         if not args:
             args = range(len(self.links))
@@ -378,25 +411,37 @@ mpr = MetaPolicyRunner()
 
 class Link(object):
     def __init__(self, data, zone, app):
-        self.client = Process(data["client"]) if "client" in data else NonAraaliClient(data["nonAraaliClient"])
-        self.server = Process(data["server"]) if "server" in data else NonAraaliServer(data["nonAraaliServer"])
-        self.ltype = data["type"]
+        self.client = (Process if "zone" in data["client"] else NonAraaliClient)(data["client"])
+        self.server = (Process if "zone" in data["server"] else NonAraaliServer)(data["server"])
+        self.type = data["type"]
         self.speculative = data["speculative"]
-        self.lstate = data["state"]
+        self.state = data["state"]
         self.timestamp = data["timestamp"]
-        self.unique_id = data["uniqueid"]
-        self.new_state = None
+        self.unique_id = data["unique_id"]
+        self.nstate = None
 
     def to_data(self):
         return {"client": self.client.to_data(), "server": self.server.to_data(),
-                "ltype": self.ltype, "lstate": self.lstate,
-                "nstate": self.new_state, "speculative": self.speculative}
+                "type": self.type, "state": self.state,
+                "nstate": self.nstate, "speculative": self.speculative}
+
+    def to_data(self):                                                          
+        obj = {}                                                                
+        obj["client"] = self.client.to_data()
+        obj["server"] = self.server.to_data()
+        obj["type"] = self.type                                                
+        obj["speculative"] = self.speculative                                   
+        obj["state"] = self.state                                              
+        obj["timestamp"] = self.timestamp                                       
+        obj["unique_id"] = self.unique_id                                        
+        obj["nstate"] = self.nstate                                        
+        return obj 
 
     def accept(self):
-        self.new_state = "DEFINED_POLICY"
+        self.nstate = "DEFINED_POLICY"
 
     def snooze(self):
-        self.new_state = "snooze"
+        self.nstate = "snooze"
 
     def to_alert_info(self, alert_status):
         alert_request = araali_ui_pb2.ManageAlertsRequest()
@@ -406,7 +451,7 @@ class Link(object):
         alert_info.alert_id = self.unique_id
         alert_info.status = alert_status
         alert_info.timestamp = self.timestamp
-        if self.ltype == "AEG" or self.ltype == "NAE":
+        if self.type == "AEG" or self.type == "NAE":
             zone = self.client.zone
             app = self.client.outer
         else:
@@ -418,23 +463,23 @@ class Link(object):
 
     def to_request(self):
         policy_request = araali_ui_pb2.PolicyRequest()
-        if self.new_state == "DEFINED_POLICY":
+        if self.nstate == "DEFINED_POLICY":
             policy_request.op = araali_ui_pb2.PolicyRequest.Op.ADD
-            if self.lstate == "BASELINE_ALERT":
+            if self.state == "BASELINE_ALERT":
                 policy_request.alert_request.CopyFrom(self.to_alert_info(flow_spec_pb2.AlertType.AlertStatus.CLOSE))
 
-        elif self.new_state == "snooze":
-            if self.lstate == "BASELINE_ALERT":
+        elif self.nstate == "snooze":
+            if self.state == "BASELINE_ALERT":
                 return self.to_alert_info(flow_spec_pb2.AlertType.AlertStatus.CLOSE)
             policy_request.op = araali_ui_pb2.PolicyRequest.Op.DEL
         else:
             return None
 
-        if self.ltype == "NAI":
+        if self.type == "NAI":
             policy_request.policy.non_araali_policies.extend([self.server.to_policy()])
             policy_request.policy.non_araali_policies[0].ingress_policies.extend([self.client.to_policy()])
             policy_request.policy.non_araali_policies[0].rank = 5000
-        elif self.ltype == "NAE":
+        elif self.type == "NAE":
             policy_request.policy.non_araali_policies.extend([self.client.to_policy()])
             policy_request.policy.non_araali_policies[0].egress_policies.extend([self.server.to_policy()])
             policy_request.policy.non_araali_policies[0].rank = 5000
@@ -445,7 +490,7 @@ class Link(object):
         return policy_request
 
     def meta_policy(self):
-        if self.ltype == "NAI":
+        if self.type == "NAI":
             print("""
 class MpTest:
     policies = [
@@ -462,12 +507,12 @@ class MpTest:
 """ % (self.server.zone, self.server.app, self.server.process))
             return
 
-        if self.ltype == "NAE":
+        if self.type == "NAE":
             print("""
 class MpTest:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("app", "%s"),
                 api.f.endpoint("process", "%s", who="client"),
                 api.f.endpoint("dns_pattern", "%s", who="server"),
@@ -478,13 +523,13 @@ class MpTest:
 """ % (self.client.app, self.client.process, self.server.dns_pattern, self.server.dns_pattern.replace(".", "\.")))
             return
 
-        if self.ltype in ["AIN", "AEG"]:
+        if self.type in ["AIN", "AEG"]:
             if self.client.zone == self.server.zone:
                 print("""
 class MpTest:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype(["AEG", "AIN"]),
+                api.f.type(["AEG", "AIN"]),
                 api.f.same_zone,
                 api.f.endpoint("app", "%s", who="client"),
                 api.f.endpoint("process", "%s", who="client"),
@@ -500,7 +545,7 @@ class MpTest:
 class MpTest:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype(["AEG", "AIN"]),
+                api.f.type(["AEG", "AIN"]),
                 api.f.endpoint("zone", "%s", who="client"),
                 api.f.endpoint("app", "%s", who="client"),
                 api.f.endpoint("process", "%s", who="client"),
@@ -517,7 +562,7 @@ class MpTest:
 class MpTest:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("app", "%s", who="client"),
                 api.f.endpoint("process", "%s", who="client"),
                 api.f.endpoint("app", "%s", who="server"),
@@ -528,10 +573,10 @@ class MpTest:
 """ % (self.client.app, self.client.process, self.server.app, self.server.process))
 
     def to_lib(self, zone, app):
-        if self.ltype == "INT":
+        if self.type == "INT":
             self.client.to_lib(zone, app)
             self.server.to_lib(zone, app)
-        elif self.ltype == "NAE" or self.ltype == "AEG":
+        elif self.type == "NAE" or self.type == "AEG":
             self.client.to_lib(zone, app)
         else: # NAI or AIN
             self.server.to_lib(zone, app)
@@ -713,12 +758,12 @@ class App(object):
         return self
         
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
-        """lfilter for ltype, pfilter for process, cfilter for changes/dirty
+        """lfilter for type, pfilter for process, cfilter for changes/dirty
            afilter for alerts, dfilter for defined
         """
         def impl():
             for l in self.links:
-                if lfilter and l.ltype != lfilter:
+                if lfilter and l.type != lfilter:
                     continue
                 # for process filter, it could be either client or server
                 proc = []
@@ -728,13 +773,13 @@ class App(object):
                     proc.append(l.server)
                 if pfilter and pfilter not in [a.process for a in proc]:
                     continue
-                if cfilter and l.new_state is None:
+                if cfilter and l.nstate is None:
                     continue
                 if afilter: # show only alerts
-                     if l.lstate != "BASELINE_ALERT" or l.ltype == "NAI" and l.speculative:
+                     if l.state != "BASELINE_ALERT" or l.type == "NAI" and l.speculative:
                         continue
                 if dfilter: # show only defined
-                     if l.lstate != "DEFINED_POLICY":
+                     if l.state != "DEFINED_POLICY":
                         continue
                 yield l
         if data:
@@ -743,31 +788,7 @@ class App(object):
 
     def commit(self):
         """accept policy etc backend calls"""
-        # iterate thru change filter and push to backend
-        policy_request_list = araali_ui_pb2.PolicyRequestList()
-        policy_request_list.tenant_id = "meta-tap" # FIXME: Parameterize later
-        manage_alerts_request = araali_ui_pb2.ManageAlertsRequest()
-        manage_alerts_request.tenant_id = "meta-tap"
-        manage_alerts_request.email = "abhishek@araalinetworks.com"
-        for link in self.review():
-            ui_request = link.to_request()
-            if isinstance(ui_request, araali_ui_pb2.PolicyRequest):
-                policy_request_list.policy_requests.extend([ui_request])
-            elif isinstance(ui_request, araali_ui_pb2.ManageAlertsRequest):
-                for a in ui_request.alert_and_status:
-                    manage_alerts_request.alert_and_status.extend([a])
-            else:
-                # Unsupported transition
-                pass
-
-        ret_val = {}
-        if len(policy_request_list.policy_requests) > 0:
-            ret_val['policies'] = araali.backend.push_policies(policy_request_list)
-        if len(manage_alerts_request.alert_and_status) > 0:
-            ret_val['alerts'] = araali.backend.manage_alerts(manage_alerts_request)
-        else:
-            ret_val['empty'] = {"success": "Empty policy request"}
-        return ret_val
+        return araalictl.update_links(self.zone, self.app, self.review(data=True))
 
     def review(self, data=False):
         """display any state changes prior to commit, data is set to true if you want data instead of objects"""
@@ -790,9 +811,9 @@ class App(object):
         def impl():
             link_type = {}                                                          
             for link in self.iterlinks():
-                if link.lstate == "BASELINE_ALERT" and link.ltype == "NAI" and link.speculative:
+                if link.state == "BASELINE_ALERT" and link.type == "NAI" and link.speculative:
                     continue # skip baseline alerts
-                link_type.setdefault(link.ltype, {}).setdefault(link.lstate, []).append(1)                      
+                link_type.setdefault(link.type, {}).setdefault(link.state, []).append(1)                      
 
             for k, sdict in link_type.items():
                 for state, v in sdict.items():
@@ -823,12 +844,9 @@ class App(object):
         self.zone = zone
         self.app = app
         for link in self.iterlinks():
-            if link.lstate == "DEFINED_POLICY":
+            if link.state == "DEFINED_POLICY":
                 link.accept()
             link.to_lib(zone, app)
 
     def __repr__(self):
         return json.dumps(self.to_data())
-
-
-

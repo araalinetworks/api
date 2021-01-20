@@ -4,7 +4,7 @@ import re
 class MpDockerd:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", [":quay.io:",
                                             ":production.cloudflare.docker.com:",
@@ -13,21 +13,21 @@ class MpDockerd:
             ], changes=[
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":.*.docker.io:", who="server"),
             ], changes=[
                 ("server", "dns_pattern", ":.*\.docker\.io:"),
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:", who="server"),
             ], changes=[
                 ("server", "dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:"),
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":175118736976.dkr.ecr..*.amazonaws.com:", who="server"),
             ], changes=[
@@ -38,13 +38,13 @@ class MpDockerd:
 class MpNAE:                                                                 
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "/usr/local/bin/cvescan", who="client"),
                 api.f.endpoint("dns_pattern", ":people.canonical.com:", who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[                                                    
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "grafana-server", who="client"),                 
                 api.f.endpoint("dns_pattern", [
                     ":hooks.slack.com:", 
@@ -54,7 +54,7 @@ class MpNAE:
             ], changes=[                                                        
             ]),
         api.AcceptLink(filters=[                                                    
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "kubelet", who="client"),                 
                 api.f.endpoint("dns_pattern", [
                     ":ec2.us-west-2.amazonaws.com:", 
@@ -63,7 +63,7 @@ class MpNAE:
             ], changes=[                                                        
             ]),         
         api.AcceptLink(filters=[                                                    
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "kubelet", who="client"),                 
                 api.f.endpoint("dns_pattern", ":.*.eks.amazonaws.com:", who="server"),           
             ], changes=[                                                        
@@ -71,7 +71,7 @@ class MpNAE:
             ]),        
         api.AcceptLink(filters=[                                                    
                 api.f.endpoint("app", "cassandra"),                           
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "/usr/bin/pip3", who="client"),               
                 api.f.endpoint("dns_pattern", [":pypi.python.org:",
                                            ":pypi.org:",
@@ -79,13 +79,13 @@ class MpNAE:
             ], changes=[                                                        
             ]),                                                                 
         api.AcceptLink(filters=[                                                    
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "/usr/lib/ubuntu-release-upgrader/check-new-release", who="client"),                 
                 api.f.endpoint("dns_pattern", [":changelogs.ubuntu.com:"], who="server"),           
             ], changes=[                                                        
             ]),
         api.AcceptLink(filters=[                                                    
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("parent_process", "apt-get", who="client"),                 
                 api.f.endpoint("dns_pattern", [":us-west-2.ec2.archive.ubuntu.com:",
                                            ":downloads.apache.org:", 
@@ -99,13 +99,13 @@ class MpNAE:
 class MpINT:
     policies = [
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "grafana-server", who="client"),                 
                 api.f.endpoint("process", "prometheus", who="server"),           
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "kube-rbac-proxy", who="client"),                 
                 api.f.endpoint("process", [
                     "node_exporter",
@@ -114,13 +114,13 @@ class MpINT:
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "coredns", who="client"),                 
                 api.f.endpoint("process", "coredns", who="server"),           
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "kubelet", who="client"),                 
                 api.f.endpoint("process", "kubelet", who="server"),           
             ], changes=[                                                        
@@ -131,81 +131,81 @@ class MpBendVm:
     policies = [
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.web"),
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "araaliweb", who="client"),
                 api.f.endpoint("dns_pattern", [":ipinfo.io:", ":metering.marketplace.us-east-1.amazonaws.com:"], who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bend.applens.applens-generator"),
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
                 api.f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:"], who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.backend"),
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "araali_backend.py", who="client"),
                 api.f.endpoint("dns_pattern", [":sns.us-west-2.amazonaws.com:", ":lambda.us-west-2.amazonaws.com:"], who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.visbot"),
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "main.py", who="client"),
                 api.f.endpoint("dns_pattern", [":email.us-west-2.amazonaws.com:", ":slack.com:"], who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "araaliweb", who="client"),
                 api.f.endpoint("process", "docker-proxy", who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "araali_backend.py", who="client"),
                 api.f.endpoint("process", "docker-proxy", who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "com.araalinetworks.LaunchKt", who="client"),
                 api.f.endpoint("process", "scanner.py", who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm"),                        
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "docker-proxy", who="client"),                 
                 api.f.endpoint("process", "main.py", who="server"),           
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.uiserver"),                        
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "grpcwebproxy", who="client"),                 
                 api.f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="server"),           
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.uiserver"),                        
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("parent_process", "check_health.sh", who="client"),                 
                 api.f.endpoint("process", "grpcwebproxy", who="server"),           
             ], changes=[                                                        
             ]),   
         api.AcceptLink(filters=[                                                    
                 api.f.endpoint("app", "bendvm.bend.backend"),                        
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "prometheus", who="client"),                 
                 api.f.endpoint("process", "araali_backend.py", who="server"),           
             ], changes=[                                                        
             ]),         
         api.AcceptLink(filters=[
                 api.f.same_zone,
-                api.f.ltype("AEG"),                                                 
+                api.f.type("AEG"),                                                 
                 api.f.endpoint("app", "dmzvm", who="client"),                        
                 api.f.endpoint("process", "/var/lib/haproxy/healthcheck.py", who="client"), 
                 api.f.endpoint("app", "bendvm.bend.backend", who="server"),                        
@@ -214,7 +214,7 @@ class MpBendVm:
             ]),         
         api.AcceptLink(filters=[
                 api.f.same_zone,
-                api.f.ltype("AEG"),                                                 
+                api.f.type("AEG"),                                                 
                 api.f.endpoint("app", "bendvm.bend.uiserver", who="client"),                        
                 api.f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="client"), 
                 api.f.endpoint("app", "dmzvm", who="server"),                        
@@ -223,7 +223,7 @@ class MpBendVm:
             ]),        
         api.AcceptLink(filters=[
                 api.f.same_zone,
-                api.f.ltype("AEG"),                                                 
+                api.f.type("AEG"),                                                 
                 api.f.endpoint("app", "dmzvm", who="client"),                        
                 api.f.endpoint("process", "haproxy", who="client"), 
                 api.f.endpoint("app", "bendvm.bend.web", who="server"),                        
@@ -232,7 +232,7 @@ class MpBendVm:
             ]),         
         api.AcceptLink(filters=[
                 api.f.same_zone,
-                api.f.ltype("AEG"),                                                 
+                api.f.type("AEG"),                                                 
                 api.f.endpoint("app", "dmzvm", who="client"),                        
                 api.f.endpoint("process", "haproxy", who="client"), 
                 api.f.endpoint("app", "bendvm.bend.uiserver", who="server"),                        
@@ -241,7 +241,7 @@ class MpBendVm:
             ]),        
         api.AcceptLink(filters=[
                 api.f.same_zone,
-                api.f.ltype("AEG"),                                                 
+                api.f.type("AEG"),                                                 
                 api.f.endpoint("app", "dmzvm", who="client"),                        
                 api.f.endpoint("process", "haproxy", who="client"), 
                 api.f.endpoint("app", "bendvm.bend.backend", who="server"),                        
@@ -287,14 +287,14 @@ class MpCassandra:
     policies = [
         api.AcceptLink(filters=[                                                    
                 api.f.endpoint("app", "cassandra"),                      
-                api.f.ltype("INT"),                                                 
+                api.f.type("INT"),                                                 
                 api.f.endpoint("process", "org.apache.cassandra.tools.NodeTool", who="client"),  
                 api.f.endpoint("process", "org.apache.cassandra.service.CassandraDaemon", who="server"),            
             ], changes=[                                                        
             ]), 
         api.AcceptLink(filters=[                                                    
                 api.f.endpoint("app", "cassandra"),
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "curl", who="client"),
                 api.f.endpoint("process", "cassandra_monitoring.py", who="server"),
             ], changes=[                                                        
@@ -375,7 +375,7 @@ class MpMonitoring:
     policies = [                                                                
         api.AcceptLink(filters=[                                                    
                 api.f.endpoint("app", "^monitoring\."),               
-                api.f.ltype("NAE"),                                                 
+                api.f.type("NAE"),                                                 
                 api.f.endpoint("process", "grafana-server", who="client"),              
                 api.f.endpoint("dns_pattern", [":stats.grafana.org:", 
                                                ":secure.gravatar.com:",
@@ -388,14 +388,14 @@ class MpAwsEks:
     policies = [
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "kube-system.kube.kube-proxy"),
-                api.f.ltype("NAE"),
+                api.f.type("NAE"),
                 api.f.endpoint("process", "kube-proxy", who="client"),
                 api.f.endpoint("dns_pattern", ":.*\.eks\.amazonaws\.com:", who="server"),
             ], changes=[
                 ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
             ]),
         api.AcceptLink(filters=[                                               
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "aws-cni", who="client"),
                 api.f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
             ], changes=[
@@ -461,7 +461,7 @@ class MpHbCheck:
 
     policies = [
         api.AcceptLink(filters=[                                               
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "heartbeat_check.py", who="client"),
                 api.f.endpoint("process", "com.araalinetworks.LaunchKt", who="server", flags=re.IGNORECASE),
             ], changes=[
@@ -511,7 +511,7 @@ class MpPrometheus:
 class MpAlertMgr:
     policies = [
         api.AcceptLink(filters=[                                               
-                api.f.ltype("INT"),
+                api.f.type("INT"),
                 api.f.endpoint("process", "alertmanager", who="client"),
                 api.f.endpoint("process", "alertmanager", who="server", flags=re.IGNORECASE),
             ], changes=[
