@@ -415,7 +415,8 @@ class MpTest:
             return
 
         if self.type == "NAE":
-            print("""
+            if self.server.dns_pattern:
+                print("""
 class MpTest:
     policies = [
         api.AcceptLink(filters=[
@@ -428,6 +429,23 @@ class MpTest:
             ]),
     ]
 """ % (self.client.app, self.client.process, self.server.dns_pattern, self.server.dns_pattern.replace(".", "\.")))
+            else:
+                print("""
+class MpTest:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.type("NAE"),
+                api.f.endpoint("app", "%s"),
+                api.f.endpoint("process", "%s", who="client"),
+                api.f.endpoint("subnet", "%s", who="server"),
+                api.f.endpoint("netmask", "%s", who="server"),
+                api.f.endpoint("dst_port", "%s", who="server"),
+            ], changes=[
+                ("server", "subnet", "%s"),
+            ]),
+    ]
+""" % (self.client.app, self.client.process, self.server.subnet, self.server.netmask, self.server.dst_port, self.server.subnet))
+
             return
 
         if self.type in ["AIN", "AEG"]:
