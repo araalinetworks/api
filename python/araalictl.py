@@ -62,7 +62,7 @@ def update_links(zone, app, data):
         ret_val['empty'] = {"success": "Empty policy request"}
     else:
         if g_debug: print(yaml.dump(data))
-        rc = run_command("./araalictl api -zone %s -app %s -update-links",
+        rc = run_command("./araalictl api -zone %s -app %s -update-links" % (zone, app),
                          in_text=yaml.dump(data), result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val['empty'] = {"success": rc[1]}
