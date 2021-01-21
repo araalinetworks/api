@@ -47,7 +47,7 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def run_command(command, result=False, strip=True, debug=False, env=os.environ):
+def run_command(command, result=False, strip=True, in_text=None, debug=False, env=os.environ):
     def collect_output(ret, output):
         if output:
             if strip:
@@ -60,11 +60,15 @@ def run_command(command, result=False, strip=True, debug=False, env=os.environ):
     if debug:
     	print(command, result)
     process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+                                stdin=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
     				env=env)
     ret = []
     if result:
-        outs, errs = process.communicate()
+        if in_text:
+            outs, errs = process.communicate(input=in_text.encode())
+        else:
+            outs, errs = process.communicate()
         return 0, outs+errs
     else:
         while True:
