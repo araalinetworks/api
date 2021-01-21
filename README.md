@@ -8,7 +8,7 @@ cd api/python
 python araalictl.py
 
 # to authorize your copy (signup link below)
-./araalictl authorize
+./araalictl authorize -local
 ```
 # Links
 * https://www.araalinetworks.com/signup
