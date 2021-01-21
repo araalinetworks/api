@@ -14,8 +14,8 @@ g_debug = False
 
 def fetch():
     """For downloading and upgrading araalictl"""
-    linux_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64"
-    darwin_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.darwin-amd64"
+    linux_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.linux-amd64"
+    darwin_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.darwin-amd64"
 
     if platform == "linux" or platform == "linux2":
         url = linux_url
@@ -29,8 +29,9 @@ def fetch():
         open('araalictl', 'wb').write(r.content)
         os.chmod('araalictl', 0o777)
     else:
-        print("upgrading araalictl ...")
-        run_command("sudo ./araalictl upgrade")
+        pass
+        #print("upgrading araalictl ...")
+        #run_command("sudo ./araalictl upgrade")
 
 
 def help():
