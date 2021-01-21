@@ -10,6 +10,8 @@ import yaml
 
 from main import Usage, run_command
 
+g_debug = False
+
 def fetch():
     """For downloading and upgrading araalictl"""
     linux_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64"
@@ -44,32 +46,28 @@ def get_zones(full=False):
 
 def update_links(zone, app, data):
     """Update actions on a link"""
-    ret_val = {}                                                                
-    for link in data:                                                           
-        if link["new_state"] == "DEFINED_POLICY":                                  
+    ret_val = {}
+    for link in data:
+        if link["new_state"] == "DEFINED_POLICY":
             ret_val["policies"] = ret_val.get("policies", 0) + 1
-            if link["state"] == "BASELINE_ALERT":                                  
+            if link["state"] == "BASELINE_ALERT":
                 ret_val["alerts"] = ret_val.get("alerts", 0) + 1
-                                                                                
-        elif link["new_state"] == "SNOOZED_POLICY":                                
-            if link["state"] == "BASELINE_ALERT":                                  
+
+        elif link["new_state"] == "SNOOZED_POLICY":
+            if link["state"] == "BASELINE_ALERT":
                 ret_val["alerts"] = ret_val.get("alerts", 0) + 1
             ret_val["policies"] = ret_val.get("policies", 0) + 1
-                                                                                
-    if not ret_val:                                                             
-        ret_val['empty'] = {"success": "Empty policy request"}                  
+
+    if not ret_val:
+        ret_val['empty'] = {"success": "Empty policy request"}
     else:
-        print(yaml.dump(data))
+        if g_debug: print(yaml.dump(data))
         rc = run_command("./araalictl api -zone %s -app %s -update-links",
                          in_text=yaml.dump(data), result=True, strip=False)
-        if 0:
-            rc = run_command("""./araalictl api -zone %s -app %s -update-links <<EOF
-%s
-EOF""" % (zone, app, yaml.dump(data)), result=True, strip=False)
         assert rc[0] == 0, rc[1]
-        print(rc[1])
+        ret_val['empty'] = {"success": rc[1]}
 
-    return ret_val    
+    return ret_val
 
 def get_links(zone, app):
     """Get links for a zone and app"""
