@@ -19,7 +19,7 @@ class Process(object):
         self.app = data["app"]
         self.process = data["process"]
         self.binary_name = data["binary_name"]
-        self.parent_process = data["parent_process"]
+        self.parent_process = data.get("parent_process", None)
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -525,7 +525,9 @@ class Runtime(object):
     def get_zone_apps(full=False):
         Runtime.zone_apps = {}
         for za in araalictl.get_zones():
-            Runtime.zone_apps[za["zone_name"]] = [a["app_name"] for a in za["apps"]]
+            if not za["zone_name"]:
+                continue
+            Runtime.zone_apps[za["zone_name"]] = [a["app_name"] for a in za["apps"] if a["app_name"] != "invalid"]
         return Runtime.zone_apps
 
     def __init__(self):
