@@ -133,7 +133,7 @@ class AcceptLink:
         self.changes = changes                                                  
                                                                                 
     def apply(self, links):                                                     
-        l = LinkTable(links, f.state("BASELINE_ALERT"), f.new_state(None), *self.filters)                                     
+        l = LinkTable(links, f.new_state(None), *self.filters)                                     
         l.accept()                                                              
         for c in self.changes:                                                       
             l.change(*c)
@@ -772,8 +772,6 @@ class App(object):
         self.zone = zone
         self.app = app
         for link in self.iterlinks():
-            if link.state == "DEFINED_POLICY":
-                link.accept()
             link.to_lib(zone, app)
 
     def __repr__(self):

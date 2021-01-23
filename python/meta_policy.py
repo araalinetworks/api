@@ -1,6 +1,31 @@
 import api
 import re
 
+class NightlyToProd:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.state("DEFINED_POLICY"),
+                api.f.type("AIN"),
+                api.f.endpoint("zone", "nightly", who="client"),
+            ], changes=[
+                ("client", "zone", "prod"),
+            ]),
+        api.AcceptLink(filters=[
+                api.f.state("DEFINED_POLICY"),
+                api.f.type("AEG"),
+                api.f.endpoint("zone", "nightly", who="server"),
+            ], changes=[
+                ("server", "zone", "prod"),
+            ]),
+    ]
+class AcceptAllDefined:
+    policies = [
+        api.AcceptLink(filters=[
+                api.f.state("DEFINED_POLICY"),
+            ], changes=[
+            ]),
+    ]
+
 class MpDockerd:
     policies = [
         api.AcceptLink(filters=[
