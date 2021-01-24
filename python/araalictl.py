@@ -49,16 +49,16 @@ def get_zones(full=False):
 def update_links(zone, app, data):
     """Update actions on a link"""
     ret_val = {}
-    # for link in data:
-    #     if link["new_state"] == "DEFINED_POLICY":
-    #         ret_val["policies"] = ret_val.get("policies", 0) + 1
-    #         if link["state"] == "BASELINE_ALERT":
-    #             ret_val["alerts"] = ret_val.get("alerts", 0) + 1
-    #
-    #     elif link["new_state"] == "SNOOZED_POLICY":
-    #         if link["state"] == "BASELINE_ALERT":
-    #             ret_val["alerts"] = ret_val.get("alerts", 0) + 1
-    #         ret_val["policies"] = ret_val.get("policies", 0) + 1
+    for link in data:
+        if link["new_state"] == "DEFINED_POLICY":
+            ret_val["policies"] = ret_val.get("policies", 0) + 1
+            if link["state"] == "BASELINE_ALERT":
+                ret_val["alerts"] = ret_val.get("alerts", 0) + 1
+    
+        elif link["new_state"] == "SNOOZED_POLICY":
+            if link["state"] == "BASELINE_ALERT":
+                ret_val["alerts"] = ret_val.get("alerts", 0) + 1
+            ret_val["policies"] = ret_val.get("policies", 0) + 1
 
     if not ret_val:
         ret_val['empty'] = {"success": "Empty policy request"}
