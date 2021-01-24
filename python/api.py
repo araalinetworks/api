@@ -2,6 +2,7 @@ import copy
 import ipaddress
 import json
 import re
+import yaml
 
 try:
     import pandas as pd
@@ -51,13 +52,15 @@ class Process(object):
 
     def to_lib(self, zone, app):
         self.zone = zone
-        self.app = app
+        app_parts = self.app.split(".")
+        app_parts[0] = app
+        self.app = ".".join(app_parts)
 
 
 class NonAraaliClient(object):
     def __init__(self, data):
         self.process = None
-        self.subnet = ipaddress.ip_address(data["subnet"])
+        self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
         self.netmask = data.get("netmask", 0)
 
     def __repr__(self):
@@ -94,7 +97,7 @@ class NonAraaliServer(object):
             self.dns_pattern = data["dns_pattern"]
         else:
             self.dns_pattern = None
-            self.subnet = ipaddress.ip_address(data["subnet"])
+            self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
             self.netmask = data.get("netmask", 0)
 
     def __repr__(self):
@@ -184,16 +187,17 @@ class MetaPolicyRunner:
         return Table(ret)
     
 
-class Table(object):
-    def check_notebook():
-        try:
-            return get_ipython().has_trait('kernel')
-        except:
-            return False
+def check_notebook():
+    try:
+        return get_ipython().has_trait('kernel')
+    except:
+        return False
 
+class Table(object):
     in_notebook = check_notebook()
 
-    def transform(a):
+    @classmethod
+    def transform(cls, a):
         op = getattr(a, "to_data", None)
         if callable(op):
             return a.to_data()
@@ -251,28 +255,33 @@ class LinkTable(Table):
                 return True
             return impl
 
-        def state(state):
+        @classmethod
+        def state(cls, state):
             """Valid states are: NAI, NAE, INT, AIN, AEG"""
             if isinstance(state, list):
                 return lambda r: r.get("state", None) in state
             return lambda r: r.get("state", None) == state
 
-        def type(link_type):
+        @classmethod
+        def type(cls, link_type):
             if isinstance(link_type, list):
                 return lambda r: r.get("type", None) in link_type
             return lambda r: r.get("type", None) == link_type
 
-        def new_state(state):
+        @classmethod
+        def new_state(cls, state):
             if isinstance(state, list):
                 return lambda r: r.get("new_state", None) in state
             return lambda r: r.get("new_state", None) == state
 
-        def speculative(state):
+        @classmethod
+        def speculative(cls, state):
             if isinstance(state, list):
                 return lambda r: r.get("speculative", None) in state
             return lambda r: r.get("speculative", None) == state
 
-        def endpoint(field, val, flags=0, who="either"):
+        @classmethod
+        def endpoint(cls, field, val, flags=0, who="either"):
             """flags=re.IGNORECASE can be used"""
             def match_str(s, v):
                 return re.search(s, v, flags=flags)
@@ -308,14 +317,17 @@ class LinkTable(Table):
                 return  False
             return match
 
-        def perimeter(r):
+        @classmethod
+        def perimeter(cls, r):
             return r.get("client", {}).get("subnet", None) != None
 
-        def server_non_ip(r):
+        @classmethod
+        def server_non_ip(cls, r):
             s = r.get("server", {})
             return s.get("dns_pattern", "")[:3] != "ip-" and s.get("subnet", None) == None
 
-        def same_zone(r):
+        @classmethod
+        def same_zone(cls, r):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
 
     def to_data(self):
@@ -464,7 +476,7 @@ class MpTest:
             ], changes=[
             ]),
     ]
-""" % (self.client.zone, self.client.app, self.client.process, self.server.zone, self.server.app, self.server.process))
+""" % (self.client.app, self.client.process, self.server.app, self.server.process))
                 return
 
             print("""
