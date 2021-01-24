@@ -60,7 +60,7 @@ class Process(object):
 class NonAraaliClient(object):
     def __init__(self, data):
         self.process = None
-        self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
+        self.subnet = ipaddress.ip_address(str(data["subnet"]))
         self.netmask = data.get("netmask", 0)
 
     def __repr__(self):
@@ -97,7 +97,7 @@ class NonAraaliServer(object):
             self.dns_pattern = data["dns_pattern"]
         else:
             self.dns_pattern = None
-            self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
+            self.subnet = ipaddress.ip_address(str(data["subnet"]))
             self.netmask = data.get("netmask", 0)
 
     def __repr__(self):
