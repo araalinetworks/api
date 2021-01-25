@@ -39,15 +39,17 @@ def help():
     """get araalictl help"""
     print(run_command("./araalictl -h", result=True, debug=False)[1])
 
-def get_zones(full=False):
+def get_zones(full=False, tenant=None):
     """Get zones and apps for tenant"""
-    rc = run_command("./araalictl api -fetch-zone-apps %s" % ("-full" if full else ""),
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("./araalictl api -fetch-zone-apps %s %s" % ("-full" if full else "", tstr),
             result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def update_links(zone, app, data):
+def update_links(zone, app, data, tenant=None):
     """Update actions on a link"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
     ret_val = {}
     for link in data:
         if link["new_state"] == "DEFINED_POLICY":
@@ -64,17 +66,18 @@ def update_links(zone, app, data):
         ret_val['empty'] = {"success": "Empty policy request"}
     else:
         if g_debug: print(yaml.dump(data))
-        rc = run_command("./araalictl api -zone %s -app %s -update-links" % (zone, app),
+        rc = run_command("./araalictl api -zone %s -app %s -update-links %s" % (zone, app, tstr),
                          in_text=yaml.dump(data), result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val = json.loads(rc[1])
 
     return ret_val
 
-def get_links(zone, app):
+def get_links(zone, app, tenant=None):
     """Get links for a zone and app"""
-    rc = run_command("./araalictl api -zone %s -app %s -fetch-links" % (
-        zone, app), result=True, strip=False)
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("./araalictl api -zone %s -app %s -fetch-links %s" % (
+        zone, app, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 

@@ -534,28 +534,29 @@ class Runtime(object):
     }
     zone_apps = None
 
-    def get_zone_apps(full=False):
+    def get_zone_apps(full=False, tenant=None):
         Runtime.zone_apps = {}
-        for za in araalictl.get_zones():
+        for za in araalictl.get_zones(tenant=tenant):
             if not za["zone_name"]:
                 continue
             Runtime.zone_apps[za["zone_name"]] = [a["app_name"] for a in za["apps"] if a["app_name"] != "invalid"]
         return Runtime.zone_apps
 
-    def __init__(self):
+    def __init__(self, tenant=None):
+        self.tenant = tenant
         self.zones = None
 
     def refresh(self):
         if Runtime.zone2apps:
             Runtime.zone_apps = Runtime.zone2apps
             if self.zones == None:
-                self.zones = [Zone(z) for z in Runtime.zone2apps.keys()]
+                self.zones = [Zone(z, tenant=self.tenant) for z in Runtime.zone2apps.keys()]
             else:
                 for z in self.zones:
-                    z.refresh()
+                    z.refresh(tenant=self.tenant)
         else:
-            Runtime.get_zone_apps()
-            self.zones = [Zone(z) for z in Runtime.zone_apps.keys()]
+            Runtime.get_zone_apps(tenant=self.tenant)
+            self.zones = [Zone(z, tenant=self.tenant) for z in Runtime.zone_apps.keys()]
 
         return self
 
@@ -617,9 +618,10 @@ class Runtime(object):
 
 
 class Zone(object):
-    def __init__(self, name):
+    def __init__(self, name, tenant):
+        self.tenant = tenant
         self.zone = name
-        self.apps = [App(name, a) for a in Runtime.zone_apps[name]]
+        self.apps = [App(name, a, tenant=tenant) for a in Runtime.zone_apps[name]]
 
     def refresh(self):
         for a in self.apps:
@@ -686,14 +688,15 @@ class App(object):
     ZONE_MARKER = "__ZONE__"
     APP_MARKER = "__APP__"
 
-    def __init__(self, zone, app):
+    def __init__(self, zone, app, tenant=None):
+        self.tenant = tenant
         self.zone = zone
         self.app = app
         self.refresh() # get links
 
     def refresh(self):
         self.links = []
-        for link in araalictl.get_links(self.zone, self.app):
+        for link in araalictl.get_links(self.zone, self.app, tenant=self.tenant):
             self.links.append(Link(link, self.zone, self.app))
         return self
         
@@ -728,7 +731,7 @@ class App(object):
 
     def commit(self):
         """accept policy etc backend calls"""
-        return araalictl.update_links(self.zone, self.app, self.review(data=True))
+        return araalictl.update_links(self.zone, self.app, self.review(data=True), tenant=self.tenant)
 
     def review(self, data=False):
         """display any state changes prior to commit, data is set to true if you want data instead of objects"""
