@@ -62,6 +62,7 @@ class NonAraaliClient(object):
         self.process = None
         self.subnet = ipaddress.ip_address(str(data["subnet"]))
         self.netmask = data.get("netmask", 0)
+        self.private_subnet = data.get("private_subnet", False)
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -93,12 +94,14 @@ class NonAraaliServer(object):
     def __init__(self, data):
         self.process = None
         self.dst_port = data["dst_port"]
+        self.private_subnet = False
         if "dns_pattern" in data:
             self.dns_pattern = data["dns_pattern"]
         else:
             self.dns_pattern = None
             self.subnet = ipaddress.ip_address(str(data["subnet"]))
             self.netmask = data.get("netmask", 0)
+            self.private_subnet = data.get("private_subnet", False)
 
     def __repr__(self):
         return json.dumps(self.to_data())
