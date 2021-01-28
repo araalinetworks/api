@@ -10,6 +10,7 @@ python araalictl.py
 
 # to authorize your copy (signup link below)
 ./araalictl authorize -local
+./araalictl config InternalCfgBackend=prod.aws.araalinetworks.com
 ```
 # Links
 * https://www.araalinetworks.com/signup
