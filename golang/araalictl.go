@@ -84,6 +84,63 @@ func RunCmd(cmdstr string) string {
 	return RunAs(cmdstr, "")
 }
 
+type Zone struct {
+	ZoneName string `yaml:"zone_name"`
+	Apps     []App
+}
+
+type App struct {
+	AppName string `yaml:"app_name"`
+	Links   []Link `yaml:"links,omitempty"`
+}
+
+// Endpoint Object
+type EndPoint struct {
+	Zone          string `yaml:"zone,omitempty"`
+	App           string `yaml:"app,omitempty"`
+	outerApp      string
+	Process       string `yaml:"process,omitempty"`
+	BinaryName    string `yaml:"binary_name,omitempty"`
+	ParentProcess string `yaml:"parent_process,omitempty"`
+	DnsPattern    string `yaml:"dns_pattern,omitempty"`
+	Subnet        string `yaml:"subnet,omitempty"`
+	NetMask       uint32 `yaml:"netmask,omitempty"`
+	DstPort       uint32 `yaml:"dst_port,omitempty"`
+
+	OrigZone          string `yaml:"orig_zone,omitempty"`
+	OrigApp           string `yaml:"orig_app,omitempty"`
+	OrigProcess       string `yaml:"orig_process,omitempty"`
+	OrigBinaryName    string `yaml:"orig_binary_name,omitempty"`
+	OrigParentProcess string `yaml:"orig_parent_process,omitempty"`
+	OrigDnsPattern    string `yaml:"orig_dns_pattern,omitempty"`
+	OrigSubnet        string `yaml:"orig_subnet,omitempty"`
+	OrigNetMask       uint32 `yaml:"orig_netmask,omitempty"`
+	OrigDstPort       uint32 `yaml:"orig_dst_port,omitempty"`
+}
+
+// Link Object
+type Link struct {
+	Client      EndPoint
+	Server      EndPoint
+	Type        string
+	Speculative bool
+	State       string
+	Timestamp   uint64
+	UniqueId    string `yaml:"unique_id"`
+	NewState    string `yaml:"new_state,omitempty"`
+}
+
+// TenantCreate - to create a tenant
+func TenantCreate(tenantID, userEmail, tenantName, UserName string) {
+	RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
+		tenantID, tenantName, userEmail, UserName))
+}
+
+// TenantDelete - to delete a tenant
+func TenantDelete(tenantID string) {
+	RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl tenant -op=del -id=%s", tenantID))
+}
+
 // GetZones - return zones and apps, use tenant="" by default
 func GetZones(full bool, tenant string) string {
 	tenantStr := func() string {
