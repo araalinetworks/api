@@ -1,6 +1,7 @@
 # Getting Started
 ```
 mkdir araalinetworks
+cd araalinetworks
 git clone https://github.com/araalinetworks/api.git
 cd api/python
 
