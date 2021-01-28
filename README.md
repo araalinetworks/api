@@ -20,7 +20,12 @@ python araalictl.py
 
 # Install notebook
 ```
+# if you have python3
 pip3 install --upgrade --force-reinstall --no-cache-dir jupyter
+
+# on kali linux
+sudo apt-get install jupyter-notebook
+
 jupyter notebook
 ```
 
