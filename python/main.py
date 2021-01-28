@@ -69,7 +69,7 @@ def run_command(command, result=False, strip=True, in_text=None, debug=False, en
             outs, errs = process.communicate(input=in_text.encode())
         else:
             outs, errs = process.communicate()
-        return 0, outs+errs
+        return process.poll(), outs+errs
     else:
         while True:
             rc = process.poll()

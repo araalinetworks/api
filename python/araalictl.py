@@ -13,6 +13,10 @@ from main import Usage, run_command
 
 g_debug = False
 
+def help():
+    """get araalictl help"""
+    print(run_command("./araalictl -h", result=True, debug=False)[1])
+
 def fetch():
     """For downloading and upgrading araalictl"""
     linux_url = "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.linux-amd64"
@@ -34,10 +38,42 @@ def fetch():
         #print("upgrading araalictl ...")
         #run_command("sudo ./araalictl upgrade")
 
+def tenant_create(tenant_id, user_email, tenant_name=None, user_name=None):
+    """Create a subtenant"""
+    cmd = "./araalictl tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (
+        tenant_id, tenant_name, user_email, user_name)
+    rc = run_command(cmd, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
 
-def help():
-    """get araalictl help"""
-    print(run_command("./araalictl -h", result=True, debug=False)[1])
+def tenant_delete(tenant_id):
+    """Delete a subtenant"""
+    rc = run_command("./araalictl tenant -op=del -id=%s" % tenant_id, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+def fog_setupconfig(tenant_id, dns_name, vpc_id, subnet_id, key_name,
+                    dns_hosted_zone_id, instance_type="m5.large"):
+    """Setup config required to install a fog"""
+    rc = run_command("./araalictl config -tenant=%s Fog=%s" % (tenant_id, dns_name),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+    cfg_str = "VPCIDParameter=%s,SubnetIDParameter=%s,KeyNameParameter=%s,HostedZoneParameter=%s,InstanceTypeParameter=%s,ReadOnlyRoleParameter=" % (
+        vpc_id, subnet_id, key_name, dns_hosted_zone_id, instance_type)
+    rc = run_command("./araalictl config -tenant=%s InternalFogInstallParams=%s" % (tenant_id, cfg_str),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+def fog_install(tenant_id, nodes=1):
+    """Install AWS mode fog"""
+    rc = run_command("./araalictl install-fog -tenant=%s -mode=aws -nodes=%d" %
+                     (tenant_id, nodes), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+def fog_uninstall(tenant_id):
+    """Uninstall AWS mode fog"""
+    rc = run_command("./araalictl uninstall-fog -tenant=%s -mode=aws" % tenant_id,
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
 
 def get_zones(full=False, tenant=None):
     """Get zones and apps for tenant"""

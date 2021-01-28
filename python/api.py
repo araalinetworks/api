@@ -286,19 +286,19 @@ class LinkTable(Table):
         @classmethod
         def endpoint(cls, field, val, flags=0, who="either"):
             """flags=re.IGNORECASE can be used"""
-            def match_str(s, v):
-                return re.search(s, v, flags=flags)
+            def match_str(t, v):
+                return re.search(t, v, flags=flags)
 
-            def match_list(s, v):
-                return any([match_val(a, v) is not None for a in s])
+            def match_list(t, v):
+                return any([match_val(a, v) is not None for a in t])
 
-            def match_nonstr(s, v):
-                return s == v
+            def match_nonstr(t, v):
+                return t == v
 
-            def match_val(s, v):
-                if isinstance(s, list):
-                    return match_list(s, v)
-                return match_str(s, v) if isinstance(s, str) else match_nonstr(s, v)
+            def match_val(t, v):
+                if isinstance(t, list):
+                    return match_list(t, v)
+                return match_str(t, v) if isinstance(t, str) else match_nonstr(t, v)
 
             def match(r):
                 def get_default():
@@ -583,6 +583,35 @@ class Runtime(object):
                     s["Zone"] = z.zone
                     yield s
         return list(impl())
+
+    def link_stats(self, all=False):
+        defined, alerts, linktype_dict = 0, 0, {}
+        for a in self.iterlinks():
+            if not all and a.state == "DEFINED_POLICY": continue
+            if a.state == "DEFINED_POLICY":
+                defined += 1
+            if a.state == "BASELINE_ALERT":
+                alerts += 1
+            linktype_dict[a.type] = linktype_dict.get(a.type, 0) + 1
+        out = [{"what": "defined", "count": defined}, {"what": "alerts", "count": alerts}]
+        for t, v in linktype_dict.items():
+            out.append({"what": "link."+t, "count": v})
+        return out
+
+    def dns_stats(self, all=False):
+        pattern_dict = {}
+        for a in self.iterlinks():
+            if not all and a.state == "DEFINED_POLICY": continue
+            if a.type != "NAE": continue
+            for p in a.server.to_data().get("dns_pattern", "").split(":"):
+                if not p or p in [".*"]: continue
+                pattern_dict[p] = pattern_dict.get(p, 0) + 1
+        keys = list(pattern_dict.keys())
+        keys.sort(key=lambda x: -pattern_dict[x])
+        out = []
+        for k in keys:
+            out.append({"dns": k, "count": pattern_dict[k]})
+        return out
 
     def review(self, data=False):
         for z in self.iterzones():
