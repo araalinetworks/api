@@ -163,3 +163,17 @@ func GetZones(full bool, tenant string) []Zone {
 	yaml.Unmarshal([]byte(output), &listOfZones)
 	return listOfZones
 }
+
+// GetLinks - get links for zone, app for tenant
+func GetLinks(zone, app, tenant string) []Link {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -zone %s -app %s -fetch-links %s", zone, app, tenantStr))
+	listOfLinks := []Link{}
+	yaml.Unmarshal([]byte(output), &listOfLinks)
+	return listOfLinks
+}
