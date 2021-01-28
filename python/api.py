@@ -584,10 +584,12 @@ class Runtime(object):
                     yield s
         return list(impl())
 
-    def link_stats(self, all=False):
+    def link_stats(self, all=False, only_new=True, runlink=None):
         defined, alerts, linktype_dict = 0, 0, {}
-        for a in self.iterlinks():
+        if not runlink: runlink = self.iterlinks()
+        for a in runlink:
             if not all and a.state == "DEFINED_POLICY": continue
+            if only_new and a.new_state is not None: continue
             if a.state == "DEFINED_POLICY":
                 defined += 1
             if a.state == "BASELINE_ALERT":
@@ -598,10 +600,12 @@ class Runtime(object):
             out.append({"what": "link."+t, "count": v})
         return out
 
-    def dns_stats(self, all=False):
+    def dns_stats(self, all=False, only_new=False, runlink=None):
         pattern_dict = {}
-        for a in self.iterlinks():
+        if not runlink: runlink = self.iterlinks()
+        for a in runlink:
             if not all and a.state == "DEFINED_POLICY": continue
+            if only_new and a.new_state is not None: continue
             if a.type != "NAE": continue
             for p in a.server.to_data().get("dns_pattern", "").split(":"):
                 if not p or p in [".*"]: continue
