@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"gopkg.in/yaml.v2"
 )
 
 // FileExists - check if file exists
@@ -142,7 +144,7 @@ func TenantDelete(tenantID string) {
 }
 
 // GetZones - return zones and apps, use tenant="" by default
-func GetZones(full bool, tenant string) string {
+func GetZones(full bool, tenant string) []Zone {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -156,6 +158,8 @@ func GetZones(full bool, tenant string) string {
 		return ""
 	}()
 
-	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-zone-apps %s %s", fullStr, tenantStr))
-	// XXX convert to yaml and return
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-zone-apps %s %s", fullStr, tenantStr))
+	listOfZones := []Zone{}
+	yaml.Unmarshal([]byte(output), &listOfZones)
+	return listOfZones
 }

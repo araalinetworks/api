@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	fmt.Println(GetZones(false, "amk"))
+	fmt.Printf("%+v\n", GetZones(false, "amk"))
 }
