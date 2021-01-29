@@ -14,6 +14,38 @@ except:
 import araalictl
 
 
+def link_stats(runlink, all=False, only_new=True):
+    defined, alerts, linktype_dict = 0, 0, {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        if a.state == "DEFINED_POLICY":
+            defined += 1
+        if a.state == "BASELINE_ALERT":
+            alerts += 1
+        linktype_dict[a.type] = linktype_dict.get(a.type, 0) + 1
+    out = [{"what": "defined", "count": defined}, {"what": "alerts", "count": alerts}]
+    for t, v in linktype_dict.items():
+        out.append({"what": "link."+t, "count": v})
+    return out
+
+def dns_stats(runlink, all=False, only_new=False):
+    pattern_dict = {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        if a.type != "NAE": continue
+        for p in a.server.to_data().get("dns_pattern", "").split(":"):
+            if not p or p in [".*"]: continue
+            pattern_dict[p] = pattern_dict.get(p, 0) + 1
+    keys = list(pattern_dict.keys())
+    keys.sort(key=lambda x: -pattern_dict[x])
+    out = []
+    for k in keys:
+        out.append({"dns": k, "count": pattern_dict[k]})
+    return out
+
+
 class Process(object):
     def __init__(self, data):
         self.zone = data["zone"]
@@ -161,7 +193,7 @@ class MetaPolicyRunner:
             count = 0
             for policy in meta_policy.policies:
                 for l in policy.apply(self.links):
-                    l.meta_policy = pname
+                    l.policy = pname
                     count += 1
             print("%-20s matched %s rows" % (pname, count))
         return self
@@ -177,17 +209,12 @@ class MetaPolicyRunner:
                 else:
                     if l.new_state is None:
                         continue
-                    if filters and l.meta_policy not in filters:
+                    if filters and l.policy not in filters:
                         continue
-                obj = l.to_data()
-                del obj["unique_id"]
-                del obj["timestamp"]
-                if not todo:
-                    obj["meta_policy"] = l.meta_policy
-                yield obj
-        ret = list(impl())
+                yield l
+        ret = list(impl()) 
         print("\nReviewing %s rows %s" % (len(ret), "that matched" if not todo else "that didn't match"))
-        return Table(ret)
+        return ret
     
 
 def check_notebook():
@@ -335,10 +362,11 @@ class LinkTable(Table):
 
     def to_data(self):
         def transform(obj):
-            del obj["unique_id"]
-            del obj["timestamp"]
+            obj = Table.transform(obj)
+            if "unique_id" in obj: del obj["unique_id"]
+            if "timestamp" in obj: del obj["timestamp"]
             return obj
-        return [transform(a.to_data()) for a in self.links]
+        return [transform(a) for a in self.links]
 
     def change(self, what, field, to, *args):
         if not args:
@@ -389,11 +417,6 @@ class Link(object):
         self.unique_id = data["unique_id"]
         self.new_state = None
 
-    def to_data(self):
-        return {"client": self.client.to_data(), "server": self.server.to_data(),
-                "type": self.type, "state": self.state,
-                "new_state": self.new_state, "speculative": self.speculative}
-
     def to_data(self):                                                          
         obj = {}                                                                
         obj["client"] = self.client.to_data()
@@ -404,6 +427,8 @@ class Link(object):
         obj["timestamp"] = self.timestamp                                       
         obj["unique_id"] = self.unique_id                                        
         obj["new_state"] = self.new_state                                        
+        if hasattr(self, "policy"):
+            obj["meta_policy"] = self.policy
         return obj 
 
     def accept(self):
@@ -535,15 +560,23 @@ class Runtime(object):
         "prod-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
         "nightly-k8s": ["k8s", "kube-system", "monitoring", "prod-araali-operator", "prod-bend"],
     }
-    zone_apps = None
+    zone2apps = None
+    zone_apps = {}
+    zone_app_links = {}
 
-    def get_zone_apps(full=False, tenant=None):
-        Runtime.zone_apps = {}
-        for za in araalictl.get_zones(tenant=tenant):
-            if not za["zone_name"]:
-                continue
-            Runtime.zone_apps[za["zone_name"]] = [a["app_name"] for a in za["apps"] if a["app_name"] != "invalid"]
-        return Runtime.zone_apps
+    def get_zone_apps(hard=False, full=False, tenant=None):
+        if hard:
+            Runtime.zone_apps = {}
+            for za in araalictl.get_zones(tenant=tenant, full=full):
+                if not za["zone_name"]:
+                    continue
+                Runtime.zone_apps[za["zone_name"]] = []
+                for a in za["apps"]:
+                    if a["app_name"] == "invalid": continue
+                    Runtime.zone_apps[za["zone_name"]].append(a["app_name"])
+                    if full:
+                        Runtime.zone_app_links[(za["zone_name"], a["app_name"])] = a["links"]
+        return list({"name":k, "Apps":v} for k,v in Runtime.zone_apps.items())
 
     def __init__(self, tenant=None):
         self.tenant = tenant
@@ -558,8 +591,8 @@ class Runtime(object):
                 for z in self.zones:
                     z.refresh(tenant=self.tenant)
         else:
-            Runtime.get_zone_apps(tenant=self.tenant)
-            self.zones = [Zone(z, tenant=self.tenant) for z in Runtime.zone_apps.keys()]
+            Runtime.get_zone_apps(hard=True, tenant=self.tenant, full=True)
+            self.zones = [Zone(z, tenant=self.tenant, hard=False) for z in Runtime.zone_apps.keys()]
 
         return self
 
@@ -584,38 +617,14 @@ class Runtime(object):
                     yield s
         return list(impl())
 
+
     def link_stats(self, all=False, only_new=True, runlink=None):
-        defined, alerts, linktype_dict = 0, 0, {}
         if not runlink: runlink = self.iterlinks()
-        for a in runlink:
-            if not all and a.state == "DEFINED_POLICY": continue
-            if only_new and a.new_state is not None: continue
-            if a.state == "DEFINED_POLICY":
-                defined += 1
-            if a.state == "BASELINE_ALERT":
-                alerts += 1
-            linktype_dict[a.type] = linktype_dict.get(a.type, 0) + 1
-        out = [{"what": "defined", "count": defined}, {"what": "alerts", "count": alerts}]
-        for t, v in linktype_dict.items():
-            out.append({"what": "link."+t, "count": v})
-        return out
+        return link_stats(runlink, all, only_new)
 
     def dns_stats(self, all=False, only_new=False, runlink=None):
-        pattern_dict = {}
         if not runlink: runlink = self.iterlinks()
-        for a in runlink:
-            if not all and a.state == "DEFINED_POLICY": continue
-            if only_new and a.new_state is not None: continue
-            if a.type != "NAE": continue
-            for p in a.server.to_data().get("dns_pattern", "").split(":"):
-                if not p or p in [".*"]: continue
-                pattern_dict[p] = pattern_dict.get(p, 0) + 1
-        keys = list(pattern_dict.keys())
-        keys.sort(key=lambda x: -pattern_dict[x])
-        out = []
-        for k in keys:
-            out.append({"dns": k, "count": pattern_dict[k]})
-        return out
+        return dns_stats(runlink, all, only_new)
 
     def review(self, data=False):
         for z in self.iterzones():
@@ -654,14 +663,14 @@ class Runtime(object):
 
 
 class Zone(object):
-    def __init__(self, name, tenant):
+    def __init__(self, name, tenant=None, hard=True):
         self.tenant = tenant
         self.zone = name
-        self.apps = [App(name, a, tenant=tenant) for a in Runtime.zone_apps[name]]
+        self.apps = [App(name, a, tenant=tenant, hard=hard) for a in Runtime.zone_apps.get(name, [])]
 
-    def refresh(self):
+    def refresh(self, hard=True):
         for a in self.apps:
-            a.refresh()
+            a.refresh(hard)
         return self
 
     def iterapps(self, filter=None):
@@ -724,18 +733,30 @@ class App(object):
     ZONE_MARKER = "__ZONE__"
     APP_MARKER = "__APP__"
 
-    def __init__(self, zone, app, tenant=None):
+    def __init__(self, zone, app, tenant=None, hard=True):
         self.tenant = tenant
         self.zone = zone
         self.app = app
-        self.refresh() # get links
+        self.refresh(hard) # get links
 
-    def refresh(self):
+    def refresh(self, hard=True):
         self.links = []
-        for link in araalictl.get_links(self.zone, self.app, tenant=self.tenant):
-            self.links.append(Link(link, self.zone, self.app))
+        if not hard and (self.zone, self.app) in Runtime.zone_app_links:
+            for link in Runtime.zone_app_links[(self.zone, self.app)]:
+                self.links.append(Link(link, self.zone, self.app))
+        else:
+            for link in araalictl.get_links(self.zone, self.app, tenant=self.tenant):
+                self.links.append(Link(link, self.zone, self.app))
         return self
         
+    def link_stats(self, all=False, only_new=True, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return link_stats(runlink, all, only_new)
+
+    def dns_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return dns_stats(runlink, all, only_new)
+
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
         """lfilter for type, pfilter for process, cfilter for changes/dirty
            afilter for alerts, dfilter for defined
