@@ -95,6 +95,7 @@ class NonAraaliClient(object):
         self.subnet = ipaddress.ip_address(str(data["subnet"]))
         self.netmask = data.get("netmask", 0)
         self.private_subnet = data.get("private_subnet", False)
+        self.endpoint_group = data.get("endpoint_group", "")
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -112,7 +113,7 @@ class NonAraaliClient(object):
         return self
 
     def to_data(self):
-        obj = {"subnet": str(self.subnet), "netmask": self.netmask}
+        obj = {"subnet": str(self.subnet), "netmask": self.netmask, "endpoint_group": self.endpoint_group}
         for attr in dir(self):
             if "orig_" == attr[:len("orig_")]:
                 obj[attr] = getattr(self, attr)
@@ -134,6 +135,7 @@ class NonAraaliServer(object):
             self.subnet = ipaddress.ip_address(str(data["subnet"]))
             self.netmask = data.get("netmask", 0)
             self.private_subnet = data.get("private_subnet", False)
+        self.endpoint_group = data.get("endpoint_group", "")
 
     def __repr__(self):
         return json.dumps(self.to_data())
@@ -152,9 +154,9 @@ class NonAraaliServer(object):
 
     def to_data(self):
         if self.dns_pattern:                                                    
-            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port}   
+            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
         else:                                                                   
-            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port}
+            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
 
         for attr in dir(self):
             if "orig_" == attr[:len("orig_")]:
