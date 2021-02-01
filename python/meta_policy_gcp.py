@@ -4,10 +4,25 @@ class MpGCP:
     policies = [
         api.AcceptLink(filters=[
                 api.f.type("NAE"),
+                api.f.endpoint("process", "dockerd", who="client"),
+                api.f.endpoint("dns_pattern", ":storage.googleapis.com:", who="server"),
+            ], changes=[
+                ("server", "dns_pattern", ".*:storage\.googleapis\.com:.*"),
+            ]),
+        api.AcceptLink(filters=[
+                api.f.type("NAE"),
                 api.f.endpoint("process", "/google-cloud-sdk/lib/gcloud.py", who="client"),
                 api.f.endpoint("dns_pattern", ":.*.googleapis.com:", who="server"),
             ], changes=[
                 ("server", "dns_pattern", ":.*\.googleapis\.com:"),
+            ]),
+        api.AcceptLink(filters=[
+                api.f.type("NAE"),
+                api.f.endpoint("process", ["signalfx-agent", "/usr/bin/google_accounts_daemon", "/usr/bin/google_clock_skew_daemon", "/usr/bin/google_network_daemon", "/usr/bin/google_metadata_script_runner"], who="client"),
+                api.f.endpoint("subnet", "169.254.169.254", who="server"),
+                api.f.endpoint("netmask", 32, who="server"),
+                api.f.endpoint("dst_port", 80, who="server"),
+            ], changes=[
             ]),
         api.AcceptLink(filters=[
                 api.f.type("NAE"),

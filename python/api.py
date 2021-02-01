@@ -29,6 +29,25 @@ def link_stats(runlink, all=False, only_new=True):
         out.append({"what": "link."+t, "count": v})
     return out
 
+def za_stats(runlink, all=False, only_new=False):
+    pattern_dict = {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        client = a.client.to_data().get("zone", None)
+        if client:
+            k = client, a.client.to_data()["app"].split(".", 1)[0]
+            pattern_dict[k] = pattern_dict.get(k, 0) + 1
+    keys = list(pattern_dict.keys())
+    keys.sort(key=lambda x: -pattern_dict[x])
+    out = []
+    count = 0
+    for k in keys:
+        out.append({"zone": k[0], "app": k[1], "count": pattern_dict[k]})
+        count += pattern_dict[k]
+    print("Total %s" % count)
+    return out
+
 
 def server_stats(runlink, all=False, only_new=False):
     pattern_dict = {}
@@ -421,6 +440,15 @@ class LinkTable(Table):
             return obj
         return [transform(a) for a in self.links]
 
+    def dump(self, *args):
+        if not args:
+            args = range(len(self.links))
+
+        data = self.to_data()
+        for a in args:
+            print(data[a])
+        return self
+
     def change(self, what, field, to, *args):
         if not args:
             args = range(len(self.links))
@@ -456,6 +484,10 @@ class LinkTable(Table):
     def server_stats(self, all=False, only_new=False):
         runlink = self.links
         return server_stats(runlink, all, only_new)
+
+    def za_stats(self, all=False, only_new=False):
+        runlink = self.links
+        return za_stats(runlink, all, only_new)
 
     def process_stats(self, all=False, only_new=False):
         runlink = self.links
@@ -544,11 +576,11 @@ class MpTest:
                 api.f.endpoint("app", "%s"),
                 api.f.endpoint("process", "%s", who="client"),
                 api.f.endpoint("subnet", "%s", who="server"),
-                api.f.endpoint("netmask", "%s", who="server"),
-                api.f.endpoint("dst_port", "%s", who="server"),
+                api.f.endpoint("netmask", %s, who="server"),
+                api.f.endpoint("dst_port", %s, who="server"),
             ], changes=[
                 ("server", "subnet", "%s"),
-                ("server", "netmask", "%s"),
+                ("server", "netmask", %s),
             ]),
     ]
 """ % (self.client.app, self.client.process, self.server.subnet, self.server.netmask, self.server.dst_port, self.server.subnet, self.server.netmask))
@@ -696,6 +728,10 @@ class Runtime(object):
         if not runlink: runlink = self.iterlinks()
         return server_stats(runlink, all, only_new)
 
+    def za_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return za_stats(runlink, all, only_new)
+
     def process_stats(self, all=False, only_new=False, runlink=None):
         if not runlink: runlink = self.iterlinks()
         return process_stats(runlink, all, only_new)
@@ -834,6 +870,10 @@ class App(object):
     def server_stats(self, all=False, only_new=False, runlink=None):
         if not runlink: runlink = self.iterlinks()
         return server_stats(runlink, all, only_new)
+
+    def za_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return za_stats(runlink, all, only_new)
 
     def process_stats(self, all=False, only_new=False, runlink=None):
         if not runlink: runlink = self.iterlinks()
