@@ -58,7 +58,7 @@ class MpNAE:
                 api.f.endpoint("process", "kubelet", who="client"),
                 api.f.endpoint("dns_pattern", ":.*.eks.amazonaws.com:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:.*\.eks\.amazonaws\.com:.*"),
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "cassandra"),
@@ -109,7 +109,7 @@ class MpBendVm:
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":175118736976.dkr.ecr..*.amazonaws.com:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":175118736976\.dkr\.ecr\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:175118736976\.dkr\.ecr\..*\.amazonaws\.com:.*"),
             ]),
         api.AcceptLink(filters=[
                 api.f.endpoint("app", "bendvm.bend.web"),
@@ -249,7 +249,7 @@ class MpSSMagentToSSM:
                 api.f.endpoint("dns_pattern", ":ssm.us-west-2.amazonaws.com:", who="server"),
             ], changes=[
                 ("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-agent-worker"),
-                ("server", "dns_pattern", ":ssm\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:ssm\..*\.amazonaws\.com:.*"),
             ]),
     ]
 
@@ -292,7 +292,7 @@ class MpDynamo:
                                       ], who="client", flags=re.IGNORECASE),
                 api.f.endpoint("dns_pattern", ":dynamodb..*.amazonaws.com:"),
             ], changes=[
-                ("server", "dns_pattern", ":dynamodb\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:dynamodb\..*\.amazonaws\.com:.*"),
             ]),
     ]
 
@@ -308,7 +308,7 @@ class MpS3:
                                       ], who="client", flags=re.IGNORECASE),
                 api.f.endpoint("dns_pattern", ":s3\..*\.amazonaws\.com:"),
             ], changes=[
-                ("server", "dns_pattern", ":s3\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:s3\..*\.amazonaws\.com:.*"),
             ]),
     ]
 
@@ -343,7 +343,7 @@ class MpAwsEks:
                 api.f.endpoint("process", "kube-proxy", who="client"),
                 api.f.endpoint("dns_pattern", ":.*\.eks\.amazonaws\.com:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:.*\.eks\.amazonaws\.com:.*"),
             ]),
         api.AcceptLink(filters=[
                 api.f.type("INT"),
@@ -355,7 +355,7 @@ class MpAwsEks:
                 api.f.endpoint("process", "aws-k8s-agent", flags=re.IGNORECASE, who="client"),
                 api.f.endpoint("dns_pattern", ":ec2.us-west-2.amazonaws.com:"),
             ], changes=[
-                ("server", "dns_pattern", ":ec2\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:ec2\..*\.amazonaws\.com:.*"),
             ]),
     ]
 
@@ -386,7 +386,7 @@ class MpAmznLinux:
                 api.f.endpoint("process", ["/usr/bin/yum", "amazon_linux_extras"], who="client", flags=re.IGNORECASE),
                 api.f.endpoint("dns_pattern", ":amazonlinux.us-west-2.amazonaws.com:", who="server", flags=re.IGNORECASE),
             ], changes=[
-                ("server", "dns_pattern", ":amazonlinux\..*\.amazonaws\.com:"),
+                ("server", "dns_pattern", ".*:amazonlinux\..*\.amazonaws\.com:.*"),
             ]),
     ]
 

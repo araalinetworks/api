@@ -16,14 +16,14 @@ class MpDockerd:
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":.*.docker.io:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":.*\.docker\.io:"),
+                ("server", "dns_pattern", ".*:.*\.docker\.io:.*"),
             ]),
         api.AcceptLink(filters=[
                 api.f.type("NAE"),
                 api.f.endpoint("process", "dockerd", who="client"),
                 api.f.endpoint("dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:", who="server"),
             ], changes=[
-                ("server", "dns_pattern", ":prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:"),
+                ("server", "dns_pattern", ".*:prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com:.*"),
             ]),
     ]
 
