@@ -177,6 +177,10 @@ class AcceptLink:
         l.accept()                                                              
         for c in self.changes:                                                       
             l.change(*c)
+
+        for link in l.links:
+            if hasattr(link.server, "dns_pattern") and link.server.dns_pattern:
+                link.server.change("dns_pattern", ".*" + link.server.dns_pattern + ".*")
         return l.links
 
 
@@ -577,7 +581,7 @@ class Runtime(object):
                     if a["app_name"] == "invalid": continue
                     Runtime.zone_apps[za["zone_name"]].append(a["app_name"])
                     if full:
-                        Runtime.zone_app_links[(za["zone_name"], a["app_name"])] = a["links"]
+                        Runtime.zone_app_links[(za["zone_name"], a["app_name"])] = a.get("links", [])
         return list({"name":k, "Apps":v} for k,v in Runtime.zone_apps.items())
 
     def __init__(self, tenant=None):
