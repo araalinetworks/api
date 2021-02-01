@@ -29,6 +29,27 @@ def link_stats(runlink, all=False, only_new=True):
         out.append({"what": "link."+t, "count": v})
     return out
 
+
+def server_stats(runlink, all=False, only_new=False):
+    pattern_dict = {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        if a.type != "NAE": continue
+        server = a.server.to_data().get("subnet", None)
+        if server:
+            pattern_dict[server] = pattern_dict.get(server, 0) + 1
+    keys = list(pattern_dict.keys())
+    keys.sort(key=lambda x: -pattern_dict[x])
+    out = []
+    count = 0
+    for k in keys:
+        out.append({"server": k, "count": pattern_dict[k]})
+        count += pattern_dict[k]
+    print("Total %s" % count)
+    return out
+
+
 def dns_stats(runlink, all=False, only_new=False):
     pattern_dict = {}
     for a in runlink:
@@ -41,9 +62,34 @@ def dns_stats(runlink, all=False, only_new=False):
     keys = list(pattern_dict.keys())
     keys.sort(key=lambda x: -pattern_dict[x])
     out = []
+    count = 0
+    for k in keys:
+        out.append({"dns": k, "count": pattern_dict[k]})
+        count += pattern_dict[k]
+    print("Total %s" % count)
+    return out
+
+
+def process_stats(runlink, all=False, only_new=False):
+    pattern_dict = {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        process = a.client.to_data().get("process", None)
+        if process:
+            process = process + ".client"
+            pattern_dict[process] = pattern_dict.get(process, 0) + 1
+        process = a.server.to_data().get("process", None)
+        if process:
+            process = process + ".server"
+            pattern_dict[process] = pattern_dict.get(process, 0) + 1
+    keys = list(pattern_dict.keys())
+    keys.sort(key=lambda x: -pattern_dict[x])
+    out = []
     for k in keys:
         out.append({"dns": k, "count": pattern_dict[k]})
     return out
+
 
 
 class Process(object):
@@ -193,7 +239,7 @@ class MetaPolicyRunner:
         for a in args:
             self.mp_names[a.__name__] = a
 
-    def run(self, links):
+    def run(self, links, show_all=False):
         self.links = list(links)
         for pname, meta_policy in self.mp_names.items():
             count = 0
@@ -201,7 +247,8 @@ class MetaPolicyRunner:
                 for l in policy.apply(self.links):
                     l.policy = pname
                     count += 1
-            print("%-20s matched %s rows" % (pname, count))
+            if show_all or count:
+                print("%-20s matched %s rows" % (pname, count))
         return self
 
     def review(self, *filters, **kwargs):
@@ -402,6 +449,18 @@ class LinkTable(Table):
             self.links[i].snooze()
         return self
 
+    def dns_stats(self, all=False, only_new=False):
+        runlink = self.links
+        return dns_stats(runlink, all, only_new)
+
+    def server_stats(self, all=False, only_new=False):
+        runlink = self.links
+        return server_stats(runlink, all, only_new)
+
+    def process_stats(self, all=False, only_new=False):
+        runlink = self.links
+        return process_stats(runlink, all, only_new)
+
     def meta_policy(self, *args):
         if not args:
             args = range(len(self.links))
@@ -489,9 +548,10 @@ class MpTest:
                 api.f.endpoint("dst_port", "%s", who="server"),
             ], changes=[
                 ("server", "subnet", "%s"),
+                ("server", "netmask", "%s"),
             ]),
     ]
-""" % (self.client.app, self.client.process, self.server.subnet, self.server.netmask, self.server.dst_port, self.server.subnet))
+""" % (self.client.app, self.client.process, self.server.subnet, self.server.netmask, self.server.dst_port, self.server.subnet, self.server.netmask))
 
             return
 
@@ -632,6 +692,14 @@ class Runtime(object):
         if not runlink: runlink = self.iterlinks()
         return dns_stats(runlink, all, only_new)
 
+    def server_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return server_stats(runlink, all, only_new)
+
+    def process_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return process_stats(runlink, all, only_new)
+
     def review(self, data=False):
         for z in self.iterzones():
             for l in z.review(data):
@@ -762,6 +830,14 @@ class App(object):
     def dns_stats(self, all=False, only_new=False, runlink=None):
         if not runlink: runlink = self.iterlinks()
         return dns_stats(runlink, all, only_new)
+
+    def server_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return server_stats(runlink, all, only_new)
+
+    def process_stats(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return process_stats(runlink, all, only_new)
 
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
         """lfilter for type, pfilter for process, cfilter for changes/dirty

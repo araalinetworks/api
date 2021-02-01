@@ -165,7 +165,7 @@ class MpBendVm:
             ], changes=[
             ]),
         api.AcceptLink(filters=[
-                api.f.endpoint("app", "bendvm.bend.uiserver"),
+                api.f.endpoint("app", ".uiserver"),
                 api.f.type("INT"),
                 api.f.endpoint("process", "grpcwebproxy", who="client"),
                 api.f.endpoint("process", "com.araalinetworks.uiserver.UiServerKt", who="server"),
@@ -183,15 +183,6 @@ class MpBendVm:
                 api.f.type("INT"),
                 api.f.endpoint("process", "prometheus", who="client"),
                 api.f.endpoint("process", "araali_backend.py", who="server"),
-            ], changes=[
-            ]),
-        api.AcceptLink(filters=[
-                api.f.same_zone,
-                api.f.type("AEG"),
-                api.f.endpoint("app", "dmzvm", who="client"),
-                api.f.endpoint("process", "/var/lib/haproxy/healthcheck.py", who="client"),
-                api.f.endpoint("app", "bendvm.bend.backend", who="server"),
-                api.f.endpoint("process", "prometheus", who="server"),
             ], changes=[
             ]),
         api.AcceptLink(filters=[
@@ -335,37 +326,22 @@ class MpMonitoring:
             ]),
     ]
 
-class MpAwsEks:
-    policies = [
-        api.AcceptLink(filters=[
-                api.f.endpoint("app", "kube-system.kube.kube-proxy"),
-                api.f.type("NAE"),
-                api.f.endpoint("process", "kube-proxy", who="client"),
-                api.f.endpoint("dns_pattern", ":.*\.eks\.amazonaws\.com:", who="server"),
-            ], changes=[
-                ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
-            ]),
-        api.AcceptLink(filters=[
-                api.f.type("INT"),
-                api.f.endpoint("process", "aws-cni", who="client"),
-                api.f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-        api.AcceptLink(filters=[
-                api.f.endpoint("process", "aws-k8s-agent", flags=re.IGNORECASE, who="client"),
-                api.f.endpoint("dns_pattern", ":ec2.us-west-2.amazonaws.com:"),
-            ], changes=[
-                ("server", "dns_pattern", ":ec2\..*\.amazonaws\.com:"),
-            ]),
-    ]
-
 class MpPerimeter:
     policies = [
         api.AcceptLink(filters=[
                 api.f.perimeter,
-                api.f.endpoint("zone", ["prod", "nightly", "dev", "ops", "nightly-k8s"], who="server", flags=re.IGNORECASE),
+                api.f.endpoint("zone", ["staging", "mufasa", "rafiki", "prod", "nightly", "dev", "ops", "nightly-k8s"], who="server", flags=re.IGNORECASE),
                 api.f.endpoint("app", ["dmzvm", "cassandra", "k8s"], who="server", flags=re.IGNORECASE),
                 api.f.endpoint("process", ["sshd", "haproxy"], who="server", flags=re.IGNORECASE),
+            ], changes=[
+            ]),
+        api.AcceptLink(filters=[
+                api.f.type(["AEG", "AIN"]),
+                api.f.same_zone,
+                api.f.endpoint("app", "dmzvm", who="client"),
+                api.f.endpoint("process", "sshd", who="client"),
+                api.f.endpoint("app", "bendvm", who="server"),
+                api.f.endpoint("process", "sshd", who="server"),
             ], changes=[
             ]),
     ]
@@ -434,7 +410,7 @@ class MpHaproxyClient:
         api.AcceptLink(filters=[
                 api.f.same_zone,
                 api.f.endpoint("process", "haproxy", who="client"),
-                api.f.endpoint("process", ['araali_backend.py', "grpcwebproxy", "araaliweb"], who="server", flags=re.IGNORECASE),
+                api.f.endpoint("process", ['araali_backend.py', "grpcwebproxy", "araaliweb", "com.araalinetworks.uiserver.UiServerKt"], who="server", flags=re.IGNORECASE),
             ], changes=[
             ]),
     ]
@@ -449,44 +425,22 @@ class MpHaproxyServer:
             ]),
     ]
 
-class MpPrometheus:
+class MpPrometheusAraali:
     policies = [
         api.AcceptLink(filters=[
                 api.f.same_zone,
                 api.f.endpoint("process", "prometheus", who="client"),
-                api.f.endpoint("process", ["alertmanager", "araali_backend.py", "node_exporter", "prometheus", "kubelet", "kube-rbac-proxy", "com.araalinetworks.LaunchKt"], who="server", flags=re.IGNORECASE),
+                api.f.endpoint("process", ["araali_backend.py", "com.araalinetworks.LaunchKt"], who="server", flags=re.IGNORECASE),
             ], changes=[
             ]),
     ]
-
-class MpAlertMgr:
-    policies = [
-        api.AcceptLink(filters=[
-                api.f.type("INT"),
-                api.f.endpoint("process", "alertmanager", who="client"),
-                api.f.endpoint("process", "alertmanager", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
-class MpKubeletClient:
-    policies = [
-        api.AcceptLink(filters=[
-                api.f.same_zone,
-                api.f.endpoint("process", "kubelet", who="client"),
-                api.f.endpoint("process", ["alertmanager", "grafana-server", "prometheus"], who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
 
 print("Adding meta-policies to runner")
 api.mpr.add(
         MpBendVm, MpNAE, MpINT,
         MpSSMagentToMeta,
         MpSSMagentToSSM, MpCassandra, MpDynamo, MpS3,
-        MpSnapdToSnapcraft, MpAwsEks, MpPerimeter, MpGrpcHealthProbe,
+        MpSnapdToSnapcraft, MpPerimeter, MpGrpcHealthProbe,
         MpAmznLinux, MpCheckHealth, MpHbCheck, MpHealthCheck, MpHaproxyClient,
-        MpHaproxyServer, MpPrometheus, MpAlertMgr, MpMonitoring,
-        MpKubeletClient,
+        MpHaproxyServer, MpPrometheusAraali, MpMonitoring,
 )
