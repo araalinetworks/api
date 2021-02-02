@@ -143,3 +143,11 @@ linkTable.change("client", "binary_name", "/snap/amazon-ssm-agent/[0-9]+/ssm-age
 run.review()
 run.commit()
 ```
+# Troubleshooting
+## Jupyter installation problems
+You could try conda to install jupyter. Its sometimes nasty to get hold of it. We are trying to create a virtualenv for it.
+## Authorization problems
+```
+./araalictl authorize -clean # to start over.
+```
+
