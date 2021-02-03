@@ -1,4 +1,4 @@
-package main
+package araalictl
 
 import (
 	"bytes"
@@ -176,4 +176,22 @@ func GetLinks(zone, app, tenant string) []Link {
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 	return listOfLinks
+}
+
+// FortifyK8sCluster - for tenant
+func FortifyK8sCluster(tenant, clusterName string) {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+
+	if clusterName == "" {
+		RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl fortify-k8s %s %s",
+			tenantStr, clusterName))
+	} else {
+		RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl fortify-k8s %s",
+			tenantStr))
+	}
 }

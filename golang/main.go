@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"./araalictl"
 )
 
 func main() {
@@ -27,7 +29,7 @@ func main() {
 		}
 
 		if text == "1" {
-			for _, zone := range GetZones(false, "") {
+			for _, zone := range araalictl.GetZones(false, "") {
 				fmt.Printf("%s:\n", zone.ZoneName)
 				for _, app := range zone.Apps {
 					fmt.Printf("\t%s\n", app.AppName)
@@ -38,7 +40,7 @@ func main() {
 		}
 
 		if text == "2" {
-			for _, zone := range GetZones(true, "") {
+			for _, zone := range araalictl.GetZones(true, "") {
 				fmt.Printf("%s:\n", zone.ZoneName)
 				for _, app := range zone.Apps {
 					fmt.Printf("\t%s\n", app.AppName)
@@ -53,7 +55,7 @@ func main() {
 
 		if text == "3" {
 			summary := make(map[string]int)
-			for _, zone := range GetZones(true, "") {
+			for _, zone := range araalictl.GetZones(true, "") {
 				for _, app := range zone.Apps {
 					for _, link := range app.Links {
 						summary["type."+link.Type] += 1
@@ -70,5 +72,5 @@ func main() {
 	}
 
 	// unreachable code, left for sample reasons
-	fmt.Printf("%+v\n", GetLinks("azure3", "istio-system", "amk"))
+	fmt.Printf("%+v\n", araalictl.GetLinks("azure3", "istio-system", "amk"))
 }
