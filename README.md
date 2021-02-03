@@ -151,5 +151,6 @@ You could try conda to install jupyter. Its sometimes nasty to get hold of it. W
 ./araalictl authorize -clean # to start over.
 ```
 ## Not able to push your branch
-https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+- https://docs.github.com/en/github/using-git/changing-a-remotes-url
+- https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 
