@@ -432,6 +432,26 @@ class LinkTable(Table):
         def same_zone(cls, r):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
 
+        @classmethod
+        def same_pod(cls, r):
+            c = r.get("client", {}).get('app', None)
+            s = r.get("server", {}).get('app', None)
+            if c is None or s is None:
+                return False
+            return c.split('.', 2)[:2]==s.split('.', 2)[:2]
+
+        @classmethod
+        def self_loop(cls, r):
+            cz = r.get("client", {}).get('zone', None)
+            sz = r.get("server", {}).get('zone', None)
+            ca = r.get("client", {}).get('app', None)
+            sa = r.get("server", {}).get('app', None)
+            cp = r.get("client", {}).get('process', None)
+            sp = r.get("server", {}).get('process', None)
+            if None in [cz, sz, ca, sa, cp, sp]:
+                return False
+            return cz == sz and ca == sa and cp == sp
+
     def to_data(self):
         def transform(obj):
             obj = Table.transform(obj)
