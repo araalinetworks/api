@@ -116,7 +116,7 @@ class Process(object):
         self.zone = data["zone"]
         self.app = data["app"]
         self.process = data["process"]
-        self.binary_name = data["binary_name"]
+        self.binary_name = data.get("binary_name", None)
         self.parent_process = data.get("parent_process", None)
 
     def __repr__(self):
@@ -371,6 +371,29 @@ class LinkTable(Table):
             return lambda r: r.get("type", None) == link_type
 
         @classmethod
+        def pod(cls, pod_match, alpha=False):
+            def match(r, pod_match):
+                c = r.get("client", {}).get('app', None)
+                s = r.get("server", {}).get('app', None)
+                if c:
+                    c = c.split(".", 2)
+                    if len(c) > 1 and re.search(pod_match, c[1]):
+                        if not alpha:
+                            return True
+                        return re.search("[a-z]", c[1]) and re.search("[0-9]", c[1])
+                if s:
+                    s = s.split(".", 2)
+                    if len(s) > 1 and re.search(pod_match, s[1]):
+                        if not alpha:
+                            return True
+                        return re.search("[a-z]", s[1]) and re.search("[0-9]", s[1])
+                return False
+
+            if isinstance(pod_match, list):
+                return lambda r: any([match(r, m) in pod_match])
+            return lambda r: match(r, pod_match)
+
+        @classmethod
         def new_state(cls, state):
             if isinstance(state, list):
                 return lambda r: r.get("new_state", None) in state
@@ -582,11 +605,12 @@ class MpTest:
                 api.f.endpoint("app", "%s"),
                 api.f.endpoint("process", "%s", who="client"),
                 api.f.endpoint("dns_pattern", "%s", who="server"),
+                api.f.endpoint("dst_port", %s, who="server"),
             ], changes=[
-                ("server", "dns_pattern", "%s"),
+                ("server", "dns_pattern", ".*%s.*"),
             ]),
     ]
-""" % (self.client.app, self.client.process, self.server.dns_pattern, self.server.dns_pattern.replace(".", "\.")))
+""" % (self.client.app, self.client.process, self.server.dns_pattern, self.server.dns_pattern.replace(".", "\."), self.server.dst_port))
             else:
                 print("""
 class MpTest:

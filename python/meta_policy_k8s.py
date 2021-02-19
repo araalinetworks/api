@@ -27,6 +27,15 @@ class MpK8s:
                 api.f.endpoint("dst_port", 80, who="server"),
             ], changes=[
             ]),
+        api.AcceptLink(filters=[
+                api.f.type("NAE"),
+                api.f.endpoint("app", "kube-system.certmanageraddon-cert-manager.cert-manager"),
+                api.f.endpoint("process", "controller", who="client"),
+                api.f.endpoint("subnet", "169.254.169.254", who="server"),
+                api.f.endpoint("netmask", 32, who="server"),
+                api.f.endpoint("dst_port", 80, who="server"),
+            ], changes=[
+            ]),
     ]
 
 class MpAlertMgr:

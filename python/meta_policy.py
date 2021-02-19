@@ -346,16 +346,6 @@ class MpPerimeter:
             ]),
     ]
 
-class MpGrpcHealthProbe:
-    policies = [
-        api.AcceptLink(filters=[
-                api.f.same_zone,
-                api.f.endpoint("process", "grpc-health-probe", who="client", flags=re.IGNORECASE),
-                api.f.endpoint("process", "aws-k8s-agent", who="server", flags=re.IGNORECASE),
-            ], changes=[
-            ]),
-    ]
-
 class MpAmznLinux:
     policies = [
         api.AcceptLink(filters=[
@@ -440,7 +430,7 @@ api.mpr.add(
         MpBendVm, MpNAE, MpINT,
         MpSSMagentToMeta,
         MpSSMagentToSSM, MpCassandra, MpDynamo, MpS3,
-        MpSnapdToSnapcraft, MpPerimeter, MpGrpcHealthProbe,
+        MpSnapdToSnapcraft, MpPerimeter,
         MpAmznLinux, MpCheckHealth, MpHbCheck, MpHealthCheck, MpHaproxyClient,
         MpHaproxyServer, MpPrometheusAraali, MpMonitoring,
 )

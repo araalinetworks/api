@@ -11,7 +11,8 @@ class MpAwsEks:
                 ("server", "dns_pattern", ":.*\.eks\.amazonaws\.com:"),
             ]),
         api.AcceptLink(filters=[
-                api.f.endpoint("process", "aws-cni", who="client"),
+                api.f.same_zone,
+                api.f.endpoint("process", ["grpc-health-probe", "aws-cni"], who="client"),
                 api.f.endpoint("process", "aws-k8s-agent", who="server"),
             ], changes=[
             ]),
