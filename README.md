@@ -9,9 +9,9 @@ cd api/python
 python araalictl.py
 
 # to authorize your copy (signup link below)
-./araalictl authorize -local
 ./araalictl config Fog=fog.<your-customer-name-here>.aws.araalinetworks.com
 ./araalictl config InternalCfgBackend=prod.aws.araalinetworks.com
+sudo ./araalictl authorize -local
 ```
 # Links
 * https://www.araalinetworks.com/signup
