@@ -195,3 +195,8 @@ func FortifyK8sCluster(tenant, clusterName string) {
 			tenantStr))
 	}
 }
+
+// GetJWT - returns a araali web ui access jwt
+func GetJWT(email string) string {
+	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl token -jwt %s", email))
+}
