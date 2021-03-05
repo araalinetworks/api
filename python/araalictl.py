@@ -118,5 +118,24 @@ def get_links(zone, app, tenant=None):
     return yaml.load(rc[1], yaml.SafeLoader)
 
 
+def enforce(data, service=False, tenant=None):
+    """Enforce zone app or service."""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    ostr = " -enforce-service " if service else " -enforce-zone-app "
+
+    ret_val = {}
+    if not data:
+        ret_val['empty'] = {"success": "Empty enforcement request"}
+    else:
+        if g_debug:
+            print(yaml.dump(data))
+        rc = run_command("./araalictl api %s %s" % (
+            ostr, tstr), result=True, strip=False)
+        assert rc[0] == 0, rc[1]
+        ret_val = json.loads(rc[1])
+
+    return ret_val
+
+
 if __name__ == '__main__':
     sys.exit(fetch())
