@@ -110,6 +110,70 @@ def process_stats(runlink, all=False, only_new=False):
     return out
 
 
+def services(runlink, all=False, only_new=False):
+    pattern_dict = {}
+    for a in runlink:
+        if not all and a.state == "DEFINED_POLICY": continue
+        if only_new and a.new_state is not None: continue
+        if a.type != "NAE": continue
+        server = a.server.to_data()
+        service = Service(server)
+        if service.get_key() in pattern_dict:
+            service = pattern_dict[service.get_key()]
+        else:
+            pattern_dict[service.get_key()] = service
+        service.count += 1
+        service.accessors.append("%s-%s" % (a.client.zone, a.client.app))
+
+    keys = list(pattern_dict.keys())
+    keys.sort(key=lambda x: -pattern_dict[x].count)
+    out = []
+    count = 0
+    for k in keys:
+        out.append(pattern_dict[k].to_data(display=True))
+        count += pattern_dict[k].count
+    print("Total %s" % count)
+    return out
+
+
+class Service(object):
+    def __init__(self, data):
+        self.dns_pattern = None
+        self.ip_address = None
+        if "dns_pattern" in data:
+            self.dns_pattern = data["dns_pattern"]
+        else:
+            self.ip_address = str(data["subnet"])
+        self.dst_port = data["dst_port"]
+        self.enforcement_state = None
+        self.count = 0
+        self.accessors = []
+
+    def get_key(self):
+        ep = ""
+        if self.dns_pattern:
+            ep = self.dns_pattern
+        else:
+            ep = self.ip_address
+        return "%s:%s" % (ep ,self.dst_port)
+
+    def to_data(self, display=False):
+        obj = {"dst_port": self.dst_port}
+        if self.dns_pattern:
+            obj["dns_pattern"] = self.dns_pattern
+        else:
+            obj["ip_address"] = self.ip_address
+
+        if self.enforcement_state != None:
+            obj["enforce"] = self.enforcement_state
+        if display:
+            obj["count"] = self.count
+            obj["accessors"] = self.accessors
+        return obj
+
+    def enforce(self, enforcement_state):
+        self.enforcement_state = enforcement_state
+
 
 class Process(object):
     def __init__(self, data):
@@ -157,7 +221,7 @@ class Process(object):
 class NonAraaliClient(object):
     def __init__(self, data):
         self.process = None
-        self.subnet = ipaddress.ip_address(str(data["subnet"]))
+        self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
         self.netmask = data.get("netmask", 0)
         self.private_subnet = data.get("private_subnet", False)
         self.endpoint_group = data.get("endpoint_group", "")
@@ -197,7 +261,7 @@ class NonAraaliServer(object):
             self.dns_pattern = data["dns_pattern"]
         else:
             self.dns_pattern = None
-            self.subnet = ipaddress.ip_address(str(data["subnet"]))
+            self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
             self.netmask = data.get("netmask", 0)
             self.private_subnet = data.get("private_subnet", False)
         self.endpoint_group = data.get("endpoint_group", "")
@@ -542,6 +606,10 @@ class LinkTable(Table):
         for i in args:
             self.links[i].meta_policy()
 
+    def services(self, all=False, only_new=False):
+        runlink = self.links
+        return services(runlink, all, only_new)
+
 
 f = LinkTable.Filter
 mpr = MetaPolicyRunner()
@@ -780,6 +848,10 @@ class Runtime(object):
         if not runlink: runlink = self.iterlinks()
         return process_stats(runlink, all, only_new)
 
+    def services(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return services(runlink, all, only_new)
+
     def review(self, data=False):
         for z in self.iterzones():
             for l in z.review(data):
@@ -887,10 +959,16 @@ class App(object):
     ZONE_MARKER = "__ZONE__"
     APP_MARKER = "__APP__"
 
-    def __init__(self, zone, app, tenant=None, hard=True):
+    def __init__(self, zone, app, tenant=None, hard=True, ingress_enforced=False, egress_enforced=False, internal_enforced=False):
         self.tenant = tenant
         self.zone = zone
         self.app = app
+        self.ingress_enforced = ingress_enforced
+        self.egress_enforced = egress_enforced
+        self.internal_enforced = internal_enforced
+        self.ingress_enforced_new = None
+        self.egress_enforced_new = None
+        self.intenal_enforced_new = None
         self.refresh(hard) # get links
 
     def refresh(self, hard=True):
@@ -922,6 +1000,10 @@ class App(object):
     def process_stats(self, all=False, only_new=False, runlink=None):
         if not runlink: runlink = self.iterlinks()
         return process_stats(runlink, all, only_new)
+
+    def services(self, all=False, only_new=False, runlink=None):
+        if not runlink: runlink = self.iterlinks()
+        return services(runlink, all, only_new)
 
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
         """lfilter for type, pfilter for process, cfilter for changes/dirty
@@ -969,6 +1051,14 @@ class App(object):
         for link in self.iterlinks():
             link.snooze()
         return self
+
+    def enforce(self, egress=False, ingress=False, internal=False):
+        if (self.egress_enforced and not egress) or (egress and not self.egress_enforced):
+            self.egress_enforced_new = egress
+        if (self.ingress_enforced and not ingress) or (ingress and not self.ingress_enforced):
+            self.ingress_enforced_new = ingress
+        if (self.internal_enforced and not internal) or (internal and not self.internal_enforced):
+            self.internal_enforced_new = internal
         
     def to_data(self):
         return {"zone": self.zone, "app": self.app, "links": [a.to_data() for a in self.links]}
