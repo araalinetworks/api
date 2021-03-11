@@ -8,9 +8,13 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
+
+// Constants
+const ONE_DAY = 24 * 60 * time.Minute
 
 // FileExists - check if file exists
 func FileExists(filename string) bool {
@@ -134,8 +138,16 @@ type Link struct {
 	Speculative bool
 	State       string
 	Timestamp   uint64
-	UniqueId    string `yaml:"unique_id"`
-	NewState    string `yaml:"new_state,omitempty"`
+	UniqueId    string    `yaml:"unique_id"`
+	NewState    string    `yaml:"new_state,omitempty"`
+	PagingToken string    `yaml:"paging_token,omitempty"`
+	AlertInfo   AlertInfo `yaml:"alert_info,omitempty"`
+}
+
+// AlertInfo object
+type AlertInfo struct {
+	CommunicationAlertType string `yaml:"communication_alert_type,omitempty"`
+	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
 }
 
 // TenantCreate - to create a tenant
@@ -219,4 +231,54 @@ func GetAlertCard(tenant string) AlertCard {
 	alertCard := AlertCard{}
 	yaml.Unmarshal([]byte(output), &alertCard)
 	return alertCard
+}
+
+// GetAlerts - get all alerts for a tenant between specified time.
+func GetAlerts(tenant, startTime, endTime string) []Link {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+
+	currentTime := time.Now()
+	startTimeStr := func() string {
+		if len(startTime) == 0 {
+			return fmt.Sprint("-starttime=", currentTime.Add(-ONE_DAY).Unix())
+		}
+		timeObj, err := time.Parse(time.RFC3339, startTime)
+		if err != nil {
+			fmt.Println(err)
+			panic(fmt.Sprintln("Required format: 2012-11-01T22:08:41, Start time given: ", startTime))
+		}
+		return fmt.Sprint("-starttime=", timeObj.Unix())
+	}()
+
+	endTimeStr := func() string {
+		if len(endTime) == 0 {
+			return fmt.Sprint("-endtime=", currentTime.Unix())
+		}
+		timeObj, err := time.Parse("2012-11-01T22:08:41", endTime)
+		if err != nil {
+			fmt.Println(err)
+			panic(fmt.Sprintln("Required format: 2012-11-01T22:08:41, End time given: ", endTime))
+		}
+		return fmt.Sprint("-endtime=", timeObj.Unix())
+	}()
+
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s", tenantStr, startTimeStr, endTimeStr))
+	completeListOfLinks := []Link{}
+	for {
+		listOfLinks := []Link{}
+		yaml.Unmarshal([]byte(output), &listOfLinks)
+		completeListOfLinks = append(completeListOfLinks, listOfLinks...)
+		pagingToken := listOfLinks[len(listOfLinks)-1].PagingToken
+		if pagingToken == "" {
+			break
+		}
+		fmt.Println("Fetched alerts: ", len(listOfLinks))
+		output = RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s -paging-token %s", tenantStr, startTimeStr, endTimeStr, pagingToken))
+	}
+	return completeListOfLinks
 }
