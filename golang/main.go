@@ -16,6 +16,7 @@ func main() {
 		fmt.Printf("\t1: zones_apps\n")
 		fmt.Printf("\t2: zones_apps_links\n")
 		fmt.Printf("\t3: summary\n")
+		fmt.Printf("\t4: alert_card\n")
 
 		reader := bufio.NewReader(os.Stdin)
 		text, err := reader.ReadString('\n')
@@ -68,6 +69,11 @@ func main() {
 				fmt.Printf("\t%-30s %d\n", k, v)
 			}
 			continue
+		}
+
+		if text == "4" {
+			alertCard := araalictl.GetAlertCard("")
+			fmt.Printf("%v\n", alertCard)
 		}
 	}
 

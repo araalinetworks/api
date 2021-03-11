@@ -94,6 +94,12 @@ type Zone struct {
 type App struct {
 	AppName string `yaml:"app_name"`
 	Links   []Link `yaml:"links,omitempty"`
+	Alerts  uint64 `yaml:"alerts,omitempty"`
+}
+
+type AlertCard struct {
+	TotalAlerts  uint64 `yaml:"alert_summary"`
+	AlertDetails []Zone `yaml:"alert_details,omitempty"`
 }
 
 // Endpoint Object
@@ -199,4 +205,18 @@ func FortifyK8sCluster(tenant, clusterName string) {
 // GetJWT - returns a araali web ui access jwt
 func GetJWT(email string) string {
 	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl token -jwt %s", email))
+}
+
+// GetAlertCard - get AlertCard for tenant.
+func GetAlertCard(tenant string) AlertCard {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alert-card %s", tenantStr))
+	alertCard := AlertCard{}
+	yaml.Unmarshal([]byte(output), &alertCard)
+	return alertCard
 }
