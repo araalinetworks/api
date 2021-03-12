@@ -266,6 +266,18 @@ func GetAlertCard(tenant string) AlertCard {
 // startTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime - 1 day.
 // endTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime.
 // count: is optional, should be number of alerts we want to fetch at a time. If 0 will be defaulted 100.
+// Sample usage:
+// startTime := time.Now().Add(-(3 * araalictl.ONE_DAY)).Unix()
+// alertPage := araalictl.GetAlerts("", startTime, 0, 25)
+// fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+// for {
+// 	if !alertPage.HasNext() {
+// 		fmt.Println("Done fetching!")
+// 		break
+// 	}
+// 	alertPage.NextPage()
+// 	fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+// }
 func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
