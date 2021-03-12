@@ -96,9 +96,34 @@ type Zone struct {
 }
 
 type App struct {
-	AppName string `yaml:"app_name"`
-	Links   []Link `yaml:"links,omitempty"`
-	Alerts  uint64 `yaml:"alerts,omitempty"`
+	AppName       string       `yaml:"app_name"`
+	Links         []Link       `yaml:"links,omitempty"`
+	AlertCounts   AlertCount   `yaml:"alert,omitempty"`
+	ServiceCounts ServiceCount `yaml:"service,omitempty"`
+	ComputeCounts ComputeCount `yaml:"compute,omitempty"`
+}
+
+type AlertCount struct {
+	TotalAlerts            uint64 `yaml:"total_alerts,omitempty"`
+	IngressAlerts          uint64 `yaml:"ingress_alerts,omitempty"`
+	PerimeterIngressAlerts uint64 `yaml:"perimeter_ingress_alerts,omitempty"`
+	InternalAlerts         uint64 `yaml:"internal_alerts,omitempty"`
+	EgressAlerts           uint64 `yaml:"egress_alerts,omitempty"`
+	PerimeterEgressAlerts  uint64 `yaml:"perimeter_egress_alerts,omitempty"`
+}
+
+type ServiceCount struct {
+	TotalServices            uint64 `yaml:"total_services,omitempty"`
+	IngressServices          uint64 `yaml:"ingress_services,omitempty"`
+	PerimeterIngressServices uint64 `yaml:"perimeter_ingress_services,omitempty"`
+	InternalServices         uint64 `yaml:"internal_services,omitempty"`
+	EgressServices           uint64 `yaml:"egress_services,omitempty"`
+	PerimeterEgressServices  uint64 `yaml:"perimeter_egress_services,omitempty"`
+}
+
+type ComputeCount struct {
+	VirtualMachines uint32 `yaml:"virtual_machines,omitempty"`
+	Containers      uint32 `yaml:"containers,omitempty"`
 }
 
 type AlertCard struct {
