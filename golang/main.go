@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"./araalictl"
 )
@@ -78,7 +79,8 @@ func main() {
 		}
 
 		if text == "5" {
-			alertPage := araalictl.GetAlerts("", "", "", 25)
+			startTime := time.Now().Add(-(3 * araalictl.ONE_DAY)).Unix()
+			alertPage := araalictl.GetAlerts("", startTime, 0, 25)
 			fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
 			for {
 				if !alertPage.HasNext() {

@@ -262,7 +262,11 @@ func GetAlertCard(tenant string) AlertCard {
 }
 
 // GetAlerts - get all alerts for a tenant between specified time.
-func GetAlerts(tenant, startTime, endTime string, count int32) AlertPage {
+// tenant: this is optional can be set to emtpy.
+// startTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime - 1 day.
+// endTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime.
+// count: is optional, should be number of alerts we want to fetch at a time. If 0 will be defaulted 100.
+func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -279,27 +283,18 @@ func GetAlerts(tenant, startTime, endTime string, count int32) AlertPage {
 
 	currentTime := time.Now()
 	startTimeStr := func() string {
-		if len(startTime) == 0 {
+		if startTime == 0 {
 			return fmt.Sprint("-starttime=", currentTime.Add(-ONE_DAY).Unix())
 		}
-		timeObj, err := time.Parse(time.RFC3339, startTime)
-		if err != nil {
-			fmt.Println(err)
-			panic(fmt.Sprintln("Required format: 2021-03-08T23:18:09+00:00, Start time given: ", startTime))
-		}
-		return fmt.Sprint("-starttime=", timeObj.Unix())
+		return fmt.Sprint("-starttime=", startTime)
 	}()
 
 	endTimeStr := func() string {
-		if len(endTime) == 0 {
+		if endTime == 0 {
 			return fmt.Sprint("-endtime=", currentTime.Unix())
 		}
-		timeObj, err := time.Parse(time.RFC3339, endTime)
-		if err != nil {
-			fmt.Println(err)
-			panic(fmt.Sprintln("Required format: 2021-03-08T23:18:09+00:00, End time given: ", endTime))
-		}
-		return fmt.Sprint("-endtime=", timeObj.Unix())
+
+		return fmt.Sprint("-endtime=", endTime)
 	}()
 
 	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr))
