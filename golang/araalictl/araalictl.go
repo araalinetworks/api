@@ -8,9 +8,13 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"gopkg.in/yaml.v2"
 )
+
+// Constants
+const ONE_DAY = 24 * 60 * time.Minute
 
 // FileExists - check if file exists
 func FileExists(filename string) bool {
@@ -94,6 +98,12 @@ type Zone struct {
 type App struct {
 	AppName string `yaml:"app_name"`
 	Links   []Link `yaml:"links,omitempty"`
+	Alerts  uint64 `yaml:"alerts,omitempty"`
+}
+
+type AlertCard struct {
+	TotalAlerts  uint64 `yaml:"alert_summary"`
+	AlertDetails []Zone `yaml:"alert_details,omitempty"`
 }
 
 // Endpoint Object
@@ -128,8 +138,16 @@ type Link struct {
 	Speculative bool
 	State       string
 	Timestamp   uint64
-	UniqueId    string `yaml:"unique_id"`
-	NewState    string `yaml:"new_state,omitempty"`
+	UniqueId    string    `yaml:"unique_id"`
+	NewState    string    `yaml:"new_state,omitempty"`
+	PagingToken string    `yaml:"paging_token,omitempty"`
+	AlertInfo   AlertInfo `yaml:"alert_info,omitempty"`
+}
+
+// AlertInfo object
+type AlertInfo struct {
+	CommunicationAlertType string `yaml:"communication_alert_type,omitempty"`
+	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
 }
 
 // TenantCreate - to create a tenant
@@ -199,4 +217,102 @@ func FortifyK8sCluster(tenant, clusterName string) {
 // GetJWT - returns a araali web ui access jwt
 func GetJWT(email string) string {
 	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl token -jwt %s", email))
+}
+
+// AlertPage
+type AlertPage struct {
+	options     string
+	PagingToken string
+	Alerts      []Link
+}
+
+func (alertPage *AlertPage) HasNext() bool {
+	if alertPage.PagingToken == "" {
+		return false
+	}
+	return true
+}
+
+func (alertPage *AlertPage) NextPage() []Link {
+	if alertPage.PagingToken == "" {
+		panic("Next page doesn't exist.")
+	}
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s -paging-token %s", alertPage.options, alertPage.PagingToken))
+
+	listOfLinks := []Link{}
+	yaml.Unmarshal([]byte(output), &listOfLinks)
+
+	alertPage.PagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
+	alertPage.Alerts = listOfLinks
+	return listOfLinks
+}
+
+// GetAlertCard - get AlertCard for tenant.
+func GetAlertCard(tenant string) AlertCard {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alert-card %s", tenantStr))
+	alertCard := AlertCard{}
+	yaml.Unmarshal([]byte(output), &alertCard)
+	return alertCard
+}
+
+// GetAlerts - get all alerts for a tenant between specified time.
+// tenant: this is optional can be set to emtpy.
+// startTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime - 1 day.
+// endTime: is optional, should be epoch expressed in seconds. If 0 will be set to currentTime.
+// count: is optional, should be number of alerts we want to fetch at a time. If 0 will be defaulted 100.
+// Sample usage:
+// startTime := time.Now().Add(-(3 * araalictl.ONE_DAY)).Unix()
+// alertPage := araalictl.GetAlerts("", startTime, 0, 25)
+// fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+// for {
+// 	if !alertPage.HasNext() {
+// 		fmt.Println("Done fetching!")
+// 		break
+// 	}
+// 	alertPage.NextPage()
+// 	fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+// }
+func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+
+	countStr := func() string {
+		if count == 0 {
+			return ""
+		}
+		return fmt.Sprint("-count=", count)
+	}()
+
+	currentTime := time.Now()
+	startTimeStr := func() string {
+		if startTime == 0 {
+			return fmt.Sprint("-starttime=", currentTime.Add(-ONE_DAY).Unix())
+		}
+		return fmt.Sprint("-starttime=", startTime)
+	}()
+
+	endTimeStr := func() string {
+		if endTime == 0 {
+			return fmt.Sprint("-endtime=", currentTime.Unix())
+		}
+
+		return fmt.Sprint("-endtime=", endTime)
+	}()
+
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr))
+
+	listOfLinks := []Link{}
+	yaml.Unmarshal([]byte(output), &listOfLinks)
+
+	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: listOfLinks[len(listOfLinks)-1].PagingToken}
 }
