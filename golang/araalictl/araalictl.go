@@ -219,6 +219,34 @@ func GetJWT(email string) string {
 	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl token -jwt %s", email))
 }
 
+// AlertPage
+type AlertPage struct {
+	options     string
+	PagingToken string
+	Alerts      []Link
+}
+
+func (alertPage *AlertPage) HasNext() bool {
+	if alertPage.PagingToken == "" {
+		return false
+	}
+	return true
+}
+
+func (alertPage *AlertPage) NextPage() []Link {
+	if alertPage.PagingToken == "" {
+		panic("Next page doesn't exist.")
+	}
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s -paging-token %s", alertPage.options, alertPage.PagingToken))
+
+	listOfLinks := []Link{}
+	yaml.Unmarshal([]byte(output), &listOfLinks)
+
+	alertPage.PagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
+	alertPage.Alerts = listOfLinks
+	return listOfLinks
+}
+
 // GetAlertCard - get AlertCard for tenant.
 func GetAlertCard(tenant string) AlertCard {
 	tenantStr := func() string {
@@ -234,12 +262,19 @@ func GetAlertCard(tenant string) AlertCard {
 }
 
 // GetAlerts - get all alerts for a tenant between specified time.
-func GetAlerts(tenant, startTime, endTime string) []Link {
+func GetAlerts(tenant, startTime, endTime string, count int32) AlertPage {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
 		}
 		return "-tenant=" + tenant
+	}()
+
+	countStr := func() string {
+		if count == 0 {
+			return ""
+		}
+		return fmt.Sprint("-count=", count)
 	}()
 
 	currentTime := time.Now()
@@ -250,7 +285,7 @@ func GetAlerts(tenant, startTime, endTime string) []Link {
 		timeObj, err := time.Parse(time.RFC3339, startTime)
 		if err != nil {
 			fmt.Println(err)
-			panic(fmt.Sprintln("Required format: 2012-11-01T22:08:41, Start time given: ", startTime))
+			panic(fmt.Sprintln("Required format: 2021-03-08T23:18:09+00:00, Start time given: ", startTime))
 		}
 		return fmt.Sprint("-starttime=", timeObj.Unix())
 	}()
@@ -259,26 +294,18 @@ func GetAlerts(tenant, startTime, endTime string) []Link {
 		if len(endTime) == 0 {
 			return fmt.Sprint("-endtime=", currentTime.Unix())
 		}
-		timeObj, err := time.Parse("2012-11-01T22:08:41", endTime)
+		timeObj, err := time.Parse(time.RFC3339, endTime)
 		if err != nil {
 			fmt.Println(err)
-			panic(fmt.Sprintln("Required format: 2012-11-01T22:08:41, End time given: ", endTime))
+			panic(fmt.Sprintln("Required format: 2021-03-08T23:18:09+00:00, End time given: ", endTime))
 		}
 		return fmt.Sprint("-endtime=", timeObj.Unix())
 	}()
 
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s", tenantStr, startTimeStr, endTimeStr))
-	completeListOfLinks := []Link{}
-	for {
-		listOfLinks := []Link{}
-		yaml.Unmarshal([]byte(output), &listOfLinks)
-		completeListOfLinks = append(completeListOfLinks, listOfLinks...)
-		pagingToken := listOfLinks[len(listOfLinks)-1].PagingToken
-		if pagingToken == "" {
-			break
-		}
-		fmt.Println("Fetched alerts: ", len(listOfLinks))
-		output = RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s -paging-token %s", tenantStr, startTimeStr, endTimeStr, pagingToken))
-	}
-	return completeListOfLinks
+	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr))
+
+	listOfLinks := []Link{}
+	yaml.Unmarshal([]byte(output), &listOfLinks)
+
+	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: listOfLinks[len(listOfLinks)-1].PagingToken}
 }

@@ -17,7 +17,7 @@ func main() {
 		fmt.Printf("\t2: zones_apps_links\n")
 		fmt.Printf("\t3: summary\n")
 		fmt.Printf("\t4: alert_card\n")
-		fmt.Printf("\t5: fetch_alerts\n")
+		fmt.Printf("\t5: alerts\n")
 
 		reader := bufio.NewReader(os.Stdin)
 		text, err := reader.ReadString('\n')
@@ -78,8 +78,16 @@ func main() {
 		}
 
 		if text == "5" {
-			alerts := araalictl.GetAlerts("", "", "")
-			fmt.Printf("Fetched %d alerts.\n", len(alerts))
+			alertPage := araalictl.GetAlerts("", "", "", 25)
+			fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+			for {
+				if !alertPage.HasNext() {
+					fmt.Println("Done fetching!")
+					break
+				}
+				alertPage.NextPage()
+				fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+			}
 		}
 	}
 
