@@ -57,57 +57,79 @@ def server_stats(runlink, all=False, only_new=False):
         if a.type != "NAE": continue
         server = a.server.to_data().get("subnet", None)
         if server:
-            pattern_dict[server] = pattern_dict.get(server, 0) + 1
+            eg = a.server.to_data().get("endpoint_group", "")
+            pattern_dict[(server, eg)] = pattern_dict.get((server, eg), 0) + 1
     keys = list(pattern_dict.keys())
     keys.sort(key=lambda x: -pattern_dict[x])
     out = []
     count = 0
-    for k in keys:
-        out.append({"server": k, "count": pattern_dict[k]})
-        count += pattern_dict[k]
+    for k,eg in keys:
+        out.append({"server": k, "country": eg, "count": pattern_dict[(k, eg)]})
+        count += pattern_dict[(k,eg)]
     print("Total %s" % count)
     return out
 
 
 def dns_stats(runlink, all=False, only_new=False):
     pattern_dict = {}
+    pattern_dict_dns = {}
     for a in runlink:
         if not all and a.state == "DEFINED_POLICY": continue
         if only_new and a.new_state is not None: continue
         if a.type != "NAE": continue
+        tld = a.server.to_data().get("endpoint_group", "")
         for p in a.server.to_data().get("dns_pattern", "").split(":"):
             if not p or p in [".*"]: continue
-            pattern_dict[p] = pattern_dict.get(p, 0) + 1
+            pattern_dict[tld] = pattern_dict.get(tld, 0) + 1
+            pattern_dict_dns.setdefault(tld, set()).add(p)
     keys = list(pattern_dict.keys())
     keys.sort(key=lambda x: -pattern_dict[x])
     out = []
     count = 0
-    for k in keys:
-        out.append({"dns": k, "count": pattern_dict[k]})
-        count += pattern_dict[k]
+    for tld in keys:
+        out.append({"tld": tld, "dns": pattern_dict_dns[tld], "count": pattern_dict[tld]})
+        count += pattern_dict[tld]
     print("Total %s" % count)
     return out
 
-
 def process_stats(runlink, all=False, only_new=False):
-    pattern_dict = {}
+    world_set = set()
+    internal_set = set()
+    araali_set = set()
+    cdict = {}
+    sdict = {}
     for a in runlink:
         if not all and a.state == "DEFINED_POLICY": continue
         if only_new and a.new_state is not None: continue
         process = a.client.to_data().get("process", None)
         if process:
-            process = process + ".client"
-            pattern_dict[process] = pattern_dict.get(process, 0) + 1
+            cdict[process] = cdict.get(process, 0) + 1
         process = a.server.to_data().get("process", None)
         if process:
-            process = process + ".server"
-            pattern_dict[process] = pattern_dict.get(process, 0) + 1
-    keys = list(pattern_dict.keys())
-    keys.sort(key=lambda x: -pattern_dict[x])
-    out = []
-    for k in keys:
-        out.append({"dns": k, "count": pattern_dict[k]})
-    return out
+            client = a.client.to_data()
+            if client.get("endpoint_group", "") == "__WORLD__":
+                world_set.add(process)
+            if client.get("endpoint_group", "") == "__HOME__":
+                internal_set.add(process)
+            if client.get("process", None) != None:
+                araali_set.add(process)
+            sdict[process] = sdict.get(process, 0) + 1
+    k = list(set(cdict.keys()) | set(sdict.keys()))
+    k.sort(key=lambda x: (-sdict.get(x, 0), -cdict.get(x, 0)))
+    items = []
+    for i in k:
+        indegree = sdict.get(i, 0)
+        outdegree = cdict.get(i, 0)
+        pcr = (indegree-outdegree)/(indegree + outdegree)
+        items.append({"process": i,
+                      "in degree": indegree,
+                      "out degree": outdegree,
+                      "pcr": pcr,
+                      "world exposed": i in world_set,
+                      "home exposed": i in internal_set,
+                      "araali exposed": i in araali_set,
+                      })
+    return items
 
 
 def services(runlink, all=False, only_new=False):
@@ -174,7 +196,6 @@ class Service(object):
     def enforce(self, enforcement_state):
         self.enforcement_state = enforcement_state
 
-
 class Process(object):
     def __init__(self, data):
         self.zone = data["zone"]
@@ -184,7 +205,7 @@ class Process(object):
         self.parent_process = data.get("parent_process", None)
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
     def to_data(self):
         if self.zone:
@@ -227,7 +248,7 @@ class NonAraaliClient(object):
         self.endpoint_group = data.get("endpoint_group", "")
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
     def change(self, what, to):
         orig_str = "orig_%s" % what
@@ -267,7 +288,7 @@ class NonAraaliServer(object):
         self.endpoint_group = data.get("endpoint_group", "")
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
     def change(self, what, to):
         orig_str = "orig_%s" % what
@@ -397,7 +418,7 @@ class Table(object):
     def __repr__(self):
         if Table.in_notebook:
             return ""
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
 
 class LinkTable(Table):
@@ -758,7 +779,7 @@ class MpTest:
             self.server.to_lib(zone, app)
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
 
 class Runtime(object):
@@ -852,6 +873,20 @@ class Runtime(object):
         if not runlink: runlink = self.iterlinks()
         return services(runlink, all, only_new)
 
+    def find_process(self, pname):
+        zadict = {}
+        for l in self.iterlinks():
+            c = l.client
+            if c.process and c.process == pname:
+                zadict[(c.zone, c.app)] = zadict.get((c.zone, c.app), 0) + 1
+            s = l.server
+            if s.process and s.process == pname:
+                zadict[(s.zone, s.app)] = zadict.get((s.zone, s.app), 0) + 1
+        k = list(zadict.keys())
+        k.sort(key=lambda x: -zadict[x])
+        for i in k:
+            yield {"zone": i[0], "app": i[1], "count": zadict[i]}
+
     def review(self, data=False):
         for z in self.iterzones():
             for l in z.review(data):
@@ -885,7 +920,7 @@ class Runtime(object):
         return [z.to_data() for z in self.iterzones()]
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
 
 
 class Zone(object):
@@ -952,7 +987,7 @@ class Zone(object):
         return [a.to_data() for a in self.iterapps()]
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
             
 
 class App(object):
@@ -1103,4 +1138,4 @@ class App(object):
             link.to_lib(zone, app)
 
     def __repr__(self):
-        return json.dumps(self.to_data())
+        return json.dumps(self.to_data(), indent=2)
