@@ -606,6 +606,13 @@ class LinkTable(Table):
             self.links[i].snooze()
         return self
 
+    def deny(self, *args):
+        if not args:
+            args = range(len(self.links))
+        for i in args:
+            self.links[i].deny()
+        return self
+
     def dns_stats(self, all=False, only_new=False):
         runlink = self.links
         return dns_stats(runlink, all, only_new)
@@ -679,6 +686,9 @@ class Link(object):
         obj["count"] = count
         flows = araalictl.fetch_flows(obj)
         return Paginator(obj, flows)
+
+    def deny(self):
+        self.new_state = "DENIED_POLICY"
 
     def meta_policy(self):
         if self.type == "NAI":
@@ -924,6 +934,11 @@ class Runtime(object):
         for a in self.iterzones():
             a.snooze()
         return self
+
+    def deny(self):
+        for a in self.iterzones():
+            a.deny()
+        return self
  
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
         for z in self.iterzones():
@@ -995,6 +1010,11 @@ class Zone(object):
     def snooze(self):
         for app in self.iterapps():
             app.snooze()
+        return self
+
+    def deny(self):
+        for app in self.iterapps():
+            app.deny()
         return self
  
     def to_data(self):
@@ -1099,6 +1119,11 @@ class App(object):
     def snooze(self):
         for link in self.iterlinks():
             link.snooze()
+        return self
+
+    def deny(self):
+        for link in self.iterlinks(afilter=True):
+            link.deny()
         return self
 
     def enforce(self, egress=False, ingress=False, internal=False):
