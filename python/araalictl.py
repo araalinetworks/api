@@ -117,6 +117,58 @@ def get_links(zone, app, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def get_fogs(tenant=None):
+    """Get all fogs"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("./araalictl api -fetch-fogs %s" % (
+        tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return json.loads(rc[1])
+
+def get_agents(tenant=None):
+    """Get all agents"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    for fog in get_fogs(tenant):
+        rc = run_command("./araalictl api -fetch-agents -agentid %s %s" % (
+            fog, tstr), result=True, strip=False)
+        assert rc[0] == 0, rc[1]
+        obj = json.loads(rc[1])
+        for o in obj:
+            yield {"agent": o, "fog": fog}
+
+def get_apps(tenant=None):
+    """Get all apps"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    for agent in get_agents(tenant):
+        if agent["agent"][:len("ak8s.")] == "ak8s.": continue
+        if agent["agent"] in ["invalid", "Unknown"]: continue
+        rc = run_command("./araalictl api -fetch-apps -agentid %s -fogid %s %s" % (
+            agent["agent"], agent["fog"], tstr), result=True, strip=False)
+        if rc[0] != 0:
+            print("*** %s: %s" % (agent["agent"], rc[1]))
+            continue
+        obj = json.loads(rc[1])
+        for o in obj["apps"]:
+            yield {"agent": agent["agent"], "fog": agent["fog"], "zone": obj["zone"], "app": o}
+
+def ping(zone, app, dst, port, agent_id, tenant=None):
+    """ping dst from src"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("./araalictl api -ping=src=%s/%s,dst=%s:%s -agentid %s %s" % (
+            zone, app, dst, port, agent_id, tstr), result=True, strip=False)
+    if rc[1].decode().strip() == "open":
+        return True
+    print("*** z=%s a=%s dst=%s port=%s agent=%s tenant=%s rc=%s" % (zone, app, dst, port, agent_id, tenant, rc))
+    return False
+
+def get_compute(zone, app, tenant=None):
+    """Get compute for a zone and app"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("./araalictl api -zone %s -app %s -fetch-compute %s" % (
+        zone, app, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return json.loads(rc[1])
+
 
 def enforce(data, service=False, tenant=None):
     """Enforce zone app or service."""
