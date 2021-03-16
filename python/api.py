@@ -542,6 +542,10 @@ class LinkTable(Table):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
 
         @classmethod
+        def inactive_open_ports(cls, r):
+            return len(r.get("inactive_ports", [])) > 0
+
+        @classmethod
         def same_pod(cls, r):
             c = r.get("client", {}).get('app', None)
             s = r.get("server", {}).get('app', None)
@@ -653,6 +657,8 @@ class Link(object):
         self.state = data["state"]
         self.timestamp = data["timestamp"]
         self.unique_id = data["unique_id"]
+        self.active_ports = data.get("active_ports", [])
+        self.inactive_ports = data.get("inactive_ports", [])
         self.new_state = None
         self.rollup_ids = data.get("rollup_ids", [])
 
@@ -665,7 +671,11 @@ class Link(object):
         obj["state"] = self.state                                              
         obj["timestamp"] = self.timestamp                                       
         obj["unique_id"] = self.unique_id                                        
-        obj["new_state"] = self.new_state                                        
+        obj["new_state"] = self.new_state
+        if len(self.active_ports) > 0:
+            obj["active_ports"] = self.active_ports
+        if len(self.inactive_ports) > 0:
+            obj["inactive_ports"] = self.inactive_ports
         if hasattr(self, "policy"):
             obj["meta_policy"] = self.policy
         return obj 
