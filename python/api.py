@@ -672,10 +672,8 @@ class Link(object):
         obj["timestamp"] = self.timestamp                                       
         obj["unique_id"] = self.unique_id                                        
         obj["new_state"] = self.new_state
-        if len(self.active_ports) > 0:
-            obj["active_ports"] = self.active_ports
-        if len(self.inactive_ports) > 0:
-            obj["inactive_ports"] = self.inactive_ports
+        obj["active_ports"] = self.active_ports
+        obj["inactive_ports"] = self.inactive_ports
         if hasattr(self, "policy"):
             obj["meta_policy"] = self.policy
         return obj 
