@@ -287,6 +287,7 @@ class NonAraaliServer(object):
             self.netmask = data.get("netmask", 0)
             self.private_subnet = data.get("private_subnet", False)
         self.endpoint_group = data.get("endpoint_group", "")
+        self.organization = data.get("organization", "")
 
     def __repr__(self):
         return json.dumps(self.to_data(), indent=2)
@@ -305,9 +306,9 @@ class NonAraaliServer(object):
 
     def to_data(self):
         if self.dns_pattern:                                                    
-            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
+            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group, "organization": self.organization}
         else:                                                                   
-            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
+            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group, "organization": self.organization}
 
         for attr in dir(self):
             if "orig_" == attr[:len("orig_")]:
