@@ -189,5 +189,17 @@ def enforce(data, service=False, tenant=None):
     return ret_val
 
 
+def fetch_flows(data, tenant=None):
+    """Update actions on a link"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+
+    if g_debug: print(yaml.dump(data))
+    print(yaml.dump(data))
+    rc = run_command("./araalictl api -fetch-flows %s" % (tstr),
+                     in_text=yaml.dump(data), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+
 if __name__ == '__main__':
     sys.exit(fetch())
