@@ -2,6 +2,7 @@ import copy
 import ipaddress
 import json
 import re
+import time
 import yaml
 
 try:
@@ -635,6 +636,7 @@ class LinkTable(Table):
 f = LinkTable.Filter
 mpr = MetaPolicyRunner()
 
+
 class Link(object):
     def __init__(self, data, zone, app):
         self.client = (Process if "zone" in data["client"] else NonAraaliClient)(data["client"])
@@ -645,6 +647,7 @@ class Link(object):
         self.timestamp = data["timestamp"]
         self.unique_id = data["unique_id"]
         self.new_state = None
+        self.rollup_ids = data.get("rollup_ids", [])
 
     def to_data(self):                                                          
         obj = {}                                                                
@@ -665,6 +668,17 @@ class Link(object):
 
     def snooze(self):
         self.new_state = "SNOOZED_POLICY"
+
+    def zoom(self, count=10, client_only=False, server_only=False):
+        if len(self.rollup_ids) == 0:
+            raise("Rollup ids are not available.")
+        obj = {}
+        obj["start_time"] = self.timestamp - 600000   # rollup time - 1 minute
+        obj["end_time"] = self.timestamp + 300000    # rollup time + 5 minute
+        obj["rollup_ids"] = self.rollup_ids
+        obj["count"] = count
+        flows = araalictl.fetch_flows(obj)
+        return Paginator(obj, flows)
 
     def meta_policy(self):
         if self.type == "NAI":
@@ -1139,3 +1153,28 @@ class App(object):
 
     def __repr__(self):
         return json.dumps(self.to_data(), indent=2)
+
+
+class Paginator(object):
+    def __init__(self, query_params={}, links = [], tenant=None):
+        self.query_params = query_params
+        self.links = links
+        self.tenant = tenant
+        if len(links) > 0:
+            if links[-1].get("pagination_token", None):
+                self.query_params["pagination_token"] = links[-1]["pagination_token"]
+
+    def has_next(self):
+        if self.query_params.get("pagination_token", None):
+            return True
+        return False
+
+    def next_page(self):
+        links = araalictl.fetch_flows(self.query_params, self.tenant)
+        self.links = links
+        if len(links) > 0:
+            if links[-1].get("pagination_token", None):
+                self.query_params["pagination_token"] = links[-1]["pagination_token"]
+            else:
+                self.query_params["pagination_token"] = None
+        return links
