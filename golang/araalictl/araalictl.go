@@ -25,6 +25,9 @@ func FileExists(filename string) bool {
 	return true
 }
 
+// Araalictl path
+var ActlPath = "/opt/araali/bin/araalictl"
+
 // CommandDebug - logs every command that is executed
 var CommandDebug = false
 
@@ -101,6 +104,7 @@ type App struct {
 	AlertCounts   AlertCount   `yaml:"alert,omitempty"`
 	ServiceCounts ServiceCount `yaml:"service,omitempty"`
 	ComputeCounts ComputeCount `yaml:"compute,omitempty"`
+	AraaliUrl     string       `yaml:"araali_url,omitempty"`
 }
 
 type AlertCount struct {
@@ -177,13 +181,13 @@ type AlertInfo struct {
 
 // TenantCreate - to create a tenant
 func TenantCreate(tenantID, userEmail, tenantName, UserName string) {
-	RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
-		tenantID, tenantName, userEmail, UserName))
+	RunCmd(fmt.Sprintf("%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
+		ActlPath, tenantID, tenantName, userEmail, UserName))
 }
 
 // TenantDelete - to delete a tenant
 func TenantDelete(tenantID string) {
-	RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl tenant -op=del -id=%s", tenantID))
+	RunCmd(fmt.Sprintf("%s tenant -op=del -id=%s", ActlPath, tenantID))
 }
 
 // GetZones - return zones and apps, use tenant="" by default
@@ -201,7 +205,7 @@ func GetZones(full bool, tenant string) []Zone {
 		return ""
 	}()
 
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-zone-apps %s %s", fullStr, tenantStr))
+	output := RunCmd(fmt.Sprintf("%s api -fetch-zone-apps %s %s", ActlPath, fullStr, tenantStr))
 	listOfZones := []Zone{}
 	yaml.Unmarshal([]byte(output), &listOfZones)
 	return listOfZones
@@ -215,7 +219,7 @@ func GetLinks(zone, app, tenant string) []Link {
 		}
 		return "-tenant=" + tenant
 	}()
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -zone %s -app %s -fetch-links %s", zone, app, tenantStr))
+	output := RunCmd(fmt.Sprintf("%s api -zone %s -app %s -fetch-links %s", ActlPath, zone, app, tenantStr))
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 	return listOfLinks
@@ -231,17 +235,15 @@ func FortifyK8sCluster(tenant, clusterName string) {
 	}()
 
 	if clusterName == "" {
-		RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl fortify-k8s %s %s",
-			tenantStr, clusterName))
+		RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
 	} else {
-		RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl fortify-k8s %s",
-			tenantStr))
+		RunCmd(fmt.Sprintf("%s fortify-k8s %s", ActlPath, tenantStr))
 	}
 }
 
 // GetJWT - returns a araali web ui access jwt
 func GetJWT(email string) string {
-	return RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl token -jwt %s", email))
+	return RunCmd(fmt.Sprintf("%s token -jwt %s", ActlPath, email))
 }
 
 // AlertPage
@@ -262,7 +264,7 @@ func (alertPage *AlertPage) NextPage() []Link {
 	if alertPage.PagingToken == "" {
 		panic("Next page doesn't exist.")
 	}
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s -paging-token %s", alertPage.options, alertPage.PagingToken))
+	output := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s -paging-token %s", ActlPath, alertPage.options, alertPage.PagingToken))
 
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
@@ -280,7 +282,7 @@ func GetAlertCard(tenant string) AlertCard {
 		}
 		return "-tenant=" + tenant
 	}()
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alert-card %s", tenantStr))
+	output := RunCmd(fmt.Sprintf("%s api -fetch-alert-card %s", ActlPath, tenantStr))
 	alertCard := AlertCard{}
 	yaml.Unmarshal([]byte(output), &alertCard)
 	return alertCard
@@ -334,7 +336,7 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
 		return fmt.Sprint("-endtime=", endTime)
 	}()
 
-	output := RunCmd(fmt.Sprintf("/opt/araali/bin/araalictl api -fetch-alerts %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr))
+	output := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, tenantStr, startTimeStr, endTimeStr, countStr))
 
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
