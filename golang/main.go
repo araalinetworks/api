@@ -74,6 +74,8 @@ func main() {
 		}
 
 		if text == "4" {
+			// We can modify araalictl path as below.
+			// araalictl.ActlPath = "/Users/home/araalictl"
 			alertCard := araalictl.GetAlertCard("")
 			fmt.Printf("%v\n", alertCard)
 		}
