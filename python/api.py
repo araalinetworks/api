@@ -287,6 +287,7 @@ class NonAraaliServer(object):
             self.netmask = data.get("netmask", 0)
             self.private_subnet = data.get("private_subnet", False)
         self.endpoint_group = data.get("endpoint_group", "")
+        self.organization = data.get("organization", "")
 
     def __repr__(self):
         return json.dumps(self.to_data(), indent=2)
@@ -305,9 +306,9 @@ class NonAraaliServer(object):
 
     def to_data(self):
         if self.dns_pattern:                                                    
-            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
+            obj = {"dns_pattern": self.dns_pattern, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group, "organization": self.organization}
         else:                                                                   
-            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group}
+            obj = {"subnet": str(self.subnet), "netmask": self.netmask, "dst_port": self.dst_port, "endpoint_group": self.endpoint_group, "organization": self.organization}
 
         for attr in dir(self):
             if "orig_" == attr[:len("orig_")]:
@@ -542,6 +543,10 @@ class LinkTable(Table):
             return r.get("client", {}).get("zone", None) == r.get("server", {}).get("zone", None)
 
         @classmethod
+        def inactive_open_ports(cls, r):
+            return len(r.get("inactive_ports", [])) > 0
+
+        @classmethod
         def same_pod(cls, r):
             c = r.get("client", {}).get('app', None)
             s = r.get("server", {}).get('app', None)
@@ -606,6 +611,13 @@ class LinkTable(Table):
             self.links[i].snooze()
         return self
 
+    def deny(self, *args):
+        if not args:
+            args = range(len(self.links))
+        for i in args:
+            self.links[i].deny()
+        return self
+
     def dns_stats(self, all=False, only_new=False):
         runlink = self.links
         return dns_stats(runlink, all, only_new)
@@ -646,6 +658,8 @@ class Link(object):
         self.state = data["state"]
         self.timestamp = data["timestamp"]
         self.unique_id = data["unique_id"]
+        self.active_ports = data.get("active_ports", [])
+        self.inactive_ports = data.get("inactive_ports", [])
         self.new_state = None
         self.rollup_ids = data.get("rollup_ids", [])
 
@@ -658,7 +672,9 @@ class Link(object):
         obj["state"] = self.state                                              
         obj["timestamp"] = self.timestamp                                       
         obj["unique_id"] = self.unique_id                                        
-        obj["new_state"] = self.new_state                                        
+        obj["new_state"] = self.new_state
+        obj["active_ports"] = self.active_ports
+        obj["inactive_ports"] = self.inactive_ports
         if hasattr(self, "policy"):
             obj["meta_policy"] = self.policy
         return obj 
@@ -679,6 +695,9 @@ class Link(object):
         obj["count"] = count
         flows = araalictl.fetch_flows(obj)
         return Paginator(obj, flows)
+
+    def deny(self):
+        self.new_state = "DENIED_POLICY"
 
     def meta_policy(self):
         if self.type == "NAI":
@@ -924,6 +943,11 @@ class Runtime(object):
         for a in self.iterzones():
             a.snooze()
         return self
+
+    def deny(self):
+        for a in self.iterzones():
+            a.deny()
+        return self
  
     def iterlinks(self, lfilter=None, pfilter=None, cfilter=False, afilter=False, dfilter=False, data=False):
         for z in self.iterzones():
@@ -995,6 +1019,11 @@ class Zone(object):
     def snooze(self):
         for app in self.iterapps():
             app.snooze()
+        return self
+
+    def deny(self):
+        for app in self.iterapps():
+            app.deny()
         return self
  
     def to_data(self):
@@ -1099,6 +1128,11 @@ class App(object):
     def snooze(self):
         for link in self.iterlinks():
             link.snooze()
+        return self
+
+    def deny(self):
+        for link in self.iterlinks(afilter=True):
+            link.deny()
         return self
 
     def enforce(self, egress=False, ingress=False, internal=False):

@@ -88,7 +88,7 @@ def update_links(zone, app, data, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     ret_val = {}
     for link in data:
-        if link["new_state"] == "DEFINED_POLICY":
+        if link["new_state"] == "DEFINED_POLICY" or link["new_state"] == "DENIED_POLICY":
             ret_val["policies"] = ret_val.get("policies", 0) + 1
             if link["state"] == "BASELINE_ALERT":
                 ret_val["alerts"] = ret_val.get("alerts", 0) + 1
