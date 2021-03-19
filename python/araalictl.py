@@ -194,7 +194,6 @@ def fetch_flows(data, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
 
     if g_debug: print(yaml.dump(data))
-    print(yaml.dump(data))
     rc = run_command("./araalictl api -fetch-flows %s" % (tstr),
                      in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]

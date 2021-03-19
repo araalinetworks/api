@@ -1170,11 +1170,11 @@ class Paginator(object):
         return False
 
     def next_page(self):
-        self.links = araalictl.fetch_flows(self.query_params, self.tenant)
-        if len(self.links) > 0:
-            if self.links[-1].get("pagination_token", None):
-                self.query_params["pagination_token"] = self.links[-1]["pagination_token"]
+        links = araalictl.fetch_flows(self.query_params, self.tenant)
+        self.links = links
+        if len(links) > 0:
+            if links[-1].get("pagination_token", None):
+                self.query_params["pagination_token"] = links[-1]["pagination_token"]
             else:
                 self.query_params["pagination_token"] = None
-
-
+        return links
