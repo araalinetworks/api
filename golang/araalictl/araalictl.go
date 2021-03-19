@@ -104,6 +104,7 @@ type App struct {
 	AlertCounts   AlertCount   `yaml:"alert,omitempty"`
 	ServiceCounts ServiceCount `yaml:"service,omitempty"`
 	ComputeCounts ComputeCount `yaml:"compute,omitempty"`
+	AraaliUrl     string       `yaml:"araali_url,omitempty"`
 }
 
 type AlertCount struct {
