@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'api'
+project = u'Araali Networks API'
 copyright = u'2021, Abhishek R. Singh'
 author = u'Abhishek R. Singh'
 
@@ -102,7 +102,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'apidoc'
+htmlhelp_basename = 'AraaliNetworksAPIdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -129,7 +129,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'api.tex', u'api Documentation',
+    (master_doc, 'AraaliNetworksAPI.tex', u'Araali Networks API Documentation',
      u'Abhishek R. Singh', 'manual'),
 ]
 
@@ -139,7 +139,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'api', u'api Documentation',
+    (master_doc, 'araalinetworksapi', u'Araali Networks API Documentation',
      [author], 1)
 ]
 
@@ -150,8 +150,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'api', u'api Documentation',
-     author, 'api', 'One line description of project.',
+    (master_doc, 'AraaliNetworksAPI', u'Araali Networks API Documentation',
+     author, 'AraaliNetworksAPI', 'One line description of project.',
      'Miscellaneous'),
 ]
 
