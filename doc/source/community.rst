@@ -2,4 +2,6 @@ Slack
 =====
 Our Slack is the main discussion space for the Araali Networks community.
 
-Send an email to support@araalinetworks.com to be added.
+Join our slack_.
+
+.. _slack: https://join.slack.com/t/araali/shared_invite/zt-o3yeo8us-GRa7qtz4p0kcIVIBaIxWbA
