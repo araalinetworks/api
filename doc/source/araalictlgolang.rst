@@ -1,3 +1,3 @@
-Golang API Guide
-================
+Golang API Doc
+==============
 Coming soon!

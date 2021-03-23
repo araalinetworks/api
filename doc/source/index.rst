@@ -33,6 +33,13 @@ So let the show begin!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Guides:
+   :hidden:
+
+   guide_getting_started_with_microk8s
+
+.. toctree::
+   :maxdepth: 2
    :caption: Community:
    :hidden:
 

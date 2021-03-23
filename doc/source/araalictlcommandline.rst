@@ -1,5 +1,5 @@
-Command Line Guide
-==================
+Command Line Doc
+================
 
 authorize
 ---------
