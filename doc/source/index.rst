@@ -11,6 +11,11 @@ Welcome to Araali Networks' API documentation!
    :caption: Contents:
 
    gettingstarted
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Community:
+
    community
 
 Indices and tables
