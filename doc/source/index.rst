@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Araali Networks' API documentation!
+Welcome to Araali Networks' API Documentation!
 ==============================================
 Araali Networks Community Edition is dedicated to the hardworking community of
 DevOps so as to imbibe a culture of continous monitoring and security to be an
