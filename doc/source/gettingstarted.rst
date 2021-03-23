@@ -133,10 +133,11 @@ single command and uninstall with a single command too.
 Make sure you have all apps that you want to test, installed on your cluster.
 If not, go ahead and install them.
 
-After running the tests, you can stop the assessment. Freemium allows you to
-run point-in-time assessments (vs continuous monitoring/security). So as long
-as your tests complete in a reasonable time, you should have a good picture of
-your application. You can run the assessments any number of times.
+After running the tests, you can stop the assessment. Community Edition allows
+you to run point-in-time assessments (vs continuous monitoring/security, which
+is our paid offering). So as long as your tests complete in a reasonable time,
+you should have a good picture of your application. You can run the assessments
+any number of times.
 
    ``./araalictl assessment -stop``
 
