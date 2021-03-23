@@ -5,10 +5,25 @@
 
 Welcome to Araali Networks' API documentation!
 ==============================================
+Araali Networks Community Edition is dedicated to the hardworking community of
+DevOps so as to imbibe a culture of continous monitoring and security to be an
+essential part of the job function. DevOps is about busting silos, and we are
+here to bust some more.
+
+We seek to make it easy and fun. We uplift the grammar of network security to
+make it meaningful for the DevOps audience.
+
+This has a tranformative effect on security because a airgap'ed environment is
+quite secure. What brings insecurity ought to fix it too. And that we do with
+zero trust - simplified to its essence, and democratized. Its rare for
+something to be simple, and yet uplift the security posture all at once.
+
+So let the show begin!
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :hidden:
 
    gettingstarted
    araalictlcommandline
@@ -19,6 +34,7 @@ Welcome to Araali Networks' API documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Community:
+   :hidden:
 
    community
 

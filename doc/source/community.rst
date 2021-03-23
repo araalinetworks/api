@@ -6,6 +6,12 @@ Join our slack_.
 
 .. _slack: https://join.slack.com/t/araali/shared_invite/zt-o3yeo8us-GRa7qtz4p0kcIVIBaIxWbA
 
+Video
+=====
+Watch our videos.
+
+- `3-minute intro video <https://vimeo.com/517546362>`_
+
 Blog
 ====
 Read our blog_.
