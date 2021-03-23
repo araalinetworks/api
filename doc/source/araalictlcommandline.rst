@@ -14,7 +14,7 @@ sudo ./araalictl authorize
   -clean
     	clean up and logout
   -upgrade
-    	internal flag
+    	manually upgrade to latest, without re-authorizing
 
 assessment
 ----------
