@@ -11,6 +11,7 @@ Welcome to Araali Networks' API documentation!
    :caption: Contents:
 
    gettingstarted
+   community
 
 Indices and tables
 ==================
