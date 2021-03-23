@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'Araali Networks API'
-copyright = u'2021, Abhishek R. Singh'
+copyright = u'2021, Araali Networks Authors'
 author = u'Abhishek R. Singh'
 
 # The short X.Y version
