@@ -25,6 +25,7 @@ So let the show begin!
    :caption: Contents:
    :hidden:
 
+   introduction_to_araali_networks
    gettingstarted
    araalictlcommandline
    araalictlpython
@@ -37,6 +38,7 @@ So let the show begin!
    :hidden:
 
    guide_getting_started_with_microk8s
+   guide_getting_started_with_GKE
 
 .. toctree::
    :maxdepth: 2

@@ -1,6 +1,6 @@
-=================
-Getting Started
-=================
+============
+Installation
+============
 
 In this guide, we’ll walk you through how to install Araali software into your
 Kubernetes cluster and run point-in-time assessments. We have made it easy for
