@@ -1,19 +1,39 @@
-=========================
-Getting Started with GKE
-=========================
+=============================
+Getting Started with microk8s
+=============================
 
-Requirements
-*****************
+This is an end-to-end guide on how to test Araali on Canonical’s MicroK8s and use an opensource microservice app (sockshop).
 
-You should have access to a cluster on GKE and a functioning kubectl on your local machine.
+Installing MicroK8s
+*******************
 
-You can validate your kubectl by running:
+Start with an Ubuntu 18 VM to install microk8s
 
-   ``kubectl version --short``
+   ``sudo snap install microk8s --classic --channel=1.19``
 
-Check if kubectl is pointing to the cluster you want to assess.
 
-   ``kubectl get svc``
+Join the Group
+
+   ``sudo usermod -a -G microk8s $USER``
+   ``sudo chown -f -R $USER ~/.kube``
+
+Exit and log back to the VM
+
+Check if microk8s is up
+
+   ``microk8s status --wait-ready``
+
+Create a link/alias
+   ``sudo snap alias microk8s.kubectl mkctl``
+
+Now use mkctl like kubectl. 
+If you DONT want the alias then use “microk8s.kubectl” command similar to “kubectl"
+
+Enable the dns and ingress services
+
+   ``microk8s enable dns``
+
+   ``microk8s enable ingress``
 
 Install Araali and start the assessment
 ***************************************
@@ -23,42 +43,42 @@ Once Araalictl is set up, start the assessment
 
  ``./araalictl assessment -start``
 
-Setting up an app to test
-*************************
 
-Download the google-microservice-shopping app from GitHub
+Installing an Opensource App
+****************************
 
-   ``git clone https://github.com/GoogleCloudPlatform/microservices-demo.git``
+Download sock-shop from Github
 
-Go to the directory
-
-   ``cd microservices-demo/release``
+   ``git clone https://github.com/ashish234/sock-shop.git``
 
 Create a namespace
+   ``mkctl create ns sock-shop``
 
-   ``kubectl create ns gshop``
+Deploy the yaml file
 
-Run the file
+   ``mkctl apply -f sock-shop/sock-shop.yaml -n sock-shop``
 
-   ``kubectl apply -f kubernetes-manifests.yaml --namespace=gshop``
+Look into the services and mark the port for NodePort service “front-end”
 
-Get the IP for external service to log from a browser
+.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/sock-shop-getsvc.png
+ :width: 650
+ :alt: kubectl get svc -A
 
-   ``kubectl get svc -A``
+In this case its running on 30001
 
-FrontEnd
 
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/googleappfrontend.png
-  :width: 600
-  :alt: Google Shopping App Front End
+**Open a browser and type your VM’s IP:30001**
+
+
+.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/sockshop-front-end-ui.png
+ :width: 650
+ :alt: sock shop frontend UI
 
 
 Stop the assessment
 ***********************
 
 After running the tests, you can stop the assessment. 
-
    ``./araalictl assessment -stop``
 
 Freemium only allows you to run point-in-time assessments (vs continuous monitoring/security). So as long as your tests complete in a reasonable time, you should have a good picture of your application
-
