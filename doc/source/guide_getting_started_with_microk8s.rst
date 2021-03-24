@@ -4,7 +4,7 @@ Getting Started with microk8s
 
 This is an end-to-end guide on how to test Araali on Canonical’s MicroK8s and use an opensource microservice app (sockshop).
 
-Installing MicroK8s
+Install MicroK8s
 *******************
 
 Start with an Ubuntu 18 VM to install microk8s
@@ -44,7 +44,7 @@ Once Araalictl is set up, start the assessment
  ``./araalictl assessment -start``
 
 
-Installing an Opensource App
+Install an Opensource App
 ****************************
 
 Download sock-shop from Github
