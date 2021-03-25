@@ -31,6 +31,7 @@ So let the show begin!
    araalictlpython
    araalictlgolang
    araalictlnotebook
+   araaliprivacypolicy
 
 .. toctree::
    :maxdepth: 2
