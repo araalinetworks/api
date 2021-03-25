@@ -31,7 +31,7 @@ After the k8s cluster and nodes are created (either through CLI or console), the
  
    aws eks --region us-west-2 update-kubeconfig --name k8s-test-cluster
 
-This will add new context arn:aws:eks:us-west-2:693683647:cluster/k8s-test-cluster to /home/ec2-user/.kube/config
+This will add cluster information to kubectl config file generally sitting in /home/ec2-user/.kube/config
 
 Test if you have access to the cluster
 --------------------------------------
