@@ -9,8 +9,8 @@ you to **single-click install as well as uninstall Araali.**
 **Overview:** Installing Araali is simple. The first step is to create an
 account for using `Araali UI <https://console.araalinetworks.com>`_ . After
 that, download the “command-line tool,” araalictl onto your your machine from
-where you typically use kubectl. Authorize araalictl, run the assessment, and
-see the results on Araali UI.
+where you typically use kubectl. Authorize araalictl, start the assessment, install 
+the Software you want to assess, and see the results on the Araali UI.
 
 Requirements
 *****************
@@ -47,7 +47,7 @@ in the email from Araali Networks.
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraaliRegistrationEmail.png
   :width: 600
-  :alt: Alternative text
+  :alt: Registration Email
 
 Revert back to the original Araali UI browser tab, and you should now be in.
 
@@ -67,7 +67,7 @@ araalictl for your Linux or Mac machine.
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/araalictldownload.png
   :width: 650
-  :alt: Alternative text
+  :alt: Araalictl download from Araali UI
 
 **To curl araalictl directly to your VM,** run:
 
@@ -95,7 +95,7 @@ left-hand panel.
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraaliAuthn2.png
   :width: 600
-  :alt: Alternative text
+  :alt: Araali Authorization
 
 Click on the green button "Approve" and refresh the page.
 
@@ -104,7 +104,7 @@ could be used to revoke the araalictl
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraaliAuthn3.png
   :width: 600
-  :alt: Alternative text
+  :alt: Araali Authorization
 
 
 Step 4: Validate your Araalictl installation and Kubectl
@@ -130,8 +130,14 @@ single command and uninstall with a single command too.
 
    ``./araalictl assessment -start``
 
-Make sure you have all apps that you want to test, installed on your cluster.
-If not, go ahead and install them.
+Make sure Araali SW is up and running before you install the apps you want to test.
+
+.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/araaliupandrunning.png
+  :width: 650
+  :alt: Araali SW is up and running
+
+
+Install all the apps that you want to test on your cluster.
 
 After running the tests, you can stop the assessment. Community Edition allows
 you to run point-in-time assessments (vs continuous monitoring/security, which
@@ -151,7 +157,7 @@ used to authorize araalictl.
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/zoneview.png
   :width: 650
-  :alt: Alternative text
+  :alt: Araali Zone View
 
 Go to the zones page in the righthand sidebar, your cluster shows as “dev”.
 Click on the magnifying glass to go inside your cluster and review the
