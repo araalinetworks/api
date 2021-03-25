@@ -18,6 +18,12 @@ is quite secure. What brings insecurity ought to fix it too. And that we do
 with zero trust - simplified to its essence, and democratized. It's rare for
 something to be simple, and yet uplift the security posture all at once.
 
+Through our assessments, we hope you will find answers to the following questions:
+
+   - Where are my crown jewels?
+   - Who is accessing them?
+   - Are services accidentally overexposed to the public Internet?
+
 So let the show begin!
 
 .. toctree::
