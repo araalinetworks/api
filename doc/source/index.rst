@@ -40,6 +40,7 @@ So let the show begin!
 
    guide_getting_started_with_microk8s
    guide_getting_started_with_GKE
+   guide_getting_started_with_EKS
 
 .. toctree::
    :maxdepth: 2
