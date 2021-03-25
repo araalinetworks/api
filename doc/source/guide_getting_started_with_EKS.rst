@@ -84,9 +84,7 @@ FrontEnd
 Stop the assessment
 ***********************
 
-After running the tests, you can stop the assessment.
-
-::
+After running the tests, you can stop the assessment::
 
    ./araalictl assessment -stop
 
