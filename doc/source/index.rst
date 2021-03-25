@@ -28,7 +28,7 @@ So let the show begin!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Installation and usage:
    :hidden:
 
    introduction_to_araali_networks
