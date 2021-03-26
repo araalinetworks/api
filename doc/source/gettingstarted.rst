@@ -139,8 +139,9 @@ single command and uninstall with a single command too::
   :alt: Araalictl assessment -start
 
 
+It might take upto a minute for the araali daemonset to start, and "Waiting for Araali firewall to start" will show SUCCESS.
 
-Install all the apps that you want to test on your cluster.
+Now, install all the apps that you want to test on your cluster.
 
 After running the tests, you can stop the assessment. Community Edition allows
 you to run point-in-time assessments (vs continuous monitoring/security, which
