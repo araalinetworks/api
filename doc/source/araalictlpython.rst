@@ -2,6 +2,13 @@ Python API Doc
 ==============
 Setup
 -----
+.. function:: api.set_araalictl_path(new_path)
+
+   set the location of araalictl on this node.
+
+   :param new_path: araalictl path
+   :type new_path: string
+
 .. function:: api.auth(token)
 
    authorize araalictl for api use. This operation is idempotent and can be run
@@ -13,13 +20,6 @@ Setup
 .. function:: api.deauth()
 
    deauth araalictl from this node.
-
-.. function:: api.set_araalictl_path(new_path)
-
-   set the location of araalictl on this node.
-
-   :param new_path: araalictl path
-   :type new_path: string
 
 App
 ---
