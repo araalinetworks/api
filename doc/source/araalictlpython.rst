@@ -50,7 +50,7 @@ App
 
    .. function:: review()
 
-      Review edits made to links in the app. Links can be accepted or snoozed.
+      Review edits made to links in the app. Links can be accepted, denied or snoozed.
 
    .. function:: commit()
 
@@ -74,6 +74,13 @@ Link
       :noindex:
 
       Accept link as whitelisted policy.
+
+   .. function:: deny()
+      :noindex:
+
+      Deny link. A denied link is ignored. Alerts will be suppressed if more
+      flows are observed. Typically links are denied when we observe benign
+      connections and don't want to be bothered until they are taken care of.
 
    .. function:: snooze()
       :noindex:
@@ -112,6 +119,14 @@ LinkTable
    .. function:: accept(* args)
 
       Accept link by index number. If no index is provided, all links in the
+      table will be accepted.
+
+      :param args: Multiple indices can be passed
+      :type args: any number of int's
+
+   .. function:: deny(* args)
+
+      Deny link by index number. If no index is provided, all links in the
       table will be accepted.
 
       :param args: Multiple indices can be passed

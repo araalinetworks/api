@@ -32,7 +32,7 @@ var ActlPath = "/opt/araali/bin/araalictl"
 var CommandDebug = false
 
 // RunControlOut takes a command and runs it, control is for whether to exit, allows output to go to stdout
-func RunControlOut(cmdArgs []string, user string, exitOnFailure bool, out *bytes.Buffer) error {
+func RunControlOut(cmdArgs []string, user string, exitOnFailure bool, out *bytes.Buffer, in *bytes.Buffer) error {
 	if CommandDebug {
 		fmt.Println(cmdArgs, user, exitOnFailure)
 	}
@@ -40,20 +40,23 @@ func RunControlOut(cmdArgs []string, user string, exitOnFailure bool, out *bytes
 	cmd.Env = os.Environ()
 	if len(user) != 0 {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}
-		uids, _ := RunControl([]string{"id", "-u", user}, "", true)
+		uids, _ := RunControl([]string{"id", "-u", user}, "", true, "")
 		uid, _ := strconv.Atoi(strings.TrimSpace(uids))
-		gids, _ := RunControl([]string{"id", "-g", user}, "", true)
+		gids, _ := RunControl([]string{"id", "-g", user}, "", true, "")
 		gid, _ := strconv.Atoi(strings.TrimSpace(gids))
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid)}
 	}
 
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
 	if out != nil {
 		cmd.Stdout = out
 		//cmd.Stderr = out // comment to not capture stderr
-	} else {
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+	}
+	if in != nil {
+		cmd.Stdin = in
 	}
 
 	if err := cmd.Run(); err != nil {
@@ -68,29 +71,44 @@ func RunControlOut(cmdArgs []string, user string, exitOnFailure bool, out *bytes
 }
 
 // RunControl takes a command and runs it, control is for whether to exit
-func RunControl(cmdArgs []string, user string, exitOnFailure bool) (string, error) {
+func RunControl(cmdArgs []string, user string, exitOnFailure bool, pipeInput string) (string, error) {
 	var out bytes.Buffer
-	err := RunControlOut(cmdArgs, user, exitOnFailure, &out)
-	if err == nil {
-		return out.String(), nil
+
+	if pipeInput != "" {
+		in := bytes.Buffer{}
+		in.Write([]byte(pipeInput))
+		err := RunControlOut(cmdArgs, user, exitOnFailure, &out, &in)
+		if err == nil {
+			return out.String(), nil
+		}
+		return "", err
+	} else {
+		err := RunControlOut(cmdArgs, user, exitOnFailure, &out, nil)
+		if err == nil {
+			return out.String(), nil
+		}
+		return "", err
 	}
-	return "", err
 }
 
 // RunStrControl takes a command string and runs it, control is for whether to exit
-func RunStrControl(cmdstr, user string, exitOnFailure bool) (string, error) {
-	return RunControl([]string{"sh", "-c", cmdstr}, user, exitOnFailure)
+func RunStrControl(cmdstr, user string, exitOnFailure bool, pipeInput string) (string, error) {
+	return RunControl([]string{"sh", "-c", cmdstr}, user, exitOnFailure, pipeInput)
 }
 
 // RunAs - Run cmdstr as user
-func RunAs(cmdstr, user string) string {
-	ret, _ := RunStrControl(cmdstr, user, true)
+func RunAs(cmdstr, user string, pipeInput string) string {
+	ret, _ := RunStrControl(cmdstr, user, true, pipeInput)
 	return ret
 }
 
 // RunCmd - Run cmdstr and collect/return output
 func RunCmd(cmdstr string) string {
-	return RunAs(cmdstr, "")
+	return RunAs(cmdstr, "", "")
+}
+
+func RunCmdWithInput(cmdstr string, pipeInput string) string {
+	return RunAs(cmdstr, "", pipeInput)
 }
 
 type Zone struct {
@@ -99,6 +117,7 @@ type Zone struct {
 }
 
 type App struct {
+	ZoneName      string
 	AppName       string          `yaml:"app_name"`
 	Links         []Link          `yaml:"links,omitempty"`
 	DefinedCounts DirectionCounts `yaml:"defined_policies,omitempty"`
@@ -106,6 +125,21 @@ type App struct {
 	ServiceCounts DirectionCounts `yaml:"services,omitempty"`
 	ComputeCounts ComputeCount    `yaml:"compute,omitempty"`
 	AraaliUrl     string          `yaml:"araali_url,omitempty"`
+}
+
+func (app *App) Refresh() {
+	app.Links = GetLinks(app.ZoneName, app.AppName, "")
+}
+
+func (app *App) Commit() string {
+	links := []Link{}
+	for _, l := range app.Links {
+		if l.NewState != "" {
+			links = append(links, l)
+		}
+	}
+	output := UpdateLinks(app.ZoneName, app.AppName, "", links)
+	return output
 }
 
 type DirectionCounts struct {
@@ -165,10 +199,39 @@ type Link struct {
 	AlertInfo   AlertInfo `yaml:"alert_info,omitempty"`
 }
 
+func (link *Link) Accept() {
+	link.NewState = "DEFINED_POLICY"
+}
+
+func (link *Link) Snooze() {
+	link.NewState = "SNOOZED_POLICY"
+}
+
+func (link *Link) Deny() {
+	link.NewState = "DENIED_POLICY"
+}
+
 // AlertInfo object
 type AlertInfo struct {
 	CommunicationAlertType string `yaml:"communication_alert_type,omitempty"`
 	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
+}
+
+// Reset araalictl path to new value
+func SetAraalictlPath(newPath string) {
+	ActlPath = newPath
+}
+
+// Authorize araalictl
+func Authorize(token string) {
+	output := RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
+	fmt.Println(output)
+}
+
+// DeAuthorize araalictl
+func DeAuthorize() {
+	output := RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
+	fmt.Println(output)
 }
 
 // TenantCreate - to create a tenant
@@ -215,6 +278,21 @@ func GetLinks(zone, app, tenant string) []Link {
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 	return listOfLinks
+}
+
+// UpdateLinks - update links for an app
+func UpdateLinks(zone, app, tenant string, links []Link) string {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	input, _ := yaml.Marshal(links)
+	fmt.Println("Running update links...")
+	fmt.Println(string(input))
+	output := RunCmdWithInput(fmt.Sprintf("%s api -zone %s -app %s -update-links %s", ActlPath, zone, app, tenantStr), string(input))
+	return output
 }
 
 // FortifyK8sCluster - for tenant
