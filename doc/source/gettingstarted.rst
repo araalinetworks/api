@@ -90,6 +90,10 @@ Authorize your session::
 
    sudo ./araalictl authorize
 
+.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
+  :width: 650
+  :alt: Araalictl authorize
+
 Now, go to Araali UI and Navigate to Araali Tools, under Administration on the
 left-hand panel.
 
@@ -97,7 +101,7 @@ left-hand panel.
   :width: 600
   :alt: Araali Authorization
 
-Click on the green button "Approve" and refresh the page.
+Click on the "refresh" button if you don't see "Approve" and click to approve araalictl. Also, the session-id listed on your araalictl will match the session-id shown in the UI.
 
 The "Approve" button should go away and you will see the "Revoke" button which
 could be used to revoke the araalictl
@@ -130,11 +134,10 @@ single command and uninstall with a single command too::
 
    ./araalictl assessment -start
 
-Make sure Araali SW is up and running before you install the apps you want to test.
-
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/araaliupandrunning.png
+.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAssess-start.png
   :width: 650
-  :alt: Araali SW is up and running
+  :alt: Araalictl assessment -start
+
 
 
 Install all the apps that you want to test on your cluster.
@@ -162,4 +165,3 @@ used to authorize araalictl.
 Go to the zones page in the righthand sidebar, your cluster shows as “dev”.
 Click on the magnifying glass to go inside your cluster and review the
 assessment results as well as a snapshot of your Kubernetes networking.
-
