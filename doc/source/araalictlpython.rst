@@ -1,5 +1,26 @@
 Python API Doc
 ==============
+Setup
+-----
+.. function:: authorize(token)
+
+   authorize araalictl for api use. This operation is idempotent and can be run
+   multiple times without any side effect App.
+
+   :param token: token is generated from a manually authenticated araalictl
+   :type token: string
+
+.. function:: deauth()
+
+   deauth araalictl from this node.
+
+.. function:: set_araalictl_path(new_path)
+
+   set the location of araalictl on this node.
+
+   :param new_path: araalictl path
+   :type new_path: string
+
 App
 ---
 .. class:: api.App
