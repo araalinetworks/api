@@ -57,9 +57,15 @@ Link
    denied links help with ignoring alerts until taken care of while snoozed links 
    will appear again if new flows are observed.
 
-   Usage:
+   Usage::
 
       app.Links[0].Accept()
+
+      // or,
+      app.Links[0].Snooze()
+
+      // or,
+      app.Links[0].Deny()
 
    .. function:: Accept()
       :noindex:
