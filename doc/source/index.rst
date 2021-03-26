@@ -16,7 +16,8 @@ make it meaningful for the DevOps audience.
 This has a transformative effect on security because an air-gapped environment
 is quite secure. What brings insecurity ought to fix it too. And that we do
 with zero trust - simplified to its essence, and democratized. It's rare for
-something to be simple, and yet uplift the security posture all at once.
+something to be simple, and yet uplift the security posture all at once. And on
+top of it make a promise of no harm.
 
 Through our assessments, we hope you will find answers to the following questions:
 
