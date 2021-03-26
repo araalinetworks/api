@@ -28,7 +28,7 @@ App
 
    A struct representing an application
 
-   Usage:
+   Usage::
 
         app := araalictl.App{ZoneName: "nightly", AppName: "bendvm"}
         app.Refresh()
@@ -66,13 +66,6 @@ Link
 
       Accept link as whitelisted policy.
 
-   .. function:: Deny()
-      :noindex:
-
-      Deny link. A denied link is snoozed forever. You not only want to not
-      accept it, but you dont even want to snooze because you are aware of it
-      and dont want to accept it, ever!
-
    .. function:: Snooze()
       :noindex:
 
@@ -80,3 +73,10 @@ Link
       flow is observed. Typically links are snoozed when the underlying problem
       is addressed. It is snoozed so that there is notification on subsequent
       occurance.
+
+   .. function:: Deny()
+      :noindex:
+
+      Deny link. A denied link is snoozed forever. You not only want to not
+      accept it, but you dont even want to snooze because you are aware of it
+      and dont want to accept it, ever!
