@@ -99,30 +99,22 @@ type Zone struct {
 }
 
 type App struct {
-	AppName       string       `yaml:"app_name"`
-	Links         []Link       `yaml:"links,omitempty"`
-	AlertCounts   AlertCount   `yaml:"alert,omitempty"`
-	ServiceCounts ServiceCount `yaml:"service,omitempty"`
-	ComputeCounts ComputeCount `yaml:"compute,omitempty"`
-	AraaliUrl     string       `yaml:"araali_url,omitempty"`
+	AppName       string          `yaml:"app_name"`
+	Links         []Link          `yaml:"links,omitempty"`
+	DefinedCounts DirectionCounts `yaml:"defined_policies,omitempty"`
+	AlertCounts   DirectionCounts `yaml:"alerts,omitempty"`
+	ServiceCounts DirectionCounts `yaml:"services,omitempty"`
+	ComputeCounts ComputeCount    `yaml:"compute,omitempty"`
+	AraaliUrl     string          `yaml:"araali_url,omitempty"`
 }
 
-type AlertCount struct {
-	TotalAlerts            uint64 `yaml:"total_alerts,omitempty"`
-	IngressAlerts          uint64 `yaml:"ingress_alerts,omitempty"`
-	PerimeterIngressAlerts uint64 `yaml:"perimeter_ingress_alerts,omitempty"`
-	InternalAlerts         uint64 `yaml:"internal_alerts,omitempty"`
-	EgressAlerts           uint64 `yaml:"egress_alerts,omitempty"`
-	PerimeterEgressAlerts  uint64 `yaml:"perimeter_egress_alerts,omitempty"`
-}
-
-type ServiceCount struct {
-	TotalServices            uint64 `yaml:"total_services,omitempty"`
-	IngressServices          uint64 `yaml:"ingress_services,omitempty"`
-	PerimeterIngressServices uint64 `yaml:"perimeter_ingress_services,omitempty"`
-	InternalServices         uint64 `yaml:"internal_services,omitempty"`
-	EgressServices           uint64 `yaml:"egress_services,omitempty"`
-	PerimeterEgressServices  uint64 `yaml:"perimeter_egress_services,omitempty"`
+type DirectionCounts struct {
+	Total            uint64 `yaml:"total,omitempty"`
+	Ingress          uint64 `yaml:"ingress,omitempty"`
+	PerimeterIngress uint64 `yaml:"perimeter_ingress,omitempty"`
+	Internal         uint64 `yaml:"internal,omitempty"`
+	Egress           uint64 `yaml:"egress,omitempty"`
+	PerimeterEgress  uint64 `yaml:"perimeter_egress,omitempty"`
 }
 
 type ComputeCount struct {
