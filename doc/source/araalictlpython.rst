@@ -2,10 +2,11 @@ Python API Doc
 ==============
 App
 ---
-class api.App
+.. class:: api.App
+
    A class representing an application
 
-   Usage::
+   Usage:
 
       >>> import api
       >>> app = api.App("nightly", "bendvm")
@@ -16,13 +17,15 @@ class api.App
       >>> app.commit()
 
    :param zone: name of the zone
+   :type zone: string
    :param app: name of the app
+   :type app: string
 
    .. function:: iterlinks()
 
       An iterator for all links of the app
       
-      :rtype: iterator of links
+      :rtype: iterator of api.Link
 
    .. function:: review()
 
@@ -34,12 +37,13 @@ class api.App
 
 Link
 ----
-class api.Link
+.. class:: api.Link
+
    Class representing an individual link (policy suggestion). Links can be
    accepted or snoozed. Accepted links become whitelist policies for the app,
    while snoozed links will appear again if new flows are observed.
 
-   Usage::
+   Usage:
 
       >>> for link in app.iterlinks():
       ...    link.accept()
@@ -60,7 +64,8 @@ class api.Link
 
 LinkTable
 ---------
-class api.LinkTable
+.. class:: class api.LinkTable
+
    Class representing an arbitrary table/collection of links (policies), that
    allows action on multiple links at the same time. Links can be filtered at
    init, so only filtered links enter the table.
@@ -70,7 +75,8 @@ class api.LinkTable
    or for the entire runtime (which essentially iterates over every app in the
    runtime).
 
-   Usage::
+   Usage:
+
       >>> links = api.LinkTable(app.iterlinks())
       >>> links = links.accept(0,2)
       >>> app.review()
@@ -78,7 +84,9 @@ class api.LinkTable
 
 
    :param links: a list of link objects
-   :param * filters: filter to be applied on the input (of links). An arbitrary number of filters can be specified. There are some predefined filters in the api for common use: api.f.*
+   :type links: list of api.Link
+   :param \*filters: filter to be applied on the input (of links). An arbitrary number of filters can be specified. There are some predefined filters in the api for common use: api.f.*
+   :type \*filters: lambda returning boolean
 
    .. function:: accept(* args)
 
