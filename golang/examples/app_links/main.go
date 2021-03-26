@@ -5,7 +5,7 @@ import (
 )
 
 func testLinks() {
-	app := araalictl.App{ZoneName: "staging", AppName: "bend"}
+	app := araalictl.App{ZoneName: "nightly", AppName: "bendvm"}
 	app.Refresh()
 	app.Links[0].Snooze()
 	app.Links[0].Accept()

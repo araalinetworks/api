@@ -217,6 +217,23 @@ type AlertInfo struct {
 	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
 }
 
+// Reset araalictl path to new value
+func SetAraalictlPath(newPath string) {
+	ActlPath = newPath
+}
+
+// Authorize araalictl
+func Authorize(token string) {
+	output := RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
+	fmt.Println(output)
+}
+
+// DeAuthorize araalictl
+func DeAuthorize() {
+	output := RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
+	fmt.Println(output)
+}
+
 // TenantCreate - to create a tenant
 func TenantCreate(tenantID, userEmail, tenantName, UserName string) {
 	RunCmd(fmt.Sprintf("%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
