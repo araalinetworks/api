@@ -69,9 +69,9 @@ Link
    .. function:: Deny()
       :noindex:
 
-      Deny link. A denied link is ignored. Alerts will be suppressed if more
-      flows are observed. Typically links are denied when we observe benign
-      connections and don't want to be bothered until they are taken care of.
+      Deny link. A denied link is snoozed forever. You not only want to not
+      accept it, but you dont even want to snooze because you are aware of it
+      and dont want to accept it, ever!
 
    .. function:: Snooze()
       :noindex:
