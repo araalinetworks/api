@@ -44,6 +44,16 @@ def set_araalictl_path(new_path):
     global g_araalictl_path
     g_araalictl_path = new_path
 
+def auth(token):
+    cmd = "sudo %s authorize -token=- -local" % (g_araalictl_path)
+    rc = run_command(cmd, in_text=token, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+def deauth():
+    cmd = "sudo %s authorize -clean" % g_araalictl_path
+    rc = run_command(cmd, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
 def tenant_create(tenant_id, user_email, tenant_name=None, user_name=None):
     """Create a subtenant"""
     cmd = "%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (

@@ -14,6 +14,9 @@ except:
 
 import araalictl
 
+auth = araalictl.auth
+deauth = araalictl.deauth
+set_araalictl_path = araalictl.set_araalictl_path
 
 def link_stats(runlink, all=False, only_new=True):
     defined, alerts, linktype_dict = 0, 0, {}

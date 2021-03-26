@@ -2,7 +2,7 @@ Python API Doc
 ==============
 Setup
 -----
-.. function:: authorize(token)
+.. function:: auth(token)
 
    authorize araalictl for api use. This operation is idempotent and can be run
    multiple times without any side effect App.
