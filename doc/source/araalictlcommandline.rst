@@ -1,6 +1,11 @@
 Command Line Doc
 ================
 
+token
+-----
+./araalictl token
+   Generate token for api use (programmatic access)
+
 authorize
 ---------
 sudo ./araalictl authorize
@@ -11,8 +16,22 @@ sudo ./araalictl authorize
 
   -check
     	check authorization status
+
   -clean
     	clean up and logout
+
+  -token <fname>
+         Use fname for token based auth. If - is used for fname, token is
+         expected to be piped through stdin
+
+         Usage::
+
+            # generate a token for api use
+            TOKEN=$(./araalictl token)
+
+            # usually TOKEN is generated elsewhere and injected with env vars
+            echo $TOKEN | sudo ./araalictl authorize -token=-
+
   -upgrade
     	manually upgrade to latest, without re-authorizing
 

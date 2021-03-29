@@ -15,7 +15,7 @@ g_debug = False
 
 def help():
     """get araalictl help"""
-    print(run_command("./araalictl -h", result=True, debug=False)[1])
+    print(run_command("%s -h" % (g_araalictl_path), result=True, debug=False)[1])
 
 def fetch():
     """For downloading and upgrading araalictl"""
@@ -36,49 +36,65 @@ def fetch():
     else:
         pass
         #print("upgrading araalictl ...")
-        #run_command("sudo ./araalictl upgrade")
+        #run_command("sudo %s upgrade" % (g_araalictl_path))
+
+g_araalictl_path = "./araalictl"
+
+def set_araalictl_path(new_path):
+    global g_araalictl_path
+    g_araalictl_path = new_path
+
+def auth(token):
+    cmd = "sudo %s authorize -token=- -local" % (g_araalictl_path)
+    rc = run_command(cmd, in_text=token, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+
+def deauth():
+    cmd = "sudo %s authorize -clean" % g_araalictl_path
+    rc = run_command(cmd, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
 
 def tenant_create(tenant_id, user_email, tenant_name=None, user_name=None):
     """Create a subtenant"""
-    cmd = "./araalictl tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (
-        tenant_id, tenant_name, user_email, user_name)
+    cmd = "%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (
+        g_araalictl_path, tenant_id, tenant_name, user_email, user_name)
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def tenant_delete(tenant_id):
     """Delete a subtenant"""
-    rc = run_command("./araalictl tenant -op=del -id=%s" % tenant_id, result=True, strip=False)
+    rc = run_command("%s tenant -op=del -id=%s" % (g_araalictl_path, tenant_id), result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def fog_setupconfig(tenant_id, dns_name, vpc_id, subnet_id, key_name,
                     dns_hosted_zone_id, instance_type="m5.large"):
     """Setup config required to install a fog"""
-    rc = run_command("./araalictl config -tenant=%s Fog=%s" % (tenant_id, dns_name),
+    rc = run_command("%s config -tenant=%s Fog=%s" % (g_araalictl_path, tenant_id, dns_name),
                      result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
     cfg_str = "VPCIDParameter=%s,SubnetIDParameter=%s,KeyNameParameter=%s,HostedZoneParameter=%s,InstanceTypeParameter=%s,ReadOnlyRoleParameter=" % (
         vpc_id, subnet_id, key_name, dns_hosted_zone_id, instance_type)
-    rc = run_command("./araalictl config -tenant=%s InternalFogInstallParams=%s" % (tenant_id, cfg_str),
+    rc = run_command("%s config -tenant=%s InternalFogInstallParams=%s" % (g_araalictl_path, tenant_id, cfg_str),
                      result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def fog_install(tenant_id, nodes=1):
     """Install AWS mode fog"""
-    rc = run_command("./araalictl install-fog -tenant=%s -mode=aws -nodes=%d" %
-                     (tenant_id, nodes), result=True, strip=False)
+    rc = run_command("%s install-fog -tenant=%s -mode=aws -nodes=%d" %
+                     (g_araalictl_path, tenant_id, nodes), result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def fog_uninstall(tenant_id):
     """Uninstall AWS mode fog"""
-    rc = run_command("./araalictl uninstall-fog -tenant=%s -mode=aws" % tenant_id,
+    rc = run_command("%s uninstall-fog -tenant=%s -mode=aws" % (g_araalictl_path, tenant_id),
                      result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def get_zones(full=False, tenant=None):
     """Get zones and apps for tenant"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("./araalictl api -fetch-zone-apps %s %s" % ("-full" if full else "", tstr),
+    rc = run_command("%s api -fetch-zone-apps %s %s" % (g_araalictl_path, "-full" if full else "", tstr),
             result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
@@ -102,7 +118,7 @@ def update_links(zone, app, data, tenant=None):
         ret_val['empty'] = {"success": "Empty policy request"}
     else:
         if g_debug: print(yaml.dump(data))
-        rc = run_command("./araalictl api -zone %s -app %s -update-links %s" % (zone, app, tstr),
+        rc = run_command("%s api -zone %s -app %s -update-links %s" % (g_araalictl_path, zone, app, tstr),
                          in_text=yaml.dump(data), result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val = json.loads(rc[1])
@@ -112,16 +128,16 @@ def update_links(zone, app, data, tenant=None):
 def get_links(zone, app, tenant=None):
     """Get links for a zone and app"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("./araalictl api -zone %s -app %s -fetch-links %s" % (
-        zone, app, tstr), result=True, strip=False)
+    rc = run_command("%s api -zone %s -app %s -fetch-links %s" % (
+        g_araalictl_path, zone, app, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
 def get_fogs(tenant=None):
     """Get all fogs"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("./araalictl api -fetch-fogs %s" % (
-        tstr), result=True, strip=False)
+    rc = run_command("%s api -fetch-fogs %s" % (
+        g_araalictl_path, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return json.loads(rc[1])
 
@@ -129,8 +145,8 @@ def get_agents(tenant=None):
     """Get all agents"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     for fog in get_fogs(tenant):
-        rc = run_command("./araalictl api -fetch-agents -agentid %s %s" % (
-            fog, tstr), result=True, strip=False)
+        rc = run_command("%s api -fetch-agents -agentid %s %s" % (
+            g_araalictl_path, fog, tstr), result=True, strip=False)
         assert rc[0] == 0, rc[1]
         obj = json.loads(rc[1])
         for o in obj:
@@ -142,8 +158,8 @@ def get_apps(tenant=None):
     for agent in get_agents(tenant):
         if agent["agent"][:len("ak8s.")] == "ak8s.": continue
         if agent["agent"] in ["invalid", "Unknown"]: continue
-        rc = run_command("./araalictl api -fetch-apps -agentid %s -fogid %s %s" % (
-            agent["agent"], agent["fog"], tstr), result=True, strip=False)
+        rc = run_command("%s api -fetch-apps -agentid %s -fogid %s %s" % (
+            g_araalictl_path, agent["agent"], agent["fog"], tstr), result=True, strip=False)
         if rc[0] != 0:
             print("*** %s: %s" % (agent["agent"], rc[1]))
             continue
@@ -154,8 +170,8 @@ def get_apps(tenant=None):
 def ping(zone, app, dst, port, agent_id, tenant=None):
     """ping dst from src"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("./araalictl api -ping=src=%s/%s,dst=%s:%s -agentid %s %s" % (
-            zone, app, dst, port, agent_id, tstr), result=True, strip=False)
+    rc = run_command("%s api -ping=src=%s/%s,dst=%s:%s -agentid %s %s" % (
+            g_araalictl_path, zone, app, dst, port, agent_id, tstr), result=True, strip=False)
     if rc[1].decode().strip() == "open":
         return True
     print("*** z=%s a=%s dst=%s port=%s agent=%s tenant=%s rc=%s" % (zone, app, dst, port, agent_id, tenant, rc))
@@ -164,8 +180,8 @@ def ping(zone, app, dst, port, agent_id, tenant=None):
 def get_compute(zone, app, tenant=None):
     """Get compute for a zone and app"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("./araalictl api -zone %s -app %s -fetch-compute %s" % (
-        zone, app, tstr), result=True, strip=False)
+    rc = run_command("%s api -zone %s -app %s -fetch-compute %s" % (
+        g_araalictl_path, zone, app, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return json.loads(rc[1])
 
@@ -181,8 +197,8 @@ def enforce(data, service=False, tenant=None):
     else:
         if g_debug:
             print(yaml.dump(data))
-        rc = run_command("./araalictl api %s %s" % (
-            ostr, tstr), result=True, strip=False)
+        rc = run_command("%s api %s %s" % (
+            g_araalictl_path, ostr, tstr), result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val = json.loads(rc[1])
 
@@ -194,7 +210,7 @@ def fetch_flows(data, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
 
     if g_debug: print(yaml.dump(data))
-    rc = run_command("./araalictl api -fetch-flows %s" % (tstr),
+    rc = run_command("%s api -fetch-flows %s" % (g_araalictl_path, tstr),
                      in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
