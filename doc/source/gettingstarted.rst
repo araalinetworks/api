@@ -29,7 +29,9 @@ You can validate you have a working setup by running::
 You should see the output with both a Client Version and a Server Version
 component.
 
-Now that we have our cluster, we’ll register our account and download araalictl
+You should have **port 443 egress open** for Araali to talk to its SaaS service
+
+Now that you have your cluster, register your account and download araalictl
 
 Step 1: Register or Log in Araali UI
 *************************************
