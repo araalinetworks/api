@@ -43,6 +43,7 @@ assessment
 -start          start the assessment
 -stop           stop the assessment
 -report         get a report on findings
+-ignoreMK8S     ignore MicroK8S even if present
 
 version
 -------

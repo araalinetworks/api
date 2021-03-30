@@ -44,6 +44,9 @@ Once Araalictl is set up, start the assessment::
 
  ./araalictl assessment -start
 
+If you don't want microk8s to be preferred even when you have it installed. Run with the `-ignoreMK8S` option set to true::
+
+ ./araalictl assessment -start -ignoreMK8S=true
 
 Install an Opensource App
 ****************************
