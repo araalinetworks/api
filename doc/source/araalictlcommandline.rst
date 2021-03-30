@@ -32,9 +32,6 @@ sudo ./araalictl authorize
             # usually TOKEN is generated elsewhere and injected with env vars
             echo $TOKEN | sudo ./araalictl authorize -token=-
 
-  -upgrade
-    	manually upgrade to latest, without re-authorizing
-
 assessment
 ----------
 ./araalictl assessment
@@ -51,3 +48,8 @@ version
         Used to get the version of araalictl
 
 -v	        verbose
+
+upgrade
+-------
+sudo ./araalictl upgrade
+        Upgrade araalictl to the latest version available.
