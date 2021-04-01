@@ -126,19 +126,20 @@ type App struct {
 	AraaliUrl     string          `yaml:"araali_url,omitempty"`
 }
 
-func (app *App) Refresh() {
-	app.Links = GetLinks(app.ZoneName, app.AppName, "")
+func (app *App) Refresh() error {
+	links, err := GetLinks(app.ZoneName, app.AppName, "")
+	app.Links = links
+	return err
 }
 
-func (app *App) Commit() string {
+func (app *App) Commit() (string, error) {
 	links := []Link{}
 	for _, l := range app.Links {
 		if l.NewState != "" {
 			links = append(links, l)
 		}
 	}
-	output := UpdateLinks(app.ZoneName, app.AppName, "", links)
-	return output
+	return UpdateLinks(app.ZoneName, app.AppName, "", links)
 }
 
 type DirectionCounts struct {
@@ -222,26 +223,24 @@ func SetAraalictlPath(newPath string) {
 }
 
 // Authorize araalictl
-func Authorize(token string) {
-	output, _ := RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
-	fmt.Println(output)
+func Authorize(token string) (string, error) {
+	return RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
 }
 
 // DeAuthorize araalictl
-func DeAuthorize() {
-	output, _ := RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
-	fmt.Println(output)
+func DeAuthorize() (string, error) {
+	return RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
 }
 
 // TenantCreate - to create a tenant
-func TenantCreate(tenantID, userEmail, tenantName, UserName string) {
-	RunCmd(fmt.Sprintf("%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
+func TenantCreate(tenantID, userEmail, tenantName, UserName string) (string, error) {
+	return RunCmd(fmt.Sprintf("%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
 		ActlPath, tenantID, tenantName, userEmail, UserName))
 }
 
 // TenantDelete - to delete a tenant
-func TenantDelete(tenantID string) {
-	RunCmd(fmt.Sprintf("%s tenant -op=del -id=%s", ActlPath, tenantID))
+func TenantDelete(tenantID string) (string, error) {
+	return RunCmd(fmt.Sprintf("%s tenant -op=del -id=%s", ActlPath, tenantID))
 }
 
 // GetZones - return zones and apps, use tenant="" by default
@@ -269,21 +268,24 @@ func GetZones(full bool, tenant string) ([]Zone, error) {
 }
 
 // GetLinks - get links for zone, app for tenant
-func GetLinks(zone, app, tenant string) []Link {
+func GetLinks(zone, app, tenant string) ([]Link, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
 		}
 		return "-tenant=" + tenant
 	}()
-	output := RunCmd(fmt.Sprintf("%s api -zone %s -app %s -fetch-links %s", ActlPath, zone, app, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -zone %s -app %s -fetch-links %s", ActlPath, zone, app, tenantStr))
+	if err != nil {
+		return []Link{}, err
+	}
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
-	return listOfLinks
+	return listOfLinks, nil
 }
 
 // UpdateLinks - update links for an app
-func UpdateLinks(zone, app, tenant string, links []Link) string {
+func UpdateLinks(zone, app, tenant string, links []Link) (string, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -291,14 +293,11 @@ func UpdateLinks(zone, app, tenant string, links []Link) string {
 		return "-tenant=" + tenant
 	}()
 	input, _ := yaml.Marshal(links)
-	fmt.Println("Running update links...")
-	fmt.Println(string(input))
-	output := RunCmdWithInput(fmt.Sprintf("%s api -zone %s -app %s -update-links %s", ActlPath, zone, app, tenantStr), string(input))
-	return output
+	return RunCmdWithInput(fmt.Sprintf("%s api -zone %s -app %s -update-links %s", ActlPath, zone, app, tenantStr), string(input))
 }
 
 // FortifyK8sCluster - for tenant
-func FortifyK8sCluster(tenant, clusterName string) {
+func FortifyK8sCluster(tenant, clusterName string) (string, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -307,14 +306,14 @@ func FortifyK8sCluster(tenant, clusterName string) {
 	}()
 
 	if clusterName == "" {
-		RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
+		return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
 	} else {
-		RunCmd(fmt.Sprintf("%s fortify-k8s %s", ActlPath, tenantStr))
+		return RunCmd(fmt.Sprintf("%s fortify-k8s %s", ActlPath, tenantStr))
 	}
 }
 
 // GetJWT - returns a araali web ui access jwt
-func GetJWT(email string) string {
+func GetJWT(email string) (string, error) {
 	return RunCmd(fmt.Sprintf("%s token -jwt %s", ActlPath, email))
 }
 
@@ -332,32 +331,37 @@ func (alertPage *AlertPage) HasNext() bool {
 	return true
 }
 
-func (alertPage *AlertPage) NextPage() []Link {
+func (alertPage *AlertPage) NextPage() ([]Link, error) {
 	if alertPage.PagingToken == "" {
 		panic("Next page doesn't exist.")
 	}
-	output := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s -paging-token %s", ActlPath, alertPage.options, alertPage.PagingToken))
-
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s -paging-token %s", ActlPath, alertPage.options, alertPage.PagingToken))
 	listOfLinks := []Link{}
+	if err != nil {
+		return listOfLinks, err
+	}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 
 	alertPage.PagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
 	alertPage.Alerts = listOfLinks
-	return listOfLinks
+	return listOfLinks, err
 }
 
 // GetAlertCard - get AlertCard for tenant.
-func GetAlertCard(tenant string) AlertCard {
+func GetAlertCard(tenant string) (AlertCard, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
 		}
 		return "-tenant=" + tenant
 	}()
-	output := RunCmd(fmt.Sprintf("%s api -fetch-alert-card %s", ActlPath, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alert-card %s", ActlPath, tenantStr))
 	alertCard := AlertCard{}
+	if err != nil {
+		return alertCard, err
+	}
 	yaml.Unmarshal([]byte(output), &alertCard)
-	return alertCard
+	return alertCard, err
 }
 
 // GetAlerts - get all alerts for a tenant between specified time.
@@ -377,7 +381,7 @@ func GetAlertCard(tenant string) AlertCard {
 // 	alertPage.NextPage()
 // 	fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
 // }
-func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
+func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -408,10 +412,13 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) AlertPage {
 		return fmt.Sprint("-endtime=", endTime)
 	}()
 
-	output := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, tenantStr, startTimeStr, endTimeStr, countStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, tenantStr, startTimeStr, endTimeStr, countStr))
+	if err != nil {
+		return AlertPage{}, err
+	}
 
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 
-	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: listOfLinks[len(listOfLinks)-1].PagingToken}
+	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: listOfLinks[len(listOfLinks)-1].PagingToken}, nil
 }
