@@ -28,7 +28,7 @@ App
 
    A struct representing an application
 
-   Usage:
+   Usage::
 
         app := araalictl.App{ZoneName: "nightly", AppName: "bendvm"}
         app.Refresh()
@@ -57,21 +57,20 @@ Link
    denied links help with ignoring alerts until taken care of while snoozed links 
    will appear again if new flows are observed.
 
-   Usage:
+   Usage::
 
       app.Links[0].Accept()
+
+      // or,
+      app.Links[0].Snooze()
+
+      // or,
+      app.Links[0].Deny()
 
    .. function:: Accept()
       :noindex:
 
       Accept link as whitelisted policy.
-
-   .. function:: Deny()
-      :noindex:
-
-      Deny link. A denied link is ignored. Alerts will be suppressed if more
-      flows are observed. Typically links are denied when we observe benign
-      connections and don't want to be bothered until they are taken care of.
 
    .. function:: Snooze()
       :noindex:
@@ -80,3 +79,10 @@ Link
       flow is observed. Typically links are snoozed when the underlying problem
       is addressed. It is snoozed so that there is notification on subsequent
       occurance.
+
+   .. function:: Deny()
+      :noindex:
+
+      Deny link. A denied link is snoozed forever. You not only want to not
+      accept it, but you dont even want to snooze because you are aware of it
+      and dont want to accept it, ever!

@@ -75,13 +75,6 @@ Link
 
       Accept link as whitelisted policy.
 
-   .. function:: deny()
-      :noindex:
-
-      Deny link. A denied link is ignored. Alerts will be suppressed if more
-      flows are observed. Typically links are denied when we observe benign
-      connections and don't want to be bothered until they are taken care of.
-
    .. function:: snooze()
       :noindex:
 
@@ -89,6 +82,13 @@ Link
       flow is observed. Typically links are snoozed when the underlying problem
       is addressed. It is snoozed so that there is notification on subsequent
       occurance.
+
+   .. function:: deny()
+      :noindex:
+
+      Deny link. A denied link is snoozed forever. You not only want to not
+      accept it, but you dont even want to snooze because you are aware of it
+      and dont want to accept it, ever!
 
 LinkTable
 ---------
@@ -127,7 +127,7 @@ LinkTable
    .. function:: deny(* args)
 
       Deny link by index number. If no index is provided, all links in the
-      table will be accepted.
+      table will be denied.
 
       :param args: Multiple indices can be passed
       :type args: any number of int's

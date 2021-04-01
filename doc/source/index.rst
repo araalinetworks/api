@@ -1,9 +1,9 @@
-.. Araali Networks API documentation master file, created by
+.. Araali Networks Community Edition master file, created by
    sphinx-quickstart on Mon Mar 22 13:38:13 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Araali Networks' API Documentation!
+Welcome to Araali Networks' Community Edition!
 ==============================================
 Araali Networks Community Edition is dedicated to the hardworking community of
 DevOps so as to imbibe a culture of continuous monitoring and security to be an

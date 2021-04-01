@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Araali Networks API'
+project = u'Araali Networks Community Edition'
 copyright = u'2021, Araali Networks Authors'
 author = u'Abhishek R. Singh'
 
@@ -133,7 +133,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'AraaliNetworksAPI.tex', u'Araali Networks API Documentation',
+    (master_doc, 'AraaliNetworksAPI.tex', u'Araali Networks Community Edition',
      u'Abhishek R. Singh', 'manual'),
 ]
 
@@ -143,7 +143,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'araalinetworksapi', u'Araali Networks API Documentation',
+    (master_doc, 'araalinetworksapi', u'Araali Networks Community Edition',
      [author], 1)
 ]
 
@@ -154,7 +154,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'AraaliNetworksAPI', u'Araali Networks API Documentation',
+    (master_doc, 'AraaliNetworksAPI', u'Araali Networks Community Edition',
      author, 'AraaliNetworksAPI', 'One line description of project.',
      'Miscellaneous'),
 ]
