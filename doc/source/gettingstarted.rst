@@ -31,27 +31,15 @@ component.
 
 Now that we have our cluster, we’ll register our account and download araalictl
 
-Step 1: Register or Log in Araali UI
-*************************************
-Go to `console.araalinetworks.com <https://console.araalinetworks.com>`_ . If
-this is your **first time**, register with your email to create an account. If
-you have **already registered**, proceed to log in with your registered email.
+Step 1: Sign In or Register in the Araali Console
+*************************************************
+Visit the `Araali Console <https://console.araalinetworks.com>`_ in your browser.
+If you use the Social buttons at the top of the form to sign in, there is no
+registration step. If you cannot use the Social buttons, use the "Sign up" link
+at the bottom of the form to sign up for an account.
 
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraaliLogin.png
- :width: 650
- :alt: Araali Login UI
-
-Now **go to your email and approve** the registration/login by following steps
-in the email from Araali Networks.
-
-
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraaliRegistrationEmail.png
-  :width: 600
-  :alt: Registration Email
-
-Revert back to the original Araali UI browser tab, and you should now be in.
-
-
+.. image:: images/araali-console-sign-in.png
+ :alt: Araali Console Sign In
 
 Step 2: Download Araalictl
 **************************
