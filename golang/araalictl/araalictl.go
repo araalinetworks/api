@@ -97,17 +97,16 @@ func RunStrControl(cmdstr, user string, exitOnFailure bool, pipeInput string) (s
 }
 
 // RunAs - Run cmdstr as user
-func RunAs(cmdstr, user string, pipeInput string) string {
-	ret, _ := RunStrControl(cmdstr, user, true, pipeInput)
-	return ret
+func RunAs(cmdstr, user string, pipeInput string) (string, error) {
+	return RunStrControl(cmdstr, user, false, pipeInput)
 }
 
 // RunCmd - Run cmdstr and collect/return output
-func RunCmd(cmdstr string) string {
+func RunCmd(cmdstr string) (string, error) {
 	return RunAs(cmdstr, "", "")
 }
 
-func RunCmdWithInput(cmdstr string, pipeInput string) string {
+func RunCmdWithInput(cmdstr string, pipeInput string) (string, error) {
 	return RunAs(cmdstr, "", pipeInput)
 }
 
@@ -224,13 +223,13 @@ func SetAraalictlPath(newPath string) {
 
 // Authorize araalictl
 func Authorize(token string) {
-	output := RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
+	output, _ := RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
 	fmt.Println(output)
 }
 
 // DeAuthorize araalictl
 func DeAuthorize() {
-	output := RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
+	output, _ := RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
 	fmt.Println(output)
 }
 
@@ -246,7 +245,7 @@ func TenantDelete(tenantID string) {
 }
 
 // GetZones - return zones and apps, use tenant="" by default
-func GetZones(full bool, tenant string) []Zone {
+func GetZones(full bool, tenant string) ([]Zone, error) {
 	tenantStr := func() string {
 		if len(tenant) == 0 {
 			return ""
@@ -260,10 +259,13 @@ func GetZones(full bool, tenant string) []Zone {
 		return ""
 	}()
 
-	output := RunCmd(fmt.Sprintf("%s api -fetch-zone-apps %s %s", ActlPath, fullStr, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-zone-apps %s %s", ActlPath, fullStr, tenantStr))
+	if err != nil {
+		return []Zone{}, err
+	}
 	listOfZones := []Zone{}
 	yaml.Unmarshal([]byte(output), &listOfZones)
-	return listOfZones
+	return listOfZones, nil
 }
 
 // GetLinks - get links for zone, app for tenant
