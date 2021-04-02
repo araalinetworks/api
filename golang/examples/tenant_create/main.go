@@ -20,11 +20,11 @@ func main() {
 	flag.Parse()
 
 	if op == "ADD" {
-		if tenantID == "" || userEmail == "" || userName == "" {
-			fmt.Println("-id, -user-email and -user-name must be specified when op=ADD")
+		if userEmail == "" || userName == "" {
+			fmt.Println("-user-email and -user-name must be specified when op=ADD")
 			os.Exit(1)
 		}
-		araalictl.TenantCreate(tenantID, userEmail, tenantName, userName)
+		araalictl.TenantCreate(userEmail, tenantName, userName)
 	} else {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=DEL")

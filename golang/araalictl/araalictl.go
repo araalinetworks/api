@@ -233,9 +233,9 @@ func DeAuthorize() (string, error) {
 }
 
 // TenantCreate - to create a tenant
-func TenantCreate(tenantID, userEmail, tenantName, UserName string) (string, error) {
-	return RunCmd(fmt.Sprintf("%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"",
-		ActlPath, tenantID, tenantName, userEmail, UserName))
+func TenantCreate(userEmail, tenantName, UserName string) (string, error) {
+	return RunCmd(fmt.Sprintf("%s tenant -op=add -name=\"%s\" -user-email=%s -user-name=\"%s\"",
+		ActlPath, tenantName, userEmail, UserName))
 }
 
 // TenantDelete - to delete a tenant
