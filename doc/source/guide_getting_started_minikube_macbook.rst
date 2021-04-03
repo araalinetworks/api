@@ -50,9 +50,7 @@ Install VirtualBox
 Get the 4.19.94 based minikube.iso
 **********************************
 
-TODO [Get the iso from ``s3://araalinetworks.cf/minikube.iso`` to ``/tmp/minikube.iso``]::
-
-   curl -L http://minikube.iso /tmp/minikube.iso [From Araali]
+Get the iso from ``s3://araalinetworks.cf/minikube.iso`` to ``/tmp/minikube.iso``.
 
 Start the Minikube Kubernetes cluster
 *************************************
@@ -74,3 +72,16 @@ Check status
 ::
 
    kubectl get pods -A
+
+Deploy an application
+*********************
+
+::
+
+   kubectl create ns guestbook
+   kubectl apply -n guestbook -f https://raw.githubusercontent.com/kubernetes/examples/master/guestbook/all-in-one/guestbook-all-in-one.yaml
+
+Check the status
+
+.. image:: images/minikube-guestbook.png
+ :alt: After minikube install
