@@ -50,7 +50,9 @@ Install VirtualBox
 Get the 4.19.94 based minikube.iso
 **********************************
 
-Get the iso from ``s3://araalinetworks.cf/minikube.iso`` to ``/tmp/minikube.iso``.
+Get the iso from ``s3://araalinetworks.cf/minikube.iso`` to ``/tmp/minikube.iso``::
+
+   curl -o /tmp/minikube.iso https://s3-us-west-2.amazonaws.com/araalinetworks.cf/minikube.iso
 
 Start the Minikube Kubernetes cluster
 *************************************
