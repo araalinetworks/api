@@ -114,7 +114,7 @@ Check if kubectl is pointing to the cluster you want to assess::
 
 
 
-Step 4: Run the assessment
+Step 5: Run the assessment
 **************************
 
 Now, araalictl is up and running on a machine that has access to your cluster,
@@ -142,10 +142,14 @@ any number of times::
    ./araalictl assessment -stop
 
 
-Step 5: Review the Results
+Step 6: Review the Results
 ****************************
+You can review the results in yaml file or the Araali UI.
 
-Go to the Araali UI (`console.araalinetworks.com
+For yaml file 
+   ./araalictl assessment -report
+
+Or, go to the Araali UI (`console.araalinetworks.com
 <https://console.araalinetworks.com>`_) and log in with the same email that was
 used to authorize araalictl. 
 
@@ -156,3 +160,6 @@ used to authorize araalictl.
 Go to the zones page in the righthand sidebar, your cluster shows as “dev”.
 Click on the magnifying glass to go inside your cluster and review the
 assessment results as well as a snapshot of your Kubernetes networking.
+
+
+
