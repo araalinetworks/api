@@ -147,6 +147,7 @@ Step 6: Review the Results
 You can review the results in yaml file or the Araali UI.
 
 For yaml file 
+
    ./araalictl assessment -report
 
 Or, go to the Araali UI (`console.araalinetworks.com
