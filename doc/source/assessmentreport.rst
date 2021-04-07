@@ -1,6 +1,6 @@
-=================
-Assessment Report
-=================
+===================================
+Understanding the Assessment Report
+===================================
 
 In this section, we’ll walk you through the key security questions answered by the assessment report.
 
@@ -24,7 +24,8 @@ Finally, we give you a process-level inventory that you could use to prioritize 
 Yaml output
 """""""""""
 
-You can generate the sample report using 
+You can generate the sample report using::
+
       ./araalictl assessment -report
 
 The report has many sections that are laid out in the diagrams below.

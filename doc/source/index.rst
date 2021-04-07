@@ -38,6 +38,7 @@ So let the show begin!
    araalictlpython
    araalictlgolang
    araalictlnotebook
+   assessmentreport
    araalislackwebhook
    araaliprivacypolicy
 
