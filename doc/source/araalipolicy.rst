@@ -89,7 +89,7 @@ The above data can be accessed as python objects as well using our API. We can s
 
    # We can access the links part of the app as below.
    for link in app.iterlinks():
-     link.to_data()``
+     link.to_data()
 
 2. Once we have the links we can take the following actions.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -121,27 +121,27 @@ Once we are satisfied with the review of the links for an app. We can fetch the 
 
 .. code-block:: python
 
-   $ ./araalictl api -fetch-links -zone=azuref -app=wordpress -defined > 
-   azuref.policies.v1.yaml
-    - client:
-       zone: azuref
-       app: wordpress
-       process: snapd
-       binary_name: /snap/core/10908/usr/lib/snapd/snapd
-      parent_process: systems
-     server:
-       subnet: 54.192.73.20
-       netmask: 32
-       dst_port: 443
-       endpoint_group: US
-       organization: AZURE-02
-     type: NAE
-     speculative: false
-     state: DEFINED_POLICY
-     timestamp: 1616661537000
-     unique_id:
- 
- id://azuref,:wordpress:,snapd,systemd,/snap/core/10908/usr/lib/snapd/snapd+++AZURE-02:443+++false+++false
+ - client:
+      zone: azuref
+      app: wordpress.wpapp-wordpress.wordpress
+      process: httpd
+      binary_name: /opt/bitnami/apache/bin/httpd
+      parent_process: httpd
+    server:
+      dns_pattern: ':api.wordpress.org:'
+      dst_port: 443
+      endpoint_group: wordpress.org
+    type: NAE
+    speculative: false
+    state: DEFINED_POLICY
+    timestamp: 1617828767000
+    unique_id: id://azuref,:wordpress.wpapp- 
+ wordpress.wordpress:,httpd,httpd,/opt/bitnami/apache/bin/httpd+++api.wordpress.org:443+++false+++false
+   rollup_ids:
+   - id://azuref,:wordpress.wpapp- 
+ wordpress.wordpress:,httpd,httpd,/opt/bitnami/apache/bin/httpd+++api.wordpress.org:443+++false+++false
+  active_ports:
+   - 443
 
 The above-saved file can be committed to a git repository.
 
