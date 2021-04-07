@@ -85,7 +85,7 @@ The above data can be accessed as python objects as well using our API. We can s
 .. code-block:: python
 
    import API
-   app = api.App("nightly", "bendvm")
+   app = api.App("azuref", "wordpress")
 
    # We can access the links part of the app as below.
    for link in app.iterlinks():
@@ -121,11 +121,11 @@ Once we are satisfied with the review of the links for an app. We can fetch the 
 
 .. code-block:: python
 
-   $ ./araalictl api -fetch-links -zone=nightly -app=bendvm -defined > 
-   nightly.policies.v1.yaml
+   $ ./araalictl api -fetch-links -zone=azuref -app=wordpress -defined > 
+   azuref.policies.v1.yaml
     - client:
-       zone: nightly
-       app: bendvm
+       zone: azuref
+       app: wordpress
        process: snapd
        binary_name: /snap/core/10908/usr/lib/snapd/snapd
       parent_process: systems
@@ -141,16 +141,16 @@ Once we are satisfied with the review of the links for an app. We can fetch the 
      timestamp: 1616661537000
      unique_id:
  
- id://nightly,:bendvm:,snapd,systemd,/snap/core/10908/usr/lib/snapd/snapd+++AMAZON-02:443+++false+++false
+ id://azuref,:wordpress:,snapd,systemd,/snap/core/10908/usr/lib/snapd/snapd+++AMAZON-02:443+++false+++false
 
 The above-saved file can be committed to a git repository.
 
 .. code-block:: python
 
-   $ git checkout -b nightly
-   $ git add nightly.policies.v1.yaml
-   $ git commit -m "Adding nightly accepted policies."
-   $ git push -u origin nightly
+   $ git checkout -b azuref
+   $ git add azuref.policies.v1.yaml
+   $ git commit -m "Adding azuref accepted policies."
+   $ git push -u origin azuref
 
 We can repeat the discovery and review process to come up with good allowed policies. We should also be able to view the difference in the policies in the file checked into a git repo with the current status of links in the app on our UI.
 
@@ -168,13 +168,13 @@ a. Clear policies - Our command-line tool araalictl offers the options of cleani
 
 .. code-block:: python
 
-    $ ./araalictl api -clear-policies -zone=nightly -app=bendvm
+    $ ./araalictl api -clear-policies -zone=azuref -app=wordpress
 
 b. Apply policies from git - Use the push-policies command supported by araalictl and pipe the contents of the policy file from git.
 
 .. code-block:: python
  
-   $ cat nightly.policies.v1.yaml | ./araalictl api -push-policies -zone=nightly -app=bendvm
+   $ cat azuref.policies.v1.yaml | ./araalictl api -push-policies -zone=azuref -app=wordpress
 
 c. Finally, deploy your app.
 
