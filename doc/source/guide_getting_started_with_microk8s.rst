@@ -1,6 +1,6 @@
-=====================================
-Getting Started with microk8s (Cloud)
-=====================================
+======================================
+Getting Started with microk8s (Ubuntu)
+======================================
 
 This is an end-to-end guide on how to test Araali on Canonical’s MicroK8s and use an opensource microservice app (sockshop).
 
