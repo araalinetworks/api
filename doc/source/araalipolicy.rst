@@ -134,14 +134,14 @@ Once we are satisfied with the review of the links for an app. We can fetch the 
        netmask: 32
        dst_port: 443
        endpoint_group: US
-       organization: AMAZON-02
+       organization: AZURE-02
      type: NAE
      speculative: false
      state: DEFINED_POLICY
      timestamp: 1616661537000
      unique_id:
  
- id://azuref,:wordpress:,snapd,systemd,/snap/core/10908/usr/lib/snapd/snapd+++AMAZON-02:443+++false+++false
+ id://azuref,:wordpress:,snapd,systemd,/snap/core/10908/usr/lib/snapd/snapd+++AZURE-02:443+++false+++false
 
 The above-saved file can be committed to a git repository.
 
