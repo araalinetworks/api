@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// Set araalictl path to a differnt value.
-	araalictl.SetAraalictlPath("ACTL_PROFILE=meta /Users/abhishek/workspace/src/araali/src/araalictl/araalictl.darwin-amd64")
+	araalictl.SetAraalictlPath("./araalictl")
 	for {
 		fmt.Printf("\nEnter command to run:\n")
 		fmt.Printf("\t0: quit\n")
