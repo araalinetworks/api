@@ -64,7 +64,7 @@ func RunControlOut(cmdArgs []string, user string, exitOnFailure bool, out *bytes
 			fmt.Fprintln(os.Stderr, strings.Join(cmdArgs, " ")+": "+fmt.Sprint(err)+": "+out.String())
 			os.Exit(1)
 		} else {
-			return err
+			return fmt.Errorf(strings.Join(cmdArgs, " ") + ": " + fmt.Sprint(err) + ": " + out.String() + "\n")
 		}
 	}
 	return nil
