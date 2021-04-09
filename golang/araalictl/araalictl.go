@@ -243,6 +243,18 @@ func TenantDelete(tenantID string) (string, error) {
 	return RunCmd(fmt.Sprintf("%s tenant -op=del -id=%s", ActlPath, tenantID))
 }
 
+// TenantAddUser - to add a user to a tenant
+func TenantAddUser(tenantID, userEmail, userName string) (string, error) {
+	return RunCmd(fmt.Sprintf("%s tenant -op=add-user -id=\"%s\" -user-email=%s -user-name=\"%s\"",
+		ActlPath, tenantID, userEmail, userName))
+}
+
+// TenantDeleteUser - to delete a user from a tenant
+func TenantDeleteUser(tenantID, userEmail, userName string) (string, error) {
+	return RunCmd(fmt.Sprintf("%s tenant -op=del-user -id=\"%s\" -user-email=%s -user-name=\"%s\"",
+		ActlPath, tenantID, userEmail, userName))
+}
+
 // GetZones - return zones and apps, use tenant="" by default
 func GetZones(full bool, tenant string) ([]Zone, error) {
 	tenantStr := func() string {
