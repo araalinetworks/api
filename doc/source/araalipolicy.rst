@@ -143,9 +143,7 @@ Once we are satisfied with the review of the links for an app. We can fetch the 
   active_ports:
    - 443
 
-The above-saved file can be committed to a git repository.
-
-.. code-block:: python
+The above-saved file can be committed to a git repository::
 
    $ git checkout -b azuref
    $ git add azuref.policies.v1.yaml
@@ -164,16 +162,12 @@ On every deployment of an app that needs to be secured, we can clean and apply p
 
 We can follow these steps as part of the app deployment process.
 
-a. Clear policies - Our command-line tool araalictl offers the options of cleaning the policies for a given app in a specific zone.
-
-.. code-block:: python
+a. Clear policies - Our command-line tool araalictl offers the options of cleaning the policies for a given app in a specific zone::
 
     $ ./araalictl api -clear-policies -zone=azuref -app=wordpress
 
-b. Apply policies from git - Use the push-policies command supported by araalictl and pipe the contents of the policy file from git.
+b. Apply policies from git - Use the push-policies command supported by araalictl and pipe the contents of the policy file from git::
 
-.. code-block:: python
- 
    $ cat azuref.policies.v1.yaml | ./araalictl api -push-policies -zone=azuref -app=wordpress
 
 c. Finally, deploy your app.

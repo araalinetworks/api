@@ -33,12 +33,15 @@ So let the show begin!
    :hidden:
 
    introduction_to_araali_networks
+   supportmatrix
+   araalitermscondition
    gettingstarted
+   assessmentreport
    araalictlcommandline
    araalictlpython
    araalictlgolang
    araalictlnotebook
-   assessmentreport
+   araalipolicy
    araalislackwebhook
    araaliprivacypolicy
 
