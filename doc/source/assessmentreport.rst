@@ -5,9 +5,9 @@ Understanding the Assessment Report
 In this section, we’ll walk you through the key security questions answered by the assessment report.
 
 1) What are my apps and services - providers, consumers, and internal
-2) What and where are the DBs and DBaaS running
-3) Inactive listen to ports
-4) Is my DB and Metadata service accessible from other services
+2) What and where are the **DBs and DBaaS** running
+3) Is my DB and Metadata service **accessible from other services**
+4) What are the **Inactive listen-to ports**
 5) Vulnerable VMs and Containers (UI)
 
 **How can you use this information:** 
@@ -43,7 +43,7 @@ The top part of the report is the summary for the cluster.
  :width: 650
  :alt: Araali Report Summary
 
-**Database** in your stack are listed under "databases" or "dbaas," if you are running the database as a service. Depending on the database or dbaas you can see the name of the process or port and also if the database is accessible from an outside pod.
+**Database** in your stack are listed under "databases" or "dbaas," if you are running the database as a service. Depending on the database or dbaas you can see the name of the process or port and also if the **database is accessible from an outside pod.** If your db has unnecessary exposure, you will see the **flag is_accessible as true**.
 
 **Top consumed services** are a list of external services/egress going out of your environment. 
 
