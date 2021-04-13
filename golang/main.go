@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"./araalictl"
+	"github.com/araalinetworks/api/golang/araalictl"
 )
 
 func main() {
