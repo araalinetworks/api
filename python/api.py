@@ -2,6 +2,9 @@ import copy
 import ipaddress
 import json
 import re
+import sys
+if sys.version_info[0] >= 3:
+    unicode = str
 import time
 import yaml
 
