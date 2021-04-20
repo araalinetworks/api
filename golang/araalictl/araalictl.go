@@ -120,6 +120,7 @@ type App struct {
 	AppName       string          `yaml:"app_name"`
 	Links         []Link          `yaml:"links,omitempty"`
 	DefinedCounts DirectionCounts `yaml:"defined_policies,omitempty"`
+	DeniedCounts  DirectionCounts `yaml:"denied_policies,omitempty"`
 	AlertCounts   DirectionCounts `yaml:"alerts,omitempty"`
 	ServiceCounts DirectionCounts `yaml:"services,omitempty"`
 	ComputeCounts ComputeCount    `yaml:"compute,omitempty"`
