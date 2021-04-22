@@ -43,6 +43,7 @@ So let the show begin!
    araalictlnotebook
    araalipolicy
    araalislackwebhook
+   remapping_apps
    araaliprivacypolicy
 
 .. toctree::
