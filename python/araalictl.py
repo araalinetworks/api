@@ -99,6 +99,23 @@ def get_zones(full=False, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def get_pod_apps(tenant=None):
+    """Get zones and apps for tenant"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -list-pod-mappings %s" % (g_araalictl_path, tstr),
+            result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def push_pod_apps(data, tenant=None):
+    """Get zones and apps for tenant"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -update-pod-mappings %s" % (g_araalictl_path, tstr),
+            in_text=yaml.dump(data), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+
 def update_links(zone, app, data, tenant=None):
     """Update actions on a link"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
