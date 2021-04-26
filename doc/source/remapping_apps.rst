@@ -168,9 +168,17 @@ transformations should ideally be idempotent so they can be rerun without
 issues::
 
         mapping = araalictl.get_pod_apps()
-        for obj in mapping:
-                if (obj["zone"] == "app-nightly" and
-                    obj["namespace"] == "bendvm" and
-                    obj["pod"] == "bend"):
-                        obj["app"] = "app-nightly-bend"
+
+        if (obj["zone"] == "nightly-k8s" and 
+            obj["namespace"] == "nightly-bend" and 
+            "pod" in obj):
+
+            if obj["pod"] in ["flowstitcher", "flowprocessor",
+                              "assetinfo-processor",
+                              'applens-generator', 
+                              "applens-compactor", 
+                              "vulnscanner"]:
+
+                obj["app"] = "nightly-bend-pipeline"
+
         araalictl.push_pod_apps(mapping)
