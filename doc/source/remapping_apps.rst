@@ -159,3 +159,18 @@ split into three different apps as below.
 
 .. image:: images/after-app-remapping.png
  :alt: After remapping apps
+
+
+Programmatic mapping example
+----------------------------
+This can also be programmatically achieved using our python APIs. The
+transformations should ideally be idempotent so they can be rerun without
+issues::
+
+        mapping = araalictl.get_pod_apps()
+        for obj in mapping:
+                if (obj["zone"] == "app-nightly" and
+                    obj["namespace"] == "bendvm" and
+                    obj["pod"] == "bend"):
+                        obj["app"] = "app-nightly-bend"
+        araalictl.push_pod_apps(mapping)
