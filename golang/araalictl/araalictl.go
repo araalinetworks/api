@@ -216,6 +216,8 @@ func (link *Link) Deny() {
 type AlertInfo struct {
 	CommunicationAlertType string `yaml:"communication_alert_type,omitempty"`
 	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
+	ReOpenCount            uint32 `yaml:"reopen_count,omitempty"`
+	Status                 string `yaml:"status,omitempty"`
 }
 
 // Reset araalictl path to new value
