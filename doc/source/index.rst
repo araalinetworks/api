@@ -44,6 +44,7 @@ So let the show begin!
    araalipolicy
    araalislackwebhook
    remapping_apps
+   araalifaq
    araaliprivacypolicy
 
 .. toctree::
