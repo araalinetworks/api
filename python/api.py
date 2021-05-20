@@ -646,6 +646,14 @@ class LinkTable(Table):
         for i in args:
             self.links[i].meta_policy()
 
+    def template(self, accept, use, *args):
+        if not args:
+            link_data = [l.to_data() for l in self.links]
+        else:
+            link_data = [self.links[i].to_data() for i in args]
+
+        araalictl.template(link_data, accept, use)
+
     def services(self, all=False, only_new=False):
         runlink = self.links
         return services(runlink, all, only_new)
@@ -660,9 +668,9 @@ class Link(object):
         self.client = (Process if "zone" in data["client"] else NonAraaliClient)(data["client"])
         self.server = (Process if "zone" in data["server"] else NonAraaliServer)(data["server"])
         self.type = data["type"]
-        self.speculative = data["speculative"]
+        self.speculative = data.get("speculative", False)
         self.state = data["state"]
-        self.timestamp = data["timestamp"]
+        self.timestamp = data.get("timestamp", 0)
         self.unique_id = data["unique_id"]
         self.active_ports = data.get("active_ports", [])
         self.inactive_ports = data.get("inactive_ports", [])
@@ -704,6 +712,9 @@ class Link(object):
 
     def deny(self):
         self.new_state = "DENIED_POLICY"
+
+    def template(self, accept=False, use=False, tenant=""):
+        araalictl.template(self.to_data(), accept, use, tenant)
 
     def meta_policy(self):
         if self.type == "NAI":
