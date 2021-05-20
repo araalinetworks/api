@@ -319,12 +319,7 @@ func FortifyK8sCluster(tenant, clusterName string) (string, error) {
 		}
 		return "-tenant=" + tenant
 	}()
-
-	if clusterName == "" {
-		return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
-	} else {
-		return RunCmd(fmt.Sprintf("%s fortify-k8s %s", ActlPath, tenantStr))
-	}
+    return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
 }
 
 // GetJWT - returns a araali web ui access jwt
