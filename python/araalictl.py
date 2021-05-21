@@ -232,6 +232,14 @@ def fetch_flows(data, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def fetch_templates(tenant=None):
+    """Create/Modify/Delete template"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+
+    rc = run_command("%s api -list-templates %s" % (g_araalictl_path, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def update_template(data, tenant=None):
     """Create/Modify/Delete template"""
@@ -253,9 +261,7 @@ def template(data, save=False, use=False, tenant=None):
     rc = run_command("%s api -link-to-template %s %s %s" % (g_araalictl_path, tstr, sstr, ustr),
                      in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    ret_val = json.loads(rc[1])
-
-    return ret_val
+    return rc[1]
 
 if __name__ == '__main__':
     sys.exit(fetch())

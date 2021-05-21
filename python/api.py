@@ -646,13 +646,16 @@ class LinkTable(Table):
         for i in args:
             self.links[i].meta_policy()
 
-    def template(self, accept, use, *args):
-        if not args:
+    def template(self, accept=False, use=False, show=False, idxs=[]):
+        if not idxs:
             link_data = [l.to_data() for l in self.links]
         else:
-            link_data = [self.links[i].to_data() for i in args]
+            link_data = [self.links[i].to_data() for i in idxs]
 
-        araalictl.template(link_data, accept, use)
+        template = araalictl.template(link_data, accept, use)
+        if show:
+            print(template)
+        return Templates(template)
 
     def services(self, all=False, only_new=False):
         runlink = self.links
@@ -662,6 +665,67 @@ class LinkTable(Table):
 f = LinkTable.Filter
 mpr = MetaPolicyRunner()
 
+
+class TemplateChange(object):
+    def __init__(self, who, selector, to="", replace=False, delete=False):
+        if who not in ['client', 'server']:
+            raise "who set to %s, allowed values are client|server" % who
+        self.who = who
+        self.selector = selector
+        self.to = to
+        self.replace = replace
+        self.delete = delete
+
+class Templates(object):
+    def __init__(self, template_yaml=None, tenant=None):
+        if not template_yaml:
+            self.templates = araalictl.fetch_templates(tenant)
+        else:
+            self.templates = yaml.load(template_yaml)
+
+    def modify(self, changes=[], idxs=[]):
+        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        for template in templates:
+            for c in changes:
+                if c.delete:
+                    if 'link_filter' in template:
+                        if c.who in template['link_filter']:
+                            if c.selector in template['link_filter'][c.who]:
+                                del template['link_filter'][c.who][c.selector]
+                    if 'selector_changes' in template:
+                        if c.who in template['selector_changes']:
+                            if c.selector in template['selector_changes'][c.who]:
+                                del template['selector_changes'][c.who][c.selector]
+                            if len(template['selector_changes'][c.who]) == 0:
+                                del template['selector_changes'][c.who]
+                            if len(template['selector_changes']) == 0:
+                                del template['selector_changes']
+                else:
+                    if c.selector not in template['link_filter'][c.who]:
+                        template['link_filter'][c.who][c.selector] = {}
+                    template['link_filter'][c.who][c.selector] = c.to
+                    if c.replace:
+                        if 'selector_changes' not in template:
+                            template['selector_changes'] = {}
+                        if c.who not in template['selector_changes']:
+                            template['selector_changes'][c.who] = {}
+                        template['selector_changes'][c.who][c.selector] = c.to
+
+    def accept(self, use=False, tenant=None, idxs=[]):
+        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        for t in templates:
+            t['use'] = use
+        araalictl.update_template(templates, tenant)
+
+    def delete(self, tenant=None, idxs=[]):
+        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        for t in templates:
+            t['action'] = 'DEL'
+        araalictl.update_template(templates, tenant)
+
+    def show(self, idxs=[]):
+        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        print(yaml.dump(templates))
 
 class Link(object):
     def __init__(self, data, zone, app):
@@ -713,8 +777,11 @@ class Link(object):
     def deny(self):
         self.new_state = "DENIED_POLICY"
 
-    def template(self, accept=False, use=False, tenant=""):
-        araalictl.template(self.to_data(), accept, use, tenant)
+    def template(self, accept=False, use=False, show=False, tenant=""):
+        template = araalictl.template([self.to_data()], accept, use, tenant)
+        if show:
+            print(template)
+        return Templates(template)
 
     def meta_policy(self):
         if self.type == "NAI":
