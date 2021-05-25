@@ -312,19 +312,17 @@ func UpdateLinks(zone, app, tenant string, links []Link) (string, error) {
 }
 
 // FortifyK8sCluster - for tenant
-func FortifyK8sCluster(tenant, clusterName string) (string, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
+func FortifyK8sCluster(tenant, clusterName string, force bool) (string, error) {
+    tenantStr := func() string {
+        if len(tenant) == 0 {
+            return ""
+        }
+        return "-tenant=" + tenant
+    }()
+    if force {
+        return RunCmd(fmt.Sprintf("%s fortify-k8s -force %s %s", ActlPath, tenantStr, clusterName))
+    }
     return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
-}
-
-// GetJWT - returns a araali web ui access jwt
-func GetJWT(email string) (string, error) {
-	return RunCmd(fmt.Sprintf("%s token -jwt %s", ActlPath, email))
 }
 
 // AlertPage

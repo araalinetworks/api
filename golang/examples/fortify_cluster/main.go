@@ -20,7 +20,7 @@ func main() {
 		fmt.Println("-id must be specified")
 		os.Exit(1)
 	}
-    out, err := araalictl.FortifyK8sCluster(tenantID, clusterName)
+    out, err := araalictl.FortifyK8sCluster(tenantID, clusterName, true)
     if err != nil {
         fmt.Printf("Fortiy-K8s failed (%v)\n", err)
         return
