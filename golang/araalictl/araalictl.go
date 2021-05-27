@@ -226,13 +226,23 @@ func SetAraalictlPath(newPath string) {
 }
 
 // Authorize araalictl
-func Authorize(token string) (string, error) {
-	return RunCmdWithInput(fmt.Sprintf("sudo %s authorize -token=- -local", ActlPath), token)
+func Authorize(token string, asRoot bool) (string, error) {
+    cmd := fmt.Sprintf("%s authorize -token=- -local", ActlPath)
+    if asRoot {
+        cmd = "sudo " + cmd
+    }
+    fmt.Println(cmd)
+	return RunCmdWithInput(cmd, token)
 }
 
 // DeAuthorize araalictl
-func DeAuthorize() (string, error) {
-	return RunCmd(fmt.Sprintf("sudo %s authorize -clean", ActlPath))
+func DeAuthorize(asRoot bool) (string, error) {
+    cmd := fmt.Sprintf("%s authorize -clean", ActlPath)
+    if asRoot {
+        cmd = "sudo " + cmd
+    }
+    fmt.Println(cmd)
+	return RunCmd(cmd)
 }
 
 // TenantCreate - to create a tenant

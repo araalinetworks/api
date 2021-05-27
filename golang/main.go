@@ -37,11 +37,11 @@ func main() {
 
 		if text == "1" {
 			token := "**********" // set to the token value obtained for api access.
-			araalictl.Authorize(token)
+			araalictl.Authorize(token, false)
 		}
 
 		if text == "2" {
-			araalictl.DeAuthorize()
+			araalictl.DeAuthorize(false)
 		}
 
 		if text == "3" {
