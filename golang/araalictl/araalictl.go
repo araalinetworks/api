@@ -227,21 +227,19 @@ func SetAraalictlPath(newPath string) {
 
 // Authorize araalictl
 func Authorize(token string, asRoot bool) (string, error) {
-    cmd := fmt.Sprintf("%s authorize -token=- -local", ActlPath)
-    if asRoot {
-        cmd = "sudo " + cmd
-    }
-    fmt.Println(cmd)
+	cmd := fmt.Sprintf("%s authorize -token=- -local", ActlPath)
+	if asRoot {
+		cmd = "sudo " + cmd
+	}
 	return RunCmdWithInput(cmd, token)
 }
 
 // DeAuthorize araalictl
 func DeAuthorize(asRoot bool) (string, error) {
-    cmd := fmt.Sprintf("%s authorize -clean", ActlPath)
-    if asRoot {
-        cmd = "sudo " + cmd
-    }
-    fmt.Println(cmd)
+	cmd := fmt.Sprintf("%s authorize -clean", ActlPath)
+	if asRoot {
+		cmd = "sudo " + cmd
+	}
 	return RunCmd(cmd)
 }
 
@@ -323,16 +321,16 @@ func UpdateLinks(zone, app, tenant string, links []Link) (string, error) {
 
 // FortifyK8sCluster - for tenant
 func FortifyK8sCluster(tenant, clusterName string, force bool) (string, error) {
-    tenantStr := func() string {
-        if len(tenant) == 0 {
-            return ""
-        }
-        return "-tenant=" + tenant
-    }()
-    if force {
-        return RunCmd(fmt.Sprintf("%s fortify-k8s -force %s %s", ActlPath, tenantStr, clusterName))
-    }
-    return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	if force {
+		return RunCmd(fmt.Sprintf("%s fortify-k8s -force %s %s", ActlPath, tenantStr, clusterName))
+	}
+	return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
 }
 
 // AlertPage
