@@ -36,8 +36,9 @@ func main() {
 		}
 
 		if text == "1" {
-			token := "**********" // set to the token value obtained for api access.
-			araalictl.Authorize(token, false)
+			registeredEmailId := "**********" // set the email registered with araali
+			token := "**********"             // set to the token value obtained for api access.
+			araalictl.Authorize(registeredEmailId, token, false)
 		}
 
 		if text == "2" {

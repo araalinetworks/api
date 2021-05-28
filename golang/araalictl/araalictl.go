@@ -226,8 +226,8 @@ func SetAraalictlPath(newPath string) {
 }
 
 // Authorize araalictl
-func Authorize(token string, asRoot bool) (string, error) {
-	cmd := fmt.Sprintf("%s authorize -token=- -local", ActlPath)
+func Authorize(emailid, token string, asRoot bool) (string, error) {
+	cmd := fmt.Sprintf("%s authorize -token=- -local %s", ActlPath, emailid)
 	if asRoot {
 		cmd = "sudo " + cmd
 	}
