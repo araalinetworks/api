@@ -212,6 +212,154 @@ araalictl and pipe the contents of the policy file from git::
 
 c. Finally, deploy your app.
 
+App Mapping
+====================
+Araali organizes applications deployed on Kubernetes using “Zone” and “App” constructs where Zone maps to a Kubernetes cluster and App maps to the namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
+
+Araali allows the teams to visualize these apps as separate apps. This is accomplished by remapping the set of pods within the app discovered in the Kubernetes namespace. Remapping is a flexible and powerful construct that allows users to group a specific set of Kubernetes pods under an app even though they run as part of a single namespace.
+
+Below is a sample google shopping application where all the pods show up under a single app - gshop. We’ll walk through the process of splitting this up into three different apps.
+
+.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsonenamespace.png
+ :width: 600
+ :alt: Many apps in a single namespace
+
+a. List all the apps to pod mapping as a yaml file.
+
+.. code-block:: python
+
+    $ ./araalictl api -list-pod-mappings > pod_mapping.yaml
+
+b. Update the mapping yaml file.
+
+   1. Delete the pods you don’t want to remap.
+   2. As we can see we have the app and namespace set to the same value.
+   3. Now we reset the app to the name we would like to see it as.
+
+This can be done programmatically as well. Here we show a manual way of editing the yaml files.
+
+Below is a sample yaml file generated. Now we would like to re-map the pods as below.
+
+  1. frontend → gshop-frontend
+  2. redis-cart → gshop-db
+  3. rest of the services → gshop-service
+
+.. code-block:: python
+
+     vi pod_mapping.yaml
+
+.. code-block:: python 
+
+    - zone: prod
+      namespace: gshop
+      pod: checkoutservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: frontend
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: cartservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: recommendationservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: currencyservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: shippingservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: adservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: redis-cart
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: productcatalogservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: emailservice
+      app: gshop
+    - zone: prod
+      namespace: gshop
+      pod: paymentservice
+      app: gshop
+
+Edited Yaml File
+
+.. code-block:: python  
+
+    - zone: prod
+      namespace: gshop
+      pod: checkoutservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: frontend
+      app: gshop-frontend
+    - zone: prod
+      namespace: gshop
+      pod: cartservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: recommendationservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: currencyservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: shippingservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: adservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: redis-cart
+      app: gshop-db
+    - zone: prod
+      namespace: gshop
+      pod: productcatalogservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: emailservice
+      app: gshop-service
+    - zone: prod
+      namespace: gshop
+      pod: paymentservice
+      app: gshop-service
+
+c. Update the pod to app mapping in araali.
+
+.. code-block:: python
+
+       cat pod_mapping.yaml | ./araalictl api -update-pod-mappings
+
+Once the above exercise is complete, we see that Araali split and remapped the single app into three different apps as below.
+
+.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsthreeapps.png
+ :width: 600
+ :alt: App split into three apps
+
+With this workflow, Araali automates the task of writing network security
+policy and managing its lifecycle using git ops. After these policies are
+discovered, the app can use them on any cluster or even other clouds!
+
 With this workflow, Araali automates the task of writing network security
 policy and managing its lifecycle using git ops. After these policies are
 discovered, the app can use them on any cluster or even other clouds!
