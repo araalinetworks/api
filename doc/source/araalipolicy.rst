@@ -212,6 +212,13 @@ araalictl and pipe the contents of the policy file from git::
 
 c. Finally, deploy your app.
 
+
+
+With this workflow, Araali automates the task of writing network security
+policy and managing its lifecycle using git ops. After these policies are
+discovered, the app can use them on any cluster or even other clouds!
+
+
 App Mapping
 ====================
 Araali organizes applications deployed on Kubernetes using “Zone” and “App” constructs where Zone maps to a Kubernetes cluster and App maps to the namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
@@ -356,10 +363,4 @@ Once the above exercise is complete, we see that Araali split and remapped the s
  :width: 600
  :alt: App split into three apps
 
-With this workflow, Araali automates the task of writing network security
-policy and managing its lifecycle using git ops. After these policies are
-discovered, the app can use them on any cluster or even other clouds!
 
-With this workflow, Araali automates the task of writing network security
-policy and managing its lifecycle using git ops. After these policies are
-discovered, the app can use them on any cluster or even other clouds!
