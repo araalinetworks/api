@@ -219,8 +219,13 @@ policy and managing its lifecycle using git ops. After these policies are
 discovered, the app can use them on any cluster or even other clouds!
 
 
+
+
+
 App Mapping
 ====================
+
+
 Araali organizes applications deployed on Kubernetes using “Zone” and “App” constructs where Zone maps to a Kubernetes cluster and App maps to the namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
 
 Araali allows the teams to visualize these apps as separate apps. This is accomplished by remapping the set of pods within the app discovered in the Kubernetes namespace. Remapping is a flexible and powerful construct that allows users to group a specific set of Kubernetes pods under an app even though they run as part of a single namespace.
@@ -239,9 +244,8 @@ a. List all the apps to pod mapping as a yaml file.
 
 b. Update the mapping yaml file.
 
-   1. Delete the pods you don’t want to remap.
-   2. As we can see we have the app and namespace set to the same value.
-   3. Now we reset the app to the name we would like to see it as.
+   1. By default, the app name is same as the namespace.
+   2. The user can change the name of the app (app tag) as desired.
 
 This can be done programmatically as well. Here we show a manual way of editing the yaml files.
 
@@ -388,6 +392,7 @@ App Links to a Template
 
 
 Araali UI
+---------
 
 In the image below we have chosen a link from Prometheus to the control plane service and clicking on the green save button takes us to the template editor.
 
@@ -412,6 +417,8 @@ APIs
 ----
 
 List links
+-----------
+
 A user can use araalictl API to accomplish the link to template conversion similar to the UI. The process starts by fetching links for a service or an app lens. Below is an example of fetching links for service. The command returns a list of links and the user picks out a link that they are interested in.
 
 .. code-block:: python
@@ -444,6 +451,8 @@ A user can use araalictl API to accomplish the link to template conversion simil
       - 443
     
 Convert link to a template
+----------------------------
+
 Given the link above the user runs ‘link-to-template’ command to convert the link to a template
 
 
@@ -483,6 +492,7 @@ Declarative Templates
 
 
 Sometimes a user might have an in-depth understanding of their app and might want to specify a declarative template. Some common examples, ‘snapd’ process on AWS EC2s talking to the  Metadata Service (169.254.169.254:80), or the Kubelet talking to the coreDNS in a Kubernetes cluster.
+
 
 via UI
 ------
