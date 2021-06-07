@@ -381,7 +381,7 @@ These repeatable and known communication patterns can be translated into templat
 Creating Templates
 ------------------
 
-Templates can be created using APIs/UI. Users can choose to create convert an existing app’s policy links (suggested by Araali) to templates or declarative templates from scratch.
+Templates can be created using APIs/UI. Users can choose to create declarative templates or convert an existing app’s policy links (suggested by Araali) to templates
 
 App Links to a Template
 -----------------------
@@ -510,7 +510,8 @@ The Araali APIs can take declarative policies in yaml format. Below is a sample 
 .. code-block:: python
 
     $ cat meta.meta
-    - name: amazonSsmAgentToMetadata
+    - action: DEL
+      name: amazonSsmAgentToMetadata
       link_filter:
         client:
           binary_name: /snap/amazon-ssm-agent/[0-9]+/amazon-ssm-agent
