@@ -394,7 +394,7 @@ App Links to a Template
 Araali UI
 ---------
 
-In the image below the user chooses a link from Prometheus to the control plane service and clicking on the green save button takes us to the template editor.
+In the image below the user chooses a link from Prometheus to the control plane service and clicking on the green save button takes them to the template editor.
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linkToTemplatePrometheus.png
  :width: 600
