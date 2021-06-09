@@ -226,9 +226,9 @@ App Mapping
 ====================
 
 
-Araali organizes applications deployed on Kubernetes using “Zone” and “App” constructs where Zone maps to a Kubernetes cluster and App maps to the namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
+Araali organizes applications deployed in Kubernetes using “Zone” and “App” constructs where "Zone" maps to a Kubernetes cluster and "App" maps to the Kubernetes namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
 
-Araali allows the teams to visualize these apps as separate apps. This is accomplished by remapping the set of pods within the app discovered in the Kubernetes namespace. Remapping is a flexible and powerful construct that allows users to group a specific set of Kubernetes pods under an app even though they run as part of a single namespace.
+Araali allows teams to visualize these apps as separate apps. This is accomplished by remapping the set of pods discovered in the Kubernetes namespace. Remapping is a flexible and powerful construct that allows users to group a specific set of Kubernetes pods under an app even though they run as part of a single namespace.
 
 Below is a sample google shopping application where all the pods show up under a single app - gshop. We’ll walk through the process of splitting this up into three different apps.
 
