@@ -373,7 +373,7 @@ Templates
 
 Araali baselines your application communication and presents them as an identity-based policy recommendation which can then be accepted and converted to policy. This means no handwriting policies, everything is automatically discovered. Once these policies are accepted, they can also be enforced, which means only whitelisted communication will be allowed and the rest will be dropped. 
 
-Policies can be accepted per application using Araali UI or APIs. This works well for small to medium-sized applications. Araali allows the option to automate the acceptance of policies by leveraging templates. Templates are generally repeating patterns that you see in an application. Some of the examples could be 
+Policies can be accepted per application using Araali UI or APIs. This works well for small to medium-sized applications but might seem tedious for a very large app. Araali allows the option to automate the acceptance of policies by leveraging templates. Templates are generally repeating patterns of communication seen in an application. Some of the examples could be 
 
    a. Backend talking to Databases
    b. K8s nodes talking to control plane service
@@ -394,14 +394,14 @@ App Links to a Template
 Araali UI
 ---------
 
-In the image below we have chosen a link from Prometheus to the control plane service and clicking on the green save button takes us to the template editor.
+In the image below the user chooses a link from Prometheus to the control plane service and clicking on the green save button takes us to the template editor.
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linkToTemplatePrometheus.png
  :width: 600
  :alt: Araali UI link to template
 
 
-In the editor a user can modify the selectors and it’s default values. This will be used to filter links that the user wanted to automatically convert to policies. The values specified here will be used in the policy selectors.
+In the editor the user can modify the selectors and it’s default values. This will be used to filter links that the user wanted to automatically convert to policies. The values specified here will be used in the policy selectors.
 
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linktoTemplatePrometheusTemplate.png
@@ -409,7 +409,7 @@ In the editor a user can modify the selectors and it’s default values. This wi
  :alt: Araali UI link to template
 
 
-Once a user is satisfied with the selectors, they can name the template and also check the ‘Search and Use Continuously’ option at the bottom which will allow the user to start using the template. The user can choose to just save and turn on the template later as well.
+Once the user is satisfied with the selectors, they can name the template and also check the ‘Search and Use Continuously’ option at the bottom which will allow the user to start using the template. The user can choose to just save and turn on the template later as well.
 
 
 
