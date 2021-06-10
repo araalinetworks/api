@@ -212,33 +212,36 @@ araalictl and pipe the contents of the policy file from git::
 
 c. Finally, deploy your app.
 
-
-
 With this workflow, Araali automates the task of writing network security
 policy and managing its lifecycle using git ops. After these policies are
 discovered, the app can use them on any cluster or even other clouds!
 
+App Re-Mapping
+==============
 
+Araali hierachically organizes applications deployed in Kubernetes by “Zone”
+and “App”, where "Zone" maps to a Kubernetes cluster and "App" maps to the
+Kubernetes namespace inside which the application was deployed. Usually, each
+application is deployed in its own namespace. However, in some organizations
+namespace could be for an entire team's use or for an entire environment (prod,
+dev, staging). In such cases, the namespace gets pretty big and Araali allows
+the flexibility of mapping pods into applications the way it is generally
+understood by developers.
 
+This is accomplished by remapping the set of pods discovered in Kubernetes.
+Remapping is a flexible and powerful construct that allows users to group a
+specific set of Kubernetes pods under an app even though they run as part of a
+single namespace.
 
-
-App Mapping
-====================
-
-
-Araali organizes applications deployed in Kubernetes using “Zone” and “App” constructs where "Zone" maps to a Kubernetes cluster and "App" maps to the Kubernetes namespace inside which the application was deployed. In some cases, this might not be the way teams use namespace. Instead, they might be using namespace by organization or business unit and deploying multiple apps inside a single namespace.
-
-Araali allows teams to visualize these apps as separate apps. This is accomplished by remapping the set of pods discovered in the Kubernetes namespace. Remapping is a flexible and powerful construct that allows users to group a specific set of Kubernetes pods under an app even though they run as part of a single namespace.
-
-Below is a sample google shopping application where all the pods show up under a single app - gshop. We’ll walk through the process of splitting this up into three different apps.
+Below is a sample google shopping application where all the pods show up under
+a single app - gshop. We’ll walk through the process of splitting this up into
+three different apps.
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsonenamespace.png
  :width: 600
  :alt: Many apps in a single namespace
 
-a. List all the apps to pod mapping as a yaml file.
-
-.. code-block:: python
+a. List all current apps to pod mapping as yaml::
 
     $ ./araalictl api -list-pod-mappings > pod_mapping.yaml
 
@@ -247,19 +250,13 @@ b. Update the mapping yaml file.
    1. By default, the app name is same as the namespace.
    2. The user can change the name of the app (app tag) as desired.
 
-This can be done programmatically as well. Here we show a manual way of editing the yaml files.
+   This can be done programmatically as well. Here we show a manual way of editing the yaml files.
 
-Below is a sample yaml file generated. Now we would like to re-map the pods as below.
+   Below is a sample yaml file generated::
 
-  1. frontend → gshop-frontend
-  2. redis-cart → gshop-db
-  3. rest of the services → gshop-service
+     cat pod_mapping.yaml
 
-.. code-block:: python
-
-     vi pod_mapping.yaml
-
-.. code-block:: python 
+   .. code-block::
 
     - zone: prod
       namespace: gshop
@@ -306,9 +303,13 @@ Below is a sample yaml file generated. Now we would like to re-map the pods as b
       pod: paymentservice
       app: gshop
 
-Edited Yaml File
+   Now we would like to re-map the pods as below.
 
-.. code-block:: python  
+     1. frontend → gshop-frontend
+     2. redis-cart → gshop-db
+     3. rest of the services → gshop-service
+
+   .. code-block::
 
     - zone: prod
       namespace: gshop
@@ -355,37 +356,48 @@ Edited Yaml File
       pod: paymentservice
       app: gshop-service
 
-c. Update the pod to app mapping in araali.
-
-.. code-block:: python
+c. Update the pod to app mapping in araali::
 
        cat pod_mapping.yaml | ./araalictl api -update-pod-mappings
 
-Once the above exercise is complete, we see that Araali split and remapped the single app into three different apps as below.
+   Once the above exercise is complete, we see that in Araali UI the namespace
+   was split and remapped into three different apps as shown below.
 
-.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsthreeapps.png
- :width: 600
- :alt: App split into three apps
+   .. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsthreeapps.png
+    :width: 600
+    :alt: App split into three apps
 
 
 Templates
-===========
+=========
 
-Araali baselines your application communication and presents them as an identity-based policy recommendation which can then be accepted and converted to policy. This means no handwriting policies, everything is automatically discovered. Once these policies are accepted, they can also be enforced, which means only whitelisted communication will be allowed and the rest will be dropped. 
+Araali baselines your application communication and presents them as an
+identity-based policy recommendation which can then be accepted and converted
+to policy. This means no handwriting policies, everything is automatically
+discovered. Once these policies are accepted, they can also be enforced, which
+means only whitelisted communication will be allowed and the rest will be
+dropped. 
 
-Policies can be accepted per application using Araali UI or APIs. This works well for small to medium-sized applications but might seem tedious for a very large app. Araali allows the option to automate the acceptance of policies by leveraging templates. Templates are generally repeating patterns of communication seen in an application. Some of the examples could be 
+Policies can be accepted per application using Araali UI or APIs. This works
+well for small to medium-sized applications but might seem tedious for a very
+large app. Araali allows the option to automate the acceptance of policies by
+leveraging templates. Templates are generally repeating patterns of
+communication seen in an application. Some of the examples could be 
 
    a. Backend talking to Databases
    b. K8s nodes talking to control plane service
    c. VMs in the cloud talking to metadata services and so on
  
-These repeatable and known communication patterns can be translated into templates which helps with accepting the policies automatically without much user intervention.
-
+These repeatable and known communication patterns can be translated into
+templates which helps with accepting the policies automatically without much
+user intervention.
 
 Creating Templates
 ------------------
 
-Templates can be created using APIs/UI. Users can choose to create declarative templates or convert an existing app’s policy links (suggested by Araali) to templates
+Templates can be created using APIs/UI. Users can choose to create declarative
+templates or convert an existing app’s policy links (suggested by Araali) to
+templates
 
 App Links to a Template
 -----------------------
@@ -394,14 +406,17 @@ App Links to a Template
 Araali UI
 ---------
 
-In the image below the user chooses a link from Prometheus to the control plane service and clicking on the green save button takes us to the template editor.
+In the image below the user chooses a link from Prometheus to the control plane
+service and clicking on the green save button takes us to the template editor.
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linkToTemplatePrometheus.png
  :width: 600
  :alt: Araali UI link to template
 
 
-In the editor the user can modify the selectors and it’s default values. This will be used to filter links that the user wanted to automatically convert to policies. The values specified here will be used in the policy selectors.
+In the editor the user can modify the selectors and it’s default values. This
+will be used to filter links that the user wanted to automatically convert to
+policies. The values specified here will be used in the policy selectors.
 
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linktoTemplatePrometheusTemplate.png
@@ -409,9 +424,10 @@ In the editor the user can modify the selectors and it’s default values. This 
  :alt: Araali UI link to template
 
 
-Once the user is satisfied with the selectors, they can name the template and also check the ‘Search and Use Continuously’ option at the bottom which will allow the user to start using the template. The user can choose to just save and turn on the template later as well.
-
-
+Once the user is satisfied with the selectors, they can name the template and
+also check the ‘Search and Use Continuously’ option at the bottom which will
+allow the user to start using the template. The user can choose to just save
+and turn on the template later as well.
 
 APIs
 ----
@@ -419,9 +435,12 @@ APIs
 List links
 -----------
 
-A user can use araalictl API to accomplish the link to template conversion similar to the UI. The process starts by fetching links for a service or an app lens. Below is an example of fetching links for service. The command returns a list of links and the user picks out a link that they are interested in.
+A user can use araalictl API to accomplish the link to template conversion
+similar to the UI. The process starts by fetching links for a service or an app
+lens. Below is an example of fetching links for service. The command returns a
+list of links and the user picks out a link that they are interested in.
 
-.. code-block:: python
+.. code-block::
 
     $ ./araalictl api -fetch-links -service 10.100.0.1:443 > prometheus_link
 
@@ -453,10 +472,8 @@ A user can use araalictl API to accomplish the link to template conversion simil
 Convert link to a template
 ----------------------------
 
-Given the link above the user runs ‘link-to-template’ command to convert the link to a template
-
-
-.. code-block:: python
+Given the link above the user runs ‘link-to-template’ command to convert the
+link to a template::
 
     $ cat prometheus_link | ./araalictl api -link-to-template
 
@@ -474,15 +491,11 @@ Given the link above the user runs ‘link-to-template’ command to convert the
 
 If the user is satisfied with the above conversion they can accept it as is. If not, they can dump it to a file, edit, and then accept using the below command.
 
-Accepting as is
-
-.. code-block:: python
+Accepting as is::
 
     $ cat <policy_yaml> | ./araalictl api -update-template -use-link-template
 
-Accepting edited template
-
-.. code-block:: python
+Accepting edited template::
 
     $ cat <edited_policy_yaml> | ./araalictl api -update-template
 
@@ -491,7 +504,10 @@ Declarative Templates
 ---------------------
 
 
-Sometimes a user might have an in-depth understanding of their app and might want to specify a declarative template. Some common examples, ‘snapd’ process on AWS EC2s talking to the  Metadata Service (169.254.169.254:80), or the Kubelet talking to the coreDNS in a Kubernetes cluster.
+Sometimes a user might have an in-depth understanding of their app and might
+want to specify a declarative template. Some common examples, ‘snapd’ process
+on AWS EC2s talking to the  Metadata Service (169.254.169.254:80), or the
+Kubelet talking to the coreDNS in a Kubernetes cluster.
 
 
 via UI
@@ -504,7 +520,11 @@ Go to the template page and click on the "green plus button" to add a new templa
  :width: 600
  :alt: Araali Templates
 
-Once the template editor pops up, the user can choose the selectors they would like to use to filter links and accept them as policies (e.g., snapd talking to the MetaData Service below). Once satisfied, name the template, and check the option to “Search and use continuously” if they want to start using it right away. The user can choose to just save and turn on the template later as well.
+Once the template editor pops up, the user can choose the selectors they would
+like to use to filter links and accept them as policies (e.g., snapd talking to
+the MetaData Service below). Once satisfied, name the template, and check the
+option to “Search and use continuously” if they want to start using it right
+away. The user can choose to just save and turn on the template later as well.
 
 .. image:: https://raw.githubusercontent.com/araalinetworks/api/main/doc/source/images/linkToTemplateCreateTemplate.png
  :width: 600
@@ -515,9 +535,8 @@ via Araali APIs
 ---------------
 
 
-The Araali APIs can take declarative policies in yaml format. Below is a sample yaml file.
-
-.. code-block:: python
+The Araali APIs can take declarative policies in yaml format. Below is a sample
+yaml file::
 
     $ cat meta.meta
     - action: DEL
@@ -581,15 +600,31 @@ The Araali APIs can take declarative policies in yaml format. Below is a sample 
 
 There are three examples in the above yaml file.
 
-1. ``amazonSsmAgentToMetadata`` - this is a non araali egress template. Non-araali servers are identified using dns_pattern or subnet/mask along with dst_port. This also shows an example of how to delete an existing template.
+1. ``amazonSsmAgentToMetadata`` - this is a non araali egress template.
+   Non-araali servers are identified using dns_pattern or subnet/mask along
+   with dst_port. This also shows an example of how to delete an existing
+   template.
 
-This policy has an action as well and it is set to DEL, this helps with deleting templates that are already defined.
+   This policy has an action as well and it is set to DEL, this helps with
+   deleting templates that are already defined.
 
-    ``snapdToSnapcraft`` - this is another example of non araali egress template where we are trying to match multiple fqdn patterns in link filter and trying to accept the links matching them.
+   ``snapdToSnapcraft`` - this is another example of non araali egress template
+   where we are trying to match multiple fqdn patterns in link filter and
+   trying to accept the links matching them.
 
-2. ``ingressHaproxy`` - this is a non-araali ingress template. The non araali clients are identified using subnet and mask and if 0.0.0.0 is used  it needs to have an endpoint group marker __WORLD__ or __HOME__ to narrow them down to public or private ip addresses. If not specified, the template will match both. In this example we have skipped using it.
+2. ``ingressHaproxy`` - this is a non-araali ingress template. The non araali
+   clients are identified using subnet and mask and if 0.0.0.0 is used  it
+   needs to have an endpoint group marker __WORLD__ or __HOME__ to narrow them
+   down to public or private ip addresses. If not specified, the template will
+   match both. In this example we have skipped using it.
 
-3. ``kubeletToCoredns`` - this is an araali to araali template. The link_filter section has client and server selectors defined to select links that need to be accepted as defined policy. Once the links are selected, we use selectors from the link to create policies by default. If we need those selectors to be replaced by a different value, we can specify them in the ``selector_change`` section. In this example we want the binary_name selector to be replaced with the regex ``/snap/microk8s/.*/kubelet.``
+3. ``kubeletToCoredns`` - this is an araali to araali template. The link_filter
+   section has client and server selectors defined to select links that need to
+   be accepted as defined policy. Once the links are selected, we use selectors
+   from the link to create policies by default. If we need those selectors to
+   be replaced by a different value, we can specify them in the
+   ``selector_change`` section. In this example we want the binary_name
+   selector to be replaced with the regex ``/snap/microk8s/.*/kubelet.``
 
 **Note:** Allowed selectors for Araali and Non-Araali endpoints.
 
@@ -602,9 +637,7 @@ This policy has an action as well and it is set to DEL, this helps with deleting
 **Note:** Once defined, we need to start using the templates to accept links as defined policies. In the yaml we can set **use: true** like we have in ssm-agent-worker
 
 
-API command to create templates
-
-.. code-block:: python
+API command to create templates::
 
     $ cat <policy_yaml> | ./araalictl api -update-template
 
@@ -612,28 +645,28 @@ API command to create templates
 Using Templates
 ---------------
 
-
-Defining templates only store it in the data store. In order to use it, to accept policies, a user has to set use boolean to true in the above yaml. Another way to use the template is to issue the start command with an explicit template name as shown below.
-
-.. code-block:: python
+Defining templates only store it in the data store. In order to use it, to
+accept policies, a user has to set use boolean to true in the above yaml.
+Another way to use the template is to issue the start command with an explicit
+template name as shown below::
 
     ./araalictl api -template ingressHaproxy,snapdToSnapcraft -op use
    
 **Stop using Templates**
 
-.. code-block:: python
+.. code-block::
 
     ./araalictl api -template ingressHaproxy,snapdToSnapcraft -op stop
     
 **Deleting Templates**
 
-.. code-block:: python
+.. code-block::
 
     ./araalictl api -template ingressHaproxy,snapdToSnapcraft -op del
 
 **Listing Templates**
 
-.. code-block:: python
+.. code-block::
 
     ./araalictl api -list-template
 
@@ -643,28 +676,23 @@ The above command dumps the existing policies and their state in yaml format.
 Alert Subscription (Email)
 --------------------------
 
+A user can subscribe to alert notifications. Anytime, a new alert is seen by
+the system an email will be generated. With time as the app is discovered, new
+alerts should reduce (only infrequent communications will trigger new alerts).
 
-A user can subscribe to alert notifications. Anytime, a new alert is seen by the system an email will be generated. With time as the app is discovered, new alerts should reduce (only infrequent communications will trigger new alerts).
-
-Security Professionals can subscribe for all alerts related to perimeter egress or ingress across all apps.
+Security Professionals can subscribe for all alerts related to perimeter egress
+or ingress across all apps.
 
 Tenant Level for Perimeter Monitoring
 -------------------------------------
 
-
-Subscribing to Perimeter Egress.
-
-.. code-block:: python
+Subscribing to Perimeter Egress::
 
      ./araalictl api -subscribe-for-alert -direction egress_world
        
 **Options for direction are:** ingress_world|egress_world|ingress_home|egress_home|araali
 
 
-
-Unsubscribing completely
-
-.. code-block:: python
+Unsubscribing completely::
 
     ./araalictl api -unsubscribe-from-alert
-
