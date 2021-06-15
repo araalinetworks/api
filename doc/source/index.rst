@@ -57,6 +57,7 @@ So let the show begin!
    guide_getting_started_with_microk8s
    guide_getting_started_microk8s_macbook
    guide_getting_started_minikube_macbook
+   guide_getting_started_with_SIEM
 
 .. toctree::
    :maxdepth: 2
