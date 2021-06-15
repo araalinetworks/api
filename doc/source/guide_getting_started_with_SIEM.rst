@@ -14,14 +14,14 @@ Integration with LogStash
 *************************
 
 Configure the TCP input plugin to accept json data. Open the existing LogStash config file
-and add the following to the input plugin list.
+and add the following to the input plugin list.::
 
-   ``input {
-     tcp {
-         port => 9099
-         codec => "json"
-     }
-   }``
+      input {
+        tcp {
+          port => 9099
+          codec => "json"
+        }
+      }
 
 Restart the LogStash service for the configuration to take effect.
 
