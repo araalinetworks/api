@@ -10,8 +10,8 @@ Follow the instructions in the `getting started post <https://araali-networks-ap
 
 This sets up and authorizes Araalictl for local use.
 
-Integration with LogStash
-*************************
+Integration with ElasticStack
+*****************************
 
 Configure the TCP input plugin to accept json data. Open the existing LogStash config file
 and add the following to the input plugin list.::
