@@ -16,7 +16,7 @@ report, but the CVE annotation is available only on Araali UI.
 
 **How can you use this information:** 
 
-First and foremost, it produces a comprehensive zoomable diagram of your
+First and foremost, it produces a comprehensive, layered diagram of your
 environment and shows all the active apps and services.
 
 This information helps you understand if you have any security misconfiguration
@@ -33,7 +33,7 @@ monitoring your monitors.
 
 Finally, you can visualize the flow of data between applications in your
 environment, annotated by any unpatched vulnerabilities, to help identify risk
-and priortize potential remediation efforts.
+and prioritize potential remediation efforts.
 
 
 Yaml output
@@ -49,7 +49,7 @@ The top part of the report is the summary for the cluster.
 
 1. Number of zones (or kubernetes clusters) = 1
 2. Number of apps (or kubernetes namespaces) = 6
-3. Number of intenal services (not publicly visible) = 24
+3. Number of internal services (not publicly visible) = 24
 4. Number of external services consumed = 27
 5. Number of services provided (publicly exposed) = 29
 
@@ -95,7 +95,7 @@ auto-discovered and starred and will also show up on your Dashboard page.
 Navigating via the UI
 """""""""""""""""""""
 
-You can `log <https://console.araalinetworks.com>`_ into the UI to get visual
+You can `log into <https://console.araalinetworks.com>`_ the UI to get visual
 information on your cluster, created out of the box by Araali. You start with a
 **dashboard** which is similar to the yaml file summary and gives you a
 high-level count of services and compute and auto-starred apps, pinned on the
