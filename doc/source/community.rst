@@ -28,9 +28,9 @@ Read our blog_.
 
 .. _End of traditional appsec: https://www.araalinetworks.com/post/end-of-traditional-appsec
 
-- `Elimiate risk of stolen passwords`_
+- `Eliminate risk of stolen passwords`_
 
-.. _Elimiate risk of stolen passwords: https://www.araalinetworks.com/post/passwordless-cloud-native-apps
+.. _Eliminate risk of stolen passwords: https://www.araalinetworks.com/post/passwordless-cloud-native-apps
 
 - `Distributed Zero Trust`_
 

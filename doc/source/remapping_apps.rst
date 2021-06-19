@@ -182,3 +182,4 @@ issues::
                 obj["app"] = "nightly-bend-pipeline"
 
         araalictl.push_pod_apps(mapping)
+

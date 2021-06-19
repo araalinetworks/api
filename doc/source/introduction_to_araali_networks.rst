@@ -18,17 +18,16 @@ At its core, Araali leverages `eBPF
 superpower of Linux and an identity paradigm inspired by `SPIFFE/SPIRE
 <https://github.com/spiffe/spire>`_. It provides powerful **visibility and
 security controls** without any code recompiles/changes, has no performance
-penalty, and guarantees no disruptions by virtue of staying out of the packet
+penalty, and guarantees no disruptions by staying out of the packet
 forwarding path. Araali deploys with a single command to cover your fleet of
 nodes on the Kubernetes cluster(s) or VMs across clouds.
 
 Visibility
 ***********
 
-Once deployed, you instantly **see your apps and services as a network
-diagram** that is easy to understand and to discover anomalies. Araali covers
-inter-cluster traffic, intra-cluster traffic, ingress traffic, and egress
-traffic based on DNS in use (if any). 
+Once deployed, you instantly **see your apps and services as an easily-understood network
+diagram** and can use this to discover anomalies. Araali covers
+inter-cluster, intra-cluster, ingress, and egress traffic based on DNS in use (if any).
 
 It also works beautifully for hybrid environments where your Kubernetes cluster
 might be communicating with databases on VMs or workloads spanning multiple
@@ -38,13 +37,13 @@ Security
 *********
 
 Araali auto-discovers identity-centric policies that are then reviewed and
-accepted via APIs or by using the Araali UI. Once these are accepted, you can
+accepted via APIs or the Araali UI. Once these are accepted, you can
 turn on alerts that carry the appropriate context and are intelligently
 dispatched to the right app owner. Until this point, Araali is running in the
 no-harm monitoring and alert mode.
 
 Once you have monitored your apps for a period, you can **turn on enforcement**
-with the flip of a switch, and araali can enforce all the policies. Enforcement
+with the flip of a switch, and Araali can enforce all the policies. Enforcement
 means that only the whitelisted/accepted policies will be allowed, and
 everything else will be dropped. Enforcement is an intrusive mode, and we
 recommend you actively monitor for no alerts for a few days.
@@ -54,25 +53,25 @@ first**. Once enforced, it will give you peace of mind that only legitimate
 processes can talk to the data layer, and nothing else. You should then slowly
 expand in concentric circles and build depth into your defense.
 
-Key Insights in building Araali
+Key Insights in Building Araali
 ********************************
 
-As the cloud gained prominence, networking got abstracted from the operations
-teams as they did not own or control the networking boxes anymore. Focus
+As the cloud gained prominence, networking was abstracted from the operations
+teams, as they did not own or control the networking boxes anymore, and focus
 shifted to IAM roles. Furthermore, the networking controls that the cloud
 providers offered (Security Groups) were **primarily IP and port-based** and
 predated the network security stack by over a decade.
 
 Araali’s critical insight was to **decouple security from the infrastructure
-and create it as an overlay** that could be orchestrated in a distributed
+and create it as an overlay** that could be implemented in a distributed
 fashion. Every node/VM gets its **personal eBPF based firewall** which could
 enforce Zero Trust security based on Identities. The identity-based policy is
 auto-discovered to free Dev and SecOps team from having to handwrite
 declarative policies.
 
 eBPF has enabled visibility and control over apps and services at a granularity
-and efficiency that was not possible before without any recompile or rewrite.
+and efficiency that was not previously possible without any recompile or rewrite.
 Also, it is well-equipped to handle **modern containerized workloads** as well
 as more traditional workloads such as **virtual machines and standard Linux
-processes** as long as these are running modern Linux kernels that support
+processes**, as long as these are running modern Linux kernels that support
 eBPF.

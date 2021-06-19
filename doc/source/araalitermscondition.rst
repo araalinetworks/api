@@ -4,7 +4,7 @@ Term and Conditions
 
 GENERAL
 --------
-The Araali Freemium product covers **up to 5 apps** for a point-in-time assessment for up to one hour. To cover more apps, the user can evaluate a paid version of the product on `AWS Marketplace <https://aws.amazon.com/marketplace/seller-profile?id=0a2a0563-6f86-4b8a-a0f6-b59c8eb0345c>`_. 
+The Araali Freemium product covers **up to 5 apps** for up to one hour for a point-in-time assessment. To cover more apps, the user can evaluate a paid version of the product on `AWS Marketplace <https://aws.amazon.com/marketplace/seller-profile?id=0a2a0563-6f86-4b8a-a0f6-b59c8eb0345c>`_.
 
 EVALUATION
 ----------- 
@@ -24,4 +24,4 @@ The evaluator has no obligation to provide Araali any suggestions, comments or o
 
 WARRANTY DISCLAIMER
 -------------------- 
-The service is provided “AS IS” for testing only, and Araali does not warrant that the service will operate without error or interruption. Araali specifically disclaims all other warranties, express or implied, including the implied warranties of merchantability, noninfringement, title, quality, accuracy, and fitness for a particular purpose.
+The service is provided “AS IS” for testing only, and Araali does not warrant that the service will operate without error or interruption. Araali specifically disclaims all other warranties, express or implied, including the implied warranties of merchantability, non-infringement, title, quality, accuracy, and fitness for a particular purpose.

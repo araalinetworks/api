@@ -158,7 +158,7 @@ used to authorize araalictl.
   :width: 650
   :alt: Araali Zone View
 
-Go to the zones page in the righthand sidebar, your cluster shows as “dev”.
+Go to the zones page in the right-hand sidebar, your cluster shows as “dev”.
 Click on the magnifying glass to go inside your cluster and review the
 assessment results as well as a snapshot of your Kubernetes networking.
 

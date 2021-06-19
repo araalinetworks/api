@@ -78,7 +78,7 @@ Link
       Snooze link. A snoozed link is forgotten. It will show up again if a new
       flow is observed. Typically links are snoozed when the underlying problem
       is addressed. It is snoozed so that there is notification on subsequent
-      occurance.
+      occurrence.
 
    .. function:: Deny()
       :noindex:

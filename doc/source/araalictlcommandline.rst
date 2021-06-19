@@ -15,10 +15,10 @@ sudo ./araalictl authorize
         auto-upgrade to the latest published production version.
 
   -check
-    	check authorization status
+        check authorization status
 
   -clean
-    	clean up and logout
+        clean up and logout
 
   -token <fname>
          Use fname for token based auth. If - is used for fname, token is
