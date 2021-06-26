@@ -54,6 +54,74 @@ def deauth():
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
+def star_lens(zone="", app="", service=None, tenant=None):
+    """star lens"""
+    flags = ""
+    if service: flags += " -service %s" % service
+    else: flags += " -zone=%s -app=%s" % (zone, app)
+
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -star-lens %s %s" % (
+                     g_araalictl_path, flags, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def get_lenses(enforced=False, starred=False, tenant=None):
+    """get lenses"""
+    flags = ""
+    if enforced: flags += " -enforced"
+    if starred: flags += " -starred"
+
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -fetch-enforcement-status %s %s" % (
+                     g_araalictl_path, flags, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_show_roles(tenant=None):
+    """show rbac"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s user-role -op list %s" % (
+                     g_araalictl_path, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_show_users(tenant=None):
+    """show rbac"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s user-role -op list-user-roles %s" % (
+                     g_araalictl_path, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_add_role(name, zone, app, tenant=None):
+    """add new role"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s user-role -op=add -zone=%s -app=%s -name=%s %s" % (
+                     g_araalictl_path, zone, app, name, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_assign_roles(email, roles, tenant=None):
+    """assign a list of roles to email"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    roles = ",".join(roles)
+    rc = run_command("%s user-role -op assign -user-email %s -roles %s %s" % (
+                     g_araalictl_path, email, roles, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def get_pod_apps(tenant=None):
+    """Get zones and apps for tenant"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -list-pod-mappings %s" % (g_araalictl_path, tstr),
+            result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+
 def tenant_create(tenant_id, user_email, tenant_name=None, user_name=None):
     """Create a subtenant"""
     cmd = "%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (

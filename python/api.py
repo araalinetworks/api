@@ -165,6 +165,37 @@ def services(runlink, all=False, only_new=False):
     return out
 
 
+class Lens(object):
+    @classmethod
+    def get(cls, enforced=False, starred=False, tenant=None):
+        cls.objs = []
+        for obj in araalictl.get_lenses(enforced, starred, tenant):
+            cls.objs.append(Lens(obj))
+        return cls.objs
+
+    def __init__(self, obj):
+        self.obj = obj
+
+    def star(self):
+        if "zone" in self.obj and self.obj["zone"]:
+            return araalictl.star_lens(zone=self.obj["zone"], app=self.obj["app"])
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            return araalictl.star_lens(service="%s:%s" % (self.obj["fqdn"],self.obj["port"]))
+        return araalictl.star_lens(service="%s:%s" % (self.obj["ip"], self.obj["port"]))
+            
+    def to_data(self, display=False):
+        return self.obj
+
+class RBAC(object):
+    @classmethod
+    def show_roles(cls):
+        return araalictl.rbac_show_roles()
+
+    @classmethod
+    def show_users(cls):
+        return araalictl.rbac_show_users()
+
+
 class Service(object):
     def __init__(self, data):
         self.dns_pattern = None
