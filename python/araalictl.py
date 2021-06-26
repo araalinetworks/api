@@ -103,6 +103,15 @@ def rbac_add_role(name, zone, app, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def rbac_del_role(name, tenant=None):
+    """del role"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s user-role -op=del -name=%s %s" % (
+                     g_araalictl_path, name, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def rbac_assign_roles(email, roles, tenant=None):
     """assign a list of roles to email"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""

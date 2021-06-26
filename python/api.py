@@ -195,6 +195,17 @@ class RBAC(object):
     def show_users(cls):
         return araalictl.rbac_show_users()
 
+    @classmethod
+    def create_role(cls, name, zone, app, tenant=None):
+        return araalictl.rbac_add_role(name, zone, app, tenant)
+
+    @classmethod
+    def delete_role(cls, name, tenant=None):
+        return araalictl.rbac_del_role(name, tenant)
+
+    @classmethod
+    def assign_roles(cls, email, roles=[], tenant=None):
+        return araalictl.rbac_assign_roles(email, roles, app, tenant)
 
 class Service(object):
     def __init__(self, data):
