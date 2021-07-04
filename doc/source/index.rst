@@ -37,7 +37,6 @@ So let the show begin!
    araalitermscondition
    gettingstarted
    assessmentreport
-   editing_docs
    araalictlcommandline
    araalictlpython
    araalictlgolang
