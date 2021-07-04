@@ -1,34 +1,37 @@
-=====================================
-Contributing to the Community Edition
-=====================================
+Contributing
+============
 
 This documentation is currently open-source, meaning you can submit pull requests on the GitHub page to change the
 documentation.
 
+==================
 Installation/Setup
-------------------
+==================
 
 Clone Repo
-==========
+----------
 1. Login into GitHub (or create your account)
 2. Setup `ssh <https://github.com/settings/ssh/new>`_ (upload your public key to github account)
-3. Fork the existing repo (top-right button)
+3. Fork the `existing repo <https://github.com/araalinetworks/api>`_ (top-right button)
 4. Clone the forked repo using ssh (not html)
     - Click the clone button to get repo details for ssh
-    - Add/Create ssh key if needed
-5. git clone <*repo link*>
+5. git clone <*repo link from step 4*>
 6. Make changes (see :ref:`rst-files`)
 7. Push changes
 8. Submit pull request
-9. Keep fork synced to upstream by following the steps for UI on `this link <https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_, then executing the following lines ::
+9. Keep fork synced to upstream by following the steps for UI on `this link <https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_, then executing the following lines to get the synced-up changes on your laptop::
 
 
+    git pull -r
+    # this line might fail
+    # in that case, stash and pop your local changes
+    # to make sure the pull goes through
     git stash
     git pull -r
     git stash pop
 
 Install sphinx-doc using your system installer
-==============================================
+----------------------------------------------
 
 mac install::
 
@@ -39,7 +42,7 @@ linux install::
     sudo apt-get -y install sphinx-doc
 
 Make sure sphinx-build is in your path
-======================================
+--------------------------------------
 
 Let the installer prompt you for the path. Or see manual instructions below. ::
 
@@ -58,7 +61,7 @@ You can put this in your ``.bashrc`` or ``.zshrc`` so it is automatically set on
     source ~/.bashrc
 
 Set up Sphinx with Python
-=========================
+-------------------------
 
 Follow `this link <https://www.docslikecode.com/learn/01-sphinx-python-rtd/>`_ ::
 
@@ -88,8 +91,9 @@ Repeat these steps to see changes in action ::
 
 .. _rst-files:
 
+====================
 How to Use rST Files
---------------------
+====================
 
 To contribute to the documentation, some knowledge of rST is required. Below are some helpful links.
 
