@@ -1,4 +1,5 @@
 import copy
+import glob
 import ipaddress
 import json
 import re
@@ -718,15 +719,284 @@ class TemplateChange(object):
         self.replace = replace
         self.delete = delete
 
-class Templates(object):
-    def __init__(self, template_yaml=None, tenant=None):
-        if not template_yaml:
-            self.templates = araalictl.fetch_templates(tenant)
+def dict_hash(d):
+    return tuple(sorted(d.items()))
+
+def match_node_template_node(template, node):
+    """match node to template node"""
+    for k,v in template.items():
+        if not re.search(str(v), str(node.get(k, ""))):
+            #print("false", str(v), node, k)
+            return False
+    return True
+
+def value_count(l):
+    vals = {}
+    for i in l:
+        vals[i] = vals.setdefault(i, 0) + 1
+    vals = list(vals.items())
+    vals.sort(key=lambda x: -x[1])
+    for k, v in vals:
+        yield {"value": k, "count": v}
+
+class Template(object):
+    def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None):
+        self.tenant = tenant
+        self.public = public
+        if obj:
+            self.obj = obj
+        elif fname:
+            with open(fname, "r") as f:
+                self.obj = yaml.load(f.read(), yaml.SafeLoader)
+            if "public" in fname:
+                self.public = True
         else:
-            self.templates = yaml.load(template_yaml)
+            self.obj = araalictl.fetch_templates(self.public, name, self.tenant)[0]
+        self.reindex()
+
+    def to_data(self):
+        return self.obj
+
+    def __repr__(self):
+        return json.dumps(self.to_data(), indent=2)
+
+    def save(self):
+        fname = "template%s-%s.yaml" % ("-public" if self.public else "",          
+                                   self.name())
+        with open(fname, "w") as f:
+            yaml.dump(self.obj, f)
+        print("Saved template to %s" % fname)
+
+    def name(self):
+        return self.obj["name"]
+
+    def rename(self, name):
+        self.obj["name"] = name
+
+    def push(self):
+        return araalictl.update_template([self.obj], self.public, self.tenant)
+
+    def reindex(self):
+        """index the template for subsequent efficient matching of links"""
+        nodes = {}
+        for l in self.links():
+            # remember the type of node
+            cdict = dict(l["client"])
+            cdict.update({"type": "c"})
+    
+            sdict = dict(l["server"])
+            sdict.update({"type": "s"})
+    
+            chash = dict_hash(cdict)
+            shash = dict_hash(sdict)
+    
+            nodes[chash] = nodes.setdefault(chash, {})
+            nodes[chash].setdefault(shash, 1)
+    
+            nodes[shash] = nodes.setdefault(shash, {})
+            nodes[shash].setdefault(chash, 1)
+
+        nodes = list(nodes.items())
+        nodes.sort(key=lambda x: -len(x[1]))
+    
+        # dedup nodes in the sorted list
+        ret = [] # prepare to return results
+        covered = set()
+        for h in nodes:
+            # keep a pruned peers list for links not already covered earlier
+            peers = []
+            # add all the links covered
+            if dict(h[0])["type"] == "c":
+                for p in h[1]:
+                    if (h[0], p) not in covered:
+                        peers.append(p)
+                        covered.add((h[0], p)) # mark it covered for future
+            else:
+                for p in h[1]:
+                    if (p, h[0]) not in covered:
+                        peers.append(p)
+                        covered.add((p, h[0]))
+            if peers: # all the links for the node are already covered, we are done
+                ret.append({"node": dict(h[0]),
+                            "peers": [dict(a) for a in peers],
+                            "peerCount": len(h[1])})
+
+        self.index = ret
+        return ret
+
+    def match_link(self, link):
+        def to_data(link):
+            def split_app(obj):
+                app = obj.get("app", "").split(".")
+                if len(app) >= 3:
+                    obj["app"] = app[0] # namesapce
+                    obj["pod"] = ".".join(app[1:-1]) # pod
+                    obj["container"] = app[-1] # container
+                return obj
+            ret = link.to_data()
+            ret["client"] = split_app(ret["client"])
+            ret["server"] = split_app(ret["server"])    
+            return ret
+
+        link.new_state = None
+        tindex = self.index
+        link_data = to_data(link)
+        cdict = dict(link_data["client"])
+        cdict.update({"type": "c"})
+    
+        sdict = dict(link_data["server"])
+        sdict.update({"type": "s"})
+    
+        for node in tindex:
+            if node["node"]["type"] == "c":
+                #print("c")
+                if match_node_template_node(node["node"], cdict): # client matched
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            link.new_state = "DEFINED_POLICY"
+                            link.policy = self.name()
+                            return True
+                    # no point matching further, all client peer links were
+                    # thoroughly checked
+                    return False
+            else: # its a server node in template index
+                #print("s")
+                if match_node_template_node(node["node"], sdict):
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            link.new_state = "DEFINED_POLICY"
+                            link.policy = self.name()
+                            return True
+                    return False
+        return False
+
+    def run(self, runlinks, matched=True):
+        for link in runlinks:
+            if self.match_link(link):
+                if matched:
+                    yield(link)
+            else:
+                if not matched:
+                    yield(link)
+
+    def nodes(self):
+        """produce a predictable ordered list of nodes"""
+        nodes = []
+        links = []
+        node_idx = {}
+        i = 0
+        for n in self.index:
+            # make a copy
+            obj = dict(n["node"])
+            del obj["type"]
+            nodes.append(obj)
+
+            nhash = dict_hash(obj)
+            links.append(len(n["peers"]))
+            node_idx[nhash] = i
+            i += 1
+
+        for n in self.index:
+            for p in n["peers"]:
+                obj = dict(p)
+                del obj["type"]
+                nhash = dict_hash(obj)
+                if nhash not in node_idx:
+                    nodes.append(obj)
+                    node_idx[nhash] = i
+                    i += 1
+                    links.append(1)
+                else:
+                    links[node_idx[nhash]] = links[node_idx[nhash]] + 1
+        return [{"node": n, "links": links[i]} for i,n in enumerate(nodes)]
+
+    def links(self, node_idx=None):
+        if node_idx is not None:
+            node_at_idx = self.nodes()[node_idx]["node"]
+        obj = self.obj
+        ret = []
+        for link in obj["template"]:
+            link = link["link_filter"]
+            client = link["client"]
+            server = link["server"]
+            if node_idx is None or client == node_at_idx or server == node_at_idx:
+                ret.append(link)
+        return ret
+
+    def delete_node(self, idx):
+        node = self.nodes()[idx]["node"]
+        new_links = []
+        for link in self.obj["template"]:
+            lf = link["link_filter"]
+            client = lf["client"]
+            server = lf["server"]
+            if not(client == node or server == node):
+                new_links.append(link)
+        self.obj["template"] = new_links
+        self.reindex()
+
+    def update_node(self, idx, change_dict):
+        old = self.nodes()[idx]["node"]
+        new = dict(old)
+        for k, v in change_dict.items():
+            new[k] = v
+
+        obj = self.obj
+        for link in obj["template"]:
+            link = link["link_filter"]
+            client = link["client"]
+            server = link["server"]
+            if client == old:
+                link["client"] = new
+            if server == old:
+                link["server"] = new
+        self.reindex()
+
+    def show(self):
+        print(yaml.dump(self.obj))
+
+class Templates(object):
+    def __init__(self, template_yaml=None, files=None, public=False, tenant=None):
+        if template_yaml:
+            self.templates = [Template(obj=a, public=public, tenant=tenant
+                                      ) for a in yaml.load(template_yaml,
+                                                           yaml.SafeLoader)]
+        elif files:
+            self.templates = [Template(fname=f) for f in glob.glob(files)]
+        else:
+            self.templates = [Template(obj=a, public=public, tenant=tenant
+                                      ) for a in araalictl.fetch_templates(
+                                            public=public, tenant=tenant)]
+
+    def add(self, t):
+        self.templates.append(t)
+
+    def to_data(self):
+        return [a.to_data() for a in self.templates]
+
+    def push(self):
+        for a in self.templates:
+            a.push()
+
+    def save(self):
+        for a in self.templates:
+            a.save()
+
+    def run(self, runlinks, matched=True):
+        for link in runlinks:
+            yield_link = False # yield only once, not per template
+            for t in self.templates:
+                for l in t.run([link], matched):
+                    yield_link = True
+                if link.new_state:
+                    if not matched:
+                        yield_link = False
+                    break # no point matching if it already matched template
+            if yield_link:
+                yield l
 
     def modify(self, changes=[], idxs=[]):
-        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         for template in templates:
             for c in changes:
                 if c.delete:
@@ -754,19 +1024,19 @@ class Templates(object):
                         template['selector_changes'][c.who][c.selector] = c.to
 
     def accept(self, use=False, tenant=None, idxs=[]):
-        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         for t in templates:
             t['use'] = use
         araalictl.update_template(templates, tenant)
 
     def delete(self, tenant=None, idxs=[]):
-        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         for t in templates:
             t['action'] = 'DEL'
         araalictl.update_template(templates, tenant)
 
     def show(self, idxs=[]):
-        templates = [t for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
+        templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         print(yaml.dump(templates))
 
 class Link(object):
@@ -822,8 +1092,8 @@ class Link(object):
     def template(self, accept=False, use=False, show=False, tenant=""):
         template = araalictl.template([self.to_data()], accept, use, tenant)
         if show:
-            print(template)
-        return Templates(template)
+            print(template.decode())
+        return Template(obj=yaml.load(template, yaml.SafeLoader)[0])
 
     def meta_policy(self):
         if self.type == "NAI":

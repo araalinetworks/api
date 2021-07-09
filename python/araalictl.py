@@ -309,21 +309,24 @@ def fetch_flows(data, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def fetch_templates(tenant=None):
-    """Create/Modify/Delete template"""
+def fetch_templates(public=False, template=None, tenant=None):
+    """Fetch templates (or public ones)"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -public " if public else ""
+    tstr += " -template=%s " % (template) if template else ""
 
     rc = run_command("%s api -list-templates %s" % (g_araalictl_path, tstr),
-                     result=True, strip=False)
+                     result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def update_template(data, tenant=None):
-    """Create/Modify/Delete template"""
+def update_template(data, public=False, tenant=None):
+    """Update template"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     if g_debug: print(yaml.dump(data))
-    rc = run_command("%s api -update-template %s" % (g_araalictl_path, tstr),
-                     in_text=yaml.dump(data), result=True, strip=False)
+    command = "-update-template" if not public else "-export-template"
+    rc = run_command("%s api %s %s" % (g_araalictl_path, command, tstr),
+                     in_text=yaml.dump(data), result=True, strip=False, debug=True)
     assert rc[0] == 0, rc[1]
     ret_val = json.loads(rc[1])
 
