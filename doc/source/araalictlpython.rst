@@ -139,3 +139,48 @@ LinkTable
 
       :param args: Multiple indices can be passed
       :type args: any number of int's
+
+Lens
+----
+.. class:: api.Lens
+
+   Class representing a Lens. Lenses can be either zone-apps or services.
+   They help to focus on smaller sections of the workspace.
+
+   Usage:
+
+      >>> for lens in api.Lens.get():
+      ...    lens.star()
+      ...
+
+   .. function:: api.Lens.get(enforced, starred, tenant)
+
+      Get all lenses. Can be filtered based on enforcement and starring.
+      Default values are `False, False, None`
+
+      :param args: enforced, starred
+      :type args: bool, bool
+
+   .. function:: api.Lens.unstar_all()
+      :noindex:
+
+      Unstar all lenses.
+
+   .. function:: enforce(ingress, egress, internal, enforcement_state)
+
+      Enforce lens. Default values are `True, True, False, True`
+
+      :param args: ingress, egress, internal, enforcement_state
+      :type args: bool, bool, bool, bool
+
+   .. function:: unenforce(ingress, egress, internal, enforcement_state)
+
+      Unenforce lens. Default values are `False, False, False, False`
+
+      :param args: ingress, egress, internal, enforcement_state
+      :type args: bool, bool, bool, bool
+
+   .. function:: star()
+      :noindex:
+
+      Star lens.
