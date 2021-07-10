@@ -19,7 +19,7 @@ Clone Repo
 6. Make changes (see :ref:`rst-files`)
 7. Push changes
 8. Submit pull request
-9. Keep fork synced to upstream by following the steps for UI on `this link <https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_, then executing the following lines to get the synced-up changes on your laptop::
+9. Keep fork synced to upstream by following the steps for UI on `this link <https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`__, then executing the following lines to get the synced-up changes on your laptop::
 
 
     git pull -r
@@ -63,7 +63,7 @@ You can put this in your ``.bashrc`` or ``.zshrc`` so it is automatically set on
 Set up Sphinx with Python
 -------------------------
 
-Follow `this link <https://www.docslikecode.com/learn/01-sphinx-python-rtd/>`_ ::
+Follow `this link <https://www.docslikecode.com/learn/01-sphinx-python-rtd/>`__ ::
 
     python3 -m venv ve-name
     # even when you open a new terminal next time, this is how
