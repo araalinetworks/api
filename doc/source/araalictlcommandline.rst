@@ -63,16 +63,7 @@ api
 
 lens
 ____
--fetch-enforcement-status                   show all lenses
-    -enforced                               show enforced lenses
 
--fetch-starred-lens                         show starred lenses
-
--clear-starred-lens                         unstar all lenses
-
--zone zone_name -app app_name -star-lens    star zone-app lens
-
--service fqdn/ip:port -star-lens            star service lens
 
 **enforce**
 

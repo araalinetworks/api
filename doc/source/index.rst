@@ -59,7 +59,7 @@ So let the show begin!
    guide_getting_started_minikube_macbook
    guide_getting_started_with_SIEM
    guide_templates
-
+   guide_lenses
 .. toctree::
    :maxdepth: 2
    :caption: Community:
