@@ -203,42 +203,42 @@ class Lens(object):
     def to_data(self, display=False):
         return self.obj
 
-    def enforce(self, ingress=True, egress=True, internal=False, enforcement_state=True):
+    def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
         data = None
-        ingress_str = "ENABLED" if ingress else "DISABLED"
-        egress_str = "ENABLED" if egress else "DISABLED"
-        internal_str = "ENABLED" if internal else "DISABLED"
-        enforcement_state_str = "ENABLED" if enforcement_state else "DISABLED"
+        za_ingress_str = "ENABLED" if za_ingress else "DISABLED"
+        za_egress_str = "ENABLED" if za_egress else "DISABLED"
+        za_internal_str = "ENABLED" if za_internal else "DISABLED"
+        svc_ingress_str = "ENABLED" if svc_ingress else "DISABLED"
         if "zone" in self.obj and self.obj["zone"]:
             data = [{"zone_name": self.obj["zone"],
                      "app_name": self.obj["app"],
-                     "ingress_enforced": ingress_str,
-                     "egress_enforced": egress_str,
-                     "internal_enforced": internal_str}]
+                     "ingress_enforced": za_ingress_str,
+                     "egress_enforced": za_egress_str,
+                     "internal_enforced": za_internal_str}]
             return araalictl.enforce(data)
         if "fqdn" in self.obj and self.obj["fqdn"]:
             data = [{"dns_pattern": self.obj["fqdn"],
                      "dst_port": self.obj["port"],
-                     "new_enforcement_state": enforcement_state_str}]
+                     "new_enforcement_state": svc_ingress_str}]
         return araalictl.enforce(data, service=True)
 
-    def unenforce(self, ingress=False, egress=False, internal=False, enforcement_state=False):
+    def unenforce(self, za_ingress=False, za_egress=False, za_internal=False, svc_ingress=False):
         data = None
-        ingress_str = "ENABLED" if ingress else "DISABLED"
-        egress_str = "ENABLED" if egress else "DISABLED"
-        internal_str = "ENABLED" if internal else "DISABLED"
-        enforcement_state_str = "ENABLED" if enforcement_state else "DISABLED"
+        za_ingress_str = "ENABLED" if za_ingress else "DISABLED"
+        za_egress_str = "ENABLED" if za_egress else "DISABLED"
+        za_internal_str = "ENABLED" if za_internal else "DISABLED"
+        svc_ingress_str = "ENABLED" if svc_ingress else "DISABLED"
         if "zone" in self.obj and self.obj["zone"]:
             data = [{"zone_name": self.obj["zone"],
                      "app_name": self.obj["app"],
-                     "ingress_enforced": ingress_str,
-                     "egress_enforced": egress_str,
-                     "internal_enforced": internal_str}]
+                     "ingress_enforced": za_ingress_str,
+                     "egress_enforced": za_egress_str,
+                     "internal_enforced": za_internal_str}]
             return araalictl.enforce(data)
         if "fqdn" in self.obj and self.obj["fqdn"]:
             data = [{"dns_pattern": self.obj["fqdn"],
                      "dst_port": self.obj["port"],
-                     "ingress_enforced": enforcement_state_str}]
+                     "new_enforcement_state": svc_ingress_str}]
         return araalictl.enforce(data, service=True)
 
 class RBAC(object):

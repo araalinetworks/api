@@ -144,18 +144,18 @@ Lens
 ----
 .. class:: api.Lens
 
-   Class representing a Lens. Lenses can be either zone-apps or services.
-   They help to focus on smaller sections of the workspace.
+   Class representing a Lens. A Lens can be either a zone-app or a service.
+   They are modular and comprehensive units that help to focus on smaller sections of the workspace.
 
    Usage:
 
-      >>> for lens in api.Lens.get():
-      ...    lens.star()
-      ...
+      >>> for lens in api.Lens.get(enforced=True):
+      ...    if "fqdn" in lens.obj and lens.obj["fqdn"]:
+      ...        lens.star()
 
-   .. function:: api.Lens.get(enforced, starred, tenant)
+   .. function:: api.Lens.get(enforced, starred)
 
-      Get all lenses. Can be filtered based on enforcement and starring.
+      Get all lenses. Can be filtered based on enforcement and starred status.
       Default values are `False, False, None`
 
       :param args: enforced, starred
@@ -164,20 +164,20 @@ Lens
    .. function:: api.Lens.unstar_all()
       :noindex:
 
-      Unstar all lenses.
+      Unstar all currently starred lenses.
 
-   .. function:: enforce(ingress, egress, internal, enforcement_state)
+   .. function:: enforce(za_ingress, za_egress, za_internal, svc_ingress)
 
       Enforce lens. Default values are `True, True, False, True`
 
-      :param args: ingress, egress, internal, enforcement_state
+      :param args: za_ingress, za_egress, za_internal, svc_ingress
       :type args: bool, bool, bool, bool
 
-   .. function:: unenforce(ingress, egress, internal, enforcement_state)
+   .. function:: unenforce(za_ingress, za_egress, za_internal, svc_ingress)
 
       Unenforce lens. Default values are `False, False, False, False`
 
-      :param args: ingress, egress, internal, enforcement_state
+      :param args: za_ingress, za_egress, za_internal, svc_ingress
       :type args: bool, bool, bool, bool
 
    .. function:: star()

@@ -295,7 +295,7 @@ def enforce(data, service=False, tenant=None):
     if not data:
         ret_val['empty'] = {"success": "Empty enforcement request"}
     else:
-        if g_debug:
+        if not g_debug:
             print(yaml.dump(data))
         rc = run_command("%s api %s %s" % (
             g_araalictl_path, ostr, tstr), in_text=yaml.dump(data), debug=True, result=True, strip=False)

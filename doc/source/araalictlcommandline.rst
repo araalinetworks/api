@@ -79,7 +79,7 @@ ____
  ::
 
     vi enforce_za.txt
-        # “i” to edit
+        # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
         # input the following
         # for zone-app:
             - zone_name: string
@@ -92,7 +92,7 @@ ____
         - dns_pattern: fqdn/ip
           dst_port: port
           new_enforcement_state: ENABLED
-        # Esc
+        # Esc to edit exit mode
         # “:wq”
         # for zone-app
             cat enforce_za.txt | ./araalictl api -enforce-zone-app
