@@ -10,7 +10,7 @@ authorize
 ---------
 sudo ./araalictl authorize
         Used to authorize this copy of araalictl.
-        
+
         Without any arguments, it will initiate the authorization and also
         auto-upgrade to the latest published production version.
 

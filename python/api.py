@@ -4,6 +4,10 @@ import ipaddress
 import json
 import re
 import sys
+
+from IPython import get_ipython
+from IPython.core.display import display
+
 if sys.version_info[0] >= 3:
     unicode = str
 import time
@@ -170,9 +174,22 @@ class Lens(object):
     @classmethod
     def get(cls, enforced=False, starred=False, tenant=None):
         cls.objs = []
-        for obj in araalictl.get_lenses(enforced, starred, tenant):
-            cls.objs.append(Lens(obj))
+        if starred:
+            for obj in araalictl.get_starred():
+                cls.objs.append(Lens(obj))
+        else:
+            for obj in araalictl.get_lenses(enforced, starred, tenant):
+                cls.objs.append(Lens(obj))
         return cls.objs
+
+    @classmethod
+    def unstar_all(cls):
+        return araalictl.unstar_all()
+
+    @classmethod
+    def unenforce_all(cls):
+        for obj in Lens.get():
+            obj.unenforce()
 
     def __init__(self, obj):
         self.obj = obj
@@ -186,6 +203,44 @@ class Lens(object):
             
     def to_data(self, display=False):
         return self.obj
+
+    def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
+        data = None
+        za_ingress_str = "ENABLED" if za_ingress else "DISABLED"
+        za_egress_str = "ENABLED" if za_egress else "DISABLED"
+        za_internal_str = "ENABLED" if za_internal else "DISABLED"
+        svc_ingress_str = "ENABLED" if svc_ingress else "DISABLED"
+        if "zone" in self.obj and self.obj["zone"]:
+            data = [{"zone_name": self.obj["zone"],
+                     "app_name": self.obj["app"],
+                     "ingress_enforced": za_ingress_str,
+                     "egress_enforced": za_egress_str,
+                     "internal_enforced": za_internal_str}]
+            return araalictl.enforce(data)
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            data = [{"dns_pattern": self.obj["fqdn"],
+                     "dst_port": self.obj["port"],
+                     "new_enforcement_state": svc_ingress_str}]
+        return araalictl.enforce(data, service=True)
+
+    def unenforce(self, za_ingress=False, za_egress=False, za_internal=False, svc_ingress=False):
+        data = None
+        za_ingress_str = "ENABLED" if za_ingress else "DISABLED"
+        za_egress_str = "ENABLED" if za_egress else "DISABLED"
+        za_internal_str = "ENABLED" if za_internal else "DISABLED"
+        svc_ingress_str = "ENABLED" if svc_ingress else "DISABLED"
+        if "zone" in self.obj and self.obj["zone"]:
+            data = [{"zone_name": self.obj["zone"],
+                     "app_name": self.obj["app"],
+                     "ingress_enforced": za_ingress_str,
+                     "egress_enforced": za_egress_str,
+                     "internal_enforced": za_internal_str}]
+            return araalictl.enforce(data)
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            data = [{"dns_pattern": self.obj["fqdn"],
+                     "dst_port": self.obj["port"],
+                     "new_enforcement_state": svc_ingress_str}]
+        return araalictl.enforce(data, service=True)
 
 class RBAC(object):
     @classmethod

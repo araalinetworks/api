@@ -66,6 +66,12 @@ def star_lens(zone="", app="", service=None, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def unstar_all():
+    rc = run_command("%s api -clear-starred-lens" % (
+                     g_araalictl_path), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def get_lenses(enforced=False, starred=False, tenant=None):
     """get lenses"""
     flags = ""
@@ -75,6 +81,15 @@ def get_lenses(enforced=False, starred=False, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s api -fetch-enforcement-status %s %s" % (
                      g_araalictl_path, flags, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def get_starred(user_email=None, tenant=None):
+    """show starred"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (user_email) if user_email else ""
+    rc = run_command("%s api -fetch-starred-lens %s" % (
+        g_araalictl_path, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -292,7 +307,7 @@ def enforce(data, service=False, tenant=None):
         if g_debug:
             print(yaml.dump(data))
         rc = run_command("%s api %s %s" % (
-            g_araalictl_path, ostr, tstr), result=True, strip=False)
+            g_araalictl_path, ostr, tstr), in_text=yaml.dump(data), debug=False, result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val = json.loads(rc[1])
 

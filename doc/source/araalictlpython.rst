@@ -139,3 +139,4 @@ LinkTable
 
       :param args: Multiple indices can be passed
       :type args: any number of int's
+
