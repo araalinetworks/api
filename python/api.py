@@ -172,7 +172,7 @@ def services(runlink, all=False, only_new=False):
 
 class Lens(object):
     @classmethod
-    def get(cls, enforced=False, starred=False, user_email=None, tenant=None):
+    def get(cls, enforced=False, starred=False, all=True, user_email=None, tenant=None):
         cls.objs = []
         if starred:
             for obj in araalictl.get_starred(user_email, tenant):
