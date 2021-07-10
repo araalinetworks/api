@@ -1,5 +1,26 @@
+Guide for Templates
+==================
+
+Overview
+--------
+There is a marketplace for shareable App policies. In the UI sidebar, there is a section labeled “Templates”.
+Araali has started publishing public templates for well-known apps starting with Araali apps. Private templates can be created
+to auto-approve based on pattern matching, and user contribution to the marketplace will be possible in the future
+(today the public policies are Araali-controlled).
+
+These templates are not acted upon by default; they are only intended for people who want to cruise control by putting
+the approval process on auto-pilot (this is based on published and community-reviewed App patterns). These templates can
+be stopped with the click of a button. It is also possible to do all of this with APIs.
+
+`Enabling the “araalifw-kube” template <https://vimeo.com/573261476>`_ will auto-approve all Araali links and
+suppress any alerts coming from Araali's app (Daemonset/Operator).
+
+Please note that the public template for Araali is still being tested internally. It should be safe for use:
+it just may not be comprehensive or complete yet.
+
+
 Guide for Araali SW Template
-============================
+----------------------------
 
 Araali baselines your application communication and presents them as identity-based links that can then be accepted as policy. This means no handwriting policies, everything is automatically discovered.
 
