@@ -31,7 +31,7 @@ Get all Lenses. Can be filtered based on enforcement and starred status.
 Unstar
 ******
 
-Unstar all currently starred lenses.
+Unstar all currently starred Lenses.
 
 .. tabs::
    .. code-tab:: bash Command Line
@@ -62,7 +62,7 @@ Star Lens.
 Enforce
 *******
 
-Enforce lens.
+Enforce Lens.
 
 .. tabs::
    .. code-tab:: bash Command Line
@@ -99,7 +99,7 @@ Enforce lens.
 Unenforce
 *********
 
-Unenforce lens.
+Unenforce Lens.
 
 .. tabs::
    .. code-tab:: bash Command Line
