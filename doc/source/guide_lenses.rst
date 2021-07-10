@@ -35,25 +35,23 @@ Functions
 Get
 ***
 
-Get all Lenses. Can be filtered based on enforcement and starred status.
+Get all Lenses. It is possible to optionally get only enforced lenses or only starred lenses.
 
 .. tabs::
    .. code-tab:: bash Command Line
 
+         # use -enforced flag to fetch only enforced lenses
          ./araalictl api -fetch-enforcement-status
-         # "-enforced" tag optional
          ./araalictl api -fetch-starred-lens
 
    .. code-tab:: py
 
-         api.Lens.get(enforced, starred)
-         # enforced: default=False
-         # starred: default=False
+         api.Lens.get(enforced=True, starred=True)
 
 Unstar
 ******
 
-Unstar all currently starred Lenses.
+Unstar all currently starred Lenses. It is like performing a factory reset and clearing the Araali dashboard.
 
 .. tabs::
    .. code-tab:: bash Command Line
