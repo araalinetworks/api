@@ -234,11 +234,17 @@ def update_links(zone, app, data, tenant=None):
 
     return ret_val
 
-def get_links(zone, app, tenant=None):
+def get_links(zone=None, app=None, service=None, tenant=None):
     """Get links for a zone and app"""
+    assert service is not None or zone is not None and app is not None
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("%s api -zone %s -app %s -fetch-links %s" % (
-        g_araalictl_path, zone, app, tstr), result=True, strip=False)
+    if service:
+        tstr += " -service=%s " % (service)
+    else:
+        tstr += " -zone=%s -app=%s " % (zone, app)
+
+    rc = run_command("%s api -fetch-links %s" % (g_araalictl_path, tstr),
+                     result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 

@@ -22,9 +22,14 @@ except:
 
 import araalictl
 
+# Remap araalictl to api module commands: dont want to expose araalictl driver
+# layer directly to users, they should always come via api module
 auth = araalictl.auth
 deauth = araalictl.deauth
 set_araalictl_path = araalictl.set_araalictl_path
+
+# globally set tenant for every api once
+g_tenant = None
 
 def link_stats(runlink, all=False, only_new=True):
     defined, alerts, linktype_dict = 0, 0, {}
@@ -174,6 +179,7 @@ class Lens(object):
     @classmethod
     def get(cls, enforced=False, starred=False, all=True, user_email=None, tenant=None):
         cls.objs = []
+        if g_tenant and not tenant: tenant = g_tenant
         cls.tenant = tenant
         if starred:
             for obj in araalictl.get_starred(user_email, tenant):
@@ -202,7 +208,12 @@ class Lens(object):
                 self.app_obj = App(self.obj["zone"], self.obj["app"],
                                     tenant=self.tenant)
             else:
-                raise Exception("service lens not supported")
+                if "fqdn" in self.obj and self.obj["fqdn"]:
+                    svc = self.obj["fqdn"]
+                else:
+                    svc = self.obj["ip"]
+                self.app_obj = App(service="%s:%s" % (svc, self.obj["port"]),
+                                   tenant=self.tenant)
         return self.app_obj
 
     def star(self):
@@ -264,14 +275,17 @@ class RBAC(object):
 
     @classmethod
     def create_role(cls, name, zone, app, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         return araalictl.rbac_add_role(name, zone, app, tenant)
 
     @classmethod
     def delete_role(cls, name, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         return araalictl.rbac_del_role(name, tenant)
 
     @classmethod
     def assign_roles(cls, email, roles=[], tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         return araalictl.rbac_assign_roles(email, roles, app, tenant)
 
 class Service(object):
@@ -807,6 +821,7 @@ def value_count(l):
 
 class Template(object):
     def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None):
+        if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.public = public
         if obj:
@@ -1035,6 +1050,7 @@ class Template(object):
 
 class Templates(object):
     def __init__(self, template_yaml=None, files=None, public=False, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         if template_yaml:
             self.templates = [Template(obj=a, public=public, tenant=tenant
                                       ) for a in yaml.load(template_yaml,
@@ -1102,12 +1118,14 @@ class Templates(object):
                         template['selector_changes'][c.who][c.selector] = c.to
 
     def accept(self, use=False, tenant=None, idxs=[]):
+        if g_tenant and not tenant: tenant = g_tenant
         templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         for t in templates:
             t['use'] = use
         araalictl.update_template(templates, tenant)
 
     def delete(self, tenant=None, idxs=[]):
+        if g_tenant and not tenant: tenant = g_tenant
         templates = [t.obj for i, t in enumerate(self.templates) if (len(idxs) == 0) or (i in idxs)]
         for t in templates:
             t['action'] = 'DEL'
@@ -1303,6 +1321,7 @@ class Runtime(object):
     zone_app_links = {}
 
     def get_zone_apps(hard=False, full=False, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         if hard:
             Runtime.zone_apps = {}
             for za in araalictl.get_zones(tenant=tenant, full=full):
@@ -1317,6 +1336,7 @@ class Runtime(object):
         return list({"name":k, "Apps":v} for k,v in Runtime.zone_apps.items())
 
     def __init__(self, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.zones = None
 
@@ -1437,6 +1457,7 @@ class Runtime(object):
 
 class Zone(object):
     def __init__(self, name, tenant=None, hard=True):
+        if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.zone = name
         self.apps = [App(name, a, tenant=tenant, hard=hard) for a in Runtime.zone_apps.get(name, [])]
@@ -1511,10 +1532,15 @@ class App(object):
     ZONE_MARKER = "__ZONE__"
     APP_MARKER = "__APP__"
 
-    def __init__(self, zone, app, tenant=None, hard=True, ingress_enforced=False, egress_enforced=False, internal_enforced=False):
+    def __init__(self, zone=None, app=None, service=None, tenant=None, hard=True,
+                 ingress_enforced=False, egress_enforced=False,
+                 internal_enforced=False):
+        assert service is not None or zone is not None and app is not None
+        if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.zone = zone
         self.app = app
+        self.service = service
         self.ingress_enforced = ingress_enforced
         self.egress_enforced = egress_enforced
         self.internal_enforced = internal_enforced
@@ -1525,12 +1551,19 @@ class App(object):
 
     def refresh(self, hard=True):
         self.links = []
-        if not hard and (self.zone, self.app) in Runtime.zone_app_links:
+        if (not self.service and not hard and (self.zone, self.app) in
+                                                    Runtime.zone_app_links):
             for link in Runtime.zone_app_links[(self.zone, self.app)]:
                 self.links.append(Link(link, self.zone, self.app))
         else:
-            for link in araalictl.get_links(self.zone, self.app, tenant=self.tenant):
-                self.links.append(Link(link, self.zone, self.app))
+            if self.service:
+                for link in araalictl.get_links(service=self.service,
+                                                tenant=self.tenant):
+                    self.links.append(Link(link, self.zone, self.app))
+            else:
+                for link in araalictl.get_links(self.zone, self.app,
+                                                tenant=self.tenant):
+                    self.links.append(Link(link, self.zone, self.app))
         return self
         
     def template(self):
@@ -1623,7 +1656,11 @@ class App(object):
             self.internal_enforced_new = internal
         
     def to_data(self):
-        return {"zone": self.zone, "app": self.app, "links": [a.to_data() for a in self.links]}
+        if self.service:
+            return {"service": self.service,
+                    "links": [a.to_data() for a in self.links]}
+        return {"zone": self.zone, "app": self.app,
+                "links": [a.to_data() for a in self.links]}
 
     def stats(self, all=False):
         def impl():
@@ -1670,6 +1707,7 @@ class App(object):
 
 class Paginator(object):
     def __init__(self, query_params={}, links = [], tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
         self.query_params = query_params
         self.links = links
         self.tenant = tenant
