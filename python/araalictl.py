@@ -347,16 +347,17 @@ def update_template(data, public=False, tenant=None):
 
     return ret_val
 
-def template(data, save=False, use=False, tenant=None):
+def template(data, save=False, use=False, name=None, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    sstr = " -save-link-template " if save else ""
-    ustr = " -use-link-template " if use else ""
+    tstr += " -multi-link-name=%s " % (name) if name else ""
+    tstr += " -save-link-template " if save else ""
+    tstr += " -use-link-template " if use else ""
 
     if g_debug: print(yaml.dump(data))
-    rc = run_command("%s api -link-to-template %s %s %s" % (g_araalictl_path, tstr, sstr, ustr),
-                     in_text=yaml.dump(data), result=True, strip=False)
+    rc = run_command("%s api -link-to-template %s" % (g_araalictl_path,
+                     tstr), in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 if __name__ == '__main__':
     sys.exit(fetch())

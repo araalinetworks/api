@@ -174,6 +174,7 @@ class Lens(object):
     @classmethod
     def get(cls, enforced=False, starred=False, all=True, user_email=None, tenant=None):
         cls.objs = []
+        cls.tenant = tenant
         if starred:
             for obj in araalictl.get_starred(user_email, tenant):
                 cls.objs.append(Lens(obj))
@@ -193,6 +194,16 @@ class Lens(object):
 
     def __init__(self, obj):
         self.obj = obj
+        self.app_obj = None
+
+    def app(self):
+        if self.app_obj is None:
+            if "zone" in self.obj:
+                self.app_obj = App(self.obj["zone"], self.obj["app"],
+                                    tenant=self.tenant)
+            else:
+                raise Exception("service lens not supported")
+        return self.app_obj
 
     def star(self):
         if "zone" in self.obj and self.obj["zone"]:
@@ -978,14 +989,26 @@ class Template(object):
                 ret.append(link)
         return ret
 
-    def delete_node(self, idx):
+    def keep_node(self, idx):
         node = self.nodes()[idx]["node"]
         new_links = []
         for link in self.obj["template"]:
             lf = link["link_filter"]
             client = lf["client"]
             server = lf["server"]
-            if not(client == node or server == node):
+            if client == node or server == node:
+                new_links.append(link)
+        self.obj["template"] = new_links
+        self.reindex()
+
+    def delete_nodes(self, *idx):
+        nodes = [self.nodes()[i]["node"] for i in idx]
+        new_links = []
+        for link in self.obj["template"]:
+            lf = link["link_filter"]
+            client = lf["client"]
+            server = lf["server"]
+            if not(client in nodes or server in nodes):
                 new_links.append(link)
         self.obj["template"] = new_links
         self.reindex()
@@ -1148,7 +1171,7 @@ class Link(object):
         template = araalictl.template([self.to_data()], accept, use, tenant)
         if show:
             print(template.decode())
-        return Template(obj=yaml.load(template, yaml.SafeLoader)[0])
+        return Template(obj=template[0])
 
     def meta_policy(self):
         if self.type == "NAI":
@@ -1510,6 +1533,11 @@ class App(object):
                 self.links.append(Link(link, self.zone, self.app))
         return self
         
+    def template(self):
+        return Template(obj=araalictl.template(
+                            [a.to_data() for a in self.iterlinks()],
+                        name="%s-%s" % (self.zone, self.app))[0])
+
     def link_stats(self, all=False, only_new=True, runlink=None):
         if not runlink: runlink = self.iterlinks()
         return link_stats(runlink, all, only_new)
