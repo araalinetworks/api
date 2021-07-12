@@ -202,6 +202,15 @@ class Lens(object):
         self.obj = obj
         self.app_obj = None
 
+    def type(self):
+        if "zone" in self.obj:
+            return "app"
+        if "fqdn" in self.obj:
+            return "fqdn"
+        if "ip" in self.obj:
+            return "ip"
+        return "unknown"
+
     def app(self):
         if self.app_obj is None:
             if "zone" in self.obj:
@@ -224,7 +233,9 @@ class Lens(object):
         return araalictl.star_lens(service="%s:%s" % (self.obj["ip"], self.obj["port"]))
             
     def to_data(self, display=False):
-        return self.obj
+        obj = dict(self.obj)
+        obj["type"] = self.type()
+        return obj
 
     def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
         data = None
