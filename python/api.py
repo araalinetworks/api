@@ -174,6 +174,31 @@ def services(runlink, all=False, only_new=False):
     print("Total %s" % count)
     return out
 
+class Assess(object):
+    def __init__(self, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        self.tenant = tenant
+        self.refresh()
+    def refresh(self):
+        self.obj = araalictl.assess(tenant=self.tenant)
+
+    def summary(self):
+        return self.obj["runtime_summary"]["summary"]
+    def top_consumed_services(self):
+        return self.obj["top_consumed_services"]
+    def inactive_ports(self):
+        return self.obj["inactive_port_services"]
+    def important_processes(self):
+        return self.obj["important_processes"]
+    def starred_lenses(self):
+        return self.obj["starred_lenses"]
+    def geo_org_accessors(self):
+        return self.obj["geo_org_accessors"]
+    def databases(self):
+        return self.obj["databases"]
+    def dbaas(self):
+        return self.obj["dbaas"]
+
 
 class Lens(object):
     @classmethod

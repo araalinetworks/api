@@ -72,6 +72,14 @@ def unstar_all():
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def assess(tenant=None):
+    """get assessment report to fetch important lenses"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s assessment -report %s" % (
+                     g_araalictl_path, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def get_lenses(enforced=False, starred=False, tenant=None):
     """get lenses"""
     flags = ""
