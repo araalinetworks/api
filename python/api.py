@@ -841,7 +841,9 @@ def dict_hash(d):
 def match_node_template_node(template, node):
     """match node to template node"""
     for k,v in template.items():
-        if not re.search(str(v), str(node.get(k, ""))):
+        if not k in node:
+            return False
+        if not re.search(str(v), str(node[k])):
             #print("false", str(v), node, k)
             return False
     return True
@@ -1006,12 +1008,13 @@ class Template(object):
             # make a copy
             obj = dict(n["node"])
             del obj["type"]
-            nodes.append(obj)
 
             nhash = dict_hash(obj)
-            links.append(len(n["peers"]))
-            node_idx[nhash] = i
-            i += 1
+            if nhash not in node_idx:
+                nodes.append(obj)
+                node_idx[nhash] = i
+                links.append(len(n["peers"]))
+                i += 1
 
         for n in self.index:
             for p in n["peers"]:
@@ -1021,8 +1024,8 @@ class Template(object):
                 if nhash not in node_idx:
                     nodes.append(obj)
                     node_idx[nhash] = i
-                    i += 1
                     links.append(1)
+                    i += 1
                 else:
                     links[node_idx[nhash]] = links[node_idx[nhash]] + 1
         return [{"node": n, "links": links[i]} for i,n in enumerate(nodes)]
