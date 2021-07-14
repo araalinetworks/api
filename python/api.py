@@ -185,19 +185,19 @@ class Assess(object):
     def summary(self):
         return self.obj["runtime_summary"]["summary"]
     def top_consumed_services(self):
-        return self.obj["top_consumed_services"]
+        return self.obj.get("top_consumed_services", [])
     def inactive_ports(self):
-        return self.obj["inactive_port_services"]
+        return self.obj.get("inactive_port_services", [])
     def important_processes(self):
-        return self.obj["important_processes"]
+        return self.obj.get("important_processes", [])
     def starred_lenses(self):
-        return self.obj["starred_lenses"]
+        return self.obj.get("starred_lenses", [])
     def geo_org_accessors(self):
-        return self.obj["geo_org_accessors"]
+        return self.obj.get("geo_org_accessors", [])
     def databases(self):
-        return self.obj["databases"]
+        return self.obj.get("databases", [])
     def dbaas(self):
-        return self.obj["dbaas"]
+        return self.obj.get("dbaas", [])
 
 
 class Lens(object):
