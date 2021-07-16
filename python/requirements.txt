@@ -1,0 +1,6 @@
+jupyter
+nbdime
+pandas 
+pyyaml
+pyreadline
+requests

@@ -889,6 +889,24 @@ class Template(object):
     def name(self):
         return self.obj["name"]
 
+    def clear_pushdown(self, endpoint="server", field="dns_pattern", value=None):
+        """clear value pushdown to actual policy"""
+        for link in self.obj["template"]:
+            if field in link["link_filter"][endpoint]:
+                # if value is specified, only that specific value is cleared
+                # else any value for that field is cleared
+                if not value or value == link["link_filter"][endpoint][field]:
+                    del link["selector_change"][endpoint][field]
+
+    def pushdown(self, endpoint="server", field="dns_pattern", value=None):
+        """pushdown value to actual policy"""
+        for link in self.obj["template"]:
+            if field in link["link_filter"][endpoint]:
+                # if value is specified, only that specific value is pushed down
+                # else any value for that field is assumed ready to pushdown
+                if not value or value == link["link_filter"][endpoint][field]:
+                    link["selector_change"][endpoint][field] = link["link_filter"][endpoint][field]
+
     def rename(self, name):
         self.obj["name"] = name
 
@@ -1082,6 +1100,7 @@ class Template(object):
                 link["client"] = new
             if server == old:
                 link["server"] = new
+        self.pushdown()
         self.reindex()
 
     def show(self):
@@ -1091,9 +1110,8 @@ class Templates(object):
     def __init__(self, template_yaml=None, files=None, public=False, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         if template_yaml:
-            self.templates = [Template(obj=a, public=public, tenant=tenant
-                                      ) for a in yaml.load(template_yaml,
-                                                           yaml.SafeLoader)]
+            self.templates = [Template(obj=a, public=public, tenant=tenant)
+                              for a in template_yaml]
         elif files:
             self.templates = [Template(fname=f) for f in glob.glob(files)]
         else:
