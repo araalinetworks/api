@@ -262,6 +262,32 @@ class Lens(object):
         obj["type"] = self.type()
         return obj
 
+    def monitor(self, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        if "zone" in self.obj and self.obj["zone"]:
+            return araalictl.monitor(on=True, zone=self.obj["zone"],
+                                     app=self.obj["app"], tenant=tenant)
+
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            service = self.obj["fqdn"]
+        else:
+            service = self.obj["ip"]
+        service = "%s:%s" % (service, self.obj["port"])
+        return araalictl.monitor(on=True, service=service, tenant=tenant)
+
+    def unmonitor(self, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        if "zone" in self.obj and self.obj["zone"]:
+            return araalictl.monitor(on=False, zone=self.obj["zone"],
+                                     app=self.obj["app"], tenant=tenant)
+
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            service = self.obj["fqdn"]
+        else:
+            service = self.obj["ip"]
+        service = "%s:%s" % (service, self.obj["port"])
+        return araalictl.monitor(on=False, service=service, tenant=tenant)
+
     def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
         data = None
         za_ingress_str = "ENABLED" if za_ingress else "DISABLED"

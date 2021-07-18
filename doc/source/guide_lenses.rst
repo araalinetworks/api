@@ -40,13 +40,39 @@ Get all Lenses. It is possible to optionally get only enforced lenses or only st
 .. tabs::
    .. code-tab:: bash Command Line
 
-         # use -enforced flag to fetch only enforced lenses
+         # get all lenses along with their enforcement status
          ./araalictl api -fetch-enforcement-status
+
+         # use -enforced flag to fetch only enforced lenses
+         ./araalictl api -fetch-enforcement-status -enforced
+
+         # use a seperate command to fetch only starred lenses
          ./araalictl api -fetch-starred-lens
 
    .. code-tab:: py
 
+         # Without params it will get all lenses
+         # Use enforced=True, or starred=True explictly to get the subset that
+         # is enforced/starred
          api.Lens.get(enforced=True, starred=True)
+
+Star
+****
+
+Star Lens.
+
+.. tabs::
+   .. code-tab:: bash Command Line
+
+         # star zone-app lens
+         ./araalictl api -zone zone_name -app app_name -star-lens
+
+         # star service lens
+         ./araalictl api -service fqdn/ip:port -star-lens
+
+   .. code-tab:: py
+
+         .star()
 
 Unstar
 ******
@@ -62,22 +88,43 @@ Unstar all currently starred Lenses. It is like performing a factory reset and c
 
          api.Lens.unstar_all()
 
-Star
-****
+Monitor
+*******
 
-Star Lens.
+Monitor a lens. You start getting emails when there is new activity in the lens
 
 .. tabs::
    .. code-tab:: bash Command Line
 
-         ./araalictl api -zone zone_name -app app_name -star-lens
          # star zone-app lens
-         ./araalictl api -service fqdn/ip:port -star-lens
+         ./araalictl api -zone zone_name -app app_name -subscribe-for-alert
+
          # star service lens
+         ./araalictl api -service fqdn/ip:port -subscribe-for-alert
 
    .. code-tab:: py
 
-         .star()
+         .monitor()
+
+Unmonitor
+*********
+
+Stop monitoring a lens. You stop getting emails for the lens
+
+.. tabs::
+   .. code-tab:: bash Command Line
+
+         # star zone-app lens
+         ./araalictl api -zone zone_name -app app_name -unsubscribe-from-alert
+
+         # star service lens
+         ./araalictl api -service fqdn/ip:port -unsubscribe-from-alert
+
+   .. code-tab:: py
+
+         .unmonitor()
+
+
 
 Enforce
 *******
@@ -87,26 +134,31 @@ Enforce Lens.
 .. tabs::
    .. code-tab:: bash Command Line
 
-        vi enforce_za.txt
         # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
         # input the following
+        vi enforce_za.txt
+
         # for zone-app:
-            - zone_name: string
-              apps:
-              - app_name: string
-                ingress_enforced: True
-                egress_enforced: True
-                internal_enforced: True
+        - zone_name: string
+          apps:
+          - app_name: string
+            ingress_enforced: True
+            egress_enforced: True
+            internal_enforced: True
+
         # for service:
-            - dns_pattern: fqdn/ip
-              dst_port: port
-              new_enforcement_state: ENABLED
-        # Esc to edit exit mode
-        # “:wq”
+        - dns_pattern: fqdn/ip
+          dst_port: port
+          new_enforcement_state: ENABLED
+
+        # Esc to exit edit mode in vi
+        # “:wq” to quit once in control mode
+
         # for zone-app
-            cat enforce_za.txt | ./araalictl api -enforce-zone-app
+        cat enforce_za.txt | ./araalictl api -enforce-zone-app
+
         # for service
-            cat enforce_za.txt | ./araalictl api -enforce-service
+        cat enforce_za.txt | ./araalictl api -enforce-service
 
    .. code-tab:: py
 

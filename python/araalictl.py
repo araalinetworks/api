@@ -54,6 +54,19 @@ def deauth():
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
+def monitor(on=True, zone=None, app=None, service=None, tenant=None):
+    """monitor lens"""
+    flags = ""
+    if service: flags += " -service %s" % service
+    else: flags += " -zone=%s -app=%s" % (zone, app)
+    cmd = "subscribe-for-alert" if on else "unsubscribe-from-alert"
+
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -%s %s %s" % (
+                     g_araalictl_path, cmd, flags, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def star_lens(zone="", app="", service=None, tenant=None):
     """star lens"""
     flags = ""
