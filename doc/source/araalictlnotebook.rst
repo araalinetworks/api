@@ -34,3 +34,9 @@ To access the notebook, copy and paste this URL into your browser:
 ::
 
         NOTE: Locate token to use in the terminal output
+
+Documentation
+-------------
+Use the python tab in this guide:
+
+        https://araali-networks-api.readthedocs.io/en/latest/guide_lenses.html
