@@ -16,9 +16,8 @@ Getting started
 In a terminal::
 
         # Create a directory where you will checkout from github
-        # Using test here as an example
-        mkdir test
-        cd test
+        mkdir -p opensrc
+        cd opensrc
         git clone git@github.com:araalinetworks/api.git
 
         # now run the notebook
