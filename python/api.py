@@ -1010,32 +1010,70 @@ class Template(object):
         sdict = dict(link_data["server"])
         sdict.update({"type": "s"})
     
+        cmatch = None
+        smatch = None
         for node in tindex:
             if node["node"]["type"] == "c":
                 #print("c")
-                if match_node_template_node(node["node"], cdict): # client matched
+                if not cmatch and match_node_template_node(node["node"], cdict): # client matched
+                    cmatch = dict(node["node"]) # cp so caller doesnt modify idx
                     for peer in node["peers"]:
                         if match_node_template_node(peer, sdict):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
-                            return True
-                    # no point matching further, all client peer links were
-                    # thoroughly checked
-                    return False
+                            return True, cmatch, peer
             else: # its a server node in template index
                 #print("s")
-                if match_node_template_node(node["node"], sdict):
+                if not smatch and match_node_template_node(node["node"], sdict):
+                    smatch = dict(node["node"])
                     for peer in node["peers"]:
                         if match_node_template_node(peer, cdict):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
-                            return True
-                    return False
-        return False
+                            return True, peer, smatch
+        return False, cmatch, smatch
+
+    def add_links(self, links):
+        """Merge links into template"""
+        for link in links:
+            # convert link to temporary template,
+            # we can add it as-is, or uplevel it to template node grain
+            t = link.template()
+    
+            matched, cnode, snode = self.match_link(link)
+            if matched: # both sides perfectly matched
+                print("*** link already part of template: %s %s" % (cnode, snode))
+    
+            elif cnode and snode: # both matched, but no link between them
+                print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
+                del cnode["type"]
+                del snode["type"]
+                t.obj["template"][0]["link_filter"]["client"] = cnode
+                t.obj["template"][0]["link_filter"]["server"] = snode
+                self.obj["template"].append(t.obj["template"][0])
+    
+            elif cnode: # only client had a match
+                print("adding new server to template node: %s %s" % (cnode, link.server))
+                del cnode["type"]
+                t.obj["template"][0]["link_filter"]["client"] = cnode
+                self.obj["template"].append(t.obj["template"][0])
+    
+            elif snode: # only server had a match
+                print("adding new client to template node: %s %s" % (link.client, snode))
+                del snode["type"]
+                t.obj["template"][0]["link_filter"]["server"] = snode
+                self.obj["template"].append(t.obj["template"][0])
+    
+            else: # both client and server nodes had no match in template
+                print("adding new client and server nodes to template: %s %s" % (link.client, link.server))
+                self.obj["template"].append(t.obj["template"][0])
+    
+        self.reindex()
+        return
 
     def run(self, runlinks, matched=True):
         for link in runlinks:
-            if self.match_link(link):
+            if self.match_link(link)[0]:
                 if matched:
                     yield(link)
             else:
