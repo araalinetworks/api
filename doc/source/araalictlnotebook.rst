@@ -10,5 +10,27 @@ links. This is quite useful as you tinker around with what Araali has
 discovered. The same APIs can be run outside of the notebook as a regular
 program/script.
 
-For starters, our github repo ships with a `notebook
-<https://github.com/araalinetworks/api/blob/main/python/araali_api.ipynb>`_
+Getting started
+---------------
+
+In a terminal::
+
+        # Create a directory where you will checkout from github
+        # Using test here as an example
+        mkdir test
+        cd test
+        git clone git@github.com:araalinetworks/api.git
+
+        # now run the notebook
+        cd api/python/
+        ./run.sh
+   
+Accessing Notebook
+------------------
+To access the notebook, copy and paste this URL into your browser:
+
+        http://localhost:8888/notebooks/araali_api_lens.ipynb
+
+::
+
+        NOTE: Locate token to use in the terminal output
