@@ -436,5 +436,9 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage,
 	listOfLinks := []Link{}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 
-	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: listOfLinks[len(listOfLinks)-1].PagingToken}, nil
+	pagingToken := ""
+        if len(listOfLinks) != 0 {
+		pagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
+	}
+	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: pagingToken}, nil
 }
