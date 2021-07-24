@@ -321,6 +321,18 @@ def get_compute(zone, app, tenant=None):
     assert rc[0] == 0, rc[1]
     return json.loads(rc[1])
 
+def world(direction="ingress_world,egress_world", on=True, tenant=None):
+    """Monitor perimeter ingress/egress"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    op = "subscribe-for-alert" if on else "unsubscribe-from-alert"
+
+    rc = run_command("%s api -%s -direction=%s %s" % (
+        g_araalictl_path, op, direction, tstr), debug=False, result=True,
+        strip=False)
+    assert rc[0] == 0, rc[1]
+    ret_val = json.loads(rc[1])
+
+    return ret_val
 
 def enforce(data, service=False, tenant=None):
     """Enforce zone app or service."""
