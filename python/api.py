@@ -174,6 +174,25 @@ def services(runlink, all=False, only_new=False):
     print("Total %s" % count)
     return out
 
+class Alerts(object):
+    def __init__(self, start_time=None, count=200, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+
+        self.start_time = start_time
+        self.count = count
+        self.tenant = tenant
+        self.paging_token = ""
+
+    def next(self):
+        if self.paging_token is None: return []
+
+        if self.paging_token == "":
+            alerts = araalictl.alerts(self.start_time, count=self.count)
+        else:
+            alerts = araalictl.alerts(token=self.paging_token, count=self.count)
+        self.paging_token = alerts[-1].get("paging_token", None)
+        return alerts
+
 class Assess(object):
     def __init__(self, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant

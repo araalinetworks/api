@@ -2,6 +2,7 @@
 """
 Wrappers for araalictl for python use
 """
+import datetime
 import json
 import os
 import requests
@@ -53,6 +54,22 @@ def deauth():
     cmd = "sudo %s authorize -clean" % g_araalictl_path
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
+
+def alerts(start_time=None, token=None, count=200, tenant=None):
+    """get alerts"""
+    if token:
+        cmd = "-paging-token %s" % token
+    else:
+        if not start_time:
+            start_time = datetime.datetime.now() - datetime.timedelta(days=1)
+        cmd = "-starttime %s" % (int(start_time.timestamp()))
+
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -fetch-alerts %s -count %s %s" % (
+                        g_araalictl_path, cmd, count, tstr),
+                     debug=False, result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def monitor(on=True, zone=None, app=None, service=None, tenant=None):
     """monitor lens"""
