@@ -96,9 +96,11 @@ def star_lens(zone="", app="", service=None, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def unstar_all():
-    rc = run_command("%s api -clear-starred-lens" % (
-                     g_araalictl_path), result=True, strip=False)
+def unstar_all(tenant=None):
+    """unstar all lenses"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s api -clear-starred-lens %s" % (
+                     g_araalictl_path, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 

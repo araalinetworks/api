@@ -187,10 +187,15 @@ class Alerts(object):
         if self.paging_token is None: return []
 
         if self.paging_token == "":
-            alerts = araalictl.alerts(self.start_time, count=self.count)
+            alerts = araalictl.alerts(self.start_time, count=self.count,
+                                      tenant=self.tenant)
         else:
-            alerts = araalictl.alerts(token=self.paging_token, count=self.count)
-        self.paging_token = alerts[-1].get("paging_token", None)
+            alerts = araalictl.alerts(token=self.paging_token, count=self.count,
+                                      tenant=self.tenant)
+        if alerts:
+            self.paging_token = alerts[-1].get("paging_token", None)
+        else:
+            self.paging_token = None
         return alerts
 
 class Assess(object):
@@ -246,8 +251,9 @@ class Lens(object):
         return cls.objs
 
     @classmethod
-    def unstar_all(cls):
-        return araalictl.unstar_all()
+    def unstar_all(cls, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.unstar_all(tenant)
 
     @classmethod
     def unenforce_all(cls):
