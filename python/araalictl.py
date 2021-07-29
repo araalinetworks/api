@@ -340,9 +340,11 @@ def get_compute(zone, app, tenant=None):
     assert rc[0] == 0, rc[1]
     return json.loads(rc[1])
 
-def world(direction="ingress_world,egress_world", on=True, tenant=None):
+def world(direction="ingress_world,egress_world", on=True, email=None,
+          tenant=None):
     """Monitor perimeter ingress/egress"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     op = "subscribe-for-alert" if on else "unsubscribe-from-alert"
 
     rc = run_command("%s api -%s -direction=%s %s" % (

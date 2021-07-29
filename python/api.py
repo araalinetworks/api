@@ -226,16 +226,16 @@ class Assess(object):
 
 class Lens(object):
     @classmethod
-    def monitor_world(cls, tenant=None):
+    def monitor_world(cls, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         return araalictl.world(direction="ingress_world,egress_world", on=True,
-                        tenant=tenant)
+                        email=email, tenant=tenant)
 
     @classmethod
-    def unmonitor_world(cls, tenant=None):
+    def unmonitor_world(cls, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         return araalictl.world(direction="ingress_world,egress_world", on=False,
-                        tenant=tenant)
+                        email=email, tenant=tenant)
 
     @classmethod
     def get(cls, enforced=False, starred=False, all=True, user_email=None, tenant=None):
