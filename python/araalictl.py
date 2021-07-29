@@ -133,6 +133,32 @@ def get_starred(user_email=None, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def get_mapping(tenant=None):
+    """get app remapping config"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s app-mapping -op list %s" % (
+        g_araalictl_path, tstr), result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def add_mapping(data, tenant=None):
+    """add app remapping config"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s app-mapping -op add %s" % (
+        g_araalictl_path, tstr), in_text=yaml.dump(data), result=True,
+        strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rm_mapping(data, tenant=None):
+    """rm app remapping config"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    rc = run_command("%s app-mapping -op del %s" % (
+        g_araalictl_path, tstr), in_text=yaml.dump(data), result=True,
+        strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def rbac_show_roles(tenant=None):
     """show rbac"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""

@@ -174,6 +174,24 @@ def services(runlink, all=False, only_new=False):
     print("Total %s" % count)
     return out
 
+class Mapping(object):
+    @classmethod
+    def get(cls, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.get_mapping(tenant=tenant)
+
+    @classmethod
+    def add(cls, zone, app, label, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        araalictl.add_mapping([{"zone": zone, "app": app, "label": label}],
+                              tenant=tenant)
+
+    @classmethod
+    def rm(cls, zone, app, label, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        araalictl.rm_mapping([{"zone": zone, "app": app, "label": label}],
+                              tenant=tenant)
+
 class Alerts(object):
     def __init__(self, start_time=None, count=200, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
