@@ -923,9 +923,11 @@ def match_node_template_node(template, node):
     """match node to template node"""
     for k,v in template.items():
         if not k in node:
+            if 0: print("k %s not in %s" % (k, node))
             return False
         if not re.search(str(v), str(node[k])):
             #print("false", str(v), node, k)
+            if 0: print("v %s not eq %s" % (str(v), str(node[k])))
             return False
     return True
 
@@ -986,7 +988,9 @@ class Template(object):
                 # if value is specified, only that specific value is pushed down
                 # else any value for that field is assumed ready to pushdown
                 if not value or value == link["link_filter"][endpoint][field]:
-                    link["selector_change"][endpoint][field] = link["link_filter"][endpoint][field]
+                    link.setdefault("selector_change", {}).setdefault(
+                            endpoint, {})[field] = link["link_filter"
+                                                       ][endpoint][field]
 
     def rename(self, name):
         self.obj["name"] = name
@@ -1052,8 +1056,10 @@ class Template(object):
                     obj["container"] = app[-1] # container
                 return obj
             ret = link.to_data()
-            ret["client"] = split_app(ret["client"])
-            ret["server"] = split_app(ret["server"])    
+            if link.client.process:
+                ret["client"] = split_app(ret["client"])
+            if link.server.process:
+                ret["server"] = split_app(ret["server"])    
             return ret
 
         link.new_state = None
@@ -1068,6 +1074,7 @@ class Template(object):
         cmatch = None
         smatch = None
         for node in tindex:
+            #print(node)
             if node["node"]["type"] == "c":
                 #print("c")
                 if not cmatch and match_node_template_node(node["node"], cdict): # client matched
@@ -1077,6 +1084,11 @@ class Template(object):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
                             return True, cmatch, peer
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            smatch = peer
+                            break
             else: # its a server node in template index
                 #print("s")
                 if not smatch and match_node_template_node(node["node"], sdict):
@@ -1086,6 +1098,11 @@ class Template(object):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
                             return True, peer, smatch
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            cmatch = peer
+                            break
         return False, cmatch, smatch
 
     def add_links(self, links):
