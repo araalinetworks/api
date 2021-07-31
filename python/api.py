@@ -1083,11 +1083,11 @@ class Template(object):
                         if match_node_template_node(peer, sdict):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
-                            return True, cmatch, peer
+                            return True, cmatch, dict(peer)
                 else:
                     for peer in node["peers"]:
                         if match_node_template_node(peer, sdict):
-                            smatch = peer
+                            smatch = dict(peer)
                             break
             else: # its a server node in template index
                 #print("s")
@@ -1097,11 +1097,11 @@ class Template(object):
                         if match_node_template_node(peer, cdict):
                             link.new_state = "DEFINED_POLICY"
                             link.policy = self.name()
-                            return True, peer, smatch
+                            return True, dict(peer), smatch
                 else:
                     for peer in node["peers"]:
                         if match_node_template_node(peer, cdict):
-                            cmatch = peer
+                            cmatch = dict(peer)
                             break
         return False, cmatch, smatch
 
