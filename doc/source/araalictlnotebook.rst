@@ -34,6 +34,17 @@ To access the notebook, copy and paste this URL into your browser:
 
         NOTE: Locate token to use in the terminal output
 
+Plain old scripting
+-------------------
+If you are not familiar with notebook, you can also write old style scripts::
+
+        $ source araali/bin/activate && python3 myscript.py
+        $ cat myscript.py
+
+          import api
+          import araalictl
+          print(api.Lens.monitor_world())
+
 Documentation
 -------------
 Use the python tab in this guide:
