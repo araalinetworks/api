@@ -489,7 +489,7 @@ class Process(object):
 class NonAraaliClient(object):
     def __init__(self, data):
         self.process = None
-        self.subnet = ipaddress.ip_address(unicode(data["subnet"]))
+        self.subnet = ipaddress.ip_address(unicode(data.get("subnet", "0.0.0.0")))
         self.netmask = data.get("netmask", 0)
         self.private_subnet = data.get("private_subnet", False)
         self.endpoint_group = data.get("endpoint_group", "")
@@ -1122,22 +1122,26 @@ class Template(object):
                 del snode["type"]
                 t.obj["template"][0]["link_filter"]["client"] = cnode
                 t.obj["template"][0]["link_filter"]["server"] = snode
+                t.pushdown()
                 self.obj["template"].append(t.obj["template"][0])
     
             elif cnode: # only client had a match
                 print("adding new server to template node: %s %s" % (cnode, link.server))
                 del cnode["type"]
                 t.obj["template"][0]["link_filter"]["client"] = cnode
+                t.pushdown()
                 self.obj["template"].append(t.obj["template"][0])
     
             elif snode: # only server had a match
                 print("adding new client to template node: %s %s" % (link.client, snode))
                 del snode["type"]
                 t.obj["template"][0]["link_filter"]["server"] = snode
+                t.pushdown()
                 self.obj["template"].append(t.obj["template"][0])
     
             else: # both client and server nodes had no match in template
                 print("adding new client and server nodes to template: %s %s" % (link.client, link.server))
+                t.pushdown()
                 self.obj["template"].append(t.obj["template"][0])
     
         self.reindex()
