@@ -38,23 +38,23 @@ Get
 Get all Lenses. It is possible to optionally get only enforced lenses or only starred lenses.
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
-         # get all lenses along with their enforcement status
-         ./araalictl api -fetch-enforcement-status
+        # get all lenses along with their enforcement status
+        ./araalictl api -fetch-enforcement-status
 
-         # use -enforced flag to fetch only enforced lenses
-         ./araalictl api -fetch-enforcement-status -enforced
+        # use -enforced flag to fetch only enforced lenses
+        ./araalictl api -fetch-enforcement-status -enforced
 
-         # use a seperate command to fetch only starred lenses
-         ./araalictl api -fetch-starred-lens
+        # use a seperate command to fetch only starred lenses
+        ./araalictl api -fetch-starred-lens
 
    .. code-tab:: py
 
-         # Without params it will get all lenses
-         # Use enforced=True, or starred=True explictly to get the subset that
-         # is enforced/starred
-         api.Lens.get(enforced=True, starred=True)
+        # Without params it will get all lenses
+        # Use enforced=True, or starred=True explictly to get the subset that
+        # is enforced/starred
+        api.Lens.get(enforced=True, starred=True)
 
 Star
 ****
@@ -62,17 +62,17 @@ Star
 Star Lens.
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
-         # star zone-app lens
-         ./araalictl api -zone zone_name -app app_name -star-lens
+        # star zone-app lens
+        ./araalictl api -zone zone_name -app app_name -star-lens
 
-         # star service lens
-         ./araalictl api -service fqdn/ip:port -star-lens
+        # star service lens
+        ./araalictl api -service fqdn/ip:port -star-lens
 
    .. code-tab:: py
 
-         .star()
+        .star()
 
 Unstar
 ******
@@ -80,13 +80,13 @@ Unstar
 Unstar all currently starred Lenses. It is like performing a factory reset and clearing the Araali dashboard.
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
-         ./araalictl api -clear-starred-lens
+        ./araalictl api -clear-starred-lens
 
    .. code-tab:: py
 
-         api.Lens.unstar_all()
+        api.Lens.unstar_all()
 
 Monitor
 *******
@@ -94,17 +94,20 @@ Monitor
 Monitor a lens. You start getting emails when there is new activity in the lens
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
-         # star zone-app lens
-         ./araalictl api -zone zone_name -app app_name -subscribe-for-alert
+        # subscribe to zone-app lens alerts
+        ./araalictl api -zone zone_name -app app_name -subscribe-for-alert
 
-         # star service lens
-         ./araalictl api -service fqdn/ip:port -subscribe-for-alert
+        # subscribe to service lens alerts
+        ./araalictl api -service fqdn/ip:port -subscribe-for-alert
+
+        # subscribe to directional alerts
+        ./araalictl api -subscribe-for-alert -direction ingress_world, egress_world
 
    .. code-tab:: py
 
-         .monitor()
+        .monitor(email=None)
 
 Unmonitor
 *********
@@ -112,17 +115,51 @@ Unmonitor
 Stop monitoring a lens. You stop getting emails for the lens
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
-         # star zone-app lens
-         ./araalictl api -zone zone_name -app app_name -unsubscribe-from-alert
+        # unsubscribe from zone-app lens alerts
+        ./araalictl api -zone zone_name -app app_name -unsubscribe-from-alert
 
-         # star service lens
-         ./araalictl api -service fqdn/ip:port -unsubscribe-from-alert
+        # unsubscribe from service lens alerts
+        ./araalictl api -service fqdn/ip:port -unsubscribe-from-alert
 
    .. code-tab:: py
 
-         .unmonitor()
+         .unmonitor(email=None)
+
+
+Monitor All
+***********
+
+Monitor all lenses for alerts. You start getting emails when there are new alerts.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        # subscribe to world alerts
+        ./araalictl api -subscribe-for-alert -direction ingress_world, egress_world
+
+
+   .. code-tab:: py
+
+         api.Lens.monitor_world()
+
+
+Unmonitor All
+***********
+
+Unmonitor all lenses for alerts. You will stop getting emails when there are new alerts.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        # unsubscribe from world alerts
+        ./araalictl api -unsubscribe-from-alert -direction ingress_world, egress_world
+
+
+   .. code-tab:: py
+
+         api.Lens.unmonitor_world()
 
 
 
@@ -132,7 +169,7 @@ Enforce
 Enforce Lens.
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
         # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
         # input the following
@@ -174,7 +211,7 @@ Unenforce
 Unenforce Lens.
 
 .. tabs::
-   .. code-tab:: bash Command Line
+   .. code-tab:: sh Command Line
 
          # follow steps for enforce
          # but change True values to False

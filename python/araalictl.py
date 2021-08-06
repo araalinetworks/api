@@ -443,7 +443,9 @@ def template(data, save=False, use=False, name=None, tenant=None):
     rc = run_command("%s api -link-to-template %s" % (g_araalictl_path,
                      tstr), in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return yaml.load(rc[1], yaml.SafeLoader)
+    if save or use:
+        return {"policies":"Success: true"}
+    return yaml.load(rc[1].strip(), yaml.SafeLoader)
 
 if __name__ == '__main__':
     sys.exit(fetch())
