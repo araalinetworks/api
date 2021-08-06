@@ -183,3 +183,58 @@ issues::
 
         araalictl.push_pod_apps(mapping)
 
+
+Functions
+---------
+
+Get
+***
+
+Get all Mapping content.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        ./araalictl app-mapping -op list
+
+   .. code-tab:: py
+
+        api.Mapping.get()
+
+Add
+****
+
+Add to mapping content.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
+        vi add_mapping.txt
+        # Insert zone, app, label in yaml format
+        # Esc to exit edit mode in vi
+        # “:wq” to quit once in control mode
+        cat add_mapping.txt | ./araalictl app-mapping -op add
+
+   .. code-tab:: py
+
+        api.Mapping.add(zone, app, label)
+
+Remove
+******
+
+Remove from mapping content.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
+        vi add_mapping.txt
+        # Insert zone, app, label in yaml format
+        # Esc to exit edit mode in vi
+        # “:wq” to quit once in control mode
+        cat add_mapping.txt | ./araalictl app-mapping -op del
+
+   .. code-tab:: py
+
+        api.Mapping.rm(cls, zone, app, label)
