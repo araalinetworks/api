@@ -63,6 +63,7 @@ Get
 ***
 
 Get all templates. It is possible to optionally filter for public templates or access a specific template.
+
 .. tabs::
    .. code-tab:: sh Command Line
 
@@ -86,6 +87,7 @@ Rename
 ******
 
 Rename an existing template
+
 .. tabs::
    .. code-tab:: sh Command Line
 
@@ -109,6 +111,7 @@ Save
 ****
 
 Save a link as a template
+
 .. tabs::
    .. code-tab:: sh Command Line
 

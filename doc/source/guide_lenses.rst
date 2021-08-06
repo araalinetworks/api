@@ -146,7 +146,7 @@ Monitor all lenses for alerts. You start getting emails when there are new alert
 
 
 Unmonitor All
-***********
+*************
 
 Unmonitor all lenses for alerts. You will stop getting emails when there are new alerts.
 

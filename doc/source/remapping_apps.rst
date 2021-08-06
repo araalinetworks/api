@@ -188,7 +188,7 @@ Functions
 ---------
 
 Get
-***
+~~~
 
 Get all Mapping content.
 
@@ -202,7 +202,7 @@ Get all Mapping content.
         api.Mapping.get()
 
 Add
-****
+~~~~
 
 Add to mapping content.
 
@@ -221,7 +221,7 @@ Add to mapping content.
         api.Mapping.add(zone, app, label)
 
 Remove
-******
+~~~~~~
 
 Remove from mapping content.
 
