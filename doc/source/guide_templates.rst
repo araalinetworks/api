@@ -56,8 +56,8 @@ Now if you go back to your kube-system app and refresh the page, you will see al
  :width: 600
  :alt: Saving Public Template as Private
 
-Functions
----------
+Programmatic Manipulation
+-------------------------
 
 Get
 ***
