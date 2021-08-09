@@ -27,8 +27,8 @@ In a terminal::
 Accessing Notebook
 ------------------
 To access the notebook, copy and paste this URL into your browser:
-
-        http://localhost:8888/notebooks/araali_api_lens.ipynb
+ * `App Lens Notebook <http://localhost:8888/notebooks/araali_api_lens.ipynb>`_
+ * `Admin Notebook <http://localhost:8888/notebooks/araali_api_admin.ipynb>`_
 
 ::
 
