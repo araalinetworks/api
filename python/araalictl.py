@@ -193,6 +193,25 @@ def rbac_del_role(name, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def rbac_create_user(email, name, tenant=None):
+    """create user"""
+    tstr = " -id=%s " % (tenant) if tenant else ""
+    rc = run_command("%s tenant -op add-user -user-email=%s -user-name=%s %s" % (
+                     g_araalictl_path, email, name, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_delete_user(email, name, tenant=None):
+    """delete user"""
+    tstr = " -id=%s " % (tenant) if tenant else ""
+    rc = run_command("%s tenant -op del-user -user-email=%s -user-name=%s %s" % (
+                     g_araalictl_path, email, name, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
+
 def rbac_assign_roles(email, roles, tenant=None):
     """assign a list of roles to email"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""

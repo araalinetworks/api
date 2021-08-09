@@ -383,12 +383,19 @@ class Lens(object):
 
 class RBAC(object):
     @classmethod
-    def show_roles(cls):
-        return araalictl.rbac_show_roles()
+    def show_roles(cls, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.rbac_show_roles(tenant)
 
     @classmethod
-    def show_users(cls):
-        return araalictl.rbac_show_users()
+    def show_users(cls, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.rbac_show_users(tenant)
+
+    @classmethod
+    def create_user(cls, name, email, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.rbac_create_user(tenant)
 
     @classmethod
     def create_role(cls, name, zone, app, tenant=None):
@@ -403,7 +410,7 @@ class RBAC(object):
     @classmethod
     def assign_roles(cls, email, roles=[], tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
-        return araalictl.rbac_assign_roles(email, roles, app, tenant)
+        return araalictl.rbac_assign_roles(email, roles, tenant)
 
 class Service(object):
     def __init__(self, data):
@@ -925,7 +932,7 @@ def match_node_template_node(template, node):
         if not k in node:
             if 0: print("k %s not in %s" % (k, node))
             return False
-        if not re.search(str(v), str(node[k])):
+        if v[0] != "$" and not re.search(str(v), str(node[k])):
             #print("false", str(v), node, k)
             if 0: print("v %s not eq %s" % (str(v), str(node[k])))
             return False
