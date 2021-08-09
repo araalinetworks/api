@@ -128,8 +128,8 @@ Stop monitoring a lens. You stop getting emails for the lens
          .unmonitor(email=None)
 
 
-Monitor All
-***********
+Monitor Perimeter
+*****************
 
 Monitor all lenses for alerts. You start getting emails when there are new alerts.
 
@@ -137,7 +137,7 @@ Monitor all lenses for alerts. You start getting emails when there are new alert
    .. code-tab:: sh Command Line
 
         # subscribe to world alerts
-        ./araalictl api -subscribe-for-alert -direction ingress_world, egress_world
+        ./araalictl api -subscribe-for-alert -direction ingress_world,egress_world
 
 
    .. code-tab:: py
@@ -145,8 +145,8 @@ Monitor all lenses for alerts. You start getting emails when there are new alert
          api.Lens.monitor_world()
 
 
-Unmonitor All
-*************
+Unmonitor Perimeter
+*******************
 
 Unmonitor all lenses for alerts. You will stop getting emails when there are new alerts.
 
@@ -154,7 +154,7 @@ Unmonitor all lenses for alerts. You will stop getting emails when there are new
    .. code-tab:: sh Command Line
 
         # unsubscribe from world alerts
-        ./araalictl api -unsubscribe-from-alert -direction ingress_world, egress_world
+        ./araalictl api -unsubscribe-from-alert -direction ingress_world,egress_world
 
 
    .. code-tab:: py
