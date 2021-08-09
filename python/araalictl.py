@@ -231,12 +231,13 @@ def get_pod_apps(tenant=None):
     return yaml.load(rc[1], yaml.SafeLoader)
 
 
-def tenant_create(tenant_id, user_email, tenant_name=None, user_name=None):
+def tenant_create(user_email, tenant_name="", user_name=""):
     """Create a subtenant"""
-    cmd = "%s tenant -op=add -id=%s -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (
-        g_araalictl_path, tenant_id, tenant_name, user_email, user_name)
+    cmd = "%s tenant -op=add -name=\"%s\" -user-email=%s -user-name=\"%s\"" % (
+        g_araalictl_path, tenant_name, user_email, user_name)
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def tenant_delete(tenant_id):
     """Delete a subtenant"""
@@ -256,10 +257,12 @@ def fog_setupconfig(tenant_id, dns_name, vpc_id, subnet_id, key_name,
                      result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
-def fog_install(tenant_id, nodes=1):
+def fog_install(tenant, force=False, nodes=None):
     """Install AWS mode fog"""
-    rc = run_command("%s install-fog -tenant=%s -mode=aws -nodes=%d" %
-                     (g_araalictl_path, tenant_id, nodes), result=True, strip=False)
+    cstr = " -nodes=%s " % (nodes) if nodes else ""
+    cstr += " -force " if force else ""
+    rc = run_command("%s install-fog -tenant=%s -mode=aws %s" %
+                     (g_araalictl_path, tenant, cstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
 def fog_uninstall(tenant_id):
