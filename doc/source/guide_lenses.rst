@@ -35,7 +35,8 @@ Functions
 Get
 ***
 
-Get all Lenses. It is possible to optionally get only enforced lenses or only starred lenses.
+Get all Lenses along with owner info (if available). It is possible to
+optionally get only enforced lenses or only starred lenses.
 
 .. tabs::
    .. code-tab:: sh Command Line
@@ -224,3 +225,33 @@ Unenforce Lens.
          # za_egress: default=False
          # za_internal: default=False
          # svc_ingress: default=False
+
+Add Owner
+*********
+
+Add lens owner.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        ./araalictl api -update-lens-owner -email=<email> -zone=<zone> -app=<app> -owner-op=add
+        ./araalictl api -update-lens-owner -email=<email> -service=<ip|dns>:<port> -owner-op=add
+
+   .. code-tab:: py
+
+         .add_owner("<email>")
+
+Del Owner
+*********
+
+Add lens owner.
+
+.. tabs::
+   .. code-tab:: sh Command Line
+
+        ./araalictl api -update-lens-owner -email=<email> -zone=<zone> -app=<app> -owner-op=del
+        ./araalictl api -update-lens-owner -email=<email> -service=<ip|dns>:<port> -owner-op=del
+
+   .. code-tab:: py
+
+         .del_owner("<email>")
