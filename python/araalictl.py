@@ -124,6 +124,20 @@ def get_lenses(enforced=False, starred=False, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def update_lens_owner(email, add=True, zone=None, app=None, service=None,
+                      tenant=None):
+    """update lens owner"""
+    assert zone and app or service
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    flags = ""
+    flags += " -owner-op=add " if add else " -owner-op=del "
+    flags += " -service=%s " % (service) if service else " -zone=%s -app=%s " % (zone, app)
+    rc = run_command("%s api -update-lens-owner -email=%s %s %s" % (
+                     g_araalictl_path, email, flags, tstr),
+                     result=True, strip=False, debug=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 def get_starred(user_email=None, tenant=None):
     """show starred"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""

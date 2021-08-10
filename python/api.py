@@ -305,6 +305,32 @@ class Lens(object):
                                    tenant=self.tenant)
         return self.app_obj
 
+    def add_owner(self, email):
+        if "zone" in self.obj and self.obj["zone"]:
+            return araalictl.update_lens_owner(email, zone=self.obj["zone"],
+                                               app=self.obj["app"],
+                                               tenant=self.tenant)
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            return araalictl.update_lens_owner(email,
+                    service="%s:%s" % (self.obj["fqdn"],self.obj["port"]),
+                    tenant=self.tenant)
+        return araalictl.update_lens_owner(email,
+                    service="%s:%s" % (self.obj["ip"],self.obj["port"]),
+                    tenant=self.tenant)
+
+    def del_owner(self, email):
+        if "zone" in self.obj and self.obj["zone"]:
+            return araalictl.update_lens_owner(email, False, zone=self.obj["zone"],
+                                               app=self.obj["app"],
+                                               tenant=self.tenant)
+        if "fqdn" in self.obj and self.obj["fqdn"]:
+            return araalictl.update_lens_owner(email, False, 
+                    service="%s:%s" % (self.obj["fqdn"],self.obj["port"]),
+                    tenant=self.tenant)
+        return araalictl.update_lens_owner(email, False, 
+                    service="%s:%s" % (self.obj["ip"],self.obj["port"]),
+                    tenant=self.tenant)
+
     def star(self):
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.star_lens(zone=self.obj["zone"], app=self.obj["app"])
