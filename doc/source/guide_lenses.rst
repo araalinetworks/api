@@ -66,10 +66,10 @@ Star Lens.
    .. code-tab:: sh Command Line
 
         # star zone-app lens
-        ./araalictl api -zone zone_name -app app_name -star-lens
+        ./araalictl api -zone=<zone> -app=<app> -star-lens
 
         # star service lens
-        ./araalictl api -service fqdn/ip:port -star-lens
+        ./araalictl api -service=<fqdn/ip:port> -star-lens
 
    .. code-tab:: py
 
@@ -98,10 +98,10 @@ Monitor a lens. You start getting emails when there is new activity in the lens
    .. code-tab:: sh Command Line
 
         # subscribe to zone-app lens alerts
-        ./araalictl api -zone zone_name -app app_name -subscribe-for-alert
+        ./araalictl api -zone=<zone> -app=<app> -subscribe-for-alert
 
         # subscribe to service lens alerts
-        ./araalictl api -service fqdn/ip:port -subscribe-for-alert
+        ./araalictl api -service=<fqdn/ip:port> -subscribe-for-alert
 
         # subscribe to directional alerts
         ./araalictl api -subscribe-for-alert -direction ingress_world, egress_world
@@ -119,7 +119,7 @@ Stop monitoring a lens. You stop getting emails for the lens
    .. code-tab:: sh Command Line
 
         # unsubscribe from zone-app lens alerts
-        ./araalictl api -zone zone_name -app app_name -unsubscribe-from-alert
+        ./araalictl api -zone=<zone> -app=<app> -unsubscribe-from-alert
 
         # unsubscribe from service lens alerts
         ./araalictl api -service fqdn/ip:port -unsubscribe-from-alert

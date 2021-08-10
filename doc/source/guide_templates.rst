@@ -74,7 +74,7 @@ Get all templates. It is possible to optionally filter for public templates or a
         ./araalictl api -list-templates -public
 
         # Specify a template
-        ./araalictl api -list-templates -template template_name
+        ./araalictl api -list-templates -template=<template>
 
    .. code-tab:: py
 
@@ -93,7 +93,7 @@ Rename an existing template
 
         # Copy the output of the following
         # Use existing template name
-        ./araalictl api -list-templates -template old_t_name
+        ./araalictl api -list-templates -template=<old_template>
 
         # "i" to insert at cursor, "a" for after cursor, and "o" for line above cursor
         vi edit_template.txt
@@ -101,7 +101,7 @@ Rename an existing template
         # Change existing name to desired name
         # Esc to exit edit mode in vi
         # “:wq” to quit once in control mode
-        cat edit_template.txt | ./araalictl api -update-template -template old_t_name
+        cat edit_template.txt | ./araalictl api -update-template -template=<old_template>
 
    .. code-tab:: py
 
