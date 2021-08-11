@@ -71,7 +71,7 @@ def alerts(start_time=None, token=None, count=200, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def monitor(on=True, zone=None, app=None, service=None, tenant=None):
+def monitor(on=True, zone=None, app=None, service=None, email=None, tenant=None):
     """monitor lens"""
     flags = ""
     if service: flags += " -service %s" % service
@@ -79,26 +79,29 @@ def monitor(on=True, zone=None, app=None, service=None, tenant=None):
     cmd = "subscribe-for-alert" if on else "unsubscribe-from-alert"
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -%s %s %s" % (
                      g_araalictl_path, cmd, flags, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def star_lens(zone="", app="", service=None, tenant=None):
+def star_lens(zone="", app="", service=None, email=None, tenant=None):
     """star lens"""
     flags = ""
     if service: flags += " -service %s" % service
     else: flags += " -zone=%s -app=%s" % (zone, app)
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -star-lens %s %s" % (
                      g_araalictl_path, flags, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def unstar_all(tenant=None):
+def unstar_all(email=None, tenant=None):
     """unstar all lenses"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -clear-starred-lens %s" % (
                      g_araalictl_path, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]

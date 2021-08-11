@@ -269,9 +269,9 @@ class Lens(object):
         return cls.objs
 
     @classmethod
-    def unstar_all(cls, tenant=None):
+    def unstar_all(cls, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
-        return araalictl.unstar_all(tenant)
+        return araalictl.unstar_all(email, tenant)
 
     @classmethod
     def unenforce_all(cls):
@@ -331,43 +331,53 @@ class Lens(object):
                     service="%s:%s" % (self.obj["ip"],self.obj["port"]),
                     tenant=self.tenant)
 
-    def star(self):
+    def star(self, email=None, tenant=None):
         if "zone" in self.obj and self.obj["zone"]:
-            return araalictl.star_lens(zone=self.obj["zone"], app=self.obj["app"])
+            return araalictl.star_lens(zone=self.obj["zone"],
+                                       app=self.obj["app"], email=email,
+                                       tenant=tenant)
         if "fqdn" in self.obj and self.obj["fqdn"]:
-            return araalictl.star_lens(service="%s:%s" % (self.obj["fqdn"],self.obj["port"]))
-        return araalictl.star_lens(service="%s:%s" % (self.obj["ip"], self.obj["port"]))
+            return araalictl.star_lens(service="%s:%s" % (
+                                        self.obj["fqdn"],self.obj["port"]),
+                                        email=email, tenant=tenant)
+        return araalictl.star_lens(service="%s:%s" % (self.obj["ip"],
+                                    self.obj["port"]),
+                                    email=email, tenant=tenant)
             
     def to_data(self, display=False):
         obj = dict(self.obj)
         obj["type"] = self.type()
         return obj
 
-    def monitor(self, tenant=None):
+    def monitor(self, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.monitor(on=True, zone=self.obj["zone"],
-                                     app=self.obj["app"], tenant=tenant)
+                                     app=self.obj["app"], email=email,
+                                     tenant=tenant)
 
         if "fqdn" in self.obj and self.obj["fqdn"]:
             service = self.obj["fqdn"]
         else:
             service = self.obj["ip"]
         service = "%s:%s" % (service, self.obj["port"])
-        return araalictl.monitor(on=True, service=service, tenant=tenant)
+        return araalictl.monitor(on=True, service=service, email=email,
+                                 tenant=tenant)
 
-    def unmonitor(self, tenant=None):
+    def unmonitor(self, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.monitor(on=False, zone=self.obj["zone"],
-                                     app=self.obj["app"], tenant=tenant)
+                                     app=self.obj["app"], email=email,
+                                     tenant=tenant)
 
         if "fqdn" in self.obj and self.obj["fqdn"]:
             service = self.obj["fqdn"]
         else:
             service = self.obj["ip"]
         service = "%s:%s" % (service, self.obj["port"])
-        return araalictl.monitor(on=False, service=service, tenant=tenant)
+        return araalictl.monitor(on=False, service=service, email=email,
+                                 tenant=tenant)
 
     def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
         data = None
