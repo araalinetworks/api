@@ -127,16 +127,17 @@ def get_lenses(enforced=False, starred=False, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def update_lens_owner(email, add=True, zone=None, app=None, service=None,
+def update_lens_owner(email=None, add=True, zone=None, app=None, service=None,
                       tenant=None):
     """update lens owner"""
     assert zone and app or service
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     flags = ""
     flags += " -owner-op=add " if add else " -owner-op=del "
     flags += " -service=%s " % (service) if service else " -zone=%s -app=%s " % (zone, app)
-    rc = run_command("%s api -update-lens-owner -email=%s %s %s" % (
-                     g_araalictl_path, email, flags, tstr),
+    rc = run_command("%s api -update-lens-owner %s %s" % (
+                     g_araalictl_path, flags, tstr),
                      result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)

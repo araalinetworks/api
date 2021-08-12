@@ -266,6 +266,7 @@ class Lens(object):
         else:
             for obj in araalictl.get_lenses(enforced, starred, tenant):
                 cls.objs.append(Lens(obj))
+        cls.objs.sort(key=lambda o: o.to_data().get("app", ""))
         return cls.objs
 
     @classmethod
@@ -305,7 +306,7 @@ class Lens(object):
                                    tenant=self.tenant)
         return self.app_obj
 
-    def add_owner(self, email):
+    def add_owner(self, email=None):
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.update_lens_owner(email, zone=self.obj["zone"],
                                                app=self.obj["app"],
@@ -318,7 +319,7 @@ class Lens(object):
                     service="%s:%s" % (self.obj["ip"],self.obj["port"]),
                     tenant=self.tenant)
 
-    def del_owner(self, email):
+    def del_owner(self, email=None):
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.update_lens_owner(email, False, zone=self.obj["zone"],
                                                app=self.obj["app"],
