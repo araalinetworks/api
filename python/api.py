@@ -979,7 +979,8 @@ def match_node_template_node(template, node):
         if not k in node:
             if 0: print("k %s not in %s" % (k, node))
             return False
-        if v[0] != "$" and not re.search(str(v), str(node[k])):
+        if type(v) == str and v[0] == "$": continue # match placeholder
+        if not re.search(str(v), str(node[k])):
             #print("false", str(v), node, k)
             if 0: print("v %s not eq %s" % (str(v), str(node[k])))
             return False
