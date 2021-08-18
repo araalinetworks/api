@@ -1016,12 +1016,17 @@ def split_zap(zone, app, process=""):
         return Zap(zone, ".".join(app[0:-2]), app[1], app[2], process)
 
 class Template(object):
-    def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None):
+    def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None, tlink=None, use=False):
         if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.public = public
         if obj:
             self.obj = obj
+        elif tlink is not None:
+            if tlink:
+                self.obj = {"template": [{"link_filter": tlink}]}
+            else:
+                self.obj = {"name": name, "template": [], "use": use}
         elif fname:
             with open(fname, "r") as f:
                 self.obj = yaml.load(f.read(), yaml.SafeLoader)
@@ -1179,6 +1184,86 @@ class Template(object):
                             cmatch = dict(peer)
                             break
         return False, cmatch, smatch
+
+    def match_tlink(self, link):
+        """returns matched, cnode, snode"""
+        tindex = self.index
+        cdict = dict(link["client"])
+        cdict.update({"type": "c"})
+    
+        sdict = dict(link["server"])
+        sdict.update({"type": "s"})
+    
+        cmatch = None
+        smatch = None
+        for node in tindex:
+            #print(node)
+            if node["node"]["type"] == "c":
+                #print("c")
+                if not cmatch and match_node_template_node(node["node"], cdict): # client matched
+                    cmatch = dict(node["node"]) # cp so caller doesnt modify idx
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            return True, cmatch, dict(peer)
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            smatch = dict(peer)
+                            break
+            else: # its a server node in template index
+                #print("s")
+                if not smatch and match_node_template_node(node["node"], sdict):
+                    smatch = dict(node["node"])
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            return True, dict(peer), smatch
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            cmatch = dict(peer)
+                            break
+        return False, cmatch, smatch
+
+    def add_tlinks(self, links):
+        """Merge links from another template into template"""
+        for link in links:
+            matched, cnode, snode = self.match_tlink(link)
+            if matched: # both sides perfectly matched
+                print("*** link already part of template: %s %s" % (cnode, snode))
+    
+            elif cnode and snode: # both matched, but no link between them
+                print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
+                del cnode["type"]
+                del snode["type"]
+                t1 = Template(tlink={"client": cnode, "server": snode})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+            elif cnode: # only client had a match
+                print("adding new server to template node: %s %s" % (cnode, link["server"]))
+                del cnode["type"]
+                t1 = Template(tlink={"client": cnode, "server": link["server"]})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+            elif snode: # only server had a match
+                print("adding new client to template node: %s %s" % (link["client"], snode))
+                del snode["type"]
+
+                t1 = Template(tlink={"client": link["client"], "server": snode})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+
+            else: # both client and server nodes had no match in template
+                print("adding new client and server nodes to template: %s" % link)
+
+                t1 = Template(tlink={"client": link["client"],
+                                     "server": link["server"]})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+        self.reindex()
+        return
 
     def add_links(self, links):
         """Merge links into template"""
