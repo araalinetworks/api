@@ -995,6 +995,26 @@ def value_count(l):
     for k, v in vals:
         yield {"value": k, "count": v}
 
+class Zap:
+    def __init__(self, zone, app, pod, container, process=""):
+        self.zone = zone
+        self.app = app
+        self.pod = pod
+        self.container = container
+        self.process = process
+
+    def to_data(self):
+        return {"zone": self.zone, "app": self.app, "pod": self.pod,
+                "container": self.container, "process": self.process}
+
+def split_zap(zone, app, process=""):
+    # ns, pod, container
+    app = app.rsplit(".", 3)
+    if len(app) == 1:
+        return Zap(zone, app[0], "None", "None", process)
+    else:
+        return Zap(zone, ".".join(app[0:-2]), app[1], app[2], process)
+
 class Template(object):
     def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None):
         if g_tenant and not tenant: tenant = g_tenant
