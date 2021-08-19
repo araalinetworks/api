@@ -1226,10 +1226,14 @@ class Template(object):
 
     def add_tlinks(self, links):
         """Merge links from another template into template"""
+        if not links:
+            return True
+
         for link in links:
             matched, cnode, snode = self.match_tlink(link)
             if matched: # both sides perfectly matched
                 print("*** link already part of template: %s %s" % (cnode, snode))
+                return False
     
             elif cnode and snode: # both matched, but no link between them
                 print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
@@ -1263,10 +1267,13 @@ class Template(object):
                 self.obj["template"].append(t1.obj["template"][0])
     
         self.reindex()
-        return
+        return True
 
     def add_links(self, links):
         """Merge links into template"""
+        if not links:
+            return True # break the loop
+
         for link in links:
             # convert link to temporary template,
             # we can add it as-is, or uplevel it to template node grain
@@ -1275,6 +1282,7 @@ class Template(object):
             matched, cnode, snode = self.match_link(link)
             if matched: # both sides perfectly matched
                 print("*** link already part of template: %s %s" % (cnode, snode))
+                return False
     
             elif cnode and snode: # both matched, but no link between them
                 print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
@@ -1305,7 +1313,7 @@ class Template(object):
                 self.obj["template"].append(t.obj["template"][0])
     
         self.reindex()
-        return
+        return True
 
     def run(self, runlinks, matched=True):
         for link in runlinks:
