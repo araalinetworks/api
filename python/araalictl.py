@@ -71,7 +71,7 @@ def alerts(start_time=None, token=None, count=200, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def monitor(on=True, zone=None, app=None, service=None, tenant=None):
+def monitor(on=True, zone=None, app=None, service=None, email=None, tenant=None):
     """monitor lens"""
     flags = ""
     if service: flags += " -service %s" % service
@@ -79,26 +79,29 @@ def monitor(on=True, zone=None, app=None, service=None, tenant=None):
     cmd = "subscribe-for-alert" if on else "unsubscribe-from-alert"
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -%s %s %s" % (
                      g_araalictl_path, cmd, flags, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def star_lens(zone="", app="", service=None, tenant=None):
+def star_lens(zone="", app="", service=None, email=None, tenant=None):
     """star lens"""
     flags = ""
     if service: flags += " -service %s" % service
     else: flags += " -zone=%s -app=%s" % (zone, app)
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -star-lens %s %s" % (
                      g_araalictl_path, flags, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def unstar_all(tenant=None):
+def unstar_all(email=None, tenant=None):
     """unstar all lenses"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     rc = run_command("%s api -clear-starred-lens %s" % (
                      g_araalictl_path, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
@@ -124,16 +127,17 @@ def get_lenses(enforced=False, starred=False, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
-def update_lens_owner(email, add=True, zone=None, app=None, service=None,
+def update_lens_owner(email=None, add=True, zone=None, app=None, service=None,
                       tenant=None):
     """update lens owner"""
     assert zone and app or service
     tstr = " -tenant=%s " % (tenant) if tenant else ""
+    tstr += " -email=%s " % (email) if email else ""
     flags = ""
     flags += " -owner-op=add " if add else " -owner-op=del "
     flags += " -service=%s " % (service) if service else " -zone=%s -app=%s " % (zone, app)
-    rc = run_command("%s api -update-lens-owner -email=%s %s %s" % (
-                     g_araalictl_path, email, flags, tstr),
+    rc = run_command("%s api -update-lens-owner %s %s" % (
+                     g_araalictl_path, flags, tstr),
                      result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
@@ -185,7 +189,8 @@ def rbac_show_users(tenant=None):
     """show rbac"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s user-role -op list-user-roles %s" % (
-                     g_araalictl_path, tstr), result=True, strip=False)
+                     g_araalictl_path, tstr), result=True, strip=False,
+                     debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -201,27 +206,27 @@ def rbac_add_role(name, zone, app, tenant=None):
 def rbac_del_role(name, tenant=None):
     """del role"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("%s user-role -op=del -name=%s %s" % (
+    rc = run_command("%s user-role -op=del -name='%s' %s" % (
                      g_araalictl_path, name, tstr),
-                     result=True, strip=False)
+                     result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
 def rbac_create_user(email, name, tenant=None):
     """create user"""
     tstr = " -id=%s " % (tenant) if tenant else ""
-    rc = run_command("%s tenant -op add-user -user-email=%s -user-name=%s %s" % (
+    rc = run_command("%s tenant -op add-user -user-email='%s' -user-name='%s' %s" % (
                      g_araalictl_path, email, name, tstr),
-                     result=True, strip=False)
+                     result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
 def rbac_delete_user(email, name, tenant=None):
     """delete user"""
     tstr = " -id=%s " % (tenant) if tenant else ""
-    rc = run_command("%s tenant -op del-user -user-email=%s -user-name=%s %s" % (
+    rc = run_command("%s tenant -op del-user -user-email='%s' -user-name='%s' %s" % (
                      g_araalictl_path, email, name, tstr),
-                     result=True, strip=False)
+                     result=True, strip=False, debug=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -235,6 +240,17 @@ def rbac_assign_roles(email, roles, tenant=None):
                      result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
+
+def rbac_unassign_roles(email, roles, tenant=None):
+    """assign a list of roles to email"""
+    tstr = " -tenant=%s " % (tenant) if tenant else ""
+    roles = ",".join(roles)
+    rc = run_command("%s user-role -op deny -user-email %s -roles %s %s" % (
+                     g_araalictl_path, email, roles, tstr),
+                     result=True, strip=False)
+    assert rc[0] == 0, rc[1]
+    return yaml.load(rc[1], yaml.SafeLoader)
+
 
 def get_pod_apps(tenant=None):
     """Get zones and apps for tenant"""

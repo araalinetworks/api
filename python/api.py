@@ -266,12 +266,13 @@ class Lens(object):
         else:
             for obj in araalictl.get_lenses(enforced, starred, tenant):
                 cls.objs.append(Lens(obj))
+        cls.objs.sort(key=lambda o: o.to_data().get("app", ""))
         return cls.objs
 
     @classmethod
-    def unstar_all(cls, tenant=None):
+    def unstar_all(cls, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
-        return araalictl.unstar_all(tenant)
+        return araalictl.unstar_all(email, tenant)
 
     @classmethod
     def unenforce_all(cls):
@@ -305,7 +306,7 @@ class Lens(object):
                                    tenant=self.tenant)
         return self.app_obj
 
-    def add_owner(self, email):
+    def add_owner(self, email=None):
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.update_lens_owner(email, zone=self.obj["zone"],
                                                app=self.obj["app"],
@@ -318,7 +319,7 @@ class Lens(object):
                     service="%s:%s" % (self.obj["ip"],self.obj["port"]),
                     tenant=self.tenant)
 
-    def del_owner(self, email):
+    def del_owner(self, email=None):
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.update_lens_owner(email, False, zone=self.obj["zone"],
                                                app=self.obj["app"],
@@ -331,43 +332,53 @@ class Lens(object):
                     service="%s:%s" % (self.obj["ip"],self.obj["port"]),
                     tenant=self.tenant)
 
-    def star(self):
+    def star(self, email=None, tenant=None):
         if "zone" in self.obj and self.obj["zone"]:
-            return araalictl.star_lens(zone=self.obj["zone"], app=self.obj["app"])
+            return araalictl.star_lens(zone=self.obj["zone"],
+                                       app=self.obj["app"], email=email,
+                                       tenant=tenant)
         if "fqdn" in self.obj and self.obj["fqdn"]:
-            return araalictl.star_lens(service="%s:%s" % (self.obj["fqdn"],self.obj["port"]))
-        return araalictl.star_lens(service="%s:%s" % (self.obj["ip"], self.obj["port"]))
+            return araalictl.star_lens(service="%s:%s" % (
+                                        self.obj["fqdn"],self.obj["port"]),
+                                        email=email, tenant=tenant)
+        return araalictl.star_lens(service="%s:%s" % (self.obj["ip"],
+                                    self.obj["port"]),
+                                    email=email, tenant=tenant)
             
     def to_data(self, display=False):
         obj = dict(self.obj)
         obj["type"] = self.type()
         return obj
 
-    def monitor(self, tenant=None):
+    def monitor(self, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.monitor(on=True, zone=self.obj["zone"],
-                                     app=self.obj["app"], tenant=tenant)
+                                     app=self.obj["app"], email=email,
+                                     tenant=tenant)
 
         if "fqdn" in self.obj and self.obj["fqdn"]:
             service = self.obj["fqdn"]
         else:
             service = self.obj["ip"]
         service = "%s:%s" % (service, self.obj["port"])
-        return araalictl.monitor(on=True, service=service, tenant=tenant)
+        return araalictl.monitor(on=True, service=service, email=email,
+                                 tenant=tenant)
 
-    def unmonitor(self, tenant=None):
+    def unmonitor(self, email=None, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         if "zone" in self.obj and self.obj["zone"]:
             return araalictl.monitor(on=False, zone=self.obj["zone"],
-                                     app=self.obj["app"], tenant=tenant)
+                                     app=self.obj["app"], email=email,
+                                     tenant=tenant)
 
         if "fqdn" in self.obj and self.obj["fqdn"]:
             service = self.obj["fqdn"]
         else:
             service = self.obj["ip"]
         service = "%s:%s" % (service, self.obj["port"])
-        return araalictl.monitor(on=False, service=service, tenant=tenant)
+        return araalictl.monitor(on=False, service=service, email=email,
+                                 tenant=tenant)
 
     def enforce(self, za_ingress=True, za_egress=True, za_internal=False, svc_ingress=True):
         data = None
@@ -419,9 +430,14 @@ class RBAC(object):
         return araalictl.rbac_show_users(tenant)
 
     @classmethod
-    def create_user(cls, name, email, tenant=None):
+    def create_user(cls, email, name, tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
-        return araalictl.rbac_create_user(tenant)
+        return araalictl.rbac_create_user(email, name, tenant)
+
+    @classmethod
+    def delete_user(cls, email, name, tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.rbac_delete_user(email, name, tenant)
 
     @classmethod
     def create_role(cls, name, zone, app, tenant=None):
@@ -437,6 +453,11 @@ class RBAC(object):
     def assign_roles(cls, email, roles=[], tenant=None):
         if g_tenant and not tenant: tenant = g_tenant
         return araalictl.rbac_assign_roles(email, roles, tenant)
+
+    @classmethod
+    def unassign_roles(cls, email, roles=[], tenant=None):
+        if g_tenant and not tenant: tenant = g_tenant
+        return araalictl.rbac_unassign_roles(email, roles, tenant)
 
 class Service(object):
     def __init__(self, data):
@@ -958,7 +979,8 @@ def match_node_template_node(template, node):
         if not k in node:
             if 0: print("k %s not in %s" % (k, node))
             return False
-        if v[0] != "$" and not re.search(str(v), str(node[k])):
+        if type(v) == str and v[0] == "$": continue # match placeholder
+        if not re.search(str(v), str(node[k])):
             #print("false", str(v), node, k)
             if 0: print("v %s not eq %s" % (str(v), str(node[k])))
             return False
@@ -973,13 +995,38 @@ def value_count(l):
     for k, v in vals:
         yield {"value": k, "count": v}
 
+class Zap:
+    def __init__(self, zone, app, pod, container, process=""):
+        self.zone = zone
+        self.app = app
+        self.pod = pod
+        self.container = container
+        self.process = process
+
+    def to_data(self):
+        return {"zone": self.zone, "app": self.app, "pod": self.pod,
+                "container": self.container, "process": self.process}
+
+def split_zap(zone, app, process=""):
+    # ns, pod, container
+    app = app.rsplit(".", 3)
+    if len(app) == 1:
+        return Zap(zone, app[0], "None", "None", process)
+    else:
+        return Zap(zone, ".".join(app[0:-2]), app[1], app[2], process)
+
 class Template(object):
-    def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None):
+    def __init__(self, name=None, fname=None, public=False, tenant=None, obj=None, tlink=None, use=False):
         if g_tenant and not tenant: tenant = g_tenant
         self.tenant = tenant
         self.public = public
         if obj:
             self.obj = obj
+        elif tlink is not None:
+            if tlink:
+                self.obj = {"template": [{"link_filter": tlink}]}
+            else:
+                self.obj = {"name": name, "template": [], "use": use}
         elif fname:
             with open(fname, "r") as f:
                 self.obj = yaml.load(f.read(), yaml.SafeLoader)
@@ -1138,8 +1185,95 @@ class Template(object):
                             break
         return False, cmatch, smatch
 
+    def match_tlink(self, link):
+        """returns matched, cnode, snode"""
+        tindex = self.index
+        cdict = dict(link["client"])
+        cdict.update({"type": "c"})
+    
+        sdict = dict(link["server"])
+        sdict.update({"type": "s"})
+    
+        cmatch = None
+        smatch = None
+        for node in tindex:
+            #print(node)
+            if node["node"]["type"] == "c":
+                #print("c")
+                if not cmatch and match_node_template_node(node["node"], cdict): # client matched
+                    cmatch = dict(node["node"]) # cp so caller doesnt modify idx
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            return True, cmatch, dict(peer)
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, sdict):
+                            smatch = dict(peer)
+                            break
+            else: # its a server node in template index
+                #print("s")
+                if not smatch and match_node_template_node(node["node"], sdict):
+                    smatch = dict(node["node"])
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            return True, dict(peer), smatch
+                else:
+                    for peer in node["peers"]:
+                        if match_node_template_node(peer, cdict):
+                            cmatch = dict(peer)
+                            break
+        return False, cmatch, smatch
+
+    def add_tlinks(self, links):
+        """Merge links from another template into template"""
+        if not links:
+            return True
+
+        for link in links:
+            matched, cnode, snode = self.match_tlink(link)
+            if matched: # both sides perfectly matched
+                print("*** link already part of template: %s %s" % (cnode, snode))
+                return False
+    
+            elif cnode and snode: # both matched, but no link between them
+                print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
+                del cnode["type"]
+                del snode["type"]
+                t1 = Template(tlink={"client": cnode, "server": snode})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+            elif cnode: # only client had a match
+                print("adding new server to template node: %s %s" % (cnode, link["server"]))
+                del cnode["type"]
+                t1 = Template(tlink={"client": cnode, "server": link["server"]})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+            elif snode: # only server had a match
+                print("adding new client to template node: %s %s" % (link["client"], snode))
+                del snode["type"]
+
+                t1 = Template(tlink={"client": link["client"], "server": snode})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+
+            else: # both client and server nodes had no match in template
+                print("adding new client and server nodes to template: %s" % link)
+
+                t1 = Template(tlink={"client": link["client"],
+                                     "server": link["server"]})
+                t1.pushdown()
+                self.obj["template"].append(t1.obj["template"][0])
+    
+        self.reindex()
+        return True
+
     def add_links(self, links):
         """Merge links into template"""
+        if not links:
+            return True # break the loop
+
         for link in links:
             # convert link to temporary template,
             # we can add it as-is, or uplevel it to template node grain
@@ -1148,6 +1282,7 @@ class Template(object):
             matched, cnode, snode = self.match_link(link)
             if matched: # both sides perfectly matched
                 print("*** link already part of template: %s %s" % (cnode, snode))
+                return False
     
             elif cnode and snode: # both matched, but no link between them
                 print("addding new link connecting existing tepmlate nodes: %s %s" % (cnode, snode))
@@ -1178,7 +1313,7 @@ class Template(object):
                 self.obj["template"].append(t.obj["template"][0])
     
         self.reindex()
-        return
+        return True
 
     def run(self, runlinks, matched=True):
         for link in runlinks:

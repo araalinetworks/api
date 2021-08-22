@@ -22,13 +22,37 @@ it just may not be comprehensive or complete yet.
 Guide for Araali SW Template
 ----------------------------
 
-Araali baselines your application communication and presents them as identity-based links that can then be accepted as policy. This means no handwriting policies, everything is automatically discovered.
+Araali baselines your application communication and presents them as
+identity-based links that can then be accepted as policy. This means no
+handwriting policies, everything is automatically discovered.
 
-One of the easier ways to accept policies is through UI Templates. Araali has published a template for its own software in the "Public" folder that can be used to auto-accept Araali’s own policies.
+One of the easier ways to accept policies is through UI Templates. Araali has
+published a template for its own software in the "Public" folder that can be
+used to auto-accept Araali’s own policies.
 
+
+When to use Templates
+---------------------
+Templates are particularly useful when:
+
+- You are an app owner and want to publish your app's profile into a
+  marketplace that anyone can use and benefit from. Ideally you want to publish
+  to the marketplace whenever there are app changes that necessitate a refresh.
+
+- You have common patterns that apply across app/service lenses. You can define
+  patterns in template once, and apply it across lenses to do the
+  greening/policy-accepting based on pattern matching.
+
+- You want to edit/customize a node (say use .* as regex for the pid in
+  snapd binaray path). You can alternatively select links and edit them
+  individually (repeating the editing to put the .* on a per link basis). The
+  benefit of using template is that you can edit a node once, and add new links
+  to the template. The node editing is automatically inherited as you add a
+  link to an existing template. This is only available via api currently. We
+  are trying to get it to UI sometime soon.
 
 Applying Araali Template in UI
-******************************
+------------------------------
 
 In the Araali UI, go to the Public Template and click on the download icon next to "araalifw-kube" template.
 

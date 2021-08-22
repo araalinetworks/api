@@ -18,7 +18,7 @@ In a terminal::
         # Create a directory where you will checkout from github
         mkdir -p opensrc
         cd opensrc
-        git clone git@github.com:araalinetworks/api.git
+        git clone https://github.com/araalinetworks/api.git
 
         # now run the notebook
         cd api/python/
