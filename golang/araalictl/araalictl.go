@@ -143,6 +143,30 @@ func (app *App) Commit() (string, error) {
 	return UpdateLinks(app.ZoneName, app.AppName, "", links)
 }
 
+type Vulnerability struct {
+	PackageName string `yaml:"package_name"`
+	CveId	[]string `yaml:"cve_id"`
+	Severity string `yaml:"severity"`
+}
+
+type Compute struct {
+	Name  string `yaml:"name"`
+	IpAddress string `yaml:"ip_address"`
+	Uuid 	  string `yaml:"uuid"`
+	Image string `yaml:"image"`
+	Zone string `yaml:"zone"`
+	Apps []App `yaml:"apps"`
+	Processes []string `yaml:"processes"`
+	State string `yaml:"state"`
+	AssetType string `yaml:"asset_type"`
+	ProcessCapabilities []string `yaml:"process_capabilities"`
+	IpAddresses []string `yaml:"ip_addresses"`
+	OriginalUuid string `yaml:"original_uuid`
+	Vulnerabilities []Vulnerability `yaml:"vulnerabilities"` 
+	Mode string `yaml:"mode"`
+	OsName string `yaml:"os_name"`
+}
+
 type DirectionCounts struct {
 	Total            uint64 `yaml:"total,omitempty"`
 	Ingress          uint64 `yaml:"ingress,omitempty"`
@@ -288,6 +312,23 @@ func GetZones(full bool, tenant string) ([]Zone, error) {
 	listOfZones := []Zone{}
 	yaml.Unmarshal([]byte(output), &listOfZones)
 	return listOfZones, nil
+}
+
+// GetCompute - return VMs and containers for given zone/app with vulnerability info
+func GetCompute(zone, app, tenant string) ([]Compute, error) {
+	tenantStr := func() string {
+		if len(tenant) == 0 {
+			return ""
+		}
+		return "-tenant=" + tenant
+	}()
+	output, err := RunCmd(fmt.Sprintf("%s api -zone=%s -app=%s -fetch-compute %s", ActlPath, zone, app, tenantStr))
+	if err != nil {
+		return []Compute{}, err
+	}
+	listOfCompute := []Compute{}
+	yaml.Unmarshal([]byte(output), &listOfCompute)
+	return listOfCompute, nil
 }
 
 // GetLinks - get links for zone, app for tenant
