@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/araalinetworks/api/golang/araalictl"
+	"gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 		fmt.Printf("\t5: summary\n")
 		fmt.Printf("\t6: alert_card\n")
 		fmt.Printf("\t7: alerts\n")
+		fmt.Printf("\t8: compute\n")
 
 		reader := bufio.NewReader(os.Stdin)
 		text, err := reader.ReadString('\n')
@@ -126,6 +128,16 @@ func main() {
 					alertPage.NextPage()
 					fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
 				}
+			}
+		}
+
+		if text == "8" {
+			computeList, err := araalictl.GetCompute("", "", "")
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				computeL, _ := yaml.Marshal(computeList)
+				fmt.Println(string(computeL))
 			}
 		}
 	}
