@@ -244,6 +244,14 @@ type AlertInfo struct {
 	Status                 string `yaml:"status,omitempty"`
 }
 
+// Generate tenant string for command line args
+func getTenantStr(tenant string) (string) {
+	if len(tenant) == 0 {
+		return ""
+	}
+	return "-tenant=" + tenant
+}
+
 // Reset araalictl path to new value
 func SetAraalictlPath(newPath string) {
 	ActlPath = newPath
@@ -292,12 +300,6 @@ func TenantDeleteUser(tenantID, userEmail, userName string) (string, error) {
 
 // GetZones - return zones and apps, use tenant="" by default
 func GetZones(full bool, tenant string) ([]Zone, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
 	fullStr := func() string {
 		if full {
 			return "-full"
@@ -305,7 +307,7 @@ func GetZones(full bool, tenant string) ([]Zone, error) {
 		return ""
 	}()
 
-	output, err := RunCmd(fmt.Sprintf("%s api -fetch-zone-apps %s %s", ActlPath, fullStr, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-zone-apps %s %s", ActlPath, fullStr, getTenantStr(tenant)))
 	if err != nil {
 		return []Zone{}, err
 	}
@@ -316,13 +318,7 @@ func GetZones(full bool, tenant string) ([]Zone, error) {
 
 // GetCompute - return VMs and containers for given zone/app with vulnerability info
 func GetCompute(zone, app, tenant string) ([]Compute, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
-	output, err := RunCmd(fmt.Sprintf("%s api -zone=%s -app=%s -fetch-compute %s", ActlPath, zone, app, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -zone=%s -app=%s -fetch-compute %s", ActlPath, zone, app, getTenantStr(tenant)))
 	if err != nil {
 		return []Compute{}, err
 	}
@@ -333,13 +329,7 @@ func GetCompute(zone, app, tenant string) ([]Compute, error) {
 
 // GetLinks - get links for zone, app for tenant
 func GetLinks(zone, app, tenant string) ([]Link, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
-	output, err := RunCmd(fmt.Sprintf("%s api -zone %s -app %s -fetch-links %s", ActlPath, zone, app, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -zone %s -app %s -fetch-links %s", ActlPath, zone, app, getTenantStr(tenant)))
 	if err != nil {
 		return []Link{}, err
 	}
@@ -350,28 +340,16 @@ func GetLinks(zone, app, tenant string) ([]Link, error) {
 
 // UpdateLinks - update links for an app
 func UpdateLinks(zone, app, tenant string, links []Link) (string, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
 	input, _ := yaml.Marshal(links)
-	return RunCmdWithInput(fmt.Sprintf("%s api -zone %s -app %s -update-links %s", ActlPath, zone, app, tenantStr), string(input))
+	return RunCmdWithInput(fmt.Sprintf("%s api -zone %s -app %s -update-links %s", ActlPath, zone, app, getTenantStr(tenant)), string(input))
 }
 
 // FortifyK8sCluster - for tenant
 func FortifyK8sCluster(tenant, clusterName string, force bool) (string, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
 	if force {
-		return RunCmd(fmt.Sprintf("%s fortify-k8s -force %s %s", ActlPath, tenantStr, clusterName))
+		return RunCmd(fmt.Sprintf("%s fortify-k8s -force %s %s", ActlPath, getTenantStr(tenant), clusterName))
 	}
-	return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, tenantStr, clusterName))
+	return RunCmd(fmt.Sprintf("%s fortify-k8s %s %s", ActlPath, getTenantStr(tenant), clusterName))
 }
 
 // AlertPage
@@ -406,13 +384,7 @@ func (alertPage *AlertPage) NextPage() ([]Link, error) {
 
 // GetAlertCard - get AlertCard for tenant.
 func GetAlertCard(tenant string) (AlertCard, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
-	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alert-card %s", ActlPath, tenantStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alert-card %s", ActlPath, getTenantStr(tenant)))
 	alertCard := AlertCard{}
 	if err != nil {
 		return alertCard, err
@@ -439,13 +411,6 @@ func GetAlertCard(tenant string) (AlertCard, error) {
 // 	fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
 // }
 func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage, error) {
-	tenantStr := func() string {
-		if len(tenant) == 0 {
-			return ""
-		}
-		return "-tenant=" + tenant
-	}()
-
 	countStr := func() string {
 		if count == 0 {
 			return ""
@@ -469,7 +434,7 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage,
 		return fmt.Sprint("-endtime=", endTime)
 	}()
 
-	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, tenantStr, startTimeStr, endTimeStr, countStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, getTenantStr(tenant), startTimeStr, endTimeStr, countStr))
 	if err != nil {
 		return AlertPage{}, err
 	}
@@ -481,5 +446,5 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage,
         if len(listOfLinks) != 0 {
 		pagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
 	}
-	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", tenantStr, startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: pagingToken}, nil
+	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", getTenantStr(tenant), startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: pagingToken}, nil
 }
