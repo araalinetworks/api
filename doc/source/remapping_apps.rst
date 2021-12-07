@@ -18,7 +18,25 @@ for these apps.
 For such scenarios Araali allows you to customize apps the way you understand
 it, regardless of which namespace they will show up in.
 
-App mapping by example
+Remapping Using podName
+-----------------------
+
+If your pods already have a label that represents your desired app remap structure, then App Remapping can be easily accomplished via the UI.
+
+Click and select “App Remap” and then click on the “+” icon on the top right corner.
+
+.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/appRemapButton.png
+ :width: 600
+ :alt: App remap
+
+This will open “Add Pod Label” where you can select the zone/cluster, app/namespace that you want to remap. Pass the Pod Label Key for Araali to pull the information from the Pod metadata and remap your app.
+
+.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/addPodLabel.png
+ :width: 600
+ :alt: App Pod Label Key
+
+
+App Mapping by Example
 ----------------------
 This is a sample google shop application where all the pods show up under a
 single app - gshop. We’ll walk through the process of splitting this up into
@@ -161,7 +179,7 @@ split into three different apps as below.
  :alt: After remapping apps
 
 
-Programmatic mapping example
+Programmatic Mapping by Example
 ----------------------------
 This can also be programmatically achieved using our python APIs. The
 transformations should ideally be idempotent so they can be rerun without
@@ -238,20 +256,3 @@ Remove from mapping content.
    .. code-tab:: py
 
         api.Mapping.rm(cls, zone, app, label)
-
-App Remap Based on Pod Label Key
-================================
-
-If your pods already have a label that represents your desired app remap structure, then App Remapping can be easily accomplished via the UI.
-
-Click and select “App Remap” and then click on the “+” icon on the top right corner.
-
-.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/appRemapButton.png
- :width: 600
- :alt: App remap
-
-This will open “Add Pod Label” where you can select the zone/cluster, app/namespace that you want to remap. Pass the Pod Label Key for Araali to pull the information from the Pod metadata and remap your app.
-
-.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/addPodLabel.png
- :width: 600
- :alt: App Pod Label Key
