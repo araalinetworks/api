@@ -18,8 +18,8 @@ for these apps.
 For such scenarios Araali allows you to customize apps the way you understand
 it, regardless of which namespace they will show up in.
 
-Remapping Using podName
------------------------
+Remapping Using Pod Label Key
+-----------------------------
 
 If your pods already have a label that represents your desired app remap structure, then App Remapping can be easily accomplished via the UI.
 
@@ -35,9 +35,42 @@ This will open “Add Pod Label” where you can select the zone/cluster, app/na
  :width: 600
  :alt: App Pod Label Key
 
+Or, do it using code::
 
-App Mapping by Example
-----------------------
+    // List existing App-Mapping Based on Pod-Label
+    $ ./araalictl app-mapping -op list
+    - zone: nightly-k8s
+    app: nightly-bend
+    label: app
+
+    // Create Yaml file with zone, app that needs to be remapped and the label to be used for remapping.
+    Create a new file: app_remap.yaml
+
+    - zone: test-zone
+      app: test-app
+      label: app
+
+    // Add new pod label based app remapping
+    $ cat app_remap.yaml | ./araalictl app-mapping -op add
+    {"success":true}
+    $ ./araalictl app-mapping -op list
+    - zone: nightly-k8s
+      app: nightly-bend
+      label: name
+    - zone: test-zone
+      app: test-app
+      label: app
+
+    // Delete existing pod label based app remapping
+    $ cat app_remap.yaml | ./araalictl app-mapping -op del
+    {"success":true}
+    $ ./araalictl app-mapping -op list
+    - zone: nightly-k8s
+      app: nightly-bend
+      label: app
+
+App (Re)mapping Using podName
+-----------------------------
 This is a sample google shop application where all the pods show up under a
 single app - gshop. We’ll walk through the process of splitting this up into
 three different apps.
@@ -69,7 +102,7 @@ below.
 
         rest of the services → gshop-service
 
-::
+Here is the code::
 
         $ vi pod_mapping.yaml
         - zone: prod
@@ -180,7 +213,7 @@ split into three different apps as below.
 
 
 Programmatic Mapping by Example
-----------------------------
+-------------------------------
 This can also be programmatically achieved using our python APIs. The
 transformations should ideally be idempotent so they can be rerun without
 issues::
