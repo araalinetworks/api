@@ -372,7 +372,8 @@ func (alertPage *AlertPage) NextPage() ([]Link, error) {
 	}
 	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s -paging-token %s", ActlPath, alertPage.options, alertPage.PagingToken))
 	listOfLinks := []Link{}
-	if err != nil {
+	if err != nil || len(listOfLinks) == 0 {
+		alertPage.PagingToken = ""
 		return listOfLinks, err
 	}
 	yaml.Unmarshal([]byte(output), &listOfLinks)
@@ -410,7 +411,7 @@ func GetAlertCard(tenant string) (AlertCard, error) {
 // 	alertPage.NextPage()
 // 	fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
 // }
-func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage, error) {
+func GetAlerts(tenant string, startTime, endTime int64, count int32, fetchAll bool) (AlertPage, error) {
 	countStr := func() string {
 		if count == 0 {
 			return ""
@@ -433,8 +434,12 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32) (AlertPage,
 
 		return fmt.Sprint("-endtime=", endTime)
 	}()
+	
+	fetchAllStr := func() string {
+		return fmt.Sprint("-all=", fetchAll)
+	}()
 
-	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s", ActlPath, getTenantStr(tenant), startTimeStr, endTimeStr, countStr))
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-alerts %s %s %s %s %s", ActlPath, getTenantStr(tenant), startTimeStr, endTimeStr, countStr, fetchAllStr))
 	if err != nil {
 		return AlertPage{}, err
 	}

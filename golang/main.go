@@ -25,6 +25,7 @@ func main() {
 		fmt.Printf("\t6: alert_card\n")
 		fmt.Printf("\t7: alerts\n")
 		fmt.Printf("\t8: compute\n")
+		fmt.Printf("\t9: all_alerts\n")
 
 		reader := bufio.NewReader(os.Stdin)
 		text, err := reader.ReadString('\n')
@@ -115,7 +116,7 @@ func main() {
 
 		if text == "7" {
 			startTime := time.Now().Add(-(3 * araalictl.ONE_DAY)).Unix()
-			alertPage, err := araalictl.GetAlerts("", startTime, 0, 25)
+			alertPage, err := araalictl.GetAlerts("", startTime, 0, 25, false)
 			if err != nil {
 				fmt.Println(err)
 			} else {
@@ -138,6 +139,23 @@ func main() {
 			} else {
 				computeL, _ := yaml.Marshal(computeList)
 				fmt.Println(string(computeL))
+			}
+		}
+		if text == "9" {
+			startTime := time.Now().Add(-(3 * araalictl.ONE_DAY)).Unix()
+			alertPage, err := araalictl.GetAlerts("", startTime, 0, 25, true)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+				for {
+					if !alertPage.HasNext() {
+						fmt.Println("Done fetching!")
+						break
+					}
+					alertPage.NextPage()
+					fmt.Printf("Fetched %d alerts.\n", len(alertPage.Alerts))
+				}
 			}
 		}
 	}
