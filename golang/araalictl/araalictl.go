@@ -144,27 +144,27 @@ func (app *App) Commit() (string, error) {
 }
 
 type Vulnerability struct {
-	PackageName string `yaml:"package_name"`
-	CveId	[]string `yaml:"cve_id"`
-	Severity string `yaml:"severity"`
+	PackageName string   `yaml:"package_name"`
+	CveId       []string `yaml:"cve_id"`
+	Severity    string   `yaml:"severity"`
 }
 
 type Compute struct {
-	Name  string `yaml:"name"`
-	IpAddress string `yaml:"ip_address"`
-	Uuid 	  string `yaml:"uuid"`
-	Image string `yaml:"image"`
-	Zone string `yaml:"zone"`
-	Apps []App `yaml:"apps"`
-	Processes []string `yaml:"processes"`
-	State string `yaml:"state"`
-	AssetType string `yaml:"asset_type"`
-	ProcessCapabilities []string `yaml:"process_capabilities"`
-	IpAddresses []string `yaml:"ip_addresses"`
-	OriginalUuid string `yaml:"original_uuid`
-	Vulnerabilities []Vulnerability `yaml:"vulnerabilities"` 
-	Mode string `yaml:"mode"`
-	OsName string `yaml:"os_name"`
+	Name                string          `yaml:"name"`
+	IpAddress           string          `yaml:"ip_address"`
+	Uuid                string          `yaml:"uuid"`
+	Image               string          `yaml:"image"`
+	Zone                string          `yaml:"zone"`
+	Apps                []App           `yaml:"apps"`
+	Processes           []string        `yaml:"processes"`
+	State               string          `yaml:"state"`
+	AssetType           string          `yaml:"asset_type"`
+	ProcessCapabilities []string        `yaml:"process_capabilities"`
+	IpAddresses         []string        `yaml:"ip_addresses"`
+	OriginalUuid        string          `yaml:"original_uuid`
+	Vulnerabilities     []Vulnerability `yaml:"vulnerabilities"`
+	Mode                string          `yaml:"mode"`
+	OsName              string          `yaml:"os_name"`
 }
 
 type DirectionCounts struct {
@@ -244,8 +244,29 @@ type AlertInfo struct {
 	Status                 string `yaml:"status,omitempty"`
 }
 
+// InsightCounts
+type Insight struct {
+	InsightType string `yaml:"insighttype"`
+	Url         string `yaml:"url,omitempty"`
+	Count       int    `yaml:"count"`
+}
+
+// FortifyHelmValues
+type FortifyHelmValues struct {
+	WorkloadId   string `yaml:"workload_id"`
+	ClusterName  string `yaml:"cluster_name"`
+	Fog          string `yaml:"fog"`
+	Zone         string `yaml:"zone"`
+	App          string `yaml:"app"`
+	Enforce      bool   `yaml:"enforce"`
+	Upgrade      bool   `yaml:"upgrade"`
+	AutoK8SImage string `yaml:"autok8s_image"`
+	FwImage      string `yaml:"fw_image"`
+	FwInitImage  string `yaml:"fw_init_image"`
+}
+
 // Generate tenant string for command line args
-func getTenantStr(tenant string) (string) {
+func getTenantStr(tenant string) string {
 	if len(tenant) == 0 {
 		return ""
 	}
@@ -296,6 +317,19 @@ func TenantAddUser(tenantID, userEmail, userName string) (string, error) {
 func TenantDeleteUser(tenantID, userEmail, userName string) (string, error) {
 	return RunCmd(fmt.Sprintf("%s tenant -op=del-user -id=\"%s\" -user-email=%s -user-name=\"%s\"",
 		ActlPath, tenantID, userEmail, userName))
+}
+
+// FortifyK8SGenerateHelm - Generates values.yaml for araali fortification helm chart
+func FortifyK8SGenerateHelm(tenantID, clusterName string) (*FortifyHelmValues, error) {
+	output, err := RunCmd(fmt.Sprintf(
+		"%s fortify-k8s -tenant=%s -tags=zone=%s -out=helm %s",
+		ActlPath, tenantID, clusterName, clusterName))
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate helm (err: %v)", err)
+	}
+	var hv FortifyHelmValues
+	yaml.Unmarshal([]byte(output), &hv)
+	return &hv, nil
 }
 
 // GetZones - return zones and apps, use tenant="" by default
@@ -434,7 +468,7 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32, fetchAll bo
 
 		return fmt.Sprint("-endtime=", endTime)
 	}()
-	
+
 	fetchAllStr := func() string {
 		return fmt.Sprint("-all=", fetchAll)
 	}()
@@ -448,8 +482,19 @@ func GetAlerts(tenant string, startTime, endTime int64, count int32, fetchAll bo
 	yaml.Unmarshal([]byte(output), &listOfLinks)
 
 	pagingToken := ""
-        if len(listOfLinks) != 0 {
+	if len(listOfLinks) != 0 {
 		pagingToken = listOfLinks[len(listOfLinks)-1].PagingToken
 	}
 	return AlertPage{options: fmt.Sprintf(" %s %s %s %s", getTenantStr(tenant), startTimeStr, endTimeStr, countStr), Alerts: listOfLinks, PagingToken: pagingToken}, nil
+}
+
+func GetInsights(tenantID string) ([]Insight, error) {
+	output, err := RunCmd(fmt.Sprintf(
+		"%s api %s -fetch-insights", ActlPath, getTenantStr(tenantID)))
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch insights (%v)", err)
+	}
+	listOfInsights := []Insight{}
+	yaml.Unmarshal([]byte(output), &listOfInsights)
+	return listOfInsights, nil
 }
