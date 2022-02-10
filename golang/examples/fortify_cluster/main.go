@@ -7,7 +7,7 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/araalinetworks/api/golang/araalictl"
+	"github.com/araalinetworks/api/golang/v1/araalictl"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/araalinetworks/api/golang/araalictl"
+	"github.com/araalinetworks/api/golang/v1/araalictl"
 )
 
 func main() {
@@ -24,24 +24,24 @@ func main() {
 			fmt.Println("-user-email and -user-name must be specified when op=ADD")
 			os.Exit(1)
 		}
-		araalictl.TenantCreate(userEmail, tenantName, userName)
+		fmt.Println(araalictl.TenantCreate(tenantName, userName, userEmail, true))
 	} else if op == "DEL" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=DEL")
 			os.Exit(1)
 		}
-		araalictl.TenantDelete(tenantID)
+		fmt.Println(araalictl.TenantDelete(tenantID))
 	} else if op == "ADD-USER" {
 		if tenantID == "" || userEmail == "" || userName == "" {
 			fmt.Println("-id, -user-email and -user-name must be specified when op=ADD-USER")
 			os.Exit(1)
 		}
-		araalictl.TenantAddUser(tenantID, userEmail, userName)
+		fmt.Println(araalictl.UserAdd(tenantID, userName, userEmail, "Site-Admin"))
 	} else if op == "DEL-USER" {
 		if tenantID == "" || userEmail == "" || userName == "" {
 			fmt.Println("-id, -user-email and -user-name must be specified when op=DEL-USER")
 			os.Exit(1)
 		}
-		araalictl.TenantDeleteUser(tenantID, userEmail, userName)
+		fmt.Println(araalictl.UserDelete(tenantID, userEmail))
 	}
 }
