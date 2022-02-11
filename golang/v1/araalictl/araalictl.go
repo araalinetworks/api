@@ -319,7 +319,7 @@ func TenantCreate(name, adminName, adminEmail string, freemium bool) (string, er
 		return "", fmt.Errorf("invalid adminEmail (%v)", adminEmail)
 	}
 	resp, err := RunCmd(fmt.Sprintf(
-		"%s tenant -api -op=add -name=%s -user-email=%s -user-name=%s",
+		"%s tenant -api -op=add -name=\"%s\" -user-email=\"%s\" -user-name=\"%s\"",
 		ActlPath, name, adminEmail, adminName))
 	if err != nil {
 		return "", err
@@ -338,7 +338,7 @@ func TenantDelete(tenantID string) error {
 		return fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 	_, err := RunCmd(fmt.Sprintf(
-		"%s tenant -api -op=del -id=%s", ActlPath, tenantID))
+		"%s tenant -api -op=del -id=\"%s\"", ActlPath, tenantID))
 	if err != nil {
 		return err
 	}
@@ -353,7 +353,7 @@ func UserAdd(tenantID, userName, userEmail, role string) error {
 		return fmt.Errorf("invalid user email (%v)", userEmail)
 	}
 	_, err := RunCmd(fmt.Sprintf(
-		"%s tenant -api -op=add-user -id=\"%s\" -user-email=%s -user-name=\"%s\" -roles=\"%s\"",
+		"%s tenant -api -op=add-user -id=\"%s\" -user-email=\"%s\" -user-name=\"%s\" -roles=\"%s\"",
 		ActlPath, tenantID, userEmail, userName, role))
 	return err
 }
@@ -365,7 +365,7 @@ func UserDelete(tenantID, userEmail string) error {
 	} else if len(userEmail) == 0 {
 		return fmt.Errorf("invalid user email (%v)", userEmail)
 	}
-	_, err := RunCmd(fmt.Sprintf("%s tenant -api -op=del-user -id=\"%s\" -user-email=%s",
+	_, err := RunCmd(fmt.Sprintf("%s tenant -api -op=del-user -id=\"%s\" -user-email=\"%s\"",
 		ActlPath, tenantID, userEmail))
 	return err
 }
