@@ -372,16 +372,22 @@ func UserDelete(tenantID, userEmail string) error {
 
 // FortifyK8SGenerateHelm - Generates values.yaml for araali fortification helm chart
 func FortifyK8SGenerateHelm(tenantID, clusterName string) (*FortifyHelmValues, error) {
+	if tenantID == "" {
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
+	} else if clusterName == "" {
+		return nil, fmt.Errorf("invalid clusterName (%v)", clusterName)
+	}
+
 	output, err := RunCmd(fmt.Sprintf(
 		"%s fortify-k8s -tenant=%s -tags=zone=%s -out=helm %s",
 		ActlPath, tenantID, clusterName, clusterName))
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate helm (err: %v)", err)
+		return nil, fmt.Errorf("failed to generate helm (err: %v/(%v))", err, output)
 	}
 	var hv FortifyHelmValues
 	err = yaml.Unmarshal([]byte(output), &hv)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate helm (err: %v)", err)
+		return nil, fmt.Errorf("failed unmarshall helm (err: %v)", err)
 	}
 	return &hv, nil
 }
