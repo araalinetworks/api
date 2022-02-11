@@ -384,6 +384,11 @@ func FortifyK8SGenerateHelm(tenantID, clusterName string) (*FortifyHelmValues, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate helm (err: %v/(%v))", err, output)
 	}
+
+	if len(strings.TrimSpace(output)) == 0 {
+		return nil, fmt.Errorf("failed to generate helm emtpy output %v", output)
+	}
+
 	var hv FortifyHelmValues
 	err = yaml.Unmarshal([]byte(output), &hv)
 	if err != nil {

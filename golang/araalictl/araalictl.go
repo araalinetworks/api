@@ -325,10 +325,13 @@ func FortifyK8SGenerateHelm(tenantID, clusterName string) (*FortifyHelmValues, e
 		"%s fortify-k8s -tenant=%s -tags=zone=%s -out=helm %s",
 		ActlPath, tenantID, clusterName, clusterName))
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate helm (err: %v)", err)
+		return nil, fmt.Errorf("failed to generate helm (err: %v/(%v))", err, output)
 	}
 	var hv FortifyHelmValues
-	yaml.Unmarshal([]byte(output), &hv)
+	err1 := yaml.Unmarshal([]byte(output), &hv)
+	if err1 != nil {
+		return nil, fmt.Errorf("unmarshall helm (err: %v)", err1)
+	}
 	return &hv, nil
 }
 
