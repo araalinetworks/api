@@ -397,6 +397,78 @@ func FortifyK8SGenerateHelm(tenantID, clusterName string) (*FortifyHelmValues, e
 	return &hv, nil
 }
 
+// GetCompute - return VMs and containers for given zone/app with vulnerability info
+func GetCompute(zone, app, tenant string) ([]Compute, error) {
+	output, err := RunCmd(fmt.Sprintf("%s api -zone=%s -app=%s -fetch-compute %s", ActlPath, zone, app, getTenantStr(tenant)))
+	if err != nil {
+		return []Compute{}, err
+	}
+	listOfCompute := []Compute{}
+	yaml.Unmarshal([]byte(output), &listOfCompute)
+	return listOfCompute, nil
+}
+
+//
+// GetComputeCount - returns a count of virtual machines and containers
+//
+func GetComputeCount(zone, app, tenant string) (int, int, error) {
+	listOfCompute, err := GetCompute(zone, app, tenant)
+	if err != nil {
+		return 0, 0, err
+	}
+	vmCount := 0
+	containerCount := 0
+	for _, c := range listOfCompute {
+		if c.State == "ACTIVE" {
+			if c.AssetType == "VM" {
+				vmCount++
+			} else if c.AssetType == "CONTAINER" {
+				containerCount++
+			}
+		}
+	}
+	return vmCount, containerCount, nil
+}
+
+type ComputeWithInsights struct {
+	VirtualMachines []Insight `yaml:"virtual_machines,omitentry" json:"virtual_machines"`
+	Containers      []Insight `yaml:"containers,omitentry" json:"containers"`
+}
+
+//
+// GetComputeWithInsights - returns
+// 		Asset type and count of each type of insight
+//
+func GetComputeWithInsights(zone, app, tenant string) (ComputeWithInsights, error) {
+	return ComputeWithInsights{}, nil
+}
+
+type ThreadCounts struct {
+	TenantId                    string `yaml:"tenantid" json:"tenant_id"`
+	Zone                        string `yaml:"zone" json:"zone"`
+	PerimeterIngressAlerts      int    `yaml: "perimeter_ingress_alerts" json:"perimeter_ingress_alerts"`
+	PerimeterEgressAlerts       int    `yaml: "perimeter_egress_alerts" json:":"perimeter_egress_alerts"`
+	MonitoredNonPerimeterAlerts int    `yaml: "monitored_non_perimeter_alerts" json:"monitored_non_perimeter_alerts"`
+	EnforceAlerts               int    `yaml: "enforced_alerts" json:"enforced_alerts"`
+}
+
+//
+// GetThreatsCounts - returns
+// 		Alert count for threats detected & alert count for threats prevented
+//
+func GetThreatsCounts(zone, app, tenant string) (int, int, error) {
+	output, err := RunCmd(fmt.Sprintf("%s api -fetch-threat-count %s", ActlPath, getTenantStr(tenant)))
+	if err != nil {
+		return 0, 0, err
+	}
+	var tc ThreadCounts
+	err = yaml.Unmarshal([]byte(output), &tc)
+	if err != nil {
+		return 0, 0, nil
+	}
+	return tc.PerimeterIngressAlerts + tc.PerimeterEgressAlerts + tc.MonitoredNonPerimeterAlerts, tc.EnforceAlerts, nil
+}
+
 // GetZones - return zones and apps, use tenant="" by default
 func GetZones(full bool, tenant string) ([]Zone, error) {
 	fullStr := func() string {
@@ -413,17 +485,6 @@ func GetZones(full bool, tenant string) ([]Zone, error) {
 	listOfZones := []Zone{}
 	yaml.Unmarshal([]byte(output), &listOfZones)
 	return listOfZones, nil
-}
-
-// GetCompute - return VMs and containers for given zone/app with vulnerability info
-func GetCompute(zone, app, tenant string) ([]Compute, error) {
-	output, err := RunCmd(fmt.Sprintf("%s api -zone=%s -app=%s -fetch-compute %s", ActlPath, zone, app, getTenantStr(tenant)))
-	if err != nil {
-		return []Compute{}, err
-	}
-	listOfCompute := []Compute{}
-	yaml.Unmarshal([]byte(output), &listOfCompute)
-	return listOfCompute, nil
 }
 
 // GetLinks - get links for zone, app for tenant
