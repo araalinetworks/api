@@ -443,7 +443,7 @@ func GetComputeWithInsights(zone, app, tenant string) (ComputeWithInsights, erro
 	return ComputeWithInsights{}, nil
 }
 
-type ThreadCounts struct {
+type ThreatCount struct {
 	TenantId                    string `yaml:"tenantid" json:"tenant_id"`
 	Zone                        string `yaml:"zone" json:"zone"`
 	PerimeterIngressAlerts      int    `yaml: "perimeter_ingress_alerts" json:"perimeter_ingress_alerts"`
@@ -453,15 +453,15 @@ type ThreadCounts struct {
 }
 
 //
-// GetThreatsCounts - returns
+// GetThreatCount - returns
 // 		Alert count for threats detected & alert count for threats prevented
 //
-func GetThreatsCounts(zone, app, tenant string) (int, int, error) {
+func GetThreatCount(zone, app, tenant string) (int, int, error) {
 	output, err := RunCmd(fmt.Sprintf("%s api -fetch-threat-count %s", ActlPath, getTenantStr(tenant)))
 	if err != nil {
 		return 0, 0, err
 	}
-	var tc ThreadCounts
+	var tc ThreatCount
 	err = yaml.Unmarshal([]byte(output), &tc)
 	if err != nil {
 		return 0, 0, nil
