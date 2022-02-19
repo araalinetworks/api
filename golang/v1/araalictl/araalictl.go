@@ -632,7 +632,7 @@ func GetInsights(tenantID string) ([]Insight, error) {
 // GetComputeWithInsights - returns
 // 		Asset type and count of each type of insight
 //
-func GetComputeWithInsights(zone, app, tenant string, includeInsights []string) (ComputeCount, error) {
+func GetComputeWithInsights(zone, app, tenant string, includeInsights map[string]bool) (ComputeCount, error) {
 	cc := ComputeCount{}
 	output, err := RunCmd(fmt.Sprintf(
 		"%s api %s -fetch-insights -full", ActlPath, getTenantStr(tenant)))
@@ -645,14 +645,9 @@ func GetComputeWithInsights(zone, app, tenant string, includeInsights []string) 
 	if err != nil {
 		return cc, err
 	}
-
-	inIncludeList := make(map[string]bool)
-	for _, i := range includeInsights {
-		inIncludeList[i] = true
-	}
 	mapOfInstances := make(map[string]int)
 	for _, i := range listOfInsights {
-		if !inIncludeList[i.InsightReason] {
+		if !includeInsights[i.InsightReason] {
 			continue
 		}
 		key := fmt.Sprintf("%s+%s+%s+%s", i.Zone, i.App, i.Pod, i.Container)
