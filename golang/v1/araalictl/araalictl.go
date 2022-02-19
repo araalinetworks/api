@@ -236,6 +236,37 @@ type EndPoint struct {
 	OrigDstPort       uint32 `yaml:"orig_dst_port,omitempty"`
 }
 
+type ThreatCount struct {
+	TenantId                    string `yaml:"tenantid" json:"tenant_id"`
+	Zone                        string `yaml:"zone" json:"zone"`
+	PerimeterIngressAlerts      int    `yaml: "perimeter_ingress_alerts" json:"perimeter_ingress_alerts"`
+	PerimeterEgressAlerts       int    `yaml: "perimeter_egress_alerts" json:":"perimeter_egress_alerts"`
+	MonitoredNonPerimeterAlerts int    `yaml: "monitored_non_perimeter_alerts" json:"monitored_non_perimeter_alerts"`
+	EnforceAlerts               int    `yaml: "enforced_alerts" json:"enforced_alerts"`
+}
+
+// InsightCounts
+type Insight struct {
+	InsightType string `yaml:"insighttype" json:"insighttype"`
+	Url         string `yaml:"url" json:"url"`
+	Count       int    `yaml:"count" json:"count"`
+}
+
+type InsightDetail struct {
+	Lenstype            string `yaml:"lenstype,omitempty" json:"lenstype"`
+	Zone                string `yaml:"zone,omitempty" json:"zone"`
+	App                 string `yaml:"app,omitempty" json:"app"`
+	Pod                 string `yaml:"pod,omitempty" json:"pod"`
+	Container           string `yaml:"containername,omitempty" json:"containername"`
+	Process             string `yaml:"process,omitempty" json:"process"`
+	ParentProcess       string `yaml:"parent_process,omitempty" json:"parentprocess"`
+	BinaryName          string `yaml:"binaryname,omitempty" json:binaryname"`
+	Service             string `yaml:"service,omitempty" json:"service"`
+	Reason              string `yaml:"reason,omitempty" json:"reason"`
+	InsightReason       string `yaml:"insightreason,omitempty" json:"insightreason"`
+	ProcessCapabilities string `yaml:"processcapabilities,omitempty" json:"processcapabilities"`
+}
+
 // Link Object
 type Link struct {
 	Client      EndPoint
@@ -268,13 +299,6 @@ type AlertInfo struct {
 	ProcessAlertType       string `yaml:"process_alert_type,omitempty"`
 	ReOpenCount            uint32 `yaml:"reopen_count,omitempty"`
 	Status                 string `yaml:"status,omitempty"`
-}
-
-// InsightCounts
-type Insight struct {
-	InsightType string `yaml:"insighttype" json:"insighttype"`
-	Url         string `yaml:"url" json:"url"`
-	Count       int    `yaml:"count" json:"count"`
 }
 
 // Generate tenant string for command line args
@@ -428,28 +452,6 @@ func GetComputeCount(zone, app, tenant string) (int, int, error) {
 		}
 	}
 	return vmCount, containerCount, nil
-}
-
-type ComputeWithInsights struct {
-	VirtualMachines []Insight `yaml:"virtual_machines,omitentry" json:"virtual_machines"`
-	Containers      []Insight `yaml:"containers,omitentry" json:"containers"`
-}
-
-//
-// GetComputeWithInsights - returns
-// 		Asset type and count of each type of insight
-//
-func GetComputeWithInsights(zone, app, tenant string) (ComputeWithInsights, error) {
-	return ComputeWithInsights{}, nil
-}
-
-type ThreatCount struct {
-	TenantId                    string `yaml:"tenantid" json:"tenant_id"`
-	Zone                        string `yaml:"zone" json:"zone"`
-	PerimeterIngressAlerts      int    `yaml: "perimeter_ingress_alerts" json:"perimeter_ingress_alerts"`
-	PerimeterEgressAlerts       int    `yaml: "perimeter_egress_alerts" json:":"perimeter_egress_alerts"`
-	MonitoredNonPerimeterAlerts int    `yaml: "monitored_non_perimeter_alerts" json:"monitored_non_perimeter_alerts"`
-	EnforceAlerts               int    `yaml: "enforced_alerts" json:"enforced_alerts"`
 }
 
 //
@@ -624,4 +626,50 @@ func GetInsights(tenantID string) ([]Insight, error) {
 	listOfInsights := []Insight{}
 	yaml.Unmarshal([]byte(output), &listOfInsights)
 	return listOfInsights, nil
+}
+
+//
+// GetComputeWithInsights - returns
+// 		Asset type and count of each type of insight
+//
+func GetComputeWithInsights(zone, app, tenant string, includeInsights []string) (ComputeCount, error) {
+	cc := ComputeCount{}
+	output, err := RunCmd(fmt.Sprintf(
+		"%s api %s -fetch-insights -full", ActlPath, getTenantStr(tenant)))
+	if err != nil {
+		return cc, fmt.Errorf("failed to fetch insights (%v)", err)
+	}
+
+	listOfInsights := []InsightDetail{}
+	err = yaml.Unmarshal([]byte(output), &listOfInsights)
+	if err != nil {
+		return cc, err
+	}
+
+	inIncludeList := make(map[string]bool)
+	for _, i := range includeInsights {
+		inIncludeList[i] = true
+	}
+	mapOfInstances := make(map[string]int)
+	for _, i := range listOfInsights {
+		if !inIncludeList[i.InsightReason] {
+			continue
+		}
+		key := fmt.Sprintf("%s+%s+%s+%s", i.Zone, i.App, i.Pod, i.Container)
+		if _, ok := mapOfInstances[key]; !ok {
+			mapOfInstances[key] = 1
+		} else {
+			mapOfInstances[key]++
+		}
+	}
+
+	for k, v := range mapOfInstances {
+		if strings.HasSuffix(k, "++") {
+			cc.VirtualMachines += uint32(v)
+		} else {
+			cc.Containers += uint32(v)
+		}
+	}
+
+	return cc, nil
 }
