@@ -59,6 +59,7 @@ So let the show begin!
    guide_getting_started_minikube_macbook
    guide_getting_started_with_SIEM
    guide_getting_started_with_k8s
+   guide_getting_started_with_rafay
    guide_templates
    guide_lenses
 .. toctree::
