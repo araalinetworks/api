@@ -15,7 +15,7 @@ Araali UI Login
 1. Open a chrome browser and go to `Araali Console <https://console.araalinetworks.com>`_
 
 .. image:: images/updated-araali-console-signin.png
- :width: 600
+ :width: 300
  :alt: Araali Sign-In
 
 2. If your email is already registered and your business email uses Google service, then use "Sign in with Google". Otherwise, click on “Need Help Signing In?” which will open “Forgot Password?”. Then, complete the steps to sign in to the console.
