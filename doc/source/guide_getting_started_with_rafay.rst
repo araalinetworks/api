@@ -18,9 +18,9 @@ Araali UI Login
  :width: 300
  :alt: Araali Sign-In
 
-2. If your email is already registered and your business email uses Google service, then use "Sign in with Google". Otherwise, click on “Need Help Signing In?” which will open “Forgot Password?”. Then, complete the steps to sign in to the console.
-3. You are in!!
-4. Now, in the left-hand panel, go to Administration and then Araali Tools. You have to come back to this page to authorize Araalictl
+1. Click ``Sign Up`` to register
+2. You are in!!
+3. Now, in the left-hand panel, go to Administration and then Araali Tools. You have to come back to this page to authorize Araalictl
 
 .. image:: images/araali-auth-dash.png
  :width: 600
@@ -49,11 +49,16 @@ your cluster.
     sudo ./araalictl authorize <email-id>
 
 4. Now go to Araali UI >> Administration >> Araali Tools to approve the araalictl session.
-5. Check if araalictl is installed::
+
+.. image:: images/araalictl-approve.png
+ :width: 600
+ :alt: Araalictl Approval
+
+1. Check if araalictl is installed::
 
     ./araalictl version -v
 
-6. Generate helm values::
+2. Generate helm values::
 
     ./araalictl fortify-k8s -out=helm > /tmp/values.yaml
 
@@ -87,6 +92,12 @@ Click on ``New Version``
 Upload the created ``values.yaml`` file::
 
     Chart Name: araali-fw Chart Version: 1.0.0
+
+Edit the ``values.yaml`` in Rafay to get the runtime clustername from Rafay.
+
+.. image:: images/rafay-araali-new-addon-edit.png
+ :width: 600
+ :alt: Edit values.yaml in Rafay
 
 The Rafay addon will be used in the Araali Blueprint below
 
