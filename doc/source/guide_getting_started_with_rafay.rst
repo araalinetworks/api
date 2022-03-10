@@ -6,9 +6,9 @@ Prerequisites
 *************
 1. Registered with Rafay and account created
 2. Register with Araali to create an account
-    * To access the UI dashboard 
-    * To install `araalictl` and authorize it
-    * To help with generation of Helm `values.yaml`
+    * To access the UI dashboard
+    * To install ``araalictl`` and authorize it
+    * To help with generation of Helm ``values.yaml``
 
 Araali UI Login
 ***************
@@ -26,9 +26,9 @@ Araali UI Login
  :width: 600
  :alt: Araali Authorization Dashboard
 
-Generating Helm `values.yaml`
-*****************************
-Follow the steps below to generate a `values.yaml` file to use with Araali Helm chart for 
+Generating Helm ``values.yaml``
+*******************************
+Follow the steps below to generate a ``values.yaml`` file to use with Araali Helm chart for 
 your cluster.
 
 1. Download Araalictl
@@ -53,38 +53,38 @@ your cluster.
 
     ./araalictl version -v
 
-6. Generate helm values
+6. Generate helm values::
 
     ./araalictl fortify-k8s -out=helm > /tmp/values.yaml
 
 
 Create Rafay Repository for Araali Helm chart access
 ****************************************************
-Add Araali Helm Repo to Rafay `Create Rafay Araali Helm Registery <https://console.rafay.dev/#/app/repositories>`_
+Add Araali Helm repository to Rafay `Create Rafay Araali Helm Registery <https://console.rafay.dev/#/app/repositories>`_
 
 .. image:: images/rafay-araali-helm-registry.png
  :width: 600
  :alt: Create Araali Helm Repo in Rafay
 
-The Rafay repository will be used in the Araali AddOn below
+The Rafay repository will be used in the Araali addon below
 
 Create Rafay AddOn for Araali Firewall
 **************************************
-Add Araali AddOn to Rafay `Create Rafay Araali AddOn <https://console.rafay.dev/#/app/addons>`_
+Add Araali addon to Rafay `Create Rafay Araali AddOn <https://console.rafay.dev/#/app/addons>`_
 
-Click on `New AddOn`
+Click on ``New AddOn``
 
 .. image:: images/rafay-araali-new-addon.png
  :width: 600
  :alt: Create Araali AddOn in Rafay
 
-Click on `New Version`
+Click on ``New Version``
 
 .. image:: images/rafay-araali-new-addon-version.png
  :width: 600
  :alt: Create Araali AddOn Version in Rafay
 
-Upload the created `values.yaml` file.
+Upload the created ``values.yaml`` file::
 
     Chart Name: araali-fw Chart Version: 1.0.0
 
@@ -92,29 +92,29 @@ The Rafay addon will be used in the Araali Blueprint below
 
 Create Rafay Blueprint that uses Rafay AddOn
 ********************************************
-Add Araali Blueprint to Rafay `Create Rafay Araali Blueprint <https://console.rafay.dev/#/app/blueprints>`_
+Add Araali blueprint to Rafay `Create Rafay Araali Blueprint <https://console.rafay.dev/#/app/blueprints>`_
 
-Click on `New AddOn`
+Click on ``New AddOn``
 
 .. image:: images/rafay-araali-new-blueprint.png
  :width: 600
  :alt: Create Araali Blueprint in Rafay
 
-Click on `New Version`
+Click on ``New Version``
 
 .. image:: images/rafay-araali-new-blueprint-version.png
  :width: 600
  :alt: Create Araali Blueprint Version in Rafay
 
-Use the addon created above in the Add `AddOn` section
+Use the addon created above in the add ``AddOn`` section
 
-This Blueprint will be applied to the cluster
+This blueprint will be applied to the cluster
 
 Enable Rafay Blueprint on the cluster
 *************************************
 Add Araali Blueprint to Rafay `Create Rafay Araali Blueprint <https://console.rafay.dev/#/app/blueprints>`_
 
-Click on the settings wheel icon and select `Update Blueprint`
+Click on the settings wheel icon and select ``Update Blueprint``
 
 .. image:: images/rafay-araali-cluster-add-blueprint.png
  :width: 600
@@ -126,7 +126,7 @@ Pick the Blueprint and Version created in previous step
  :width: 600
  :alt: Add Araali Blueprint Version to Cluster in Rafay
 
-Once the changes are saved the Araali AddOn is activated in the cluster.
+Once the changes are saved the Araali add on is activated in the cluster.
 Check for the sync to finish and visit the Araali Dashboard for instant visibility into your cluster.
 
 Araali Dashboard
