@@ -108,8 +108,8 @@ GitOps with Araali API
 The above data can be accessed as python objects as well using our API. We can
 set up python API as described `here <https://github.com/araalinetworks/api>`_.
 
-1. Fetching links for a given zone and app.
--------------------------------------------
+Fetching links for a given zone and app.
+----------------------------------------
 
 .. code-block:: python
 
@@ -120,8 +120,8 @@ set up python API as described `here <https://github.com/araalinetworks/api>`_.
    for link in app.iterlinks():
      link.to_data()
 
-2. Once we have the links we can take the following actions.
-------------------------------------------------------------
+Once we have the links we can take the following actions.
+---------------------------------------------------------
 
 a. Accept an alert as defined policy.
 
@@ -143,43 +143,41 @@ c. Snooze an alert / defined policy / denied policy.
    
    app.links[0].snooze()
 
-
 Pushing policies to git
 -----------------------
 Once we are satisfied with the review of the links for an app. We can fetch the
 links in yaml format using our command-line tool araalictl as shown in the
 example below.
 
+Download the reviewed and accepted policy for an application (rsncommon/voting)
+
 .. code-block:: python
 
- - client:
-      zone: azuref
-      app: wordpress.wpapp-wordpress.wordpress
-      process: httpd
-      binary_name: /opt/bitnami/apache/bin/httpd
-      parent_process: httpd
-    server:
-      dns_pattern: ':api.wordpress.org:'
-      dst_port: 443
-      endpoint_group: wordpress.org
-    type: NAE
-    speculative: false
-    state: DEFINED_POLICY
-    timestamp: 1617828767000
-    unique_id: id://azuref,:wordpress.wpapp- 
- wordpress.wordpress:,httpd,httpd,/opt/bitnami/apache/bin/httpd+++api.wordpress.org:443+++false+++false
-   rollup_ids:
-   - id://azuref,:wordpress.wpapp- 
- wordpress.wordpress:,httpd,httpd,/opt/bitnami/apache/bin/httpd+++api.wordpress.org:443+++false+++false
-  active_ports:
-   - 443
+   araalictl policy -zone=rsncommon -app=voting -tenant=rsn > /tmp/yaml/common.voting.yaml
 
-The above-saved file can be committed to a git repository::
+We will use the AKS voting app running in ``rsncommon`` zone and ``voting`` namespace.
 
-   $ git checkout -b azuref
-   $ git add azuref.policies.v1.yaml
-   $ git commit -m "Adding azuref accepted policies."
-   $ git push -u origin azuref
+.. image:: images/aks-voting-app.png
+ :width: 800
+ :alt: AKS Voting App
+
+Modify the zone, app and any other fields that need to be edited and save into a different
+file. In this example the zone and app will be modified to (policy-1/voting-tmp)
+
+Check your policy diff visually to make sure it is ok
+
+.. code-block:: python
+
+   araalictl policy -file1 /tmp/yaml/common.voting.yaml -file2 /tmp/yaml/common.voting-tmp.yaml -op=diff
+
+Note down the URL presented by the policy diff API. This is a persistant URL that can be
+passed around for policy review.
+
+.. code-block:: python
+
+   araalictl policy -diff-id=74c05743-a25c-45e4-8dd8-1f27956b690c
+
+Commit the new policy file (/tmp/yaml/common.voting-tmp.yaml) to git along side the application.
 
 We can repeat the discovery and review process to come up with good allowed
 policies. We should also be able to view the difference in the policies in the
@@ -189,7 +187,6 @@ UI.
 Saving policies in git also help with versioning the policies which allow us to
 iterate over the discovery and review process.
 
-
 Provisioning policies from git
 ------------------------------
 
@@ -198,19 +195,32 @@ policies that were saved in the git repo as part of ops for that app. This
 ensures that we always start from a pristine state where we only allow the
 links that we have already reviewed and approved. 
 
-We can follow these steps as part of the app deployment process.
+Generate and apply the Araali firewall installation yaml with the AraaliPolicy
+CRD enabled.
 
-a. Clear policies - Our command-line tool araalictl offers the options of
-cleaning the policies for a given app in a specific zone::
+Modify the Service Discovery config to start watching Araali policy lifecycle.
 
-    $ ./araalictl api -clear-policies -zone=azuref -app=wordpress
+.. code-block:: python
 
-b. Apply policies from git - Use the push-policies command supported by
-araalictl and pipe the contents of the policy file from git::
+   araalictl fortify-k8s -tags=zone=policy-1 -araali-policy-crd -force policy-1
 
-   $ cat azuref.policies.v1.yaml | ./araalictl api -push-policies -zone=azuref -app=wordpress
+   kubectl edit cm araali-operator-config -n araali-operator
+   araalitags.operator.araali_k8s_policy_enable: "1" (Add this to configmap)
 
-c. Finally, deploy your app.
+   kubectl apply -f araali_k8s.yaml
+
+Apply the Araali policy from git before deploying application.
+
+.. code-block:: python
+
+   kubectl apply -f /tmp/yaml/common.voting-tmp.yaml -n voting-tmp (K8S)
+   cat /tmp/yaml/common.voting-tmp.yaml | araalictl policy -zone=policy-1 -app=voting-tmp -tenant=vmk -op update (VM)
+
+Check UI for policy
+
+.. image:: images/aks-voting-app-new.png
+ :width: 800
+ :alt: AKS Voting App
 
 With this workflow, Araali automates the task of writing network security
 policy and managing its lifecycle using git ops. After these policies are
@@ -256,7 +266,7 @@ b. Update the mapping yaml file.
 
      cat pod_mapping.yaml
 
-   .. code-block::
+.. code-block::python
 
     - zone: prod
       namespace: gshop
@@ -309,7 +319,7 @@ b. Update the mapping yaml file.
      2. redis-cart → gshop-db
      3. rest of the services → gshop-service
 
-   .. code-block::
+.. code-block::python
 
     - zone: prod
       namespace: gshop
@@ -440,7 +450,7 @@ similar to the UI. The process starts by fetching links for a service or an app
 lens. Below is an example of fetching links for service. The command returns a
 list of links and the user picks out a link that they are interested in.
 
-.. code-block::
+.. code-block::python
 
     $ ./araalictl api -fetch-links -service 10.100.0.1:443 > prometheus_link
 
@@ -654,19 +664,19 @@ template name as shown below::
    
 **Stop using Templates**
 
-.. code-block::
+.. code-block::python
 
     ./araalictl api -template ingressHaproxy,snapdToSnapcraft -op stop
     
 **Deleting Templates**
 
-.. code-block::
+.. code-block::python
 
     ./araalictl api -template ingressHaproxy,snapdToSnapcraft -op del
 
 **Listing Templates**
 
-.. code-block::
+.. code-block::python
 
     ./araalictl api -list-template
 
