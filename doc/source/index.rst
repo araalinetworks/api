@@ -29,7 +29,7 @@ So let the show begin!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation and usage:
+   :caption: Installation and usage
    :hidden:
 
    introduction_to_araali_networks
@@ -49,7 +49,7 @@ So let the show begin!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Guides:
+   :caption: Guides
    :hidden:
 
    guide_getting_started_with_EKS
@@ -59,12 +59,14 @@ So let the show begin!
    guide_getting_started_minikube_macbook
    guide_getting_started_with_SIEM
    guide_getting_started_with_k8s
-   guide_getting_started_with_rafay
+   getting_started_with_rafay
    guide_templates
    guide_lenses
+
+
 .. toctree::
    :maxdepth: 2
-   :caption: Community:
+   :caption: Community
    :hidden:
 
    community
