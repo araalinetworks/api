@@ -42,6 +42,7 @@ So let the show begin!
    araalictlgolang
    araalictlnotebook
    araalipolicy
+   policy_as_code
    araalislackwebhook
    remapping_apps
    araalifaq

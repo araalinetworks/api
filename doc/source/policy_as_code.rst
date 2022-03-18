@@ -1,4 +1,4 @@
-Policy and Git
+Policy as Code
 ==============
 
 Provisioning Policies from Git

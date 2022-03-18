@@ -36,9 +36,8 @@ Now that you have your cluster, register your account and download araalictl
 Step 1: Sign In or Register in the Araali Console
 *************************************************
 Visit the `Araali Console <https://console.araalinetworks.com>`_ in your browser.
-If you use the Social buttons at the top of the form to sign in, there is no
-registration step. If you cannot use the Social buttons, use the "Sign up" link
-at the bottom of the form to sign up for an account.
+If you have a Gmail account, click the "Sign in with Google" button to access the Araali UI.
+If you do not have a a Gmail account, use the "Sign up" button to sign up for an account.
 
 .. image:: images/araali-console-sign-in.png
  :alt: Araali Console Sign In
@@ -146,7 +145,7 @@ Step 6: Review the Results
 ****************************
 You can review the results in yaml file or the Araali UI.
 
-For yaml file 
+For yaml file::
 
    ./araalictl assessment -report
 
@@ -154,13 +153,20 @@ Or, go to the Araali UI (`console.araalinetworks.com
 <https://console.araalinetworks.com>`_) and log in with the same email that was
 used to authorize araalictl. 
 
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/zoneview.png
+.. image:: images/top_risk_buckets.png
   :width: 650
-  :alt: Araali Zone View
+  :alt: Araali Dashboard Insights
 
-Go to the zones page in the right-hand sidebar, your cluster shows as “dev”.
-Click on the magnifying glass to go inside your cluster and review the
-assessment results as well as a snapshot of your Kubernetes networking.
+The Insights section on the Dashboard pull out nuggets of high priority information for you, such as
+
+* Database, DB-as-a-Service - your crown jewels
+* World Exposed Process - check for accidental exposures
+* Privilege Access Process and Containers - these have over privileges and can cause significant damage if exploited
+* Critical Vulnerability Containers - these are running with critical CVEs
+* SaaS Services - All the SaaS services consumed by your apps
+* Log4j - to identify if you have any log4j vulnerability in your environment
+
+You can click on any of the cards to review the details.
 
 
 
