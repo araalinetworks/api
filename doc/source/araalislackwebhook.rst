@@ -38,6 +38,13 @@ Subscribing to Alerts
 We can subscribe to alerts for a lens we are interested in using araali UI as
 below.
 
+A user can subscribe to alert notifications. Anytime, a new alert is seen by
+the system an email will be generated. With time as the app is discovered, new
+alerts should reduce (only infrequent communications will trigger new alerts).
+
+Security Professionals can subscribe for all alerts related to perimeter egress
+or ingress across all apps.
+
 .. image:: images/alerts-subscribe-in-araali.png
  :alt: Subscribing to Alerts
 

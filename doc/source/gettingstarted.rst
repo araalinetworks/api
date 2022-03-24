@@ -113,8 +113,8 @@ Check if kubectl is pointing to the cluster you want to assess::
 
 
 
-Step 5: Run the assessment
-**************************
+Step 5: Run Araali
+******************
 
 Now, araalictl is up and running on a machine that has access to your cluster,
 you can start your assessment prior to running your integration test. Araali
@@ -143,13 +143,12 @@ any number of times::
 
 Step 6: Review the Results
 ****************************
-You can review the results in yaml file or the Araali UI.
+You can review the results in the Araali UI or a yaml file.
 
-For yaml file::
+Araali UI
+---------
 
-   ./araalictl assessment -report
-
-Or, go to the Araali UI (`console.araalinetworks.com
+Go to the Araali UI (`console.araalinetworks.com
 <https://console.araalinetworks.com>`_) and log in with the same email that was
 used to authorize araalictl. 
 
@@ -169,4 +168,9 @@ The Insights section on the Dashboard pull out nuggets of high priority informat
 You can click on any of the cards to review the details.
 
 
+yaml file
+-----------
+::
+
+   ./araalictl assessment -report
 
