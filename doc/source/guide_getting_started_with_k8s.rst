@@ -66,27 +66,84 @@ Follow the steps below to fortify a Kubernetes cluster (same place where your k8
 
     kubectl config get-contexts
 
-7. Fortify your cluster, araalictl and kubectl running on same machine::
+7. Fortify your cluster, araalictl and kubectl running on the same machine::
 
-    ./araalictl fortify-k8s -auto -context=<context of k8s cluster>
+    ./araalictl fortify-k8s -auto -tags=zone=<optional-zone-override> -context=<context of k8s cluster>
 
-If araalictl and kubectl are not running on the same machine::
+Optional: If araalictl and kubectl are not running on the same machine::
 
     # Create yaml file to fortify your cluster
-    ./araalictl fortify-k8s -context=<context of k8s cluster>
+    ./araalictl fortify-k8s -tags=zone=<optional-zone-override> -context=<context of k8s cluster>
     # The above command will generate araali_k8s.yaml file. Copy it to the k8s control plane (where kubectl is running) and then apply
     kubectl apply -f araali_k8s.yaml
 
 Check if Araali is Installed
 ****************************
 
-Araali should be running in two namespaces (1) araali-operator and (2)kube-system::
+Araali should be running in two namespaces (1) araali-operator and (2) kube-system::
 
     kubectl get pods -A
 
 .. image:: images/kubectl-pods.png
  :width: 600
  :alt: Kubectl Pods
+
+Setting up Araalictl in the CM VM
+*********************************
+
+1. Download Araalictl
+
+    Linux::
+
+        curl -O https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64
+
+    Mac::
+
+        curl -O https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.darwin-amd64
+
+2. Make it Executable::
+
+    chmod +x araali*
+    ln -sf araali* araalictl
+
+3. Authorize Araalictl::
+
+    sudo ./araalictl authorize <email-id>
+
+4. Check if Araalictl is installed::
+
+    ./araalictl version -v
+
+5. Optional - Generate and add ssh-key (if Araalictl is running on the VM you wish to fortify)
+
+6. If you don’t have id_rsa.pub in your ~/.ssh account::
+
+    ssh-keygen
+
+7. Copy it to authorized_keys to allow ssh localhost::
+
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+Fortifying target VMs in your Cluster
+*************************************
+
+* Fortifying Remotely::
+
+    ./araalictl fortify-live -fortify -tags=zone=<zone_name>,app=<app_name> vm1
+
+* Fortifying Localhost::
+
+    ./araalictl fortify-live  -fortify -tags=zone=<zone_name>,app=<app_name> localhost
+
+* Updating Zone, App tags::
+
+    ./araalictl fortify-live -add -tags=zone=<updated_zone>,app=<updated_app> <remote_user>@<remote_host>
+
+
+*For wider use, we recommend to run Araali on the same machine as your Configuration Management Tool (Ansible, Salt, Puppet, Chef, etc.)*
+
+
+
 
 Sample K8s Microservice to Test
 *******************************
@@ -99,7 +156,7 @@ Clone from Github::
 
     kubectl create ns gshop
 
-2. run the microservice::
+2. Run the microservice::
 
   cd microservices-demo/release
   kubectl apply -f kubernetes-manifests.yaml -n gshop
@@ -125,3 +182,11 @@ To uninstall if araalictl and kubectl are on the same machine::
 Otherwise, delete the yaml file::
 
     kubectl delete -f araali_k8s.yaml
+
+To Uninstall Remotely::
+
+    ./araalictl fortify-live -unfortify <remote_user>@<remote_host>
+
+To Uninstall Locally::
+
+    ./araalictl fortify-live -unfortify localhost

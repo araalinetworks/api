@@ -60,7 +60,7 @@ that depends on the value of the resource being protected. Araali allows you to
 make these decisions at a very fine granularity - at a per app and per service
 level
 
-Managing policies in Araali UI
+Managing Policies in Araali UI
 ==============================
 We drill down to the app page from the zone page selecting the zone we are
 interested in and from there we choose the app we are interested in and land on
@@ -102,8 +102,8 @@ The snapshot below shows some of the transitions made on our UI.
 
 
 
-GitOps with Araali API
-======================
+Managing  Policies Araali API
+=============================
 
 The above data can be accessed as python objects as well using our API. We can
 set up python API as described `here <https://github.com/araalinetworks/api>`_.
@@ -142,159 +142,6 @@ c. Snooze an alert / defined policy / denied policy.
 .. code-block:: python
    
    app.links[0].snooze()
-
-
-App Re-Mapping
-==============
-
-Araali hierachically organizes applications deployed in Kubernetes by “Zone”
-and “App”, where "Zone" maps to a Kubernetes cluster and "App" maps to the
-Kubernetes namespace inside which the application was deployed. Usually, each
-application is deployed in its own namespace. However, in some organizations
-namespace could be for an entire team's use or for an entire environment (prod,
-dev, staging). In such cases, the namespace gets pretty big and Araali allows
-the flexibility of mapping pods into applications the way it is generally
-understood by developers.
-
-This is accomplished by remapping the set of pods discovered in Kubernetes.
-Remapping is a flexible and powerful construct that allows users to group a
-specific set of Kubernetes pods under an app even though they run as part of a
-single namespace.
-
-Below is a sample google shopping application where all the pods show up under
-a single app - gshop. We’ll walk through the process of splitting this up into
-three different apps.
-
-.. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsonenamespace.png
- :width: 600
- :alt: Many apps in a single namespace
-
-a. List all current apps to pod mapping as yaml::
-
-    $ ./araalictl api -list-pod-mappings > pod_mapping.yaml
-
-b. Update the mapping yaml file.
-
-   1. By default, the app name is same as the namespace.
-   2. The user can change the name of the app (app tag) as desired.
-
-   This can be done programmatically as well. Here we show a manual way of editing the yaml files.
-
-   Below is a sample yaml file generated::
-
-     cat pod_mapping.yaml
-
-.. code-block::python
-
-    - zone: prod
-      namespace: gshop
-      pod: checkoutservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: frontend
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: cartservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: recommendationservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: currencyservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: shippingservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: adservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: redis-cart
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: productcatalogservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: emailservice
-      app: gshop
-    - zone: prod
-      namespace: gshop
-      pod: paymentservice
-      app: gshop
-
-   Now we would like to re-map the pods as below.
-
-     1. frontend → gshop-frontend
-     2. redis-cart → gshop-db
-     3. rest of the services → gshop-service
-
-.. code-block::python
-
-    - zone: prod
-      namespace: gshop
-      pod: checkoutservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: frontend
-      app: gshop-frontend
-    - zone: prod
-      namespace: gshop
-      pod: cartservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: recommendationservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: currencyservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: shippingservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: adservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: redis-cart
-      app: gshop-db
-    - zone: prod
-      namespace: gshop
-      pod: productcatalogservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: emailservice
-      app: gshop-service
-    - zone: prod
-      namespace: gshop
-      pod: paymentservice
-      app: gshop-service
-
-c. Update the pod to app mapping in araali::
-
-       cat pod_mapping.yaml | ./araalictl api -update-pod-mappings
-
-   Once the above exercise is complete, we see that in Araali UI the namespace
-   was split and remapped into three different apps as shown below.
-
-   .. image:: https://raw.githubusercontent.com/araalinetworks/attacks/main/images/manypodsthreeapps.png
-    :width: 600
-    :alt: App split into three apps
-
 
 Templates
 =========
@@ -599,17 +446,6 @@ template name as shown below::
     ./araalictl api -list-template
 
 The above command dumps the existing policies and their state in yaml format.
-
-
-Alert Subscription (Email)
---------------------------
-
-A user can subscribe to alert notifications. Anytime, a new alert is seen by
-the system an email will be generated. With time as the app is discovered, new
-alerts should reduce (only infrequent communications will trigger new alerts).
-
-Security Professionals can subscribe for all alerts related to perimeter egress
-or ingress across all apps.
 
 Tenant Level for Perimeter Monitoring
 -------------------------------------
