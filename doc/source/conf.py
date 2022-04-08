@@ -40,6 +40,7 @@ needs_sphinx = '1.3'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel',
     'sphinx_rtd_theme',
     'sphinx_tabs.tabs',
     'myst_parser'
