@@ -1,12 +1,12 @@
-=============================
+*****************************
 Understanding Araali Policies
-=============================
+*****************************
 
 Araali Policies
-===============
+###############
 
 Discover
---------
+********
 
 One of the most beneficial features of Araali is its policy paradigm. It
 automatically discovers policies for every namespace/app - no need to write
@@ -27,7 +27,7 @@ boxes represent network communication - all the links will start their
 lifecycle as alerts as shown in the above diagram.
 
 Review
-------
+******
 
 Araali provides various ways of reviewing the links once we are done with the
 discovery step. We can verify the communication pattern of an application
@@ -53,7 +53,7 @@ A denied link is snoozed forever. You neither want to accept nor snooze because
 you are aware of it and don’t want to be bothered by it again.
 
 Enforce
--------
+*******
 Once policies are reviewed, they are ready to be enforced. Creating guard rails
 and monitoring for deviations vs enforcing them upfront is a business decision
 that depends on the value of the resource being protected. Araali allows you to
@@ -61,7 +61,7 @@ make these decisions at a very fine granularity - at a per app and per service
 level
 
 Managing Policies in Araali UI
-==============================
+##############################
 We drill down to the app page from the zone page selecting the zone we are
 interested in and from there we choose the app we are interested in and land on
 our policy page for that app. 
@@ -73,7 +73,7 @@ our policy page for that app.
 
 
 1. Accepting
-------------
+************
 a. Choose the red line for each connection that you want to approve.
 b. Choose the check mark. The line turns green.
 
@@ -83,13 +83,13 @@ That’s it—you have created allow-list policies for your app! No need to
 **manually discover and write declarative** policies.
 
 2. Snoozing
------------
+***********
 
 a. Choose the red line for each connection that you want to snooze.
 b. Choose the timer icon. The line turns blue and is hidden by default.
 
 3. Denying
-----------
+**********
 
 a. Choose the red line connection you’d like to snooze forever.
 b. Choose the bell icon. The line turns yellow.
@@ -103,13 +103,13 @@ The snapshot below shows some of the transitions made on our UI.
 
 
 Managing  Policies Araali API
-=============================
+#############################
 
 The above data can be accessed as python objects as well using our API. We can
 set up python API as described `here <https://github.com/araalinetworks/api>`_.
 
 Fetching links for a given zone and app.
-----------------------------------------
+****************************************
 
 .. code-block:: python
 
@@ -121,7 +121,7 @@ Fetching links for a given zone and app.
      link.to_data()
 
 Once we have the links we can take the following actions.
----------------------------------------------------------
+*********************************************************
 
 a. Accept an alert as defined policy.
 
@@ -144,7 +144,7 @@ c. Snooze an alert / defined policy / denied policy.
    app.links[0].snooze()
 
 Templates
-=========
+#########
 
 Araali baselines your application communication and presents them as an
 identity-based policy recommendation which can then be accepted and converted
@@ -168,18 +168,19 @@ templates which helps with accepting the policies automatically without much
 user intervention.
 
 Creating Templates
-------------------
+******************
 
 Templates can be created using APIs/UI. Users can choose to create declarative
 templates or convert an existing app’s policy links (suggested by Araali) to
 templates
 
 App Links to a Template
------------------------
+***********************
 
+Here are instructions to use templates.
 
 Araali UI
----------
+=========
 
 In the image below the user chooses a link from Prometheus to the control plane
 service and clicking on the green save button takes us to the template editor.
@@ -205,10 +206,11 @@ allow the user to start using the template. The user can choose to just save
 and turn on the template later as well.
 
 APIs
-----
+====
 
 List links
------------
+----------
+
 
 A user can use araalictl API to accomplish the link to template conversion
 similar to the UI. The process starts by fetching links for a service or an app
@@ -245,7 +247,7 @@ list of links and the user picks out a link that they are interested in.
       - 443
     
 Convert link to a template
-----------------------------
+--------------------------
 
 Given the link above the user runs ‘link-to-template’ command to convert the
 link to a template::

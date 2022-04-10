@@ -12,27 +12,6 @@ that, download the “command-line tool,” araalictl onto your your machine fro
 where you typically use kubectl. Authorize araalictl, start the assessment, install 
 the Software you want to assess, and see the results on the Araali UI.
 
-Requirements
-*****************
-
-You should have access to a modern Kubernetes cluster and a functioning kubectl
-on your local machine. If you don’t already have a Kubernetes cluster (e.g.
-EKS, GKE, AKS, RancherD), one easy option is to run one on your local machine.
-There are many ways to do this, including Canonical’s production-ready
-`microk8s for Ubuntu
-<https://www.araalinetworks.com/post/use-araali-with-microk8s>`_
-
-You can validate you have a working setup by running::
-
-   kubectl version --short
-
-You should see the output with both a Client Version and a Server Version
-component.
-
-You should have **port 443 egress open** for Araali to talk to its SaaS service
-
-Now that you have your cluster, register your account and download araalictl
-
 Step 1: Sign In or Register in the Araali Console
 *************************************************
 Visit the `Araali Console <https://console.araalinetworks.com>`_ in your browser.
@@ -100,48 +79,137 @@ could be used to revoke the araalictl
   :alt: Araali Authorization
 
 
-Step 4: Validate your Araalictl installation and Kubectl
-********************************************************
+Step 4: Fortify your VM/k8s
+***************************
 
-Go back to your VM and check if araalictl is installed properly in your system::
+Kubernetes
+----------
 
-   ./araalictl version -v
+Requirements
+^^^^^^^^^^^^
 
-Check if kubectl is pointing to the cluster you want to assess::
+1. You should have access to a modern Kubernetes cluster and a functioning kubectl
+on your local machine. If you don’t already have a Kubernetes cluster (e.g.
+EKS, GKE, AKS, RancherD), one easy option is to run one on your local machine.
+There are many ways to do this, including Canonical’s production-ready
+`microk8s for Ubuntu
+<https://www.araalinetworks.com/post/use-araali-with-microk8s>`_
 
-   kubectl get svc
+2. You can validate you have a working setup by running::
 
-
-
-Step 5: Run Araali
-******************
-
-Now, araalictl is up and running on a machine that has access to your cluster,
-you can start your assessment prior to running your integration test. Araali
-agents are easy to install and uninstall. You can install the software with a
-single command and uninstall with a single command too::
-
-   ./araalictl assessment -start
-
-.. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAssess-start.png
-  :width: 650
-  :alt: Araalictl assessment -start
+    kubectl version --short
 
 
-It might take upto a minute for the araali daemonset to start, and "Waiting for Araali firewall to start" will show SUCCESS.
+3. You should see the output with both a Client Version and a Server Version component.
 
-Now, install all the apps that you want to test on your cluster.
-
-After running the tests, you can stop the assessment. Community Edition allows
-you to run point-in-time assessments (vs continuous monitoring/security, which
-is our paid offering). So as long as your tests complete in a reasonable time,
-you should have a good picture of your application. You can run the assessments
-any number of times::
-
-   ./araalictl assessment -stop
+4. You should have **port 443 egress open** for Araali to talk to its SaaS service
 
 
-Step 6: Review the Results
+Fortification
+^^^^^^^^^^^^^
+1. Check current context, the name with a "*" is the one you are pointing to right now::
+
+    kubectl config get-contexts
+
+2. Fortify your cluster
+
+    * If araalictl and kubectl are running on the same machine::
+
+        ./araalictl fortify-k8s -auto -tags=zone=<optional-zone-override> -context=<context of k8s cluster>
+    * If araalictl and kubectl are not running on the same machine::
+
+        # Create yaml file to fortify your cluster
+        ./araalictl fortify-k8s -tags=zone=<optional-zone-override> -context=<context of k8s cluster>
+
+        # The above command will generate araali_k8s.yaml file. Copy it to the k8s control plane (where kubectl is running) and then apply
+        kubectl apply -f araali_k8s.yaml
+
+3. Check if Araali is installed
+
+    * Araali should be running in two namespaces (1) araali-operator and (2) kube-system::
+
+        kubectl get pods -A
+
+    .. image:: images/kubectl_post_install.png
+      :width: 650
+      :alt: Output of Kubectl after Araali Fortification
+
+Uninstall Araali
+^^^^^^^^^^^^^^^^^^^
+If araalictl and kubectl are running on the same machine::
+
+    ./araalictl fortify-k8s -delete -context=<context of k8s cluster>
+
+If araalictl and kubectl are not running on the same machine::
+
+    kubectl delete -f araali_k8s.yaml
+
+
+VM
+--
+
+Requirements
+^^^^^^^^^^^^
+
+1. You should have a Virtual Machine already set up in order to fortify it with Araali.
+    * Alternatively if you have a cluster of VMs and wish to fortify them all through a CM VM, see the :ref:`Remote Fortification` section.
+
+2. You should have **port 443 egress open on all VMs** for Araali to talk to its SaaS service
+
+Self Fortification
+^^^^^^^^^^^^^^^^^^
+
+1. Generate and add ssh-key (optional if you don’t have id_rsa.pub in your ~/.ssh account)::
+
+    ssh-keygen
+
+2. Copy it to authorized_keys to allow ssh localhost::
+
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+3. Self-Fortify::
+
+    ./araalictl fortify-live  -fortify -tags=zone=<zone_name>,app=<app_name> localhost
+
+Remote Fortification
+^^^^^^^^^^^^^^^^^^^^
+
+1. Check CM VM
+
+    * A Configuration Manager VM (CM VM) that has ssh access to the other VMs is required to remotely fortify
+        .. image:: images/remote_fortification_flow.png
+          :width: 650
+          :alt: Setup and Networking
+
+    It is important that araalictl is downloaded and authorized **specifically on the CM VM** so that it can remotely install Araali on the rest of the VMs
+
+
+2. Remotely Fortify::
+
+    ./araalictl fortify-live -fortify -tags=zone=<zone_name>,app=<app_name> <remote_user>@<remote_host>
+
+To update Zone and/or App tags
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+    ./araalictl fortify-live -add -tags=zone=<updated_zone>,app=<updated_app> <remote_user>@<remote_host>
+
+**For wider use, we recommend running Araali on the same machine as your Configuration Management Tool (Ansible, Salt, Puppet, Chef, etc.)**
+
+
+Uninstall Araali
+^^^^^^^^^^^^^^^^^^^
+Self::
+
+    ./araalictl fortify-live -unfortify localhost
+
+
+Remote::
+
+    ./araalictl fortify-live -unfortify <remote_user>@<remote_host>
+
+
+Step 5: Review the Results
 ****************************
 You can review the results in the Araali UI or a yaml file.
 
