@@ -27,7 +27,7 @@ If the above command does not return any output, it is likely that an error occu
 Remove the same command without the ``--wait-ready`` flag to know any errors and/or warnings.
 
 Create a link/alias
-   ``sudo snap alias microk8s.kubectl mkctl``
+   ``sudo snap alias microk8s.kubectl mk``
 
 Now use mkctl like kubectl. 
 If you DONT want the alias then use “microk8s.kubectl” command similar to “kubectl"
@@ -41,14 +41,6 @@ Enable the dns and ingress services
 Install Araali and start the assessment
 ***************************************
 Follow the instructions in the `getting started post <https://araali-networks-api.readthedocs.io/en/latest/gettingstarted.html#>`_
-
-Once Araalictl is set up, start the assessment
-
- ``./araalictl assessment -start``
-
-If you don't want microk8s to be preferred even when you have it installed. Run with the `-ignoreMK8S` option set to true::
-
- ./araalictl assessment -start -ignoreMK8S=true
 
 Install an Opensource App
 ****************************
@@ -81,10 +73,3 @@ In this case its running on 30001
  :alt: sock shop frontend UI
 
 
-Stop the assessment
-***********************
-
-After running the tests, you can stop the assessment. 
-   ``./araalictl assessment -stop``
-
-Freemium only allows you to run point-in-time assessments (vs continuous monitoring/security). So as long as your tests complete in a reasonable time, you should have a good picture of your application
