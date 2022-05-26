@@ -49,13 +49,9 @@ Before proceeding further, **ensure dns and ingress are up and running by execut
    microk8s kubectl get pods -A
 
 
-Install Araali and start the assessment
+Install Araali
 ***************************************
 Follow the instructions in the `getting started post <https://araali-networks-api.readthedocs.io/en/latest/gettingstarted.html#>`_
-
-Once Araalictl is set up, start the assessment::
-
- ./araalictl assessment -start
 
 
 Installing an Opensource App
@@ -90,14 +86,4 @@ In this case its running on 30001
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/sockshop-front-end-ui.png
  :width: 650
  :alt: sock shop frontend UI
-
-
-Stop the assessment
-*******************
-
-After running the tests, you can stop the assessment::
-
-   ./araalictl assessment -stop
-
-Freemium only allows you to run point-in-time assessments (vs continuous monitoring/security). So as long as your tests complete in a reasonable time, you should have a good picture of your application
 
