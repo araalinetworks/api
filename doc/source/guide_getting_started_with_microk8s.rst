@@ -7,9 +7,10 @@ This is an end-to-end guide on how to test Araali on Canonical’s MicroK8s and 
 Install MicroK8s
 *******************
 
-Start with an Ubuntu 18 VM to install microk8s
+Start with a VM running Ubuntu. For demonstration purposes, Ubuntu 21.10 is used here. 
+Install MicroK8s with the following command to get periodic snap updates of Microk8s to ensure compatibily with newer Ubuntu releases:
 
-   ``sudo snap install microk8s --classic --channel=1.19``
+   ``sudo snap install microk8s --classic --channel=latest/stable``
 
 
 Join the Group
@@ -22,6 +23,8 @@ Exit and log back to the VM
 Check if microk8s is up
 
    ``microk8s status --wait-ready``
+If the above command does not return any output, it is likely that an error occured.
+Remove the same command without the ``--wait-ready`` flag to know any errors and/or warnings.
 
 Create a link/alias
    ``sudo snap alias microk8s.kubectl mkctl``
