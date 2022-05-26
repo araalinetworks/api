@@ -27,7 +27,7 @@ If the above command does not return any output, it is likely that an error occu
 Remove the same command without the ``--wait-ready`` flag to know any errors and/or warnings.
 
 Create a link/alias
-   ``sudo snap alias microk8s.kubectl mk``
+   ``sudo snap alias microk8s.kubectl kubectl``
 
 Now use mkctl like kubectl. 
 If you DONT want the alias then use “microk8s.kubectl” command similar to “kubectl"
