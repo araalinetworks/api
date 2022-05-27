@@ -56,7 +56,9 @@ First, make your araalictl executable::
 
 Authorize your session::
 
-   sudo ./araalictl authorize
+   sudo ./araalictl authorize <CORRECT EMAIL ADDRESS>
+
+   **NOTE: To correctly authorize araalictl, please enter the correct and same email used when creating an account in Araali Console.**
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
   :width: 650
