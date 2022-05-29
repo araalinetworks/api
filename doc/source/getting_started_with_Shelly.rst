@@ -25,6 +25,7 @@ We suggest you run Shelly after `installing Araali <https://araali-networks-api.
 
 Step 1: Setup Shelly in your Cluster
 ************************************
+
  Setup Helm Repo::
 
     helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
