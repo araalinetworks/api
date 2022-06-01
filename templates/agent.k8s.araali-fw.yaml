@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node-0
+    rename: araali-cni-k8s
     zone: .*
     app: k8s-nodes
     binary_name: /home/kubernetes/bin/araali-cni
@@ -91,6 +92,7 @@ identities:
     dns_pattern: .*:quay.io:.*
 - node:
     name: node-2
+    rename: araali-cni-opt
     zone: .*
     app: k8s-nodes
     binary_name: /opt/cni/bin/araali-cni
