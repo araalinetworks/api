@@ -112,18 +112,21 @@ identities:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
     name: node_18
+    rename: s3
     dns_pattern: .*s3.*.amazonaws.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*.amazonaws.com:.*
 - node:
     name: node_19
+    rename: quay_io
     dns_pattern: quay.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:quay.io:.*
 - node:
     name: node_20
+    rename: gcr_io
     dns_pattern: gcr.io
     dst_port: 443
   pushdown:
@@ -194,6 +197,7 @@ identities:
     dns_pattern: .*:search.maven.org:.*
 - node:
     name: node_9
+    rename: anchore_io
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
   pushdown:
