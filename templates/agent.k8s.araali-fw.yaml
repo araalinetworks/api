@@ -6,6 +6,16 @@ identities:
   pushdown:
     dns_pattern: .*:toolbox-data.anchore.io:.*
 - node:
+    name: apt_http
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt
+    process: http
+  pushdown: {}
+- node:
     name: araali_cni
     zone: .*
     app: k8s-nodes
@@ -40,6 +50,12 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
+- node:
+    name: gcp_packages
+    dns_pattern: packages.cloud.google.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:packages.cloud.google.com:.*
 - node:
     name: gcr_io
     dns_pattern: gcr.io
@@ -139,31 +155,6 @@ identities:
   pushdown:
     dns_pattern: .*:nvd.nist.gov:.*
 - node:
-    name: node_16
-    rename: apt_http
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /usr/lib/apt/methods/http
-    parent_process: apt
-    process: http
-  pushdown: {}
-- node:
-    name: node_17
-    rename: ubuntu_archive
-    dns_pattern: archive.ubuntu.com
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:archive.ubuntu.com:.*
-- node:
-    name: node_23
-    rename: gcp_packages
-    dns_pattern: packages.cloud.google.com
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:packages.cloud.google.com:.*
-- node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
@@ -201,7 +192,17 @@ identities:
     parent_process: sh
     process: syft
   pushdown: {}
+- node:
+    name: ubuntu_archive
+    dns_pattern: archive.ubuntu.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:archive.ubuntu.com:.*
 authorizations:
+- name: apt_http
+  out:
+  - gcp_packages
+  - ubuntu_archive
 - name: araalifw_grype
   out:
   - anchore_io
@@ -233,10 +234,6 @@ authorizations:
   - github
   - github_objects_usercontent
   - github_releases_usercontent
-- name: node_16
-  out:
-  - node_17
-  - node_23
 - name: sh_owasp_dependency_check
   out:
   - maven_repo1
