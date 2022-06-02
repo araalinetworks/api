@@ -36,6 +36,7 @@ identities:
   pushdown: {}
 - node:
     name: node_10
+    rename: helper_owasp_dependency_check
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -58,6 +59,7 @@ identities:
     dns_pattern: .*:jeremylong.github.io:.*
 - node:
     name: node_13
+    rename: helper_wget
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -184,6 +186,7 @@ identities:
     dns_pattern: .*:search.maven.org:.*
 - node:
     name: node_8
+    name: helper_grype
     zone: .*
     app: kube-system
     pod: .*araali-fw
