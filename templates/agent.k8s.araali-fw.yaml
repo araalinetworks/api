@@ -186,7 +186,7 @@ identities:
     dns_pattern: .*:search.maven.org:.*
 - node:
     name: node_8
-    name: helper_grype
+    rename: helper_grype
     zone: .*
     app: kube-system
     pod: .*araali-fw
