@@ -1,5 +1,11 @@
 identities:
 - node:
+    name: anchore_io
+    dns_pattern: toolbox-data.anchore.io
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:toolbox-data.anchore.io:.*
+- node:
     name: araali_cni
     zone: .*
     app: k8s-nodes
@@ -14,6 +20,12 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
+- node:
+    name: gcr_io
+    dns_pattern: gcr.io
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:gcr.io:.*
 - node:
     name: github
     dns_pattern: github.com
@@ -111,27 +123,6 @@ identities:
   pushdown:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
-    name: node_18
-    rename: s3
-    dns_pattern: .*s3.*.amazonaws.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*s3.*.amazonaws.com:.*
-- node:
-    name: node_19
-    rename: quay_io
-    dns_pattern: quay.io
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:quay.io:.*
-- node:
-    name: node_20
-    rename: gcr_io
-    dns_pattern: gcr.io
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:gcr.io:.*
-- node:
     name: node_21
     dns_pattern: repo1.maven.org
     dst_port: 443
@@ -196,12 +187,17 @@ identities:
   pushdown:
     dns_pattern: .*:search.maven.org:.*
 - node:
-    name: node_9
-    rename: anchore_io
-    dns_pattern: toolbox-data.anchore.io
+    name: quay_io
+    dns_pattern: quay.io
     dst_port: 443
   pushdown:
-    dns_pattern: .*:toolbox-data.anchore.io:.*
+    dns_pattern: .*:quay.io:.*
+- node:
+    name: s3
+    dns_pattern: .*s3.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*s3.*.amazonaws.com:.*
 authorizations:
 - name: guarantor
   in:
@@ -213,10 +209,10 @@ authorizations:
   - fog
 - name: helper_grype
   out:
-  - node_18
-  - node_19
-  - node_20
-  - node_9
+  - anchore_io
+  - gcr_io
+  - quay_io
+  - s3
 - name: helper_owasp_dependency_check
   out:
   - node_11
@@ -235,12 +231,12 @@ authorizations:
   - node_23
 - name: node_22
   out:
+  - anchore_io
   - node_26
   - node_27
-  - node_9
 - name: node_25
   out:
-  - node_9
+  - anchore_io
 - name: node_3
   out:
   - node_21
