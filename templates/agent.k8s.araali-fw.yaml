@@ -35,8 +35,17 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
-    name: node_10
-    rename: helper_owasp_dependency_check
+    name: helper_grype
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/grype
+    parent_process: guarantor-helpe
+    process: grype
+  pushdown: {}
+- node:
+    name: helper_owasp_dependency_check
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -44,6 +53,16 @@ identities:
     binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
     parent_process: guarantor-helpe
     process: org.owasp.dependencycheck.App
+  pushdown: {}
+- node:
+    name: helper_wget
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/bin/wget
+    parent_process: guarantor-helpe
+    process: wget
   pushdown: {}
 - node:
     name: node_11
@@ -57,17 +76,6 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:jeremylong.github.io:.*
-- node:
-    name: node_13
-    rename: helper_wget
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /usr/bin/wget
-    parent_process: guarantor-helpe
-    process: wget
-  pushdown: {}
 - node:
     name: node_14
     dns_pattern: github-releases.githubusercontent.com
@@ -185,17 +193,6 @@ identities:
   pushdown:
     dns_pattern: .*:search.maven.org:.*
 - node:
-    name: node_8
-    rename: helper_grype
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /opt/araali/bin/grype
-    parent_process: guarantor-helpe
-    process: grype
-  pushdown: {}
-- node:
     name: node_9
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
@@ -210,14 +207,20 @@ authorizations:
 - name: guarantor_current
   out:
   - fog
-- name: node_10
+- name: helper_grype
+  out:
+  - node_18
+  - node_19
+  - node_20
+  - node_9
+- name: helper_owasp_dependency_check
   out:
   - node_11
   - node_12
   - node_21
   - node_4
   - node_5
-- name: node_13
+- name: helper_wget
   out:
   - node_14
   - node_15
@@ -239,9 +242,3 @@ authorizations:
   - node_21
   - node_4
   - node_5
-- name: node_8
-  out:
-  - node_18
-  - node_19
-  - node_20
-  - node_9
