@@ -162,6 +162,7 @@ identities:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
     name: node_3
+    rename: sh_owasp_dependency_check
     zone: .*
     app: kube-system
     pod: .*araali-fw
