@@ -130,6 +130,7 @@ identities:
     dns_pattern: .*:repo1.maven.org:.*
 - node:
     name: node_22
+    rename: araalifw_grype
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -146,6 +147,7 @@ identities:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
     name: node_25
+    rename: syft
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -156,11 +158,13 @@ identities:
   pushdown: {}
 - node:
     name: node_26
+    rename: aws_ecr
     dns_pattern: .*ecr.*.amazonaws.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_27
+    name: aws_ecr_public
     dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: {}
