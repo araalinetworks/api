@@ -1,22 +1,15 @@
 identities:
 - node:
-    name: araali-cni-k8s
+    name: araali_cni
     zone: .*
     app: k8s-nodes
-    binary_name: /home/kubernetes/bin/araali-cni
+    binary_name: .*/bin/araali-cni
     parent_process: kubelet
     process: araali-cni
-  pushdown: {}
+  pushdown:
+    binary_name: ^.*/bin/araali-cni$
 - node:
-    name: araali-cni-opt
-    zone: .*
-    app: k8s-nodes
-    binary_name: /opt/cni/bin/araali-cni
-    parent_process: kubelet
-    process: araali-cni
-  pushdown: {}
-- node:
-    name: node-1
+    name: node_1
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -26,7 +19,7 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
-    name: node-10
+    name: node_10
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -36,19 +29,19 @@ identities:
     process: org.owasp.dependencycheck.App
   pushdown: {}
 - node:
-    name: node-11
+    name: node_11
     dns_pattern: nvd.nist.gov
     dst_port: 443
   pushdown:
     dns_pattern: .*:nvd.nist.gov:.*
 - node:
-    name: node-12
+    name: node_12
     dns_pattern: jeremylong.github.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:jeremylong.github.io:.*
 - node:
-    name: node-13
+    name: node_13
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -58,19 +51,19 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: node-14
+    name: node_14
     dns_pattern: github-releases.githubusercontent.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:github-releases.githubusercontent.com:.*
 - node:
-    name: node-15
+    name: node_15
     dns_pattern: github.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:github.com:.*
 - node:
-    name: node-16
+    name: node_16
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -80,37 +73,37 @@ identities:
     process: http
   pushdown: {}
 - node:
-    name: node-17
+    name: node_17
     dns_pattern: archive.ubuntu.com
     dst_port: 80
   pushdown:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
-    name: node-18
+    name: node_18
     dns_pattern: .*s3.*.amazonaws.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*.amazonaws.com:.*
 - node:
-    name: node-19
+    name: node_19
     dns_pattern: quay.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:quay.io:.*
 - node:
-    name: node-20
+    name: node_20
     dns_pattern: gcr.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:gcr.io:.*
 - node:
-    name: node-21
+    name: node_21
     dns_pattern: repo1.maven.org
     dst_port: 443
   pushdown:
     dns_pattern: .*:repo1.maven.org:.*
 - node:
-    name: node-22
+    name: node_22
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -120,19 +113,19 @@ identities:
     process: grype
   pushdown: {}
 - node:
-    name: node-23
+    name: node_23
     dns_pattern: packages.cloud.google.com
     dst_port: 80
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
-    name: node-24
+    name: node_24
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:objects.githubusercontent.com:.*
 - node:
-    name: node-25
+    name: node_25
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -142,17 +135,17 @@ identities:
     process: syft
   pushdown: {}
 - node:
-    name: node-26
+    name: node_26
     dns_pattern: .*ecr.*.amazonaws.com
     dst_port: 443
   pushdown: {}
 - node:
-    name: node-27
+    name: node_27
     dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: {}
 - node:
-    name: node-3
+    name: node_3
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -162,19 +155,19 @@ identities:
     process: org.owasp.dependencycheck.App
   pushdown: {}
 - node:
-    name: node-4
+    name: node_4
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
   pushdown:
     dns_pattern: .*:ossindex.sonatype.org:.*
 - node:
-    name: node-5
+    name: node_5
     dns_pattern: search.maven.org
     dst_port: 443
   pushdown:
     dns_pattern: .*:search.maven.org:.*
 - node:
-    name: node-6
+    name: node_6
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -184,13 +177,13 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
-    name: node-7
+    name: node_7
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
 - node:
-    name: node-8
+    name: node_8
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -200,53 +193,52 @@ identities:
     process: grype
   pushdown: {}
 - node:
-    name: node-9
+    name: node_9
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:toolbox-data.anchore.io:.*
 authorizations:
-- name: node-1
+- name: node_1
   in:
-  - araali-cni-k8s
-  - araali-cni-opt
+  - araali_cni
   out:
-  - node-7
-- name: node-10
+  - node_7
+- name: node_10
   out:
-  - node-11
-  - node-12
-  - node-21
-  - node-4
-  - node-5
-- name: node-13
+  - node_11
+  - node_12
+  - node_21
+  - node_4
+  - node_5
+- name: node_13
   out:
-  - node-14
-  - node-15
-  - node-24
-- name: node-16
+  - node_14
+  - node_15
+  - node_24
+- name: node_16
   out:
-  - node-17
-  - node-23
-- name: node-22
+  - node_17
+  - node_23
+- name: node_22
   out:
-  - node-26
-  - node-27
-  - node-9
-- name: node-25
+  - node_26
+  - node_27
+  - node_9
+- name: node_25
   out:
-  - node-9
-- name: node-3
+  - node_9
+- name: node_3
   out:
-  - node-21
-  - node-4
-  - node-5
-- name: node-6
+  - node_21
+  - node_4
+  - node_5
+- name: node_6
   out:
-  - node-7
-- name: node-8
+  - node_7
+- name: node_8
   out:
-  - node-18
-  - node-19
-  - node-20
-  - node-9
+  - node_18
+  - node_19
+  - node_20
+  - node_9

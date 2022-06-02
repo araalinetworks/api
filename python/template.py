@@ -51,13 +51,13 @@ class Graph:
         server_key = yaml.dump(server)
         if client_key not in self.node_dict:
             if not client.node.obj["name"]:
-                client.node.obj["name"] = "node-%s" % self.node_num
+                client.node.obj["name"] = "node_%s" % self.node_num
             self.node_dict[client_key] = client
             self.node_num += 1
         
         if server_key not in self.node_dict:
             if not server.node.obj["name"]:
-                server.node.obj["name"] = "node-%s" % self.node_num
+                server.node.obj["name"] = "node_%s" % self.node_num
             self.node_dict[server_key] = server
             self.node_num += 1
         
