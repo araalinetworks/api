@@ -140,6 +140,7 @@ identities:
     dns_pattern: .*:nvd.nist.gov:.*
 - node:
     name: node_16
+    rename: apt_http
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -150,12 +151,14 @@ identities:
   pushdown: {}
 - node:
     name: node_17
+    rename: ubuntu_archive
     dns_pattern: archive.ubuntu.com
     dst_port: 80
   pushdown:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
     name: node_23
+    rename: gcp_packages
     dns_pattern: packages.cloud.google.com
     dst_port: 80
   pushdown:
