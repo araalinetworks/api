@@ -25,6 +25,16 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
+    name: guarantor_current
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/guarantor.current
+    parent_process: araalictl
+    process: guarantor
+  pushdown: {}
+- node:
     name: node_10
     zone: .*
     app: kube-system
@@ -173,17 +183,6 @@ identities:
   pushdown:
     dns_pattern: .*:search.maven.org:.*
 - node:
-    name: node_6
-    rename: guarantor_current
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /opt/araali/bin/guarantor.current
-    parent_process: araalictl
-    process: guarantor
-  pushdown: {}
-- node:
     name: node_8
     zone: .*
     app: kube-system
@@ -203,6 +202,9 @@ authorizations:
 - name: guarantor
   in:
   - araali_cni
+  out:
+  - fog
+- name: guarantor_current
   out:
   - fog
 - name: node_10
@@ -234,9 +236,6 @@ authorizations:
   - node_21
   - node_4
   - node_5
-- name: node_6
-  out:
-  - fog
 - name: node_8
   out:
   - node_18
