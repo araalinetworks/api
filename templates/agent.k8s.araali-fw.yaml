@@ -115,19 +115,29 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: node_11
-    rename: nist_nvd
-    dns_pattern: nvd.nist.gov
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:nvd.nist.gov:.*
-- node:
-    name: node_12
-    rename: jeremylong
+    name: jeremylong
     dns_pattern: jeremylong.github.io
     dst_port: 443
   pushdown:
     dns_pattern: .*:jeremylong.github.io:.*
+- node:
+    name: maven_repo1
+    dns_pattern: repo1.maven.org
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:repo1.maven.org:.*
+- node:
+    name: maven_search
+    dns_pattern: search.maven.org
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:search.maven.org:.*
+- node:
+    name: nist_nvd
+    dns_pattern: nvd.nist.gov
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:nvd.nist.gov:.*
 - node:
     name: node_16
     zone: .*
@@ -145,13 +155,6 @@ identities:
   pushdown:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
-    name: node_21
-    rename: maven_repo1
-    dns_pattern: repo1.maven.org
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:repo1.maven.org:.*
-- node:
     name: node_23
     dns_pattern: packages.cloud.google.com
     dst_port: 80
@@ -168,20 +171,6 @@ identities:
     process: org.owasp.dependencycheck.App
   pushdown: {}
 - node:
-    name: node_4
-    rename: sonatype_ossindex
-    dns_pattern: ossindex.sonatype.org
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:ossindex.sonatype.org:.*
-- node:
-    name: node_5
-    rename: maven_search
-    dns_pattern: search.maven.org
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:search.maven.org:.*
-- node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
@@ -193,6 +182,12 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*.amazonaws.com:.*
+- node:
+    name: sonatype_ossindex
+    dns_pattern: ossindex.sonatype.org
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:ossindex.sonatype.org:.*
 - node:
     name: syft
     zone: .*
@@ -225,11 +220,11 @@ authorizations:
   - s3
 - name: helper_owasp_dependency_check
   out:
-  - node_11
-  - node_12
-  - node_21
-  - node_4
-  - node_5
+  - jeremylong
+  - maven_repo1
+  - maven_search
+  - nist_nvd
+  - sonatype_ossindex
 - name: helper_wget
   out:
   - github
@@ -241,9 +236,9 @@ authorizations:
   - node_23
 - name: node_3
   out:
-  - node_21
-  - node_4
-  - node_5
+  - maven_repo1
+  - maven_search
+  - sonatype_ossindex
 - name: syft
   out:
   - anchore_io
