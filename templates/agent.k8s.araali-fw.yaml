@@ -161,17 +161,6 @@ identities:
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
-    name: node_3
-    rename: sh_owasp_dependency_check
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
-    parent_process: sh
-    process: org.owasp.dependencycheck.App
-  pushdown: {}
-- node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
@@ -183,6 +172,16 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*.amazonaws.com:.*
+- node:
+    name: sh_owasp_dependency_check
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
+    parent_process: sh
+    process: org.owasp.dependencycheck.App
+  pushdown: {}
 - node:
     name: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
@@ -235,7 +234,7 @@ authorizations:
   out:
   - node_17
   - node_23
-- name: node_3
+- name: sh_owasp_dependency_check
   out:
   - maven_repo1
   - maven_search
