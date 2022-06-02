@@ -15,6 +15,24 @@ identities:
   pushdown:
     dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
 - node:
+    name: github
+    dns_pattern: github.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:github.com:.*
+- node:
+    name: github_objects_usercontent
+    dns_pattern: objects.githubusercontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:objects.githubusercontent.com:.*
+- node:
+    name: github_releases_usercontent
+    dns_pattern: github-releases.githubusercontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:github-releases.githubusercontent.com:.*
+- node:
     name: guarantor
     zone: .*
     app: kube-system
@@ -77,20 +95,6 @@ identities:
   pushdown:
     dns_pattern: .*:jeremylong.github.io:.*
 - node:
-    name: node_14
-    rename: github_releases_usercontent
-    dns_pattern: github-releases.githubusercontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:github-releases.githubusercontent.com:.*
-- node:
-    name: node_15
-    rename: github
-    dns_pattern: github.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:github.com:.*
-- node:
     name: node_16
     zone: .*
     app: kube-system
@@ -146,13 +150,6 @@ identities:
     dst_port: 80
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
-- node:
-    name: node_24
-    rename: github_objects_usercontent
-    dns_pattern: objects.githubusercontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:objects.githubusercontent.com:.*
 - node:
     name: node_25
     zone: .*
@@ -225,9 +222,9 @@ authorizations:
   - node_5
 - name: helper_wget
   out:
-  - node_14
-  - node_15
-  - node_24
+  - github
+  - github_objects_usercontent
+  - github_releases_usercontent
 - name: node_16
   out:
   - node_17
