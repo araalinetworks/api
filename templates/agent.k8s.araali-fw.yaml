@@ -147,7 +147,8 @@ identities:
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
-    name: github_objects_usercontent
+    name: node_24
+    rename: github_objects_usercontent
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
   pushdown:
