@@ -78,12 +78,13 @@ identities:
     dns_pattern: .*:jeremylong.github.io:.*
 - node:
     name: node_14
+    rename: github_releases_usercontent
     dns_pattern: github-releases.githubusercontent.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:github-releases.githubusercontent.com:.*
 - node:
-    name: node_15
+    name: github
     dns_pattern: github.com
     dst_port: 443
   pushdown:
@@ -145,7 +146,7 @@ identities:
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
 - node:
-    name: node_24
+    name: github_objects_usercontent
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
   pushdown:
