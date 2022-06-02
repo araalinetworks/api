@@ -77,26 +77,27 @@ class Graph:
         nums = [int(a.rsplit(".", 1)[-1]) for a in files]
         if nums:
             num = 1+max(nums)
-            prev_fname = fname + ".%s" % (num-1)
         else:
             num = 1
-            prev_fname = basename
 
         fname = fname + ".%s" % num
-        with open(fname, "w") as f:
-            yaml.dump(self, f, default_flow_style=False, default_style='', canonical=False, Dumper=NoAliasDumper)
-        if args.verbose >= 0: print("saving template", fname, "links:", self.link_count)
 
-        if not os.path.isfile(basename):
-            os.rename(fname, basename)
-            if args.verbose >= 0: print("moving", fname, "to", basename)
-
+        if os.path.isfile(basename): # yaml already exists
+            os.rename(basename, fname) # backup current yaml
+            if args.verbose >= 0: print("backing up", basename, "to", fname)
         else:
-            with open(prev_fname) as prev, open(fname) as curr:
-                if not [a for a in difflib.unified_diff(prev.readlines(), curr.readlines())]:
+            fname = None # we didnt need to backup
+
+        with open(basename, "w") as f:
+            yaml.dump(self, f, default_flow_style=False, default_style='', canonical=False, Dumper=NoAliasDumper)
+        if args.verbose >= 0: print("saving template", basename, "links:", self.link_count)
+
+        if fname: # dont want to keep a backup if nothing changed
+            with open(fname) as prev, open(basename) as curr:
+                if next(difflib.unified_diff(prev.readlines(), curr.readlines()), None) == None:
                     # there is no difference, remove this one
                     os.remove(fname)
-                    if args.verbose >= 0: print("removing", fname, "same as", prev_fname)
+                    if args.verbose >= 0: print("removing", fname, "same as", basename)
 
 def represent_graph(dumper, obj):
     value = []

@@ -1,10 +1,17 @@
 identities:
 - node:
-    name: node-0
-    rename: araali-cni-k8s
+    name: araali-cni-k8s
     zone: .*
     app: k8s-nodes
     binary_name: /home/kubernetes/bin/araali-cni
+    parent_process: kubelet
+    process: araali-cni
+  pushdown: {}
+- node:
+    name: araali-cni-opt
+    zone: .*
+    app: k8s-nodes
+    binary_name: /opt/cni/bin/araali-cni
     parent_process: kubelet
     process: araali-cni
   pushdown: {}
@@ -90,15 +97,6 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:quay.io:.*
-- node:
-    name: node-2
-    rename: araali-cni-opt
-    zone: .*
-    app: k8s-nodes
-    binary_name: /opt/cni/bin/araali-cni
-    parent_process: kubelet
-    process: araali-cni
-  pushdown: {}
 - node:
     name: node-20
     dns_pattern: gcr.io
@@ -210,8 +208,8 @@ identities:
 authorizations:
 - name: node-1
   in:
-  - node-0
-  - node-2
+  - araali-cni-k8s
+  - araali-cni-opt
   out:
   - node-7
 - name: node-10
