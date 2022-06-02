@@ -84,7 +84,8 @@ identities:
   pushdown:
     dns_pattern: .*:github-releases.githubusercontent.com:.*
 - node:
-    name: github
+    name: node_15
+    rename: github
     dns_pattern: github.com
     dst_port: 443
   pushdown:
