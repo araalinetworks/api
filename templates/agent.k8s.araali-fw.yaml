@@ -15,6 +15,26 @@ identities:
   pushdown:
     binary_name: ^.*/bin/araali-cni$
 - node:
+    name: araalifw_grype
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/grype
+    parent_process: sh
+    process: grype
+  pushdown: {}
+- node:
+    name: aws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: aws_ecr_public
+    dns_pattern: public.ecr.aws
+    dst_port: 443
+  pushdown: {}
+- node:
     name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
@@ -129,45 +149,11 @@ identities:
   pushdown:
     dns_pattern: .*:repo1.maven.org:.*
 - node:
-    name: node_22
-    rename: araalifw_grype
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /opt/araali/bin/grype
-    parent_process: sh
-    process: grype
-  pushdown: {}
-- node:
     name: node_23
     dns_pattern: packages.cloud.google.com
     dst_port: 80
   pushdown:
     dns_pattern: .*:packages.cloud.google.com:.*
-- node:
-    name: node_25
-    rename: syft
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /opt/araali/bin/syft
-    parent_process: sh
-    process: syft
-  pushdown: {}
-- node:
-    name: node_26
-    rename: aws_ecr
-    dns_pattern: .*ecr.*.amazonaws.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_27
-    rename: aws_ecr_public
-    dns_pattern: public.ecr.aws
-    dst_port: 443
-  pushdown: {}
 - node:
     name: node_3
     zone: .*
@@ -202,7 +188,22 @@ identities:
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*.amazonaws.com:.*
+- node:
+    name: syft
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/syft
+    parent_process: sh
+    process: syft
+  pushdown: {}
 authorizations:
+- name: araalifw_grype
+  out:
+  - anchore_io
+  - aws_ecr
+  - aws_ecr_public
 - name: guarantor
   in:
   - araali_cni
@@ -233,16 +234,11 @@ authorizations:
   out:
   - node_17
   - node_23
-- name: node_22
-  out:
-  - anchore_io
-  - node_26
-  - node_27
-- name: node_25
-  out:
-  - anchore_io
 - name: node_3
   out:
   - node_21
   - node_4
   - node_5
+- name: syft
+  out:
+  - anchore_io
