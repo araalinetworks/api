@@ -164,7 +164,7 @@ identities:
   pushdown: {}
 - node:
     name: node_27
-    name: aws_ecr_public
+    rename: aws_ecr_public
     dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: {}
