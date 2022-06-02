@@ -9,8 +9,13 @@ identities:
   pushdown:
     binary_name: ^.*/bin/araali-cni$
 - node:
-    name: node_1
-    rename: guarantor
+    name: fog
+    dns_pattern: .*.fog.*.aws.araalinetworks.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
+- node:
+    name: guarantor
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -178,13 +183,6 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
-    name: node_7
-    rename: fog
-    dns_pattern: .*.fog.*.aws.araalinetworks.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
-- node:
     name: node_8
     zone: .*
     app: kube-system
@@ -201,11 +199,11 @@ identities:
   pushdown:
     dns_pattern: .*:toolbox-data.anchore.io:.*
 authorizations:
-- name: node_1
+- name: guarantor
   in:
   - araali_cni
   out:
-  - node_7
+  - fog
 - name: node_10
   out:
   - node_11
@@ -237,7 +235,7 @@ authorizations:
   - node_5
 - name: node_6
   out:
-  - node_7
+  - fog
 - name: node_8
   out:
   - node_18
