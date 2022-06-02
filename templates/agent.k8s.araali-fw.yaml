@@ -10,6 +10,7 @@ identities:
     binary_name: ^.*/bin/araali-cni$
 - node:
     name: node_1
+    rename: guarantor
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -178,6 +179,7 @@ identities:
   pushdown: {}
 - node:
     name: node_7
+    rename: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
   pushdown:
