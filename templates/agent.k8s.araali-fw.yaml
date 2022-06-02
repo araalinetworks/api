@@ -116,12 +116,14 @@ identities:
   pushdown: {}
 - node:
     name: node_11
+    rename: nist_nvd
     dns_pattern: nvd.nist.gov
     dst_port: 443
   pushdown:
     dns_pattern: .*:nvd.nist.gov:.*
 - node:
     name: node_12
+    rename: jeremylong
     dns_pattern: jeremylong.github.io
     dst_port: 443
   pushdown:
@@ -144,6 +146,7 @@ identities:
     dns_pattern: .*:archive.ubuntu.com:.*
 - node:
     name: node_21
+    rename: maven_repo1
     dns_pattern: repo1.maven.org
     dst_port: 443
   pushdown:
@@ -166,12 +169,14 @@ identities:
   pushdown: {}
 - node:
     name: node_4
+    rename: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
   pushdown:
     dns_pattern: .*:ossindex.sonatype.org:.*
 - node:
     name: node_5
+    rename: maven_search
     dns_pattern: search.maven.org
     dst_port: 443
   pushdown:
