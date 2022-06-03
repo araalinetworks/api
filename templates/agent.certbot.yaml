@@ -1,5 +1,13 @@
 identities:
 - node:
+    name: cerbot_openssl
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/openssl
+    parent_process: certbot
+    process: openssl
+  pushdown: {}
+- node:
     name: certbot
     zone: .*
     app: .*
@@ -15,17 +23,8 @@ identities:
     dst_port: 80
   pushdown:
     dns_pattern: .*:.*.lencr.org:.*
-- node:
-    name: node_2
-    rename: cerbot_openssl
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/openssl
-    parent_process: certbot
-    process: openssl
-  pushdown: {}
 authorizations:
 - name: lencr_org
   in:
+  - cerbot_openssl
   - certbot
-  - node_2
