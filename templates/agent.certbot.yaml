@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: certbot
+    name: certbot
     zone: .*
     app: .*
     binary_name: /snap/certbot/.*/usr/bin/python3.8
@@ -19,4 +18,4 @@ identities:
 authorizations:
 - name: node_1
   in:
-  - node_0
+  - certbot
