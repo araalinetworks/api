@@ -1,0 +1,21 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    binary_name: /snap/certbot/.*/usr/bin/python3.8
+    parent_process: systemd
+    process: /snap/certbot/.*/bin/certbot
+  pushdown:
+    binary_name: ^/snap/certbot/.*/usr/bin/python3.8$
+    process: ^/snap/certbot/.*/bin/certbot$
+- node:
+    name: node_1
+    dns_pattern: .*.lencr.org
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:.*.lencr.org:.*
+authorizations:
+- name: node_1
+  in:
+  - node_0
