@@ -291,6 +291,21 @@ def represent_node(dumper, obj):
 
 def pull(args):
     cfg = read_config()
+
+    # get the names from local file and apply it to pulled template
+    existing_nodes = {}
+    if args.dirname:
+        with open("%s/%s.yaml" % (args.dirname, args.template)) as f:
+            template = yaml.load(f, Loader=yaml.SafeLoader)
+
+            # identities, authorizations
+            for node in template["identities"]:
+                name = node["node"]["name"]
+                node["node"]["name"] = None
+                node = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+                key = yaml.dump(node)
+                existing_nodes[key] = name
+ 
     for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
                                        template=args.template):
         # keys: ['name', 'template', 'use', 'author', 'version']
@@ -304,6 +319,15 @@ def pull(args):
                         Node(link.get("selector_change", {}).get("client", {})))
             server = NodeWithPushdown(Node(link_filter["server"], None),
                         Node(link.get("selector_change", {}).get("server", {})))
+
+            # fix up names based on existing nodes
+            key = yaml.dump(client)
+            if key in existing_nodes:
+                client.node.obj["name"] = existing_nodes[key]
+
+            key = yaml.dump(server)
+            if key in existing_nodes:
+                server.node.obj["name"] = existing_nodes[key]
 
             graph.add_link(client, server)
 
