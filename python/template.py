@@ -30,11 +30,17 @@ def read_config():
 def config(args):
     cfg = read_config()
     if args.tenant is not None:
-        if not args.tenant:
-            args.tenant = None
+        if not args.tenant: # passed as empty string
+            args.tenant = None # store it as nil in yaml
         cfg["tenant"] = args.tenant
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
+    elif args.tenants is not None:
+        cfg["tenants"] = args.tenants.split(",")
+        with open(cfg_fname, "w") as f:
+            yaml.dump(cfg, f)
+    else:
+        print(yaml.dump(read_config()))
     
 class Graph:
     def __init__(self, name):
@@ -325,6 +331,7 @@ def rename(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Manage Templates as Code')
     parser.add_argument('--verbose', '-v', action='count', default=0)
+    parser.add_argument('--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
     
     parser_pull = subparsers.add_parser("pull", help="pull araali templates")
@@ -333,6 +340,7 @@ if __name__ == '__main__':
     
     parser_config = subparsers.add_parser("config", help="add config params")
     parser_config.add_argument('-t', '--tenant')
+    parser_config.add_argument('--tenants')
 
     parser_rename = subparsers.add_parser("rename", help="rename template node name")
     parser_rename.add_argument('template')
