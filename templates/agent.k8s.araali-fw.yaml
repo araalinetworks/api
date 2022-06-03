@@ -1,0 +1,230 @@
+identities:
+- node:
+    name: anchore_io
+    dns_pattern: toolbox-data.anchore.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: apt_http
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt
+    process: http
+  pushdown: {}
+- node:
+    name: araali_cni
+    zone: .*
+    app: k8s-nodes
+    binary_name: .*/bin/araali-cni
+    parent_process: kubelet
+    process: araali-cni
+  pushdown:
+    binary_name: ^.*/bin/araali-cni$
+- node:
+    name: araalifw_grype
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/grype
+    parent_process: sh
+    process: grype
+  pushdown: {}
+- node:
+    name: aws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: aws_ecr_public
+    dns_pattern: public.ecr.aws
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: fog
+    dns_pattern: .*.fog.*.aws.araalinetworks.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: gcp_packages
+    dns_pattern: packages.cloud.google.com
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: gcr_io
+    dns_pattern: gcr.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: github
+    dns_pattern: github.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: github_objects_usercontent
+    dns_pattern: objects.githubusercontent.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: github_releases_usercontent
+    dns_pattern: github-releases.githubusercontent.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: guarantor
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/guarantor
+    parent_process: araalictl
+    process: guarantor
+  pushdown: {}
+- node:
+    name: guarantor_current
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/guarantor.current
+    parent_process: araalictl
+    process: guarantor
+  pushdown: {}
+- node:
+    name: helper_grype
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/grype
+    parent_process: guarantor-helpe
+    process: grype
+  pushdown: {}
+- node:
+    name: helper_owasp_dependency_check
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
+    parent_process: guarantor-helpe
+    process: org.owasp.dependencycheck.App
+  pushdown: {}
+- node:
+    name: helper_wget
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/bin/wget
+    parent_process: guarantor-helpe
+    process: wget
+  pushdown: {}
+- node:
+    name: jeremylong
+    dns_pattern: jeremylong.github.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: maven_repo1
+    dns_pattern: repo1.maven.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: maven_search
+    dns_pattern: search.maven.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: nist_nvd
+    dns_pattern: nvd.nist.gov
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: quay_io
+    dns_pattern: quay.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: s3
+    dns_pattern: .*s3.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*s3.*.amazonaws.com:.*
+- node:
+    name: sh_owasp_dependency_check
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
+    parent_process: sh
+    process: org.owasp.dependencycheck.App
+  pushdown: {}
+- node:
+    name: sonatype_ossindex
+    dns_pattern: ossindex.sonatype.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: syft
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/syft
+    parent_process: sh
+    process: syft
+  pushdown: {}
+- node:
+    name: ubuntu_archive
+    dns_pattern: archive.ubuntu.com
+    dst_port: 80
+  pushdown: {}
+authorizations:
+- name: apt_http
+  out:
+  - gcp_packages
+  - ubuntu_archive
+- name: araalifw_grype
+  out:
+  - anchore_io
+  - aws_ecr
+  - aws_ecr_public
+- name: guarantor
+  in:
+  - araali_cni
+  out:
+  - fog
+- name: guarantor_current
+  out:
+  - fog
+- name: helper_grype
+  out:
+  - anchore_io
+  - gcr_io
+  - quay_io
+  - s3
+- name: helper_owasp_dependency_check
+  out:
+  - jeremylong
+  - maven_repo1
+  - maven_search
+  - nist_nvd
+  - sonatype_ossindex
+- name: helper_wget
+  out:
+  - github
+  - github_objects_usercontent
+  - github_releases_usercontent
+- name: sh_owasp_dependency_check
+  out:
+  - maven_repo1
+  - maven_search
+  - sonatype_ossindex
+- name: syft
+  out:
+  - anchore_io

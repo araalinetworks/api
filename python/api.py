@@ -1043,8 +1043,7 @@ class Template(object):
         return json.dumps(self.to_data(), indent=2)
 
     def save(self):
-        fname = "template%s-%s.yaml" % ("-public" if self.public else "",          
-                                   self.name())
+        fname = "../templates/%s.yaml" % (self.name())
         with open(fname, "w") as f:
             yaml.dump(self.obj, f)
         print("Saved template to %s" % fname)
