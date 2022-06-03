@@ -11,6 +11,7 @@ identities:
     process: ^/snap/certbot/.*/bin/certbot$
 - node:
     name: node_1
+    rename: lencr_org
     dns_pattern: .*.lencr.org
     dst_port: 80
   pushdown:
