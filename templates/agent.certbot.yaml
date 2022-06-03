@@ -10,13 +10,12 @@ identities:
     binary_name: ^/snap/certbot/.*/usr/bin/python3.8$
     process: ^/snap/certbot/.*/bin/certbot$
 - node:
-    name: node_1
-    rename: lencr_org
+    name: lencr_org
     dns_pattern: .*.lencr.org
     dst_port: 80
   pushdown:
     dns_pattern: .*:.*.lencr.org:.*
 authorizations:
-- name: node_1
+- name: lencr_org
   in:
   - certbot
