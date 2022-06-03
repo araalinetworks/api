@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: git_remote_http
+    name: git_remote_http
     zone: .*
     app: .*
     binary_name: /usr/lib/git-core/git-remote-http
@@ -9,14 +8,7 @@ identities:
     process: git-remote-https
   pushdown: {}
 - node:
-    name: node_1
-    rename: gitlab_web
-    dns_pattern: gitlab.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_2
-    rename: git_remote_http_libexec
+    name: git_remote_http_libexec
     zone: .*
     app: .*
     pod: .*
@@ -26,17 +18,7 @@ identities:
     process: git-remote-https
   pushdown: {}
 - node:
-    name: node_3
-    rename: gitlab_runner
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/gitlab-runner
-    parent_process: systemd
-    process: gitlab-runner
-  pushdown: {}
-- node:
-    name: node_4
-    rename: git_ssh
+    name: git_ssh
     zone: .*
     app: .*
     binary_name: /usr/bin/ssh
@@ -44,17 +26,29 @@ identities:
     process: ssh
   pushdown: {}
 - node:
-    name: node_5
-    rename: gitlab_ssh
+    name: gitlab_runner
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/gitlab-runner
+    parent_process: systemd
+    process: gitlab-runner
+  pushdown: {}
+- node:
+    name: gitlab_ssh
     dns_pattern: gitlab.com
     dst_port: 22
   pushdown: {}
+- node:
+    name: gitlab_web
+    dns_pattern: gitlab.com
+    dst_port: 443
+  pushdown: {}
 authorizations:
-- name: node_1
+- name: gitlab_ssh
   in:
-  - node_0
-  - node_2
-  - node_3
-- name: node_5
+  - git_ssh
+- name: gitlab_web
   in:
-  - node_4
+  - git_remote_http
+  - git_remote_http_libexec
+  - gitlab_runner
