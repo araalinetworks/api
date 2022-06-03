@@ -3,8 +3,7 @@ identities:
     name: anchore_io
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:toolbox-data.anchore.io:.*
+  pushdown: {}
 - node:
     name: apt_http
     zone: .*
@@ -48,38 +47,32 @@ identities:
     name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*.fog.*.aws.araalinetworks.com:.*
+  pushdown: {}
 - node:
     name: gcp_packages
     dns_pattern: packages.cloud.google.com
     dst_port: 80
-  pushdown:
-    dns_pattern: .*:packages.cloud.google.com:.*
+  pushdown: {}
 - node:
     name: gcr_io
     dns_pattern: gcr.io
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:gcr.io:.*
+  pushdown: {}
 - node:
     name: github
     dns_pattern: github.com
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:github.com:.*
+  pushdown: {}
 - node:
     name: github_objects_usercontent
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:objects.githubusercontent.com:.*
+  pushdown: {}
 - node:
     name: github_releases_usercontent
     dns_pattern: github-releases.githubusercontent.com
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:github-releases.githubusercontent.com:.*
+  pushdown: {}
 - node:
     name: guarantor
     zone: .*
@@ -134,32 +127,27 @@ identities:
     name: jeremylong
     dns_pattern: jeremylong.github.io
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:jeremylong.github.io:.*
+  pushdown: {}
 - node:
     name: maven_repo1
     dns_pattern: repo1.maven.org
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:repo1.maven.org:.*
+  pushdown: {}
 - node:
     name: maven_search
     dns_pattern: search.maven.org
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:search.maven.org:.*
+  pushdown: {}
 - node:
     name: nist_nvd
     dns_pattern: nvd.nist.gov
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:nvd.nist.gov:.*
+  pushdown: {}
 - node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:quay.io:.*
+  pushdown: {}
 - node:
     name: s3
     dns_pattern: .*s3.*.amazonaws.com
@@ -180,8 +168,7 @@ identities:
     name: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:ossindex.sonatype.org:.*
+  pushdown: {}
 - node:
     name: syft
     zone: .*
@@ -196,8 +183,7 @@ identities:
     name: ubuntu_archive
     dns_pattern: archive.ubuntu.com
     dst_port: 80
-  pushdown:
-    dns_pattern: .*:archive.ubuntu.com:.*
+  pushdown: {}
 authorizations:
 - name: apt_http
   out:
