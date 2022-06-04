@@ -1,16 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: grpc_health_probe
-    zone: .*
-    app: k8s-nodes
-    binary_name: /app/grpc-health-probe
-    parent_process: runc
-    process: grpc-health-probe
-  pushdown: {}
-- node:
-    name: node_1
-    rename: aws_k8s
+    name: aws_k8s
     zone: .*
     app: kube-system
     pod: aws-node
@@ -19,7 +9,15 @@ identities:
     parent_process: bash
     process: aws-k8s-agent
   pushdown: {}
+- node:
+    name: grpc_health_probe
+    zone: .*
+    app: k8s-nodes
+    binary_name: /app/grpc-health-probe
+    parent_process: runc
+    process: grpc-health-probe
+  pushdown: {}
 authorizations:
-- name: node_1
+- name: aws_k8s
   in:
-  - node_0
+  - grpc_health_probe
