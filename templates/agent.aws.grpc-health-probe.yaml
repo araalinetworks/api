@@ -1,0 +1,25 @@
+identities:
+- node:
+    name: node_0
+    rename: grpc_health_probe
+    zone: .*
+    app: k8s-nodes
+    binary_name: /app/grpc-health-probe
+    parent_process: runc
+    process: grpc-health-probe
+  pushdown: {}
+- node:
+    name: node_1
+    rename: aws_k8s
+    zone: .*
+    app: kube-system
+    pod: aws-node
+    container: aws-node
+    binary_name: /app/aws-k8s-agent
+    parent_process: bash
+    process: aws-k8s-agent
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
