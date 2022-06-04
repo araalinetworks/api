@@ -1,22 +1,45 @@
 identities:
 - node:
-    name: node_0
-    rename: systemd_agent
-    zone: .*
-    app: .*
-    binary_name: /opt/datadog-agent/bin/agent/agent
-    parent_process: systemd
-    process: agent
+    name: agent
+    dns_pattern: .*-app.agent.datadoghq.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*-app.agent.datadoghq.com:.*
+- node:
+    name: agent_intake_logs
+    dns_pattern: agent-http-intake.logs.datadoghq.com
+    dst_port: 443
   pushdown: {}
 - node:
-    name: node_1
-    rename: api
+    name: any
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: {}
+- node:
+    name: api
     dns_pattern: api.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_2
-    rename: s6_supervise
+    name: apt
+    dns_pattern: apt.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: apt_get_https
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: https
+  pushdown: {}
+- node:
+    name: s6_supervise
     zone: .*
     app: .*
     pod: .*
@@ -26,8 +49,7 @@ identities:
     process: agent
   pushdown: {}
 - node:
-    name: node_3
-    rename: s6_supervise_trace_agent
+    name: s6_supervise_trace_agent
     zone: .*
     app: .*
     pod: .*
@@ -37,66 +59,34 @@ identities:
     process: trace-agent
   pushdown: {}
 - node:
-    name: node_4
-    rename: trace_agent
+    name: systemd_agent
+    zone: .*
+    app: .*
+    binary_name: /opt/datadog-agent/bin/agent/agent
+    parent_process: systemd
+    process: agent
+  pushdown: {}
+- node:
+    name: trace_agent
     dns_pattern: trace.agent.datadoghq.com
     dst_port: 443
   pushdown: {}
-- node:
-    name: node_5
-    rename: agent
-    dns_pattern: .*-app.agent.datadoghq.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*-app.agent.datadoghq.com:.*
-- node:
-    name: node_6
-    rename: apt_get_https
-    zone: .*
-    app: .*
-    binary_name: /usr/lib/apt/methods/http
-    parent_process: apt-get
-    process: https
-  pushdown: {}
-- node:
-    name: node_7
-    rename: apt
-    dns_pattern: apt.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_8
-    rename: agent_intake_logs
-    dns_pattern: agent-http-intake.logs.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_9
-    rename: any
-    zone: .*
-    app: .*
-    pod: .*
-    container: .*
-    binary_name: .*
-    parent_process: .*
-    process: .*
-  pushdown: {}
 authorizations:
-- name: node_0
+- name: any
   out:
-  - node_1
-  - node_8
-- name: node_2
-  out:
-  - node_1
-  - node_5
-  - node_8
-- name: node_4
+  - api
+- name: apt
   in:
-  - node_3
-- name: node_7
-  in:
-  - node_6
-- name: node_9
+  - apt_get_https
+- name: s6_supervise
   out:
-  - node_1
+  - agent
+  - agent_intake_logs
+  - api
+- name: systemd_agent
+  out:
+  - agent_intake_logs
+  - api
+- name: trace_agent
+  in:
+  - s6_supervise_trace_agent
