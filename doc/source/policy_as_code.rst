@@ -15,7 +15,7 @@ CRD enabled.
 2. Modify the Service Discovery config to start watching Araali policy lifecycle.
     .. code-block:: python
 
-       araalictl fortify-k8s -tags=zone=policy-1 -araali-policy-crd -force policy-1
+       ./araalictl fortify-k8s -tags=zone=policy-1 -araali-policy-crd -force policy-1
 
        kubectl edit cm araali-operator-config -n araali-operator
        araalitags.operator.araali_k8s_policy_enable: "1" (Add this to configmap)
@@ -48,7 +48,7 @@ links in yaml format using our command-line tool araalictl by following the step
 
     .. code-block:: python
 
-       araalictl policy -zone=rsncommon -app=voting -tenant=rsn > /tmp/yaml/common.voting.yaml
+       ./araalictl policy -zone=rsncommon -app=voting -tenant=rsn > /tmp/yaml/common.voting.yaml
 
 2. Use the AKS voting app running in ``rsncommon`` zone and ``voting`` namespace.
 
@@ -63,14 +63,14 @@ file. *In this example the zone and app will be modified to (policy-1/voting-tmp
 
     .. code-block:: python
 
-       araalictl policy -file1 /tmp/yaml/common.voting.yaml -file2 /tmp/yaml/common.voting-tmp.yaml -op=diff
+       ./araalictl policy -file1 /tmp/yaml/common.voting.yaml -file2 /tmp/yaml/common.voting-tmp.yaml -op=diff
 
 5. Note down the URL presented by the policy diff API. This is a persistant URL that can be
 passed around for policy review.
 
     .. code-block:: python
 
-       araalictl policy -diff-id=74c05743-a25c-45e4-8dd8-1f27956b690c
+       ./araalictl policy -diff-id=74c05743-a25c-45e4-8dd8-1f27956b690c
 
 6. Commit the new policy file (/tmp/yaml/common.voting-tmp.yaml) to git along side the application.
 
