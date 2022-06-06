@@ -53,12 +53,12 @@ FrontEnd
   :alt: Google Shopping App Front End
 
 
-Stop the assessment
-***********************
+.. Stop the assessment
+.. ***********************
 
-After running the tests, you can stop the assessment::
+ After running the tests, you can stop the assessment::
 
-   ./araalictl assessment -stop
+..    ./araalictl assessment -stop
 
-Freemium only allows you to run point-in-time assessments (vs continuous monitoring/security). So as long as your tests complete in a reasonable time, you should have a good picture of your application
+.. Freemium only allows you to run point-in-time assessments (vs continuous monitoring/security). So as long as your tests complete in a reasonable time, you should have a good picture of your application
 
