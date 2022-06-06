@@ -1,0 +1,27 @@
+identities:
+- node:
+    name: node_0
+    rename: containerd
+    zone: .*
+    app: .*
+    binary_name: /usr/local/bin/containerd
+    parent_process: systemd
+    process: containerd
+  pushdown: {}
+- node:
+    name: node_1
+    rename: auth_docker_443
+    dns_pattern: auth.docker.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_2
+    rename: prod_cloud_docker_443
+    dns_pattern: production.cloudflare.docker.com
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
