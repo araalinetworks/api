@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: gunicorn
+    name: gunicorn
     zone: .*
     app: .*
     pod: .*
@@ -11,13 +10,12 @@ identities:
     process: /venv/bin/gunicorn
   pushdown: {}
 - node:
-    name: node_1
-    rename: pgadmin_443
+    name: pgadmin_443
     dns_pattern: www.pgadmin.org
     dst_port: 443
   pushdown:
     dns_pattern: www.pgadmin.org
 authorizations:
-- name: node_1
+- name: pgadmin_443
   in:
-  - node_0
+  - gunicorn
