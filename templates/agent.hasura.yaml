@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: graphql_engine
+    name: graphql_engine
     zone: .*
     app: .*
     pod: .*
@@ -11,12 +10,11 @@ identities:
     process: graphql-engine
   pushdown: {}
 - node:
-    name: node_1
-    rename: releases_443
+    name: releases_443
     dns_pattern: releases.hasura.io
     dst_port: 443
   pushdown: {}
 authorizations:
-- name: node_1
+- name: releases_443
   in:
-  - node_0
+  - graphql_engine
