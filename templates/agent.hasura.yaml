@@ -1,0 +1,22 @@
+identities:
+- node:
+    name: node_0
+    rename: graphql_engine
+    zone: .*
+    app: .*
+    pod: .*
+    container: hasura
+    binary_name: /bin/graphql-engine
+    parent_process: containerd-shim
+    process: graphql-engine
+  pushdown: {}
+- node:
+    name: node_1
+    rename: releases_443
+    dns_pattern: releases.hasura.io
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
