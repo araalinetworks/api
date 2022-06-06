@@ -1,0 +1,80 @@
+identities:
+- node:
+    name: node_0
+    rename: dockerd
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/dockerd
+    parent_process: systemd
+    process: dockerd
+  pushdown: {}
+- node:
+    name: node_1
+    rename: auth_docker_443
+    dns_pattern: auth.docker.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_2
+    rename: prod_cloud_docker_443
+    dns_pattern: production.cloudflare.docker.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_3
+    rename: docker_images_443
+    dns_pattern: docker-images-.*amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:docker-images-.*amazonaws.com:.*
+- node:
+    name: node_4
+    rename: cloudfront_443
+    dns_pattern: .*cloudfront.net
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*cloudfront.net:.*
+- node:
+    name: node_5
+    rename: public_ecr_443
+    dns_pattern: public.ecr.aws
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_6
+    rename: quay_443
+    dns_pattern: quay.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_7
+    rename: docker_443
+    dns_pattern: .*docker.io
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*docker.io:.*
+- node:
+    name: node_8
+    rename: storage_googleapis_443
+    dns_pattern: .*storage.googleapis.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*storage.googleapis.com:.*
+- node:
+    name: node_9
+    rename: k8s_gcr_443
+    dns_pattern: k8s.gcr.io
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
+  - node_3
+  - node_4
+  - node_5
+  - node_6
+  - node_7
+  - node_8
+  - node_9
