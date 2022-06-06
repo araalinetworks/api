@@ -1,14 +1,6 @@
 identities:
 - node:
-    name: 50_motd_news_curl
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/curl
-    parent_process: 50-motd-news
-    process: curl
-  pushdown: {}
-- node:
-    name: 50_motd_news_wget
+    name: node_0
     zone: .*
     app: .*
     binary_name: /usr/bin/wget
@@ -16,84 +8,39 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: api_snapcraft
-    dns_pattern: api.snapcraft.io
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:api.snapcraft.io:.*
-- node:
-    name: apt_get
-    zone: .*
-    app: .*
-    binary_name: /usr/lib/apt/methods/http
-    parent_process: apt-get
-    process: http
-  pushdown: {}
-- node:
-    name: archive_80
-    dns_pattern: archive.ubuntu.com
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:archive.ubuntu.com:.*
-- node:
-    name: bin_dnf
-    zone: .*
-    app: .*
-    binary_name: /usr/libexec/platform-python.*
-    parent_process: systemd
-    process: /usr/bin/dnf
-  pushdown: {}
-- node:
-    name: cdn_fwupd_443
-    dns_pattern: cdn.fwupd.org
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:cdn.fwupd.org:.*
-- node:
-    name: changelongs_443
-    dns_pattern: changelogs.ubuntu.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: fwupdmgr
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/fwupdmgr
-    parent_process: systemd
-    process: fwupdmgr
-  pushdown: {}
-- node:
-    name: motd_443
+    name: node_1
     dns_pattern: motd.ubuntu.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:motd.ubuntu.com:.*
 - node:
-    name: node_6
-    dns_pattern: .*
+    name: node_10
+    dns_pattern: api.snapcraft.io
     dst_port: 443
   pushdown:
-    dns_pattern: .*:.*:.*
+    dns_pattern: .*:api.snapcraft.io:.*
 - node:
-    name: port_80
-    dns_pattern: .*
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:.*:.*
+    name: node_11
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: unattended-upgr
+    process: http
+  pushdown: {}
 - node:
-    name: security_80
-    dns_pattern: security.ubuntu.com
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:security.ubuntu.com:.*
-- node:
-    name: snapcraft_443
+    name: node_12
     dns_pattern: .*.snapcraftcontent.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*.snapcraftcontent.com:.*
 - node:
-    name: snapd
+    name: node_13
+    dns_pattern: security.ubuntu.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:security.ubuntu.com:.*
+- node:
+    name: node_14
     zone: .*
     app: .*
     binary_name: /snap/core/.*/usr/lib/snapd/snapd
@@ -102,16 +49,15 @@ identities:
   pushdown:
     binary_name: ^/snap/core/.*/usr/lib/snapd/snapd$
 - node:
-    name: snapd
+    name: node_15
     zone: .*
     app: .*
-    binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
-    parent_process: systemd
-    process: snapd
-  pushdown:
-    binary_name: ^/snap/snapd/.*/usr/lib/snapd/snapd$
+    binary_name: /usr/bin/curl
+    parent_process: 50-motd-news
+    process: curl
+  pushdown: {}
 - node:
-    name: upgr_chckr
+    name: node_16
     zone: .*
     app: .*
     binary_name: /usr/bin/python3.6
@@ -119,38 +65,94 @@ identities:
     process: /usr/lib/ubuntu-release-upgrader/check-new-release
   pushdown: {}
 - node:
-    name: upgr_http
+    name: node_17
+    dns_pattern: changelogs.ubuntu.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_2
     zone: .*
     app: .*
     binary_name: /usr/lib/apt/methods/http
-    parent_process: unattended-upgr
+    parent_process: apt-get
     process: http
   pushdown: {}
+- node:
+    name: node_3
+    dns_pattern: archive.ubuntu.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:archive.ubuntu.com:.*
+- node:
+    name: node_4
+    zone: .*
+    app: .*
+    binary_name: /usr/libexec/platform-python.*
+    parent_process: systemd
+    process: /usr/bin/dnf
+  pushdown: {}
+- node:
+    name: node_5
+    dns_pattern: .*
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:.*:.*
+- node:
+    name: node_6
+    dns_pattern: .*
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*:.*
+- node:
+    name: node_7
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/fwupdmgr
+    parent_process: systemd
+    process: fwupdmgr
+  pushdown: {}
+- node:
+    name: node_8
+    dns_pattern: cdn.fwupd.org
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:cdn.fwupd.org:.*
+- node:
+    name: node_9
+    zone: .*
+    app: .*
+    binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
+    parent_process: systemd
+    process: snapd
+  pushdown:
+    binary_name: ^/snap/snapd/.*/usr/lib/snapd/snapd$
 authorizations:
-- name: apt_get
+- name: node_1
+  in:
+  - node_0
+  - node_15
+- name: node_11
   out:
-  - archive_80
-  - security_80
-- name: bin_dnf
+  - node_13
+  - node_3
+- name: node_14
   out:
+  - node_10
+- name: node_17
+  in:
+  - node_16
+- name: node_2
+  out:
+  - node_13
+  - node_3
+- name: node_4
+  out:
+  - node_5
   - node_6
-  - port_80
-- name: cdn_fwupd_443
+- name: node_8
   in:
-  - fwupdmgr
-- name: changelongs_443
-  in:
-  - upgr_chckr
-- name: motd_443
-  in:
-  - 50_motd_news_curl
-  - 50_motd_news_wget
-- name: snapd
+  - node_7
+- name: node_9
   out:
-  - api_snapcraft
-  - api_snapcraft
-  - snapcraft_443
-- name: upgr_http
-  out:
-  - archive_80
-  - security_80
+  - node_10
+  - node_12
