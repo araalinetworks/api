@@ -37,8 +37,8 @@ assessment
 ./araalictl assessment
         Used to start and stop point in time assessments
 
--start          start the assessment
--stop           stop the assessment
+.. -start          start the assessment
+.. -stop           stop the assessment
 -report         get a report on findings
 -ignoreMK8S     ignore MicroK8S even if present
 
