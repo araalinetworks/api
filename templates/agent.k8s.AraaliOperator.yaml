@@ -1,18 +1,12 @@
 identities:
 - node:
-    name: node_0
-    rename: guarantor
-    zone: .*
-    app: kube-system
-    pod: .*araali-fw
-    container: .*araali-fw
-    binary_name: /opt/araali/bin/guarantor.*
-    parent_process: araalictl
-    process: guarantor
-  pushdown: {}
+    name: araali_aws_443
+    dns_pattern: .*fog.*.aws.araalinetworks.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*fog.*.aws.araalinetworks.com:.*
 - node:
-    name: node_1
-    rename: autok8s
+    name: autok8s
     zone: .*
     app: .*
     pod: servicediscovery
@@ -22,15 +16,18 @@ identities:
     process: autok8s
   pushdown: {}
 - node:
-    name: node_2
-    rename: araali_aws_443
-    dns_pattern: .*fog.*.aws.araalinetworks.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*fog.*.aws.araalinetworks.com:.*
+    name: guarantor
+    zone: .*
+    app: kube-system
+    pod: .*araali-fw
+    container: .*araali-fw
+    binary_name: /opt/araali/bin/guarantor.*
+    parent_process: araalictl
+    process: guarantor
+  pushdown: {}
 authorizations:
-- name: node_1
+- name: autok8s
   in:
-  - node_0
+  - guarantor
   out:
-  - node_2
+  - araali_aws_443
