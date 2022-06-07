@@ -1,7 +1,11 @@
 identities:
 - node:
-    name: node_0
-    rename: npm_containerd_shim
+    name: js_registry
+    dns_pattern: registry.npmjs.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: npm_containerd_shim
     zone: .*
     app: .*
     pod: .*
@@ -10,13 +14,7 @@ identities:
     parent_process: containerd-shim
     process: npm
   pushdown: {}
-- node:
-    name: node_1
-    rename: js_registry
-    dns_pattern: registry.npmjs.org
-    dst_port: 443
-  pushdown: {}
 authorizations:
-- name: node_1
+- name: js_registry
   in:
-  - node_0
+  - npm_containerd_shim
