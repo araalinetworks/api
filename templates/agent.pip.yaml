@@ -1,7 +1,16 @@
 identities:
 - node:
-    name: node_0
-    rename: pip_python
+    name: github_443
+    dns_pattern: github.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: githubusercontent_443
+    dns_pattern: objects.githubusercontent.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: pip_python
     zone: .*
     app: .*
     binary_name: .*/python.*
@@ -9,20 +18,7 @@ identities:
     process: .*/pip
   pushdown: {}
 - node:
-    name: node_1
-    rename: pypi_443
-    dns_pattern: pypi.org
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_2
-    rename: python_files_443
-    dns_pattern: files.pythonhosted.org
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_3
-    rename: pip_python_sh
+    name: pip_python_sh
     zone: .*
     app: .*
     pod: .*
@@ -32,23 +28,21 @@ identities:
     process: .*/pip
   pushdown: {}
 - node:
-    name: node_4
-    rename: github_443
-    dns_pattern: github.com
+    name: pypi_443
+    dns_pattern: pypi.org
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_5
-    rename: githubusercontent_443
-    dns_pattern: objects.githubusercontent.com
+    name: python_files_443
+    dns_pattern: files.pythonhosted.org
     dst_port: 443
   pushdown: {}
 authorizations:
-- name: node_0
+- name: pip_python
   out:
-  - node_1
-  - node_2
-- name: node_3
+  - pypi_443
+  - python_files_443
+- name: pip_python_sh
   out:
-  - node_4
-  - node_5
+  - github_443
+  - githubusercontent_443
