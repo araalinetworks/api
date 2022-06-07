@@ -1,7 +1,11 @@
 identities:
 - node:
-    name: node_0
-    rename: aws_k8s_agent
+    name: arsenal_uswest_aws_443
+    dns_pattern: arsenal.us-west-2.amazonaws.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: aws_k8s_agent
     zone: .*
     app: kube-system
     pod: aws-node
@@ -11,15 +15,7 @@ identities:
     process: aws-k8s-agent
   pushdown: {}
 - node:
-    name: node_1
-    rename: ec2_aws_443
-    dns_pattern: ec2.*amazonaws.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:ec2.*amazonaws.com:.*
-- node:
-    name: node_2
-    rename: awsagent
+    name: awsagent
     zone: .*
     app: k8s-nodes
     binary_name: /opt/aws/awsagent/bin/awsagent
@@ -27,23 +23,22 @@ identities:
     process: awsagent
   pushdown: {}
 - node:
-    name: node_3
-    rename: arsenal_uswest_aws_443
-    dns_pattern: arsenal.us-west-2.amazonaws.com
+    name: ec2_aws_443
+    dns_pattern: ec2.*amazonaws.com
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:ec2.*amazonaws.com:.*
 - node:
-    name: node_4
-    rename: instance_metadata_80
+    name: instance_metadata_80
     dst_port: 80
     subnet: 169.254.169.254
     netmask: 32
   pushdown: {}
 authorizations:
-- name: node_1
-  in:
-  - node_0
-- name: node_2
+- name: awsagent
   out:
-  - node_3
-  - node_4
+  - arsenal_uswest_aws_443
+  - instance_metadata_80
+- name: ec2_aws_443
+  in:
+  - aws_k8s_agent

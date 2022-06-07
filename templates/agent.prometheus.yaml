@@ -1,12 +1,6 @@
 identities:
 - node:
-    name: aps_workspaces_aws_443
-    dns_pattern: aps-workspaces.*amazonaws.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:aps-workspaces.*amazonaws.com:.*
-- node:
-    name: prometheus
+    name: node_0
     zone: .*
     app: .*
     pod: .*
@@ -15,7 +9,13 @@ identities:
     parent_process: containerd-shim
     process: prometheus
   pushdown: {}
+- node:
+    name: node_1
+    dns_pattern: aps-workspaces.*amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:aps-workspaces.*amazonaws.com:.*
 authorizations:
-- name: aps_workspaces_aws_443
+- name: node_1
   in:
-  - prometheus
+  - node_0

@@ -272,7 +272,7 @@ class Node:
 def represent_node(dumper, obj):
     def rank(key):
         key = key[0].value
-        key_order = ["name", "dns_pattern", "dst_port",
+        key_order = ["name", "dns_pattern", "dst_port", "subnet", "netmask",
                      "zone", "app", "pod", "container",
                      "binary_name", "parent_process", "process"]
         key_order = dict(zip(key_order, range(0, len(key_order))))
