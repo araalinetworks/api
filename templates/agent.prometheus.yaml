@@ -1,0 +1,23 @@
+identities:
+- node:
+    name: node_0
+    rename: prometheus
+    zone: .*
+    app: .*
+    pod: .*
+    container: prometheus-server
+    binary_name: /bin/prometheus
+    parent_process: containerd-shim
+    process: prometheus
+  pushdown: {}
+- node:
+    name: node_1
+    rename: aps_workspaces_aws_443
+    dns_pattern: aps-workspaces.*amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:aps-workspaces.*amazonaws.com:.*
+authorizations:
+- name: node_1
+  in:
+  - node_0
