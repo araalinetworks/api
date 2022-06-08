@@ -1,7 +1,12 @@
 identities:
 - node:
-    name: node_0
-    rename: cluster-autoscaler
+    name: aws_autoscaling_443
+    dns_pattern: .*autoscaling.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+    dst_pattern: .*:.*autoscaling.*.amazonaws.com:.*
+- node:
+    name: cluster-autoscaler
     zone: .*
     app: .*
     pod: .*
@@ -10,14 +15,7 @@ identities:
     parent_process: containerd-shim
     process: cluster-autoscaler
   pushdown: {}
-- node:
-    name: node_1
-    rename: aws_autoscaling_443
-    dns_pattern: .*autoscaling.*.amazonaws.com
-    dst_port: 443
-  pushdown:
-    dst_pattern: .*:.*autoscaling.*.amazonaws.com:.*
 authorizations:
-- name: node_1
+- name: aws_autoscaling_443
   in:
-  - node_0
+  - cluster-autoscaler
