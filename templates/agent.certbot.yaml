@@ -1,7 +1,12 @@
 identities:
 - node:
-    name: node_0
-    rename: snap_certbot
+    name: lencr_80
+    dns_pattern: .*.lencr.org
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:.*.lencr.org:.*
+- node:
+    name: snap_certbot
     zone: .*
     app: .*
     binary_name: /snap/certbot/.*/usr/bin/python3.8
@@ -10,14 +15,7 @@ identities:
   pushdown:
     binary_name: ^/snap/certbot/.*/usr/bin/python3.8$
     process: ^/snap/certbot/.*/bin/certbot$
-- node:
-    name: node_1
-    rename: lencr_80
-    dns_pattern: .*.lencr.org
-    dst_port: 80
-  pushdown:
-    dns_pattern: .*:.*.lencr.org:.*
 authorizations:
-- name: node_1
+- name: lencr_80
   in:
-  - node_0
+  - snap_certbot
