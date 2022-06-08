@@ -1,7 +1,11 @@
 identities:
 - node:
-    name: node_0
-    rename: sonarsource_scanner
+    name: sonarcloud_443
+    dns_pattern: sonarcloud.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: sonarsource_scanner
     zone: .*
     app: .*
     pod: .*
@@ -10,13 +14,7 @@ identities:
     parent_process: bash
     process: org.sonarsource.scanner.cli.Main
   pushdown: {}
-- node:
-    name: node_1
-    rename: sonarcloud_443
-    dns_pattern: sonarcloud.io
-    dst_port: 443
-  pushdown: {}
 authorizations:
-- name: node_1
+- name: sonarcloud_443
   in:
-  - node_0
+  - sonarsource_scanner
