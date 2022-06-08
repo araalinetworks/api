@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: process_agent
     zone: .*
     app: .*
     pod: datadog
@@ -11,11 +12,13 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: orchestrator_hq_443
     dns_pattern: orchestrator.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_10
+    rename: datadog_agent
     zone: .*
     app: .*
     pod: datadog-agent
@@ -26,11 +29,13 @@ identities:
   pushdown: {}
 - node:
     name: node_11
+    rename: intake_logs_443
     dns_pattern: agent-http-intake.logs.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_12
+    rename: process_agent_datadog_agent
     zone: .*
     app: .*
     pod: datadog-agent
@@ -41,6 +46,7 @@ identities:
   pushdown: {}
 - node:
     name: node_13
+    rename: datadog_agent_cluster_agent
     zone: .*
     app: .*
     pod: datadog-agent-cluster-agent
@@ -51,6 +57,7 @@ identities:
   pushdown: {}
 - node:
     name: node_14
+    rename: any
     zone: .*
     app: .*
     pod: .*
@@ -61,12 +68,14 @@ identities:
   pushdown: {}
 - node:
     name: node_15
+    rename: app_agent_hq_443
     dns_pattern: .*app.agent.datadoghq.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*app.agent.datadoghq.com:.*
 - node:
     name: node_16
+    rename: security_agent
     zone: .*
     app: .*
     pod: datadog
@@ -77,11 +86,13 @@ identities:
   pushdown: {}
 - node:
     name: node_17
+    rename: cspm_intake_hq_443
     dns_pattern: cspm-intake.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_18
+    rename: runc_datadog_cluster_agent
     zone: .*
     app: .*
     pod: datadog-cluster-agent
@@ -92,12 +103,14 @@ identities:
   pushdown: {}
 - node:
     name: node_19
+    rename: agent_hq_443
     dns_pattern: .*.agent.datadoghq.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*.agent.datadoghq.com:.*
 - node:
     name: node_2
+    rename: datadog_cluster_agent
     zone: .*
     app: .*
     pod: datadog-cluster-agent
@@ -108,21 +121,19 @@ identities:
   pushdown: {}
 - node:
     name: node_20
+    rename: app_hq_443
     dns_pattern: app.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_21
+    rename: metadata_google_80
     dns_pattern: metadata.google.internal
     dst_port: 80
   pushdown: {}
 - node:
-    name: node_22
-    dns_pattern: .*.agent.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
     name: node_3
+    rename: trace_agent
     zone: .*
     app: .*
     pod: datadog
@@ -133,21 +144,25 @@ identities:
   pushdown: {}
 - node:
     name: node_4
+    rename: trace_agent_hq_443
     dns_pattern: trace.agent.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_5
+    rename: intake_profile_hq_443
     dns_pattern: intake.profile.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_6
+    rename: process_hq_443
     dns_pattern: process.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_7
+    rename: agent
     zone: .*
     app: .*
     pod: datadog
@@ -158,12 +173,14 @@ identities:
   pushdown: {}
 - node:
     name: node_8
+    rename: app_agent_hq_443
     dns_pattern: .*-app.agent.datadoghq.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*-app.agent.datadoghq.com:.*
 - node:
     name: node_9
+    rename: api_hq_443
     dns_pattern: api.datadoghq.com
     dst_port: 443
   pushdown: {}
@@ -190,7 +207,7 @@ authorizations:
   out:
   - node_11
   - node_17
-  - node_22
+  - node_19
 - name: node_18
   out:
   - node_19
