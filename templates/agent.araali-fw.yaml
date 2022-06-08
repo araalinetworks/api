@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: araalictl_guarantor
+    name: araalictl_guarantor
     zone: .*
     app: .*
     binary_name: /opt/araali/bin/guarantor
@@ -9,78 +8,7 @@ identities:
     process: guarantor
   pushdown: {}
 - node:
-    name: node_1
-    rename: fog_aws_araali_443
-    dns_pattern: .*fog.*.aws.araalinetworks.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*fog.*.aws.araalinetworks.com:.*
-- node:
-    name: node_10
-    rename: github_release_githubusercontent_443
-    dns_pattern: github-releases.githubusercontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:github-releases.githubusercontent.com:.*
-- node:
-    name: node_11
-    rename: ubuntu_check_release
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/python3.8
-    parent_process: systemd
-    process: /usr/lib/ubuntu-release-upgrader/check-new-release
-  pushdown: {}
-- node:
-    name: node_12
-    rename: changelogs_ubuntu_443
-    dns_pattern: changelogs.ubuntu.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:changelogs.ubuntu.com:.*
-- node:
-    name: node_13
-    rename: sh_curl
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/curl
-    parent_process: sh
-    process: curl
-  pushdown: {}
-- node:
-    name: node_14
-    rename: instance_metadata_80
-    dst_port: 80
-    subnet: 169.254.169.254
-    netmask: 32
-  pushdown: {}
-- node:
-    name: node_15
-    rename: sh_grype
-    zone: .*
-    app: .*
-    binary_name: /opt/araali/bin/grype
-    parent_process: sh
-    process: grype
-  pushdown: {}
-- node:
-    name: node_16
-    rename: toolbox_data_anchore_443
-    dns_pattern: toolbox-data.anchore.io
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_17
-    rename: guarantor_helpe_grype
-    zone: .*
-    app: .*
-    binary_name: /opt/araali/bin/grype
-    parent_process: guarantor-helpe
-    process: grype
-  pushdown: {}
-- node:
-    name: node_18
-    rename: araalictl_linux_amd64
+    name: araalictl_linux_amd64
     zone: .*
     app: .*
     binary_name: .*/araalictl.linux-.*
@@ -89,35 +17,38 @@ identities:
   pushdown:
     binary_name: ^.*/araalictl.linux-.*$
 - node:
-    name: node_19
-    rename: prod_aws_araali_443
-    dns_pattern: prod.aws.araalinetworks.com
+    name: changelogs_ubuntu_443
+    dns_pattern: changelogs.ubuntu.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:changelogs.ubuntu.com:.*
+- node:
+    name: fog_aws_araali_443
+    dns_pattern: .*fog.*.aws.araalinetworks.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*fog.*.aws.araalinetworks.com:.*
+- node:
+    name: github_443
+    dns_pattern: github.com
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_2
-    rename: sh_owasp_dependencycheck
+    name: github_release_githubusercontent_443
+    dns_pattern: github-releases.githubusercontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:github-releases.githubusercontent.com:.*
+- node:
+    name: guarantor_helpe_grype
     zone: .*
     app: .*
-    binary_name: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-    parent_process: sh
-    process: org.owasp.dependencycheck.App
+    binary_name: /opt/araali/bin/grype
+    parent_process: guarantor-helpe
+    process: grype
   pushdown: {}
 - node:
-    name: node_20
-    rename: objects_githubusercontent_443
-    dns_pattern: objects.githubusercontent.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_3
-    rename: search_maven_443
-    dns_pattern: search.maven.org
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_4
-    rename: guarantor_helpe_owasp_dependencycheck
+    name: guarantor_helpe_owasp_dependencycheck
     zone: .*
     app: .*
     binary_name: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
@@ -125,14 +56,7 @@ identities:
     process: org.owasp.dependencycheck.App
   pushdown: {}
 - node:
-    name: node_5
-    rename: nvd_nist_443
-    dns_pattern: nvd.nist.gov
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_6
-    rename: guarantor_helpe_wget
+    name: guarantor_helpe_wget
     zone: .*
     app: .*
     binary_name: /usr/bin/wget
@@ -140,52 +64,107 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: node_7
-    rename: github_443
-    dns_pattern: github.com
+    name: instance_metadata_80
+    dst_port: 80
+    subnet: 169.254.169.254
+    netmask: 32
+  pushdown: {}
+- node:
+    name: jeremylong_github_443
+    dns_pattern: jeremylong.github.io
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_8
-    rename: ossindex_sontaype_443
+    name: nvd_nist_443
+    dns_pattern: nvd.nist.gov
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: objects_githubusercontent_443
+    dns_pattern: objects.githubusercontent.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: ossindex_sontaype_443
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_9
-    rename: jeremylong_github_443
-    dns_pattern: jeremylong.github.io
+    name: prod_aws_araali_443
+    dns_pattern: prod.aws.araalinetworks.com
     dst_port: 443
   pushdown: {}
+- node:
+    name: search_maven_443
+    dns_pattern: search.maven.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: sh_curl
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/curl
+    parent_process: sh
+    process: curl
+  pushdown: {}
+- node:
+    name: sh_grype
+    zone: .*
+    app: .*
+    binary_name: /opt/araali/bin/grype
+    parent_process: sh
+    process: grype
+  pushdown: {}
+- node:
+    name: sh_owasp_dependencycheck
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+    parent_process: sh
+    process: org.owasp.dependencycheck.App
+  pushdown: {}
+- node:
+    name: toolbox_data_anchore_443
+    dns_pattern: toolbox-data.anchore.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: ubuntu_check_release
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python3.8
+    parent_process: systemd
+    process: /usr/lib/ubuntu-release-upgrader/check-new-release
+  pushdown: {}
 authorizations:
-- name: node_1
+- name: changelogs_ubuntu_443
   in:
-  - node_0
-- name: node_12
+  - ubuntu_check_release
+- name: fog_aws_araali_443
   in:
-  - node_11
-- name: node_14
-  in:
-  - node_13
-- name: node_16
-  in:
-  - node_15
-  - node_17
-- name: node_19
-  in:
-  - node_18
-- name: node_2
+  - araalictl_guarantor
+- name: guarantor_helpe_owasp_dependencycheck
   out:
-  - node_3
-  - node_8
-- name: node_4
+  - jeremylong_github_443
+  - nvd_nist_443
+  - ossindex_sontaype_443
+  - search_maven_443
+- name: guarantor_helpe_wget
   out:
-  - node_3
-  - node_5
-  - node_8
-  - node_9
-- name: node_6
+  - github_443
+  - github_release_githubusercontent_443
+  - objects_githubusercontent_443
+- name: instance_metadata_80
+  in:
+  - sh_curl
+- name: prod_aws_araali_443
+  in:
+  - araalictl_linux_amd64
+- name: sh_owasp_dependencycheck
   out:
-  - node_10
-  - node_20
-  - node_7
+  - ossindex_sontaype_443
+  - search_maven_443
+- name: toolbox_data_anchore_443
+  in:
+  - guarantor_helpe_grype
+  - sh_grype
