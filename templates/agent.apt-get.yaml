@@ -1,0 +1,153 @@
+identities:
+- node:
+    name: node_0
+    rename: apt_get_https
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: https
+  pushdown: {}
+- node:
+    name: node_1
+    rename: packages_cloud_google_443
+    dns_pattern: packages.cloud.google.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_10
+    rename: debian_map_fastlydns_80
+    dns_pattern: debian.map.fastlydns.net
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_11
+    rename: apt_http
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt
+    process: http
+  pushdown: {}
+- node:
+    name: node_12
+    rename: archive_ubuntu_80
+    dns_pattern: .*.archive.ubuntu.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: .*:.*.archive.ubuntu.com:.*
+- node:
+    name: node_13
+    rename: packages_wazuh_443
+    dns_pattern: packages.wazuh.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_14
+    rename: dl_bintray_443
+    dns_pattern: dl.bintray.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_15
+    rename: apt_get_http
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: http
+  pushdown: {}
+- node:
+    name: node_16
+    rename: deb_debian_80
+    dns_pattern: deb.debian.org
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_17
+    rename: security_debian_80
+    dns_pattern: security.debian.org
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_2
+    rename: nginx_443
+    dns_pattern: nginx.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_3
+    rename: download_docker_443
+    dns_pattern: download.docker.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_4
+    rename: agt_get_http_2
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: http
+  pushdown: {}
+- node:
+    name: node_5
+    rename: packages_cloud_google_80
+    dns_pattern: packages.cloud.google.com
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_6
+    rename: archive_canonical_80
+    dns_pattern: archive.canonical.com
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_7
+    rename: ppa_launchpad_80
+    dns_pattern: ppa.launchpad.net
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_8
+    rename: dev_download_nvidia_80
+    dns_pattern: developer.download.nvidia.com
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_9
+    rename: apt_http_2
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt
+    process: http
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_13
+  - node_14
+  - node_2
+  - node_3
+- name: node_10
+  in:
+  - node_9
+- name: node_12
+  in:
+  - node_11
+- name: node_15
+  out:
+  - node_16
+  - node_17
+- name: node_4
+  out:
+  - node_5
+  - node_6
+  - node_7
+  - node_8
