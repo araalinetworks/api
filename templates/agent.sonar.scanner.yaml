@@ -1,0 +1,22 @@
+identities:
+- node:
+    name: node_0
+    rename: sonarsource_scanner
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/lib/jvm/java-11-openjdk/bin/java
+    parent_process: bash
+    process: org.sonarsource.scanner.cli.Main
+  pushdown: {}
+- node:
+    name: node_1
+    rename: sonarcloud_443
+    dns_pattern: sonarcloud.io
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
