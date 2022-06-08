@@ -1,20 +1,18 @@
 identities:
 - node:
-    name: node_0
-    rename: gitlab_runner
+    name: gitlab_443
+    dns_pattern: gitlab.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: gitlab_runner
     zone: .*
     app: .*
     binary_name: /usr/bin/gitlab-runner
     parent_process: systemd
     process: gitlab-runner
   pushdown: {}
-- node:
-    name: node_1
-    rename: gitlab_443
-    dns_pattern: gitlab.com
-    dst_port: 443
-  pushdown: {}
 authorizations:
-- name: node_1
+- name: gitlab_443
   in:
-  - node_0
+  - gitlab_runner
