@@ -1,63 +1,22 @@
 identities:
 - node:
-    name: node_0
-    rename: process_agent
+    name: agent
     zone: .*
     app: .*
     pod: datadog
-    container: process-agent
-    binary_name: /opt/datadog-agent/embedded/bin/process-agent
-    parent_process: containerd-shim
-    process: process-agent
-  pushdown: {}
-- node:
-    name: node_1
-    rename: orchestrator_hq_443
-    dns_pattern: orchestrator.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_10
-    rename: datadog_agent
-    zone: .*
-    app: .*
-    pod: datadog-agent
     container: agent
     binary_name: /opt/datadog-agent/bin/agent/agent
     parent_process: containerd-shim
     process: agent
   pushdown: {}
 - node:
-    name: node_11
-    rename: intake_logs_443
-    dns_pattern: agent-http-intake.logs.datadoghq.com
+    name: agent_hq_443
+    dns_pattern: .*.agent.datadoghq.com
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:.*.agent.datadoghq.com:.*
 - node:
-    name: node_12
-    rename: process_agent_datadog_agent
-    zone: .*
-    app: .*
-    pod: datadog-agent
-    container: process-agent
-    binary_name: /opt/datadog-agent/embedded/bin/process-agent
-    parent_process: containerd-shim
-    process: process-agent
-  pushdown: {}
-- node:
-    name: node_13
-    rename: datadog_agent_cluster_agent
-    zone: .*
-    app: .*
-    pod: datadog-agent-cluster-agent
-    container: cluster-agent
-    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
-    parent_process: containerd-shim
-    process: datadog-cluster-agent
-  pushdown: {}
-- node:
-    name: node_14
-    rename: any
+    name: any
     zone: .*
     app: .*
     pod: .*
@@ -67,32 +26,109 @@ identities:
     process: .*
   pushdown: {}
 - node:
-    name: node_15
-    rename: app_agent_hq_443
+    name: api_hq_443
+    dns_pattern: api.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: app_agent_hq_443
     dns_pattern: .*app.agent.datadoghq.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*app.agent.datadoghq.com:.*
 - node:
-    name: node_16
-    rename: security_agent
-    zone: .*
-    app: .*
-    pod: datadog
-    container: security-agent
-    binary_name: /opt/datadog-agent/embedded/bin/security-agent
-    parent_process: containerd-shim
-    process: security-agent
+    name: app_agent_hq_443
+    dns_pattern: .*-app.agent.datadoghq.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*-app.agent.datadoghq.com:.*
+- node:
+    name: app_hq_443
+    dns_pattern: app.datadoghq.com
+    dst_port: 443
   pushdown: {}
 - node:
-    name: node_17
-    rename: cspm_intake_hq_443
+    name: cspm_intake_hq_443
     dns_pattern: cspm-intake.datadoghq.com
     dst_port: 443
   pushdown: {}
 - node:
-    name: node_18
-    rename: runc_datadog_cluster_agent
+    name: datadog_agent
+    zone: .*
+    app: .*
+    pod: datadog-agent
+    container: agent
+    binary_name: /opt/datadog-agent/bin/agent/agent
+    parent_process: containerd-shim
+    process: agent
+  pushdown: {}
+- node:
+    name: datadog_agent_cluster_agent
+    zone: .*
+    app: .*
+    pod: datadog-agent-cluster-agent
+    container: cluster-agent
+    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    parent_process: containerd-shim
+    process: datadog-cluster-agent
+  pushdown: {}
+- node:
+    name: datadog_cluster_agent
+    zone: .*
+    app: .*
+    pod: datadog-cluster-agent
+    container: cluster-agent
+    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    parent_process: containerd-shim
+    process: datadog-cluster-agent
+  pushdown: {}
+- node:
+    name: intake_logs_443
+    dns_pattern: agent-http-intake.logs.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: intake_profile_hq_443
+    dns_pattern: intake.profile.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: metadata_google_80
+    dns_pattern: metadata.google.internal
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: orchestrator_hq_443
+    dns_pattern: orchestrator.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: process_agent
+    zone: .*
+    app: .*
+    pod: datadog
+    container: process-agent
+    binary_name: /opt/datadog-agent/embedded/bin/process-agent
+    parent_process: containerd-shim
+    process: process-agent
+  pushdown: {}
+- node:
+    name: process_agent_datadog_agent
+    zone: .*
+    app: .*
+    pod: datadog-agent
+    container: process-agent
+    binary_name: /opt/datadog-agent/embedded/bin/process-agent
+    parent_process: containerd-shim
+    process: process-agent
+  pushdown: {}
+- node:
+    name: process_hq_443
+    dns_pattern: process.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: runc_datadog_cluster_agent
     zone: .*
     app: .*
     pod: datadog-cluster-agent
@@ -102,38 +138,17 @@ identities:
     process: datadog-cluster-agent
   pushdown: {}
 - node:
-    name: node_19
-    rename: agent_hq_443
-    dns_pattern: .*.agent.datadoghq.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*.agent.datadoghq.com:.*
-- node:
-    name: node_2
-    rename: datadog_cluster_agent
+    name: security_agent
     zone: .*
     app: .*
-    pod: datadog-cluster-agent
-    container: cluster-agent
-    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    pod: datadog
+    container: security-agent
+    binary_name: /opt/datadog-agent/embedded/bin/security-agent
     parent_process: containerd-shim
-    process: datadog-cluster-agent
+    process: security-agent
   pushdown: {}
 - node:
-    name: node_20
-    rename: app_hq_443
-    dns_pattern: app.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_21
-    rename: metadata_google_80
-    dns_pattern: metadata.google.internal
-    dst_port: 80
-  pushdown: {}
-- node:
-    name: node_3
-    rename: trace_agent
+    name: trace_agent
     zone: .*
     app: .*
     pod: datadog
@@ -143,87 +158,50 @@ identities:
     process: trace-agent
   pushdown: {}
 - node:
-    name: node_4
-    rename: trace_agent_hq_443
+    name: trace_agent_hq_443
     dns_pattern: trace.agent.datadoghq.com
     dst_port: 443
   pushdown: {}
-- node:
-    name: node_5
-    rename: intake_profile_hq_443
-    dns_pattern: intake.profile.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_6
-    rename: process_hq_443
-    dns_pattern: process.datadoghq.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_7
-    rename: agent
-    zone: .*
-    app: .*
-    pod: datadog
-    container: agent
-    binary_name: /opt/datadog-agent/bin/agent/agent
-    parent_process: containerd-shim
-    process: agent
-  pushdown: {}
-- node:
-    name: node_8
-    rename: app_agent_hq_443
-    dns_pattern: .*-app.agent.datadoghq.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*-app.agent.datadoghq.com:.*
-- node:
-    name: node_9
-    rename: api_hq_443
-    dns_pattern: api.datadoghq.com
-    dst_port: 443
-  pushdown: {}
 authorizations:
-- name: node_0
+- name: agent
   out:
-  - node_1
-  - node_6
-- name: node_10
+  - api_hq_443
+  - app_agent_hq_443
+  - intake_logs_443
+- name: any
   out:
-  - node_11
-- name: node_12
+  - api_hq_443
+- name: datadog_agent
   out:
-  - node_1
-  - node_6
-- name: node_13
+  - intake_logs_443
+- name: datadog_agent_cluster_agent
   out:
-  - node_1
-  - node_15
-- name: node_14
+  - app_agent_hq_443
+  - orchestrator_hq_443
+- name: datadog_cluster_agent
   out:
-  - node_9
-- name: node_16
+  - app_agent_hq_443
+  - cspm_intake_hq_443
+  - orchestrator_hq_443
+- name: process_agent
   out:
-  - node_11
-  - node_17
-  - node_19
-- name: node_18
+  - orchestrator_hq_443
+  - process_hq_443
+- name: process_agent_datadog_agent
   out:
-  - node_19
-  - node_20
-  - node_21
-- name: node_2
+  - orchestrator_hq_443
+  - process_hq_443
+- name: runc_datadog_cluster_agent
   out:
-  - node_1
-  - node_17
-  - node_8
-- name: node_3
+  - agent_hq_443
+  - app_hq_443
+  - metadata_google_80
+- name: security_agent
   out:
-  - node_4
-  - node_5
-- name: node_7
+  - agent_hq_443
+  - cspm_intake_hq_443
+  - intake_logs_443
+- name: trace_agent
   out:
-  - node_11
-  - node_8
-  - node_9
+  - intake_profile_hq_443
+  - trace_agent_hq_443
