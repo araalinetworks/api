@@ -1,0 +1,85 @@
+identities:
+- node:
+    name: node_0
+    rename: timeout_yum
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python2.7
+    parent_process: timeout
+    process: /usr/bin/yum
+  pushdown: {}
+- node:
+    name: node_1
+    rename: amznlinux_aws_443
+    dns_pattern: amazonlinux-.*amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:amazonlinux-.*amazonaws.com:.*
+- node:
+    name: node_2
+    rename: bash_yum
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python2.7
+    parent_process: bash
+    process: /bin/yum
+  pushdown: {}
+- node:
+    name: node_3
+    rename: mirrors_fedoraproject_443
+    dns_pattern: mirrors.fedoraproject.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_4
+    rename: mirror_arizona_443
+    dns_pattern: mirror.arizona.edu
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_5
+    rename: yum_urlgrabber
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python2.7
+    parent_process: yum
+    process: /usr/libexec/urlgrabber-ext-down
+  pushdown: {}
+- node:
+    name: node_6
+    rename: download_fedoraproject_443
+    dns_pattern: download-ib01.fedoraproject.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_7
+    rename: pubmirror_uh_443
+    dns_pattern: pubmirror1.math.uh.edu
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_8
+    rename: run_parts_yum_cron
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python2.7
+    parent_process: run-parts
+    process: /usr/sbin/yum-cron
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_3
+- name: node_2
+  out:
+  - node_3
+  - node_4
+- name: node_5
+  out:
+  - node_4
+  - node_6
+  - node_7
+- name: node_8
+  out:
+  - node_3
