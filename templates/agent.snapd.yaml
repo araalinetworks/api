@@ -1,7 +1,12 @@
 identities:
 - node:
-    name: node_0
-    rename: snapd
+    name: snapcraftcontent_443
+    dns_pattern: .*.snapcraftcontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*.snapcraftcontent.com:.*
+- node:
+    name: snapd
     zone: .*
     app: .*
     binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
@@ -10,15 +15,7 @@ identities:
   pushdown:
     binary_name: ^/snap/snapd/.*/usr/lib/snapd/snapd$
 - node:
-    name: node_1
-    rename: snapcraftcontent_443
-    dns_pattern: .*.snapcraftcontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*.snapcraftcontent.com:.*
-- node:
-    name: node_2
-    rename: snapd_core
+    name: snapd_core
     zone: .*
     app: .*
     binary_name: /snap/core/.*/usr/lib/snapd/snapd
@@ -26,7 +23,7 @@ identities:
     process: snapd
   pushdown: {}
 authorizations:
-- name: node_1
+- name: snapcraftcontent_443
   in:
-  - node_0
-  - node_2
+  - snapd
+  - snapd_core
