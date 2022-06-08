@@ -1,0 +1,43 @@
+identities:
+- node:
+    name: node_0
+    rename: grafana_server
+    zone: .*
+    app: .*
+    pod: .*
+    container: grafana
+    binary_name: /usr/share/grafana/bin/grafana-server
+    parent_process: containerd-shim
+    process: grafana-server
+  pushdown: {}
+- node:
+    name: node_1
+    rename: stats_grafana_443
+    dns_pattern: stats.grafana.org
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_2
+    rename: secure_gravatar_443
+    dns_pattern: secure.gravatar.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_3
+    rename: hooks_slack_443
+    dns_pattern: hooks.slack.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_4
+    rename: raw_githubusercontent_443
+    dns_pattern: raw.githubusercontent.com
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
+  - node_3
+  - node_4
