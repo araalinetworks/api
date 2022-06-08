@@ -1,0 +1,212 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    pod: datadog
+    container: process-agent
+    binary_name: /opt/datadog-agent/embedded/bin/process-agent
+    parent_process: containerd-shim
+    process: process-agent
+  pushdown: {}
+- node:
+    name: node_1
+    dns_pattern: orchestrator.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_10
+    zone: .*
+    app: .*
+    pod: datadog-agent
+    container: agent
+    binary_name: /opt/datadog-agent/bin/agent/agent
+    parent_process: containerd-shim
+    process: agent
+  pushdown: {}
+- node:
+    name: node_11
+    dns_pattern: agent-http-intake.logs.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_12
+    zone: .*
+    app: .*
+    pod: datadog-agent
+    container: process-agent
+    binary_name: /opt/datadog-agent/embedded/bin/process-agent
+    parent_process: containerd-shim
+    process: process-agent
+  pushdown: {}
+- node:
+    name: node_13
+    zone: .*
+    app: .*
+    pod: datadog-agent-cluster-agent
+    container: cluster-agent
+    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    parent_process: containerd-shim
+    process: datadog-cluster-agent
+  pushdown: {}
+- node:
+    name: node_14
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: {}
+- node:
+    name: node_15
+    dns_pattern: .*app.agent.datadoghq.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*app.agent.datadoghq.com:.*
+- node:
+    name: node_16
+    zone: .*
+    app: .*
+    pod: datadog
+    container: security-agent
+    binary_name: /opt/datadog-agent/embedded/bin/security-agent
+    parent_process: containerd-shim
+    process: security-agent
+  pushdown: {}
+- node:
+    name: node_17
+    dns_pattern: cspm-intake.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_18
+    zone: .*
+    app: .*
+    pod: datadog-cluster-agent
+    container: cluster-agent
+    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    parent_process: runc
+    process: datadog-cluster-agent
+  pushdown: {}
+- node:
+    name: node_19
+    dns_pattern: .*.agent.datadoghq.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*.agent.datadoghq.com:.*
+- node:
+    name: node_2
+    zone: .*
+    app: .*
+    pod: datadog-cluster-agent
+    container: cluster-agent
+    binary_name: /opt/datadog-agent/bin/datadog-cluster-agent
+    parent_process: containerd-shim
+    process: datadog-cluster-agent
+  pushdown: {}
+- node:
+    name: node_20
+    dns_pattern: app.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_21
+    dns_pattern: metadata.google.internal
+    dst_port: 80
+  pushdown: {}
+- node:
+    name: node_22
+    dns_pattern: .*.agent.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_3
+    zone: .*
+    app: .*
+    pod: datadog
+    container: trace-agent
+    binary_name: /opt/datadog-agent/embedded/bin/trace-agent
+    parent_process: containerd-shim
+    process: trace-agent
+  pushdown: {}
+- node:
+    name: node_4
+    dns_pattern: trace.agent.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_5
+    dns_pattern: intake.profile.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_6
+    dns_pattern: process.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_7
+    zone: .*
+    app: .*
+    pod: datadog
+    container: agent
+    binary_name: /opt/datadog-agent/bin/agent/agent
+    parent_process: containerd-shim
+    process: agent
+  pushdown: {}
+- node:
+    name: node_8
+    dns_pattern: .*-app.agent.datadoghq.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*-app.agent.datadoghq.com:.*
+- node:
+    name: node_9
+    dns_pattern: api.datadoghq.com
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_6
+- name: node_10
+  out:
+  - node_11
+- name: node_12
+  out:
+  - node_1
+  - node_6
+- name: node_13
+  out:
+  - node_1
+  - node_15
+- name: node_14
+  out:
+  - node_9
+- name: node_16
+  out:
+  - node_11
+  - node_17
+  - node_22
+- name: node_18
+  out:
+  - node_19
+  - node_20
+  - node_21
+- name: node_2
+  out:
+  - node_1
+  - node_17
+  - node_8
+- name: node_3
+  out:
+  - node_4
+  - node_5
+- name: node_7
+  out:
+  - node_11
+  - node_8
+  - node_9

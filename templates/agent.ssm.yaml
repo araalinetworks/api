@@ -1,7 +1,12 @@
 identities:
 - node:
-    name: node_0
-    rename: ssm_agent_worker
+    name: aws_ssm_443
+    dns_pattern: .*ssm.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*ssm.*amazonaws.com:.*
+- node:
+    name: ssm_agent_worker
     zone: .*
     app: .*
     binary_name: /usr/bin/ssm-agent-worker
@@ -9,23 +14,15 @@ identities:
     process: ssm-agent-worker
   pushdown: {}
 - node:
-    name: node_2
-    rename: ssm_doc_worker
+    name: ssm_doc_worker
     zone: .*
     app: .*
     binary_name: /usr/bin/ssm-document-worker
     parent_process: ssm-agent-worke
     process: ssm-document-worker
   pushdown: {}
-- node:
-    name: node_3
-    rename: aws_ssm_443
-    dns_pattern: .*ssm.*.amazonaws.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*ssm.*amazonaws.com:.*
 authorizations:
-- name: node_3
+- name: aws_ssm_443
   in:
-  - node_0
-  - node_2
+  - ssm_agent_worker
+  - ssm_doc_worker
