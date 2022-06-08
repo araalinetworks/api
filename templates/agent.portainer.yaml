@@ -1,0 +1,30 @@
+identities:
+- node:
+    name: node_0
+    rename: portainer
+    zone: .*
+    app: .*
+    pod: portainer
+    container: .*
+    binary_name: /portainer
+    parent_process: containerd-shim
+    process: portainer
+  pushdown: {}
+- node:
+    name: node_1
+    rename: portainer_digitaloceanspaces_443
+    dns_pattern: portainer.*digitaloceanspaces.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:portainer.*digitaloceanspaces.com:.*
+- node:
+    name: node_2
+    rename: api_github_443
+    dns_pattern: api.github.com
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
