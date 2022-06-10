@@ -44,6 +44,12 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
+    name: cloudfront_net
+    dns_pattern: .*.cloudfront.net
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*.cloudfront.net:.*
+- node:
     name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
@@ -194,6 +200,7 @@ authorizations:
   - anchore_io
   - aws_ecr
   - aws_ecr_public
+  - cloudfront_net
 - name: guarantor
   in:
   - araali_cni

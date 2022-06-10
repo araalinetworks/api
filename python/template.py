@@ -10,7 +10,9 @@ import araalictl
 import argparse
 import difflib
 import glob
+import json
 import os
+import sys
 import yaml
 
 class NoAliasDumper(yaml.Dumper):
@@ -36,7 +38,7 @@ def config(args):
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
     elif args.tenants is not None:
-        cfg["tenants"] = args.tenants.split(",")
+        cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in args.tenants.split(",")]
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
     else:
@@ -272,7 +274,7 @@ class Node:
 def represent_node(dumper, obj):
     def rank(key):
         key = key[0].value
-        key_order = ["name", "dns_pattern", "dst_port",
+        key_order = ["name", "dns_pattern", "subnet", "netmask", "dst_port",
                      "zone", "app", "pod", "container",
                      "binary_name", "parent_process", "process"]
         key_order = dict(zip(key_order, range(0, len(key_order))))
@@ -289,13 +291,128 @@ def represent_node(dumper, obj):
 
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
+def push(args):
+    ans = input("are you sure? (yes/no)> ")
+    if ans != "yes":
+        print("This is a dangerous command, thanks for exercising caution!")
+        return
+
+    if args.verbose >= 1: print(args, ans)
+    if args.verbose >= 1: araalictl.g_debug = True
+    basename = "../templates/%s.yaml" % args.template
+    if not os.path.isfile(basename): # yaml already exists
+        print(basename, "does not exist")
+        return
+
+    # read a sample template from araali
+    obj = [a for a in araalictl.fetch_templates(public=True, template="agent.k8s.araali-fw")][0]
+    # name, template, use, author, version
+    if args.verbose >= 2: print(obj["name"], obj["use"], obj["author"], obj["version"])
+    obj["name"] = args.template
+    if args.public:
+        obj["use"] = False
+    else:
+        obj["use"] = True
+    obj["author"] = "Template As Code (Git)"
+    obj["version"] = "v0.0.1"
+
+    cfg = read_config()
+    nodes = {}
+    obj["template"] = []
+    with open(basename) as f:
+        template = yaml.load(f, Loader=yaml.SafeLoader)
+        # load identities
+        for node in template["identities"]:
+            name = node["node"]["name"]
+            nodes[name] = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+
+        for node in template["authorizations"]:
+            # name, in, out
+            node_obj = nodes[node["name"]]
+            if args.verbose >= 2: print(yaml.dump(node_obj))
+            for label in node.get("in", []):
+                peer_obj = nodes[label]
+                o = {"link_filter": {}}
+                o["link_filter"]["client"] = dict(peer_obj.node.obj)
+                o["link_filter"]["server"] = dict(node_obj.node.obj)
+                if node_obj.pushdown.obj or peer_obj.pushdown.obj:
+                    o["selector_change"] = {}
+                    if peer_obj.pushdown.obj:
+                        o["selector_change"]["client"] = dict(peer_obj.pushdown.obj)
+                    if node_obj.pushdown.obj:
+                        o["selector_change"]["server"] = dict(node_obj.pushdown.obj)
+                obj["template"].append(o)
+            for label in node.get("out", []):
+                peer_obj = nodes[label]
+                o = {"link_filter": {}}
+                o["link_filter"]["client"] = dict(node_obj.node.obj)
+                o["link_filter"]["server"] = dict(peer_obj.node.obj)
+                if node_obj.pushdown.obj or peer_obj.pushdown.obj:
+                    o["selector_change"] = {}
+                    if node_obj.pushdown.obj:
+                        o["selector_change"]["client"] = dict(node_obj.pushdown.obj)
+                    if peer_obj.pushdown.obj:
+                        o["selector_change"]["server"] = dict(peer_obj.pushdown.obj)
+                obj["template"].append(o)
+ 
+    if args.verbose >= 1: print(obj)
+    if args.tenant:
+        tenant = args.tenant
+    else:
+        tenant = cfg["tenant"]
+    rc = araalictl.update_template([obj], args.public, tenant)
+    print(rc)
+
+def alerts(args):
+    cfg = read_config()
+
+    if args.tenant:
+        tenants = [{"name": args.tenant, "id": args.tenant}]
+    else:
+        tenants = cfg["tenants"]
+        if not tenants:
+            tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+
+    araalictl.g_debug = False
+    os.makedirs("%s/%s" % (args.progdir, ".alerts.template.py"), exist_ok=True)
+    for t in tenants:
+        with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
+            count = 0
+            skipped_count = 0
+            token = None
+            while True:
+                for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
+                    if obj["alert_info"]["status"] == "CLOSE":
+                        skipped_count += 1
+                        continue
+                    count += 1
+                    json.dump(obj, f)
+                    f.write("\n")
+
+                token=obj.get("paging_token", None)
+                if not token:
+                    break
+
+            print(t, "open=%s" % count, "closed=%s" % skipped_count)
+
+def list(args):
+    cfg = read_config()
+
+    for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
+                                       template=args.template):
+        # keys: ['name', 'template', 'use', 'author', 'version']
+        del obj["template"]
+        print(obj)
+
 def pull(args):
     cfg = read_config()
 
     # get the names from local file and apply it to pulled template
     existing_nodes = {}
-    if args.dirname:
-        with open("%s/%s.yaml" % (args.dirname, args.template)) as f:
+
+    basename = "../templates/%s.yaml" % args.template
+    if os.path.isfile(basename): # yaml already exists
+        with open(basename) as f:
             template = yaml.load(f, Loader=yaml.SafeLoader)
 
             # identities, authorizations
@@ -306,6 +423,7 @@ def pull(args):
                 key = yaml.dump(node)
                 existing_nodes[key] = name
  
+    found = False
     for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
                                        template=args.template):
         # keys: ['name', 'template', 'use', 'author', 'version']
@@ -324,14 +442,21 @@ def pull(args):
             key = yaml.dump(client)
             if key in existing_nodes:
                 client.node.obj["name"] = existing_nodes[key]
+            else:
+                print("not found", yaml.dump(client))
 
             key = yaml.dump(server)
             if key in existing_nodes:
                 server.node.obj["name"] = existing_nodes[key]
+            else:
+                print("not found", yaml.dump(server))
 
             graph.add_link(client, server)
 
         graph.dump()
+        found = True
+    if not found:
+        print("No template found")
 
 def rename(args):
     if args.verbose >= 1: print(args.template, args.dirname)
@@ -355,16 +480,30 @@ def rename(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Manage Templates as Code')
     parser.add_argument('--verbose', '-v', action='count', default=0)
-    parser.add_argument('--template', help="apply operation for a specific template")
+    parser.add_argument('-T', '--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
+
+    parser_alerts = subparsers.add_parser("alerts", help="list araali templates")
+    parser_alerts.add_argument('-t', '--tenant')
+    
+    parser_list = subparsers.add_parser("list", help="list araali templates")
+    parser_list.add_argument('-p', '--public', action="store_true")
+    parser_list.add_argument('-t', '--tenant')
+    parser_list.add_argument('-T', '--template', help="pull a specific template (name or path)")
     
     parser_pull = subparsers.add_parser("pull", help="pull araali templates")
     parser_pull.add_argument('-p', '--public', action="store_true")
-    parser_pull.add_argument('-t', '--template', help="pull a specific template (name or path)")
+    parser_pull.add_argument('-T', '--template', help="pull a specific template (name or path)")
+    parser_pull.add_argument('-t', '--tenant')
+    
+    parser_push = subparsers.add_parser("push", help="pull araali templates")
+    parser_push.add_argument('-p', '--public', action="store_true")
+    parser_push.add_argument('-T', '--template', help="pull a specific template (name or path)")
+    parser_push.add_argument('-t', '--tenant')
     
     parser_config = subparsers.add_parser("config", help="add config params")
     parser_config.add_argument('-t', '--tenant')
-    parser_config.add_argument('--tenants')
+    parser_config.add_argument('-ts', '--tenants')
 
     parser_rename = subparsers.add_parser("rename", help="rename template node name")
     parser_rename.add_argument('template')
@@ -375,6 +514,7 @@ if __name__ == '__main__':
     yaml.add_representer(NameWithInOut, represent_name_with_in_out)
 
     args = parser.parse_args()
+    args.progdir, args.prog = os.path.split(sys.argv[0])
     if args.template: # template can be specified by name or file path
         args.dirname, args.pathname = os.path.split(args.template)
         args.template = args.pathname.split(".yaml")[0]
