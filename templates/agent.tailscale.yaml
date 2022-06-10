@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: tailscaled
     zone: .*
     app: .*
     pod: .*
@@ -11,17 +12,20 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: google_dns
     subnet: 8.8.8.8
     netmask: 32
     dst_port: 443
   pushdown: {}
 - node:
     name: node_2
+    rename: tailscale_login
     dns_pattern: login.tailscale.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_3
+    rename: tailscale_log
     dns_pattern: log.tailscale.io
     dst_port: 443
   pushdown: {}
