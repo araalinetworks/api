@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: any
     zone: .*
     app: .*
     binary_name: .*
@@ -9,6 +10,7 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: cloudtrace
     dns_pattern: cloudtrace.googleapis.com
     dst_port: 443
   pushdown:

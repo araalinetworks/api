@@ -503,7 +503,7 @@ if __name__ == '__main__':
     
     parser_config = subparsers.add_parser("config", help="add config params")
     parser_config.add_argument('-t', '--tenant')
-    parser_config.add_argument('--tenants')
+    parser_config.add_argument('-ts', '--tenants')
 
     parser_rename = subparsers.add_parser("rename", help="rename template node name")
     parser_rename.add_argument('template')
