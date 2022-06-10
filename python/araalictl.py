@@ -458,7 +458,6 @@ def enforce(data, service=False, tenant=None):
 
     return ret_val
 
-
 def fetch_flows(data, tenant=None):
     """Update actions on a link"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""

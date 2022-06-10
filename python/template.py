@@ -298,6 +298,7 @@ def push(args):
         return
 
     if args.verbose >= 1: print(args, ans)
+    if args.verbose >= 1: araalictl.g_debug = True
     basename = "../templates/%s.yaml" % args.template
     if not os.path.isfile(basename): # yaml already exists
         print(basename, "does not exist")
@@ -332,30 +333,35 @@ def push(args):
             for label in node.get("in", []):
                 peer_obj = nodes[label]
                 o = {"link_filter": {}}
-                o["link_filter"]["client"] = peer_obj.node.obj
-                o["link_filter"]["server"] = node_obj.node.obj
+                o["link_filter"]["client"] = dict(peer_obj.node.obj)
+                o["link_filter"]["server"] = dict(node_obj.node.obj)
                 if node_obj.pushdown.obj or peer_obj.pushdown.obj:
                     o["selector_change"] = {}
                     if peer_obj.pushdown.obj:
-                        o["selector_change"]["client"] = peer_obj.pushdown.obj
+                        o["selector_change"]["client"] = dict(peer_obj.pushdown.obj)
                     if node_obj.pushdown.obj:
-                        o["selector_change"]["server"] = node_obj.pushdown.obj
+                        o["selector_change"]["server"] = dict(node_obj.pushdown.obj)
                 obj["template"].append(o)
             for label in node.get("out", []):
                 peer_obj = nodes[label]
                 o = {"link_filter": {}}
-                o["link_filter"]["client"] = node_obj.node.obj
-                o["link_filter"]["server"] = peer_obj.node.obj
+                o["link_filter"]["client"] = dict(node_obj.node.obj)
+                o["link_filter"]["server"] = dict(peer_obj.node.obj)
                 if node_obj.pushdown.obj or peer_obj.pushdown.obj:
                     o["selector_change"] = {}
                     if node_obj.pushdown.obj:
-                        o["selector_change"]["client"] = node_obj.pushdown.obj
+                        o["selector_change"]["client"] = dict(node_obj.pushdown.obj)
                     if peer_obj.pushdown.obj:
-                        o["selector_change"]["server"] = peer_obj.pushdown.obj
+                        o["selector_change"]["server"] = dict(peer_obj.pushdown.obj)
                 obj["template"].append(o)
  
     if args.verbose >= 1: print(obj)
-    araalictl.update_template([obj], args.public, cfg["tenant"])  
+    if args.tenant:
+        tenant = args.tenant
+    else:
+        tenant = cfg["tenant"]
+    rc = araalictl.update_template([obj], args.public, tenant)
+    print(rc)
 
 def alerts(args):
     cfg = read_config()
@@ -493,6 +499,7 @@ if __name__ == '__main__':
     parser_push = subparsers.add_parser("push", help="pull araali templates")
     parser_push.add_argument('-p', '--public', action="store_true")
     parser_push.add_argument('-T', '--template', help="pull a specific template (name or path)")
+    parser_push.add_argument('-t', '--tenant')
     
     parser_config = subparsers.add_parser("config", help="add config params")
     parser_config.add_argument('-t', '--tenant')
