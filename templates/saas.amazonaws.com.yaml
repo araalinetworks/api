@@ -1,5 +1,12 @@
 identities:
 - node:
+    name: node_1
+    rename: sns
+    dns_pattern: sns.*amazonaws.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: sns.*amazonaws.com
+- node:
     name: any
     zone: .*
     app: .*
@@ -15,5 +22,8 @@ identities:
     dns_pattern: .*:.*s3.*amazonaws.com:.*
 authorizations:
 - name: s3
+  in:
+  - any
+- name: node_1
   in:
   - any
