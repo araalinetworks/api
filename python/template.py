@@ -10,7 +10,9 @@ import araalictl
 import argparse
 import difflib
 import glob
+import json
 import os
+import sys
 import yaml
 
 class NoAliasDumper(yaml.Dumper):
@@ -366,22 +368,26 @@ def alerts(args):
             tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
 
     araalictl.g_debug = False
+    os.makedirs("%s/%s" % (args.progdir, ".alerts.template.py"), exist_ok=True)
     for t in tenants:
-        count = 0
-        skipped_count = 0
-        token = None
-        while True:
-            for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
-                if obj["alert_info"]["status"] == "CLOSE":
-                    skipped_count += 1
-                    continue
-                count += 1
+        with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
+            count = 0
+            skipped_count = 0
+            token = None
+            while True:
+                for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
+                    if obj["alert_info"]["status"] == "CLOSE":
+                        skipped_count += 1
+                        continue
+                    count += 1
+                    json.dump(obj, f)
+                    f.write("\n")
 
-            token=obj.get("paging_token", None)
-            if not token:
-                break
+                token=obj.get("paging_token", None)
+                if not token:
+                    break
 
-        print(t, "open=%s" % count, "closed=%s" % skipped_count)
+            print(t, "open=%s" % count, "closed=%s" % skipped_count)
 
 def list(args):
     cfg = read_config()
@@ -501,6 +507,7 @@ if __name__ == '__main__':
     yaml.add_representer(NameWithInOut, represent_name_with_in_out)
 
     args = parser.parse_args()
+    args.progdir, args.prog = os.path.split(sys.argv[0])
     if args.template: # template can be specified by name or file path
         args.dirname, args.pathname = os.path.split(args.template)
         args.template = args.pathname.split(".yaml")[0]
