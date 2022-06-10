@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: any
+    name: any
     zone: .*
     app: .*
     binary_name: .*
@@ -9,13 +8,12 @@ identities:
     process: .*
   pushdown: {}
 - node:
-    name: node_1
-    rename: s3
+    name: s3
     dns_pattern: .*s3.*amazonaws.com
     dst_port: 443
   pushdown:
     dns_pattern: .*:.*s3.*amazonaws.com:.*
 authorizations:
-- name: node_1
+- name: s3
   in:
-  - node_0
+  - any
