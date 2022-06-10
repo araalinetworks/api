@@ -1,0 +1,33 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    pod: .*
+    container: tailscale-relay
+    binary_name: /usr/local/bin/tailscaled
+    parent_process: bash
+    process: tailscaled
+  pushdown: {}
+- node:
+    name: node_1
+    subnet: 8.8.8.8
+    netmask: 32
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_2
+    dns_pattern: login.tailscale.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: node_3
+    dns_pattern: log.tailscale.io
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
+  - node_3
