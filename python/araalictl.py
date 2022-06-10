@@ -55,14 +55,21 @@ def deauth():
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
-def alerts(start_time=None, token=None, count=200, tenant=None):
+def alerts(start_time=None, token=None, count=200, end_time=None, tenant=None):
     """get alerts"""
     if token:
         cmd = "-paging-token %s" % token
     else:
-        if not start_time:
+        if start_time is None:
             start_time = datetime.datetime.now() - datetime.timedelta(days=1)
-        cmd = "-starttime %s" % (int(start_time.timestamp()))
+        if type(start_time) == datetime.datetime:
+            start_time = int(start_time.timestamp())
+        cmd = "-starttime %s" % (start_time)
+        if end_time is None:
+            end_time = datetime.datetime.now() - datetime.timedelta(days=1)
+        if type(end_time) == datetime.datetime:
+            end_time = int(end_time.timestamp())
+        cmd += " -endtime %s" % (end_time)
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s api -fetch-alerts %s -count %s %s" % (

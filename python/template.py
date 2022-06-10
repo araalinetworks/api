@@ -36,7 +36,7 @@ def config(args):
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
     elif args.tenants is not None:
-        cfg["tenants"] = args.tenants.split(",")
+        cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in args.tenants.split(",")]
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
     else:
@@ -355,6 +355,34 @@ def push(args):
     if args.verbose >= 1: print(obj)
     araalictl.update_template([obj], args.public, cfg["tenant"])  
 
+def alerts(args):
+    cfg = read_config()
+
+    if args.tenant:
+        tenants = [{"name": args.tenant, "id": args.tenant}]
+    else:
+        tenants = cfg["tenants"]
+        if not tenants:
+            tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+
+    araalictl.g_debug = False
+    for t in tenants:
+        count = 0
+        skipped_count = 0
+        token = None
+        while True:
+            for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
+                if obj["alert_info"]["status"] == "CLOSE":
+                    skipped_count += 1
+                    continue
+                count += 1
+
+            token=obj.get("paging_token", None)
+            if not token:
+                break
+
+        print(t, "open=%s" % count, "closed=%s" % skipped_count)
+
 def list(args):
     cfg = read_config()
 
@@ -439,9 +467,12 @@ if __name__ == '__main__':
     parser.add_argument('--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
 
-    parser_pull = subparsers.add_parser("list", help="list araali templates")
-    parser_pull.add_argument('-p', '--public', action="store_true")
-    parser_pull.add_argument('-t', '--template', help="pull a specific template (name or path)")
+    parser_alerts = subparsers.add_parser("alerts", help="list araali templates")
+    parser_alerts.add_argument('-t', '--tenant')
+    
+    parser_list = subparsers.add_parser("list", help="list araali templates")
+    parser_list.add_argument('-p', '--public', action="store_true")
+    parser_list.add_argument('-t', '--template', help="pull a specific template (name or path)")
     
     parser_pull = subparsers.add_parser("pull", help="pull araali templates")
     parser_pull.add_argument('-p', '--public', action="store_true")
