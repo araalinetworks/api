@@ -289,13 +289,90 @@ def represent_node(dumper, obj):
 
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
+def push(args):
+    ans = input("are you sure? (yes/no)> ")
+    if ans != "yes":
+        print("This is a dangerous command, thanks for exercising caution!")
+        return
+
+    if args.verbose >= 1: print(args, ans)
+    basename = "../templates/%s.yaml" % args.template
+    if not os.path.isfile(basename): # yaml already exists
+        print(basename, "does not exist")
+        return
+
+    # read a sample template from araali
+    obj = [a for a in araalictl.fetch_templates(public=True, template="agent.k8s.araali-fw")][0]
+    # name, template, use, author, version
+    if args.verbose >= 2: print(obj["name"], obj["use"], obj["author"], obj["version"])
+    obj["name"] = args.template
+    if args.public:
+        obj["use"] = False
+    else:
+        obj["use"] = True
+    obj["author"] = "Template As Code (Git)"
+    obj["version"] = "v0.0.1"
+
+    cfg = read_config()
+    nodes = {}
+    obj["template"] = []
+    with open(basename) as f:
+        template = yaml.load(f, Loader=yaml.SafeLoader)
+        # load identities
+        for node in template["identities"]:
+            name = node["node"]["name"]
+            nodes[name] = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+
+        for node in template["authorizations"]:
+            # name, in, out
+            node_obj = nodes[node["name"]]
+            if args.verbose >= 2: print(yaml.dump(node_obj))
+            for label in node.get("in", []):
+                peer_obj = nodes[label]
+                o = {"link_filter": {}}
+                o["link_filter"]["client"] = peer_obj.node.obj
+                o["link_filter"]["server"] = node_obj.node.obj
+                if node_obj.pushdown.obj or peer_obj.pushdown.obj:
+                    o["selector_change"] = {}
+                    if peer_obj.pushdown.obj:
+                        o["selector_change"]["client"] = peer_obj.pushdown.obj
+                    if node_obj.pushdown.obj:
+                        o["selector_change"]["server"] = node_obj.pushdown.obj
+                obj["template"].append(o)
+            for label in node.get("out", []):
+                peer_obj = nodes[label]
+                o = {"link_filter": {}}
+                o["link_filter"]["client"] = node_obj.node.obj
+                o["link_filter"]["server"] = peer_obj.node.obj
+                if node_obj.pushdown.obj or peer_obj.pushdown.obj:
+                    o["selector_change"] = {}
+                    if node_obj.pushdown.obj:
+                        o["selector_change"]["client"] = node_obj.pushdown.obj
+                    if peer_obj.pushdown.obj:
+                        o["selector_change"]["server"] = peer_obj.pushdown.obj
+                obj["template"].append(o)
+ 
+    if args.verbose >= 1: print(obj)
+    araalictl.update_template([obj], args.public, cfg["tenant"])  
+
+def list(args):
+    cfg = read_config()
+
+    for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
+                                       template=args.template):
+        # keys: ['name', 'template', 'use', 'author', 'version']
+        del obj["template"]
+        print(obj)
+
 def pull(args):
     cfg = read_config()
 
     # get the names from local file and apply it to pulled template
     existing_nodes = {}
-    if args.dirname:
-        with open("%s/%s.yaml" % (args.dirname, args.template)) as f:
+
+    basename = "../templates/%s.yaml" % args.template
+    if os.path.isfile(basename): # yaml already exists
+        with open(basename) as f:
             template = yaml.load(f, Loader=yaml.SafeLoader)
 
             # identities, authorizations
@@ -324,10 +401,14 @@ def pull(args):
             key = yaml.dump(client)
             if key in existing_nodes:
                 client.node.obj["name"] = existing_nodes[key]
+            else:
+                print("not found", yaml.dump(client))
 
             key = yaml.dump(server)
             if key in existing_nodes:
                 server.node.obj["name"] = existing_nodes[key]
+            else:
+                print("not found", yaml.dump(server))
 
             graph.add_link(client, server)
 
@@ -357,10 +438,18 @@ if __name__ == '__main__':
     parser.add_argument('--verbose', '-v', action='count', default=0)
     parser.add_argument('--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
+
+    parser_pull = subparsers.add_parser("list", help="list araali templates")
+    parser_pull.add_argument('-p', '--public', action="store_true")
+    parser_pull.add_argument('-t', '--template', help="pull a specific template (name or path)")
     
     parser_pull = subparsers.add_parser("pull", help="pull araali templates")
     parser_pull.add_argument('-p', '--public', action="store_true")
     parser_pull.add_argument('-t', '--template', help="pull a specific template (name or path)")
+    
+    parser_push = subparsers.add_parser("push", help="pull araali templates")
+    parser_push.add_argument('-p', '--public', action="store_true")
+    parser_push.add_argument('-t', '--template', help="pull a specific template (name or path)")
     
     parser_config = subparsers.add_parser("config", help="add config params")
     parser_config.add_argument('-t', '--tenant')

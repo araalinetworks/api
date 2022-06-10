@@ -16,7 +16,7 @@ g_debug = False
 
 def help():
     """get araalictl help"""
-    print(run_command("%s -h" % (g_araalictl_path), result=True, debug=False)[1])
+    print(run_command("%s -h" % (g_araalictl_path), result=True, debug=g_debug)[1])
 
 def fetch():
     """For downloading and upgrading araalictl"""
@@ -67,7 +67,7 @@ def alerts(start_time=None, token=None, count=200, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s api -fetch-alerts %s -count %s %s" % (
                         g_araalictl_path, cmd, count, tstr),
-                     debug=False, result=True, strip=False)
+                     debug=g_debug, result=True, strip=False)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -138,7 +138,7 @@ def update_lens_owner(email=None, add=True, zone=None, app=None, service=None,
     flags += " -service=%s " % (service) if service else " -zone=%s -app=%s " % (zone, app)
     rc = run_command("%s api -update-lens-owner %s %s" % (
                      g_araalictl_path, flags, tstr),
-                     result=True, strip=False, debug=False)
+                     result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -190,7 +190,7 @@ def rbac_show_users(tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s user-role -op list-user-roles %s" % (
                      g_araalictl_path, tstr), result=True, strip=False,
-                     debug=False)
+                     debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -208,7 +208,7 @@ def rbac_del_role(name, tenant=None):
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s user-role -op=del -name='%s' %s" % (
                      g_araalictl_path, name, tstr),
-                     result=True, strip=False, debug=False)
+                     result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -217,7 +217,7 @@ def rbac_create_user(email, name, tenant=None):
     tstr = " -id=%s " % (tenant) if tenant else ""
     rc = run_command("%s tenant -op add-user -user-email='%s' -user-name='%s' %s" % (
                      g_araalictl_path, email, name, tstr),
-                     result=True, strip=False, debug=False)
+                     result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -226,7 +226,7 @@ def rbac_delete_user(email, name, tenant=None):
     tstr = " -id=%s " % (tenant) if tenant else ""
     rc = run_command("%s tenant -op del-user -user-email='%s' -user-name='%s' %s" % (
                      g_araalictl_path, email, name, tstr),
-                     result=True, strip=False, debug=False)
+                     result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -426,7 +426,7 @@ def world(direction="ingress_world,egress_world", on=True, email=None,
     op = "subscribe-for-alert" if on else "unsubscribe-from-alert"
 
     rc = run_command("%s api -%s -direction=%s %s" % (
-        g_araalictl_path, op, direction, tstr), debug=False, result=True,
+        g_araalictl_path, op, direction, tstr), debug=g_debug, result=True,
         strip=False)
     assert rc[0] == 0, rc[1]
     ret_val = json.loads(rc[1])
@@ -445,7 +445,7 @@ def enforce(data, service=False, tenant=None):
         if g_debug:
             print(yaml.dump(data))
         rc = run_command("%s api %s %s" % (
-            g_araalictl_path, ostr, tstr), in_text=yaml.dump(data), debug=False, result=True, strip=False)
+            g_araalictl_path, ostr, tstr), in_text=yaml.dump(data), debug=g_debug, result=True, strip=False)
         assert rc[0] == 0, rc[1]
         ret_val = json.loads(rc[1])
 
@@ -469,7 +469,7 @@ def fetch_templates(public=False, template=None, tenant=None):
     tstr += " -template=%s " % (template) if template else ""
 
     rc = run_command("%s api -list-templates %s" % (g_araalictl_path, tstr),
-                     result=True, strip=False, debug=False)
+                     result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
@@ -479,7 +479,7 @@ def update_template(data, public=False, tenant=None):
     if g_debug: print(yaml.dump(data))
     command = "-update-template" if not public else "-export-template"
     rc = run_command("%s api %s %s" % (g_araalictl_path, command, tstr),
-                     in_text=yaml.dump(data), result=True, strip=False, debug=True)
+                     in_text=yaml.dump(data), result=True, strip=False, debug=g_debug)
     assert rc[0] == 0, rc[1]
     ret_val = json.loads(rc[1])
 
