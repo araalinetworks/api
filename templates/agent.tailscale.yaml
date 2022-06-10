@@ -6,6 +6,11 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
+    name: tailscale_controlplane
+    dns_pattern: controlplane.tailscale.com
+    dst_port: 443
+  pushdown: {}
+- node:
     name: tailscale_log
     dns_pattern: log.tailscale.io
     dst_port: 443
@@ -29,5 +34,6 @@ authorizations:
 - name: tailscaled
   out:
   - google_dns
+  - tailscale_controlplane
   - tailscale_log
   - tailscale_login
