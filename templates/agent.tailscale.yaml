@@ -1,7 +1,22 @@
 identities:
 - node:
-    name: node_0
-    rename: tailscaled
+    name: google_dns
+    subnet: 8.8.8.8
+    netmask: 32
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: tailscale_log
+    dns_pattern: log.tailscale.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: tailscale_login
+    dns_pattern: login.tailscale.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: tailscaled
     zone: .*
     app: .*
     pod: .*
@@ -10,28 +25,9 @@ identities:
     parent_process: bash
     process: tailscaled
   pushdown: {}
-- node:
-    name: node_1
-    rename: google_dns
-    subnet: 8.8.8.8
-    netmask: 32
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_2
-    rename: tailscale_login
-    dns_pattern: login.tailscale.com
-    dst_port: 443
-  pushdown: {}
-- node:
-    name: node_3
-    rename: tailscale_log
-    dns_pattern: log.tailscale.io
-    dst_port: 443
-  pushdown: {}
 authorizations:
-- name: node_0
+- name: tailscaled
   out:
-  - node_1
-  - node_2
-  - node_3
+  - google_dns
+  - tailscale_log
+  - tailscale_login
