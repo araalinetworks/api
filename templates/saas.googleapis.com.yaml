@@ -1,0 +1,19 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: {}
+- node:
+    name: node_1
+    dns_pattern: cloudtrace.googleapis.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: cloudtrace.googleapis.com
+authorizations:
+- name: node_1
+  in:
+  - node_0
