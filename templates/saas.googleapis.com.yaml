@@ -11,9 +11,14 @@ identities:
     name: cloudtrace
     dns_pattern: cloudtrace.googleapis.com
     dst_port: 443
-  pushdown:
-    dns_pattern: cloudtrace.googleapis.com
+  pushdown: {}
+- node:
+    name: monitoring
+    dns_pattern: monitoring.googleapis.com
+    dst_port: 443
+  pushdown: {}
 authorizations:
-- name: cloudtrace
-  in:
-  - any
+- name: any
+  out:
+  - cloudtrace
+  - monitoring
