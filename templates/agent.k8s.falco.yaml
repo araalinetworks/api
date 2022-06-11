@@ -25,6 +25,11 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
+    name: slack_hooks
+    dns_pattern: hooks.slack.com
+    dst_port: 443
+  pushdown: {}
+- node:
     name: falcosidekick
     zone: .*
     app: .*
@@ -41,3 +46,5 @@ authorizations:
 - name: falcosidekick
   in:
   - falco
+  out:
+  - slack_hooks
