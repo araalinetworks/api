@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: guarantor
     zone: .*
     app: kube-system
     pod: .*araali-fw
@@ -11,6 +12,7 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: autok8s
     zone: .*
     app: .*
     pod: servicediscovery
@@ -21,6 +23,7 @@ identities:
   pushdown: {}
 - node:
     name: node_2
+    rename: fog
     dns_pattern: .*fog.*.aws.araalinetworks.com
     dst_port: 443
   pushdown:
