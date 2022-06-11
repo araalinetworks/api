@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: falco
     zone: .*
     app: .*
     pod: falco
@@ -11,6 +12,7 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: falcosidekick
     zone: .*
     app: .*
     pod: falco-falcosidekick
@@ -21,6 +23,7 @@ identities:
   pushdown: {}
 - node:
     name: node_2
+    rename: curl
     zone: .*
     app: .*
     pod: falco
@@ -31,6 +34,7 @@ identities:
   pushdown: {}
 - node:
     name: node_3
+    rename: falco_download
     dns_pattern: download.falco.org
     dst_port: 443
   pushdown: {}
