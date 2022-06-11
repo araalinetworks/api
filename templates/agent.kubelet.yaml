@@ -1,0 +1,23 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: k8s-nodes
+    binary_name: /usr/bin/kubelet
+    parent_process: systemd
+    process: kubelet
+  pushdown: {}
+- node:
+    name: node_1
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
