@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: npm
     zone: .*
     app: .*
     pod: .*
@@ -11,6 +12,7 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: registry_npmjs
     dns_pattern: registry.npmjs.org
     dst_port: 443
   pushdown: {}
