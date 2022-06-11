@@ -1,0 +1,43 @@
+identities:
+- node:
+    name: node_0
+    zone: asia-southeast1-a
+    app: default
+    pod: falco
+    container: falco
+    binary_name: /usr/bin/falco
+    parent_process: containerd-shim
+    process: falco
+  pushdown: {}
+- node:
+    name: node_1
+    zone: asia-southeast1-a
+    app: default
+    pod: falco-falcosidekick
+    container: falcosidekick
+    binary_name: /app/falcosidekick
+    parent_process: containerd-shim
+    process: falcosidekick
+  pushdown: {}
+- node:
+    name: node_2
+    zone: asia-southeast1-a
+    app: default
+    pod: falco
+    container: falco
+    binary_name: /usr/bin/curl
+    parent_process: bash
+    process: curl
+  pushdown: {}
+- node:
+    name: node_3
+    dns_pattern: download.falco.org
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
+- name: node_3
+  in:
+  - node_2
