@@ -1,5 +1,15 @@
 identities:
 - node:
+    name: node
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/local/bin/node
+    parent_process: npm
+    process: node
+  pushdown: {}
+- node:
     name: npm
     zone: .*
     app: .*
@@ -17,4 +27,5 @@ identities:
 authorizations:
 - name: registry_npmjs
   in:
+  - node
   - npm
