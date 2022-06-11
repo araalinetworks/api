@@ -3,8 +3,6 @@ identities:
     name: any
     zone: .*
     app: .*
-    pod: .*
-    container: .*
     binary_name: .*
     parent_process: .*
     process: .*
@@ -13,9 +11,26 @@ identities:
     name: cloudtrace
     dns_pattern: cloudtrace.googleapis.com
     dst_port: 443
-  pushdown:
-    dns_pattern: {}
+  pushdown: {}
+- node:
+    name: logging
+    dns_pattern: logging.googleapis.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: monitoring
+    dns_pattern: monitoring.googleapis.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: storage
+    dns_pattern: storage.googleapis.com
+    dst_port: 443
+  pushdown: {}
 authorizations:
 - name: any
   out:
   - cloudtrace
+  - logging
+  - monitoring
+  - storage
