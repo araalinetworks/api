@@ -398,7 +398,11 @@ def alerts(args):
 def list(args):
     cfg = read_config()
 
-    for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
+    if args.tenant:
+        tenant = args.tenant
+    else:
+        tenant = cfg["tenant"]
+    for obj in araalictl.fetch_templates(public=args.public, tenant=tenant,
                                        template=args.template):
         # keys: ['name', 'template', 'use', 'author', 'version']
         del obj["template"]
@@ -424,7 +428,11 @@ def pull(args):
                 existing_nodes[key] = name
  
     found = False
-    for obj in araalictl.fetch_templates(public=args.public, tenant=cfg["tenant"],
+    if args.tenant:
+        tenant = args.tenant
+    else:
+        tenant = cfg["tenant"]
+    for obj in araalictl.fetch_templates(public=args.public, tenant=tenant,
                                        template=args.template):
         # keys: ['name', 'template', 'use', 'author', 'version']
         graph = Graph(args.template)

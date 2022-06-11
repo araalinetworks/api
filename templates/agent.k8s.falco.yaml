@@ -1,8 +1,8 @@
 identities:
 - node:
     name: node_0
-    zone: asia-southeast1-a
-    app: default
+    zone: .*
+    app: .*
     pod: falco
     container: falco
     binary_name: /usr/bin/falco
@@ -11,8 +11,8 @@ identities:
   pushdown: {}
 - node:
     name: node_1
-    zone: asia-southeast1-a
-    app: default
+    zone: .*
+    app: .*
     pod: falco-falcosidekick
     container: falcosidekick
     binary_name: /app/falcosidekick
@@ -21,8 +21,8 @@ identities:
   pushdown: {}
 - node:
     name: node_2
-    zone: asia-southeast1-a
-    app: default
+    zone: .*
+    app: .*
     pod: falco
     container: falco
     binary_name: /usr/bin/curl

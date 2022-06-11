@@ -13,7 +13,7 @@ identities:
     name: kubelet
     zone: .*
     app: k8s-nodes
-    binary_name: /usr/bin/kubelet
+    binary_name: .*/bin/kubelet
     parent_process: systemd
     process: kubelet
   pushdown: {}
