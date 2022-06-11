@@ -35,6 +35,16 @@ identities:
     process: falcosidekick
   pushdown: {}
 - node:
+    name: falcosidekick_ui
+    zone: .*
+    app: .*
+    pod: falco-falcosidekick-ui
+    container: falcosidekick-ui
+    binary_name: /app/falcosidekick-ui
+    parent_process: containerd-shim
+    process: falcosidekick-ui
+  pushdown: {}
+- node:
     name: slack_hooks
     dns_pattern: hooks.slack.com
     dst_port: 443
@@ -47,4 +57,5 @@ authorizations:
   in:
   - falco
   out:
+  - falcosidekick_ui
   - slack_hooks
