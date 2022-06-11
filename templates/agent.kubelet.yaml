@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: kubelet
     zone: .*
     app: k8s-nodes
     binary_name: /usr/bin/kubelet
@@ -9,6 +10,7 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: any
     zone: .*
     app: .*
     pod: .*
