@@ -8,8 +8,8 @@ identities:
     process: containerd
   pushdown: {}
 - node:
-    name: docker_auth
-    dns_pattern: auth.docker.io
+    name: docker
+    dns_pattern: .*.docker.io
     dst_port: 443
   pushdown: {}
 - node:
@@ -17,8 +17,20 @@ identities:
     dns_pattern: production.cloudflare.docker.com
     dst_port: 443
   pushdown: {}
+- node:
+    name: gcr
+    dns_pattern: .*.gcr.io
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: quay
+    dns_pattern: .*.quay.io
+    dst_port: 443
+  pushdown: {}
 authorizations:
 - name: containerd
   out:
-  - docker_auth
+  - docker
   - docker_cloudflare_prod
+  - gcr
+  - quay
