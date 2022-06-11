@@ -25,11 +25,6 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
-    name: slack_hooks
-    dns_pattern: hooks.slack.com
-    dst_port: 443
-  pushdown: {}
-- node:
     name: falcosidekick
     zone: .*
     app: .*
@@ -38,6 +33,11 @@ identities:
     binary_name: /app/falcosidekick
     parent_process: containerd-shim
     process: falcosidekick
+  pushdown: {}
+- node:
+    name: slack_hooks
+    dns_pattern: hooks.slack.com
+    dst_port: 443
   pushdown: {}
 authorizations:
 - name: falco_download
