@@ -1,29 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: falco
-    zone: .*
-    app: .*
-    pod: falco
-    container: falco
-    binary_name: /usr/bin/falco
-    parent_process: containerd-shim
-    process: falco
-  pushdown: {}
-- node:
-    name: node_1
-    rename: falcosidekick
-    zone: .*
-    app: .*
-    pod: falco-falcosidekick
-    container: falcosidekick
-    binary_name: /app/falcosidekick
-    parent_process: containerd-shim
-    process: falcosidekick
-  pushdown: {}
-- node:
-    name: node_2
-    rename: curl
+    name: curl
     zone: .*
     app: .*
     pod: falco
@@ -33,15 +10,34 @@ identities:
     process: curl
   pushdown: {}
 - node:
-    name: node_3
-    rename: falco_download
+    name: falco
+    zone: .*
+    app: .*
+    pod: falco
+    container: falco
+    binary_name: /usr/bin/falco
+    parent_process: containerd-shim
+    process: falco
+  pushdown: {}
+- node:
+    name: falco_download
     dns_pattern: download.falco.org
     dst_port: 443
   pushdown: {}
+- node:
+    name: falcosidekick
+    zone: .*
+    app: .*
+    pod: falco-falcosidekick
+    container: falcosidekick
+    binary_name: /app/falcosidekick
+    parent_process: containerd-shim
+    process: falcosidekick
+  pushdown: {}
 authorizations:
-- name: node_1
+- name: falco_download
   in:
-  - node_0
-- name: node_3
+  - curl
+- name: falcosidekick
   in:
-  - node_2
+  - falco
