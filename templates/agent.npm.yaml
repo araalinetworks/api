@@ -1,0 +1,20 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/local/bin/node
+    parent_process: containerd-shim
+    process: npm
+  pushdown: {}
+- node:
+    name: node_1
+    dns_pattern: registry.npmjs.org
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: node_1
+  in:
+  - node_0
