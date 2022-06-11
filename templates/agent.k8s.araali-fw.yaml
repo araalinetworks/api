@@ -36,7 +36,13 @@ identities:
   pushdown:
     dns_pattern: .*:.*ecr.*.amazonaws.com:.*
 - node:
-    name: fog_aws_araalinetworks_443
+    name: cloudfront_net
+    dns_pattern: .*.cloudfront.net
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*:.*.cloudfront.net:.*
+- node:
+    name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
   pushdown:
@@ -197,9 +203,15 @@ identities:
 authorizations:
 - name: apt_http
   out:
-  - archive_ubuntu_80
-  - google_packages_80
-- name: araalictl_guarantor
+  - gcp_packages
+  - ubuntu_archive
+- name: araalifw_grype
+  out:
+  - anchore_io
+  - aws_ecr
+  - aws_ecr_public
+  - cloudfront_net
+- name: guarantor
   in:
   - kubelet_araali_cni
   - opt_kubelet_araali_cni

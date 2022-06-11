@@ -1,22 +1,27 @@
 identities:
 - node:
-    name: google_443
-    dst_port: 443
+    name: google_dns
     subnet: 8.8.8.8
     netmask: 32
+    dst_port: 443
   pushdown: {}
 - node:
-    name: log_443
+    name: tailscale_controlplane
+    dns_pattern: controlplane.tailscale.com
+    dst_port: 443
+  pushdown: {}
+- node:
+    name: tailscale_log
     dns_pattern: log.tailscale.io
     dst_port: 443
   pushdown: {}
 - node:
-    name: login_443
+    name: tailscale_login
     dns_pattern: login.tailscale.com
     dst_port: 443
   pushdown: {}
 - node:
-    name: tailscale_relay
+    name: tailscaled
     zone: .*
     app: .*
     pod: .*
@@ -26,8 +31,10 @@ identities:
     process: tailscaled
   pushdown: {}
 authorizations:
-- name: tailscale_relay
+- name: tailscaled
   out:
-  - google_443
-  - log_443
-  - login_443
+  - google_dns
+  - tailscale_controlplane
+  - tailscale_log
+  - tailscale_login
+  
