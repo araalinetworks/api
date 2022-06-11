@@ -25,24 +25,28 @@ def read_config():
     if os.path.isfile(cfg_fname):
         with open(cfg_fname, "r") as f:
             cfg = yaml.load(f, Loader=yaml.SafeLoader)
-            if not cfg["tenant"]: cfg["tenant"] = None
+            if not cfg.get("tenant", None): cfg["tenant"] = None
+            if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
             return cfg
-    return {"tenant": None}
+    return {"tenant": None, "template_dir": "../templates"}
 
 def config(args):
-    cfg = read_config()
+    global cfg
     if args.tenant is not None:
         if not args.tenant: # passed as empty string
             args.tenant = None # store it as nil in yaml
         cfg["tenant"] = args.tenant
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
-    elif args.tenants is not None:
+    if args.tenants is not None:
         cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in args.tenants.split(",")]
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
-    else:
-        print(yaml.dump(read_config()))
+    if args.template_dir is not None:
+        cfg["template_dir"] = args.template_dir
+        with open(cfg_fname, "w") as f:
+            yaml.dump(cfg, f)
+    print(yaml.dump(cfg))
     
 class Graph:
     def __init__(self, name):
@@ -78,7 +82,8 @@ class Graph:
         self.link_count += 1
         
     def dump(self):
-        basename = "../templates/%s.yaml" % self.name
+        global cfg
+        basename = "%s/%s.yaml" % (cfg["template_dir"], self.name)
         fname = basename
 
         files = glob.glob(fname+".*")
@@ -292,6 +297,7 @@ def represent_node(dumper, obj):
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
 def push(args):
+    global cfg
     ans = input("are you sure? (yes/no)> ")
     if ans != "yes":
         print("This is a dangerous command, thanks for exercising caution!")
@@ -299,7 +305,8 @@ def push(args):
 
     if args.verbose >= 1: print(args, ans)
     if args.verbose >= 1: araalictl.g_debug = True
-    basename = "../templates/%s.yaml" % args.template
+
+    basename = "%s/%s.yaml" % (cfg["template_dir"], args.template)
     if not os.path.isfile(basename): # yaml already exists
         print(basename, "does not exist")
         return
@@ -316,7 +323,6 @@ def push(args):
     obj["author"] = "Template As Code (Git)"
     obj["version"] = "v0.0.1"
 
-    cfg = read_config()
     nodes = {}
     obj["template"] = []
     with open(basename) as f:
@@ -364,7 +370,7 @@ def push(args):
     print(rc)
 
 def alerts(args):
-    cfg = read_config()
+    global cfg
 
     if args.tenant:
         tenants = [{"name": args.tenant, "id": args.tenant}]
@@ -395,8 +401,41 @@ def alerts(args):
 
             print(t, "open=%s" % count, "closed=%s" % skipped_count)
 
+def drift(args):
+    global cfg
+
+    if args.tenant:
+        tenants = [{"name": args.tenant, "id": args.tenant}]
+    else:
+        tenants = cfg["tenants"]
+        if not tenants:
+            tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+
+    araalictl.g_debug = False
+    os.makedirs("%s/%s" % (args.progdir, ".drift.template.py"), exist_ok=True)
+    for t in tenants:
+        with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
+            count = 0
+            skipped_count = 0
+            token = None
+            while True:
+                for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
+                    if obj["alert_info"]["status"] == "CLOSE":
+                        skipped_count += 1
+                        continue
+                    count += 1
+                    json.dump(obj, f)
+                    f.write("\n")
+
+                token=obj.get("paging_token", None)
+                if not token:
+                    break
+
+            print(t, "open=%s" % count, "closed=%s" % skipped_count)
+
+
 def list(args):
-    cfg = read_config()
+    global cfg
 
     if args.tenant:
         tenant = args.tenant
@@ -409,12 +448,12 @@ def list(args):
         print(obj)
 
 def pull(args):
-    cfg = read_config()
+    global cfg
 
     # get the names from local file and apply it to pulled template
     existing_nodes = {}
 
-    basename = "../templates/%s.yaml" % args.template
+    basename = "%s/%s.yaml" % (cfg["template_dir"], args.template)
     if os.path.isfile(basename): # yaml already exists
         with open(basename) as f:
             template = yaml.load(f, Loader=yaml.SafeLoader)
@@ -486,6 +525,7 @@ def rename(args):
     graph.dump()
 
 if __name__ == '__main__':
+    cfg = read_config()
     parser = argparse.ArgumentParser(description = 'Manage Templates as Code (in Git)')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     parser.add_argument('-T', '--template', help="apply operation for a specific template")
@@ -493,6 +533,9 @@ if __name__ == '__main__':
 
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
+    
+    parser_drift = subparsers.add_parser("drift", help="get drift (from template as code)")
+    parser_drift.add_argument('-t', '--tenant', help="get drift for a specific tenant")
     
     parser_list = subparsers.add_parser("list", help="list templates")
     parser_list.add_argument('-p', '--public', action="store_true", help="list from public library")
@@ -511,7 +554,8 @@ if __name__ == '__main__':
     
     parser_config = subparsers.add_parser("config", help="list/change config params")
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
-    parser_config.add_argument('-ts', '--tenants', help="setup a list of sub-tenants (for managing alerts)")
+    parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
+    parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
     parser_rename = subparsers.add_parser("rename", help="rename template node name/ reformat into a normalized form")
     parser_rename.add_argument('template')
