@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: containerd
     zone: .*
     app: .*
     binary_name: /usr/local/bin/containerd
@@ -9,11 +10,13 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: docker_auth
     dns_pattern: auth.docker.io
     dst_port: 443
   pushdown: {}
 - node:
     name: node_2
+    rename: docker_cloudflare_prod
     dns_pattern: production.cloudflare.docker.com
     dst_port: 443
   pushdown: {}
