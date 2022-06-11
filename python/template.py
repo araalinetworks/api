@@ -478,34 +478,34 @@ def rename(args):
     graph.dump()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description = 'Manage Templates as Code')
-    parser.add_argument('--verbose', '-v', action='count', default=0)
+    parser = argparse.ArgumentParser(description = 'Manage Templates as Code (in Git)')
+    parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     parser.add_argument('-T', '--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
 
-    parser_alerts = subparsers.add_parser("alerts", help="list araali templates")
-    parser_alerts.add_argument('-t', '--tenant')
+    parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
+    parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     
-    parser_list = subparsers.add_parser("list", help="list araali templates")
-    parser_list.add_argument('-p', '--public', action="store_true")
-    parser_list.add_argument('-t', '--tenant')
-    parser_list.add_argument('-T', '--template', help="pull a specific template (name or path)")
+    parser_list = subparsers.add_parser("list", help="list templates")
+    parser_list.add_argument('-p', '--public', action="store_true", help="list from public library")
+    parser_list.add_argument('-t', '--tenant', help="list for a sub-tenant")
+    parser_list.add_argument('-T', '--template', help="list a specific template (name or path)")
     
-    parser_pull = subparsers.add_parser("pull", help="pull araali templates")
-    parser_pull.add_argument('-p', '--public', action="store_true")
+    parser_pull = subparsers.add_parser("pull", help="pull templates")
+    parser_pull.add_argument('-p', '--public', action="store_true", help="pull from public library")
     parser_pull.add_argument('-T', '--template', help="pull a specific template (name or path)")
     parser_pull.add_argument('-t', '--tenant')
     
-    parser_push = subparsers.add_parser("push", help="pull araali templates")
-    parser_push.add_argument('-p', '--public', action="store_true")
-    parser_push.add_argument('-T', '--template', help="pull a specific template (name or path)")
-    parser_push.add_argument('-t', '--tenant')
+    parser_push = subparsers.add_parser("push", help="push templates")
+    parser_push.add_argument('-p', '--public', action="store_true", help="push to public library")
+    parser_push.add_argument('-T', '--template', help="push a specific template (name or path)")
+    parser_push.add_argument('-t', '--tenant', help="push for a sub-tenant")
     
-    parser_config = subparsers.add_parser("config", help="add config params")
-    parser_config.add_argument('-t', '--tenant')
-    parser_config.add_argument('-ts', '--tenants')
+    parser_config = subparsers.add_parser("config", help="list/change config params")
+    parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
+    parser_config.add_argument('-ts', '--tenants', help="setup a list of sub-tenants (for managing alerts)")
 
-    parser_rename = subparsers.add_parser("rename", help="rename template node name")
+    parser_rename = subparsers.add_parser("rename", help="rename template node name/ reformat into a normalized form")
     parser_rename.add_argument('template')
 
     yaml.add_representer(Node, represent_node)
