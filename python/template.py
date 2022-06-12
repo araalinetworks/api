@@ -430,6 +430,7 @@ def eval_drift(tenant):
     in_git.sort()
     
     print('\nEvaluating drift for:', tenant)
+    if args.verbose >= 3: print("git:", git_files, "drift:", drift_files)
     if not_in_git:
         print("*** Files not in git:")
         for f in not_in_git:
@@ -458,11 +459,11 @@ def drift(args):
     global cfg
 
     if args.tenant:
-        tenants = [{"name": args.tenant, "id": args.tenant}]
+        tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
     else:
         tenants = cfg["tenants"]
         if not tenants:
-            tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+            tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == cfg["tenant"]][0]["name"], "id": cfg["tenant"]}]
         else:
             # full run
             if not args.nopull:
