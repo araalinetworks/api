@@ -458,16 +458,17 @@ def eval_drift(tenant):
 def drift(args):
     global cfg
 
-    if args.tenant:
-        tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
-    else:
-        tenants = cfg["tenants"]
-        if not tenants:
-            tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == cfg["tenant"]][0]["name"], "id": cfg["tenant"]}]
+    if not args.public:
+        if args.tenant:
+            tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
         else:
-            # full run
-            if not args.nopull:
-                shutil.rmtree("%s/%s" % (args.progdir, ".drift.template.py"), ignore_errors=True)
+            tenants = cfg["tenants"]
+            if not tenants:
+                tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == cfg["tenant"]][0]["name"], "id": cfg["tenant"]}]
+            else:
+                # full run
+                if not args.nopull:
+                    shutil.rmtree("%s/%s" % (args.progdir, ".drift.template.py"), ignore_errors=True)
 
     araalictl.g_debug = False
     os.makedirs("%s/%s" % (args.progdir, ".drift.template.py"), exist_ok=True)
