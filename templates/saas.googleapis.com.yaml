@@ -9,24 +9,28 @@ identities:
   pushdown: {}
 - node:
     name: cloudtrace
-    dns_pattern: cloudtrace.googleapis.com
+    dns_pattern: .*:cloudtrace.googleapis.com:.*
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:cloudtrace.googleapis.com:.*
 - node:
     name: logging
-    dns_pattern: logging.googleapis.com
+    dns_pattern: .*:logging.googleapis.com:.*
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:logging.googleapis.com:.*
 - node:
     name: monitoring
-    dns_pattern: monitoring.googleapis.com
+    dns_pattern: .*:monitoring.googleapis.com:.*
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:monitoring.googleapis.com:.*
 - node:
     name: storage
-    dns_pattern: storage.googleapis.com
+    dns_pattern: .*:storage.googleapis.com:.*
     dst_port: 443
-  pushdown: {}
+  pushdown:
+    dns_pattern: .*:storage.googleapis.com:.*
 authorizations:
 - name: any
   out:
