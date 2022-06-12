@@ -435,6 +435,14 @@ def eval_drift(tenant):
         for f in not_in_git:
             print("\t", f)
     
+    if tenant == "public":
+        not_in_public = list(git_files - drift_files)
+        not_in_public.sort()
+        if not_in_public:
+            print("*** Files not in public:")
+            for f in not_in_public:
+                print("\t", f)
+            
     for fname in in_git:
         prevfname = cfg["template_dir"] + "/" + fname
         currfname = cfg["out_dir"] + "/" + fname
