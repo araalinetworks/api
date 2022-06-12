@@ -3,7 +3,7 @@
     Usage:
         ./setup.sh
         ./template.py pull -t control |less
-        ./template.py pull -p -t agent.k8s.araali-fw|less
+        ./template.py pull -p -t agent.k8s.araali_fw|less
         ./template.py rename ../templates/control.yaml.1
 """
 import araalictl
@@ -12,6 +12,7 @@ import difflib
 import glob
 import json
 import os
+import shutil
 import sys
 import yaml
 
@@ -83,7 +84,7 @@ class Graph:
         
     def dump(self):
         global cfg
-        basename = "%s/%s.yaml" % (cfg["template_dir"], self.name)
+        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name)
         fname = basename
 
         files = glob.glob(fname+".*")
@@ -252,6 +253,13 @@ class NodeWithPushdown:
     def __init__(self, node, pushdown):
         self.node = node
         self.pushdown = pushdown
+        # XXX: temporary workaround - remove ^$ from binary_name, process etc
+        if self.pushdown.obj:
+            for k,v in self.pushdown.obj.items():
+                if v[0] == "^":
+                    self.pushdown.obj[k] = v[1:-1] # strip ^ and $
+                elif v[0:3] == ".*:":
+                    self.pushdown.obj[k] = v[3:-3] # strip .*: and :.*
 
 def represent_node_with_pushdown(dumper, obj):
     value = []
@@ -312,7 +320,7 @@ def push(args):
         return
 
     # read a sample template from araali
-    obj = [a for a in araalictl.fetch_templates(public=True, template="agent.k8s.araali-fw")][0]
+    obj = [a for a in araalictl.fetch_templates(public=True, template="agent.k8s.araali_fw")][0]
     # name, template, use, author, version
     if args.verbose >= 2: print(obj["name"], obj["use"], obj["author"], obj["version"])
     obj["name"] = args.template
@@ -378,6 +386,14 @@ def alerts(args):
         tenants = cfg["tenants"]
         if not tenants:
             tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+        else:
+            # we are doing a full run
+            if not args.nopull:
+                shutil.rmtree("%s/%s" % (args.progdir, ".alerts.template.py"), ignore_errors=True)
+
+    if args.nopull:
+        print("ls .alerts.template.py/*.json | xargs wc -l")
+        return
 
     araalictl.g_debug = False
     os.makedirs("%s/%s" % (args.progdir, ".alerts.template.py"), exist_ok=True)
@@ -401,6 +417,35 @@ def alerts(args):
 
             print(t, "open=%s" % count, "closed=%s" % skipped_count)
 
+def eval_drift():
+    global cfg
+
+    git_files = set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % cfg["template_dir"])])
+    drift_files =set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % cfg["out_dir"])])
+
+    not_in_git = list(drift_files - git_files)
+    in_git = list(drift_files & git_files)
+    
+    not_in_git.sort()
+    in_git.sort()
+    
+    print('\nEvaluating drift:')
+    if not_in_git:
+        print("*** Files not in git:")
+        for f in not_in_git:
+            print("\t", f)
+    
+    for fname in in_git:
+        prevfname = cfg["template_dir"] + "/" + fname
+        currfname = cfg["out_dir"] + "/" + fname
+        with open(prevfname) as prev, open(currfname) as curr:
+            if next(difflib.unified_diff(prev.readlines(), curr.readlines()), None) != None:
+                print("***", prevfname, currfname, "have drifted")
+            else:
+                if args.verbose >= 1:
+                    print(prevfname, currfname, "have not drifted")
+
+
 def drift(args):
     global cfg
 
@@ -410,31 +455,34 @@ def drift(args):
         tenants = cfg["tenants"]
         if not tenants:
             tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+        else:
+            # full run
+            if not args.nopull:
+                shutil.rmtree("%s/%s" % (args.progdir, ".drift.template.py"), ignore_errors=True)
 
     araalictl.g_debug = False
     os.makedirs("%s/%s" % (args.progdir, ".drift.template.py"), exist_ok=True)
+
+    if args.public:
+        cfg["out_dir"] = "%s/%s/public" % (args.progdir, ".drift.template.py")
+        if not args.nopull:
+            shutil.rmtree("%s/%s/public" % (args.progdir, ".drift.template.py"), ignore_errors=True)
+            os.makedirs("%s/%s/public" % (args.progdir, ".drift.template.py"), exist_ok=True)
+            args.tenant = None
+            pull(args)
+        eval_drift()
+        return
+
     for t in tenants:
-        with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
-            count = 0
-            skipped_count = 0
-            token = None
-            while True:
-                for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
-                    if obj["alert_info"]["status"] == "CLOSE":
-                        skipped_count += 1
-                        continue
-                    count += 1
-                    json.dump(obj, f)
-                    f.write("\n")
+        cfg["out_dir"] = "%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"])
+        if not args.nopull:
+            shutil.rmtree("%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"]), ignore_errors=True)
+            os.makedirs("%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"]), exist_ok=True)
+            args.tenant = t["id"]
+            pull(args)
+        eval_drift()
 
-                token=obj.get("paging_token", None)
-                if not token:
-                    break
-
-            print(t, "open=%s" % count, "closed=%s" % skipped_count)
-
-
-def list(args):
+def ls(args):
     global cfg
 
     if args.tenant:
@@ -450,31 +498,34 @@ def list(args):
 def pull(args):
     global cfg
 
-    # get the names from local file and apply it to pulled template
-    existing_nodes = {}
+    if args.verbose >= 1: araalictl.g_debug = True
 
-    basename = "%s/%s.yaml" % (cfg["template_dir"], args.template)
-    if os.path.isfile(basename): # yaml already exists
-        with open(basename) as f:
-            template = yaml.load(f, Loader=yaml.SafeLoader)
-
-            # identities, authorizations
-            for node in template["identities"]:
-                name = node["node"]["name"]
-                node["node"]["name"] = None
-                node = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
-                key = yaml.dump(node)
-                existing_nodes[key] = name
- 
-    found = False
     if args.tenant:
         tenant = args.tenant
     else:
         tenant = cfg["tenant"]
+
+    found = False
     for obj in araalictl.fetch_templates(public=args.public, tenant=tenant,
                                        template=args.template):
+        # get the names from local file and apply it to pulled template
+        existing_nodes = {}
+
+        basename = "%s/%s.yaml" % (cfg["template_dir"], obj["name"])
+        if os.path.isfile(basename): # yaml already exists
+            with open(basename) as f:
+                template = yaml.load(f, Loader=yaml.SafeLoader)
+
+                # identities, authorizations
+                for node in template["identities"]:
+                    name = node["node"]["name"]
+                    node["node"]["name"] = None
+                    node = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+                    key = yaml.dump(node)
+                    existing_nodes[key] = name
+ 
         # keys: ['name', 'template', 'use', 'author', 'version']
-        graph = Graph(args.template)
+        graph = Graph(obj["name"])
         for link in obj["template"]:
             #print(yaml.dump(link))
 
@@ -533,11 +584,15 @@ if __name__ == '__main__':
 
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
+    parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     
     parser_drift = subparsers.add_parser("drift", help="get drift (from template as code)")
     parser_drift.add_argument('-t', '--tenant', help="get drift for a specific tenant")
+    parser_drift.add_argument('-p', '--public', action="store_true", help="drift in public library")
+    parser_drift.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_drift.add_argument('-T', '--template', help="get drift for a specific template (name or path)")
     
-    parser_list = subparsers.add_parser("list", help="list templates")
+    parser_list = subparsers.add_parser("ls", help="list templates")
     parser_list.add_argument('-p', '--public', action="store_true", help="list from public library")
     parser_list.add_argument('-t', '--tenant', help="list for a sub-tenant")
     parser_list.add_argument('-T', '--template', help="list a specific template (name or path)")

@@ -13,8 +13,7 @@ identities:
     name: fog
     dns_pattern: .*fog.*.aws.araalinetworks.com
     dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*fog.*.aws.araalinetworks.com:.*
+  pushdown: {}
 - node:
     name: guarantor
     zone: .*
