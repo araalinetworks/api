@@ -8,6 +8,12 @@ identities:
     process: .*
   pushdown: {}
 - node:
+    name: cache
+    dns_pattern: .*cache.amazonaws.com
+    dst_port: 6379
+  pushdown:
+    dns_pattern: .*cache.amazonaws.com
+- node:
     name: ec2
     dns_pattern: ec2.amazonaws.com
     dst_port: 443
@@ -50,12 +56,6 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
-    name: cache
-    dns_pattern: .*cache.amazonaws.com
-    dst_port: 6379
-  pushdown:
-    dns_pattern: .*cache.amazonaws.com
-- node:
     name: sts
     dns_pattern: sts.amazonaws.com
     dst_port: 443
@@ -63,6 +63,7 @@ identities:
 authorizations:
 - name: any
   out:
+  - cache
   - ec2
   - ec2messages
   - eks
@@ -72,4 +73,3 @@ authorizations:
   - sns
   - ssm
   - sts
-  - cache
