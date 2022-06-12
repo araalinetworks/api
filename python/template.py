@@ -4,7 +4,7 @@
         ./setup.sh
         ./template.py pull -t control |less
         ./template.py pull -p -t agent.k8s.araali_fw|less
-        ./template.py rename ../templates/control.yaml.1
+        ./template.py fmt ../templates/control.yaml.1
 """
 import araalictl
 import argparse
@@ -395,7 +395,7 @@ def alerts(args):
         print("ls .alerts.template.py/*.json | xargs wc -l")
         return
 
-    araalictl.g_debug = False
+    if args.verbose >= 1: araalictl.g_debug = True
     os.makedirs("%s/%s" % (args.progdir, ".alerts.template.py"), exist_ok=True)
     for t in tenants:
         with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
@@ -565,7 +565,7 @@ def pull(args):
     if not found:
         print("No template found")
 
-def rename(args):
+def fmt(args):
     if args.verbose >= 1: print(args.template, args.dirname)
     graph = Graph(args.template)
     nodes = {}
@@ -621,8 +621,8 @@ if __name__ == '__main__':
     parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
     parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
-    parser_rename = subparsers.add_parser("rename", help="rename template node name/ reformat into a normalized form")
-    parser_rename.add_argument('template')
+    parser_format = subparsers.add_parser("fmt", help="rename template node name/ format into a normalized form")
+    parser_format.add_argument('template')
 
     yaml.add_representer(Node, represent_node)
     yaml.add_representer(NodeWithPushdown, represent_node_with_pushdown)
