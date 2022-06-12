@@ -27,6 +27,11 @@ identities:
     dns_pattern: storage.googleapis.com
     dst_port: 443
   pushdown: {}
+- node:
+    name: www
+    dns_pattern: www.googleapis.com
+    dst_port: 443
+  pushdown: {}
 authorizations:
 - name: any
   out:
@@ -34,3 +39,4 @@ authorizations:
   - logging
   - monitoring
   - storage
+  - www
