@@ -23,6 +23,11 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
+    name: oauth2
+    dns_pattern: oauth2.googleapis.com
+    dst_port: 443
+  pushdown: {}
+- node:
     name: storage
     dns_pattern: storage.googleapis.com
     dst_port: 443
@@ -38,5 +43,6 @@ authorizations:
   - cloudtrace
   - logging
   - monitoring
+  - oauth2
   - storage
   - www

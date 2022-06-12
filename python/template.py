@@ -417,7 +417,7 @@ def alerts(args):
 
             print(t, "open=%s" % count, "closed=%s" % skipped_count)
 
-def eval_drift():
+def eval_drift(tenant):
     global cfg
 
     git_files = set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % cfg["template_dir"])])
@@ -429,7 +429,7 @@ def eval_drift():
     not_in_git.sort()
     in_git.sort()
     
-    print('\nEvaluating drift:')
+    print('\nEvaluating drift for:', tenant)
     if not_in_git:
         print("*** Files not in git:")
         for f in not_in_git:
@@ -470,7 +470,7 @@ def drift(args):
             os.makedirs("%s/%s/public" % (args.progdir, ".drift.template.py"), exist_ok=True)
             args.tenant = None
             pull(args)
-        eval_drift()
+        eval_drift("public")
         return
 
     for t in tenants:
@@ -480,7 +480,7 @@ def drift(args):
             os.makedirs("%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"]), exist_ok=True)
             args.tenant = t["id"]
             pull(args)
-        eval_drift()
+        eval_drift("%s (%s)" % (t["name"], t["id"]))
 
 def ls(args):
     global cfg
