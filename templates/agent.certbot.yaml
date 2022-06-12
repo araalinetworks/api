@@ -15,14 +15,14 @@ identities:
     parent_process: systemd
     process: /snap/certbot/.*/bin/certbot
   pushdown:
-    binary_name: ^/snap/certbot/.*/usr/bin/python3.8$
-    process: ^/snap/certbot/.*/bin/certbot$
+    binary_name: /snap/certbot/.*/usr/bin/python3.8
+    process: /snap/certbot/.*/bin/certbot
 - node:
     name: lencr_org
     dns_pattern: .*.lencr.org
     dst_port: 80
   pushdown:
-    dns_pattern: .*:.*.lencr.org:.*
+    dns_pattern: .*.lencr.org
 authorizations:
 - name: lencr_org
   in:
