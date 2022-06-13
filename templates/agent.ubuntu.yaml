@@ -1,5 +1,11 @@
 identities:
 - node:
+    name: api_snapcraft
+    dns_pattern: api.snapcraft.io
+    dst_port: 443
+  pushdown:
+    dns_pattern: api.snapcraft.io
+- node:
     name: motd_curl
     zone: .*
     app: .*
@@ -22,13 +28,6 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: node_10
-    rename: api_snapcraft
-    dns_pattern: api.snapcraft.io
-    dst_port: 443
-  pushdown:
-    dns_pattern: api.snapcraft.io
-- node:
     name: node_11
     zone: .*
     app: .*
@@ -36,30 +35,6 @@ identities:
     parent_process: unattended-upgr
     process: http
   pushdown: {}
-- node:
-    name: node_12
-    rename: snapcraftcontent
-    dns_pattern: .*.snapcraftcontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*.snapcraftcontent.com
-- node:
-    name: node_13
-    rename: ubuntu_security
-    dns_pattern: security.ubuntu.com
-    dst_port: 80
-  pushdown:
-    dns_pattern: security.ubuntu.com
-- node:
-    name: node_14
-    rename: snapd
-    zone: .*
-    app: .*
-    binary_name: /snap/core/.*/usr/lib/snapd/snapd
-    parent_process: systemd
-    process: snapd
-  pushdown:
-    binary_name: /snap/core/.*/usr/lib/snapd/snapd
 - node:
     name: node_16
     zone: .*
@@ -130,6 +105,27 @@ identities:
     process: snapd
   pushdown:
     binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
+- node:
+    name: snapcraftcontent
+    dns_pattern: .*.snapcraftcontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*.snapcraftcontent.com
+- node:
+    name: snapd
+    zone: .*
+    app: .*
+    binary_name: /snap/core/.*/usr/lib/snapd/snapd
+    parent_process: systemd
+    process: snapd
+  pushdown:
+    binary_name: /snap/core/.*/usr/lib/snapd/snapd
+- node:
+    name: ubuntu_security
+    dns_pattern: security.ubuntu.com
+    dst_port: 80
+  pushdown:
+    dns_pattern: security.ubuntu.com
 authorizations:
 - name: motd_ubuntu_com
   in:
@@ -137,18 +133,15 @@ authorizations:
   - motd_wget
 - name: node_11
   out:
-  - node_13
   - node_3
-- name: node_14
-  out:
-  - node_10
+  - ubuntu_security
 - name: node_17
   in:
   - node_16
 - name: node_2
   out:
-  - node_13
   - node_3
+  - ubuntu_security
 - name: node_4
   out:
   - node_5
@@ -158,5 +151,8 @@ authorizations:
   - node_7
 - name: node_9
   out:
-  - node_10
-  - node_12
+  - api_snapcraft
+  - snapcraftcontent
+- name: snapd
+  out:
+  - api_snapcraft
