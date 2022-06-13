@@ -1,12 +1,5 @@
 identities:
 - node:
-    name: api_snapcraft
-    rename: snapcraft_api
-    dns_pattern: api.snapcraft.io
-    dst_port: 443
-  pushdown:
-    dns_pattern: api.snapcraft.io
-- node:
     name: apt_get_http
     zone: .*
     app: .*
@@ -53,12 +46,11 @@ identities:
     process: wget
   pushdown: {}
 - node:
-    name: node_6
-    rename: world_443
-    dns_pattern: .*
+    name: snapcraft_api
+    dns_pattern: api.snapcraft.io
     dst_port: 443
   pushdown:
-    dns_pattern: .*
+    dns_pattern: api.snapcraft.io
 - node:
     name: snapcraftcontent
     dns_pattern: .*.snapcraftcontent.com
@@ -114,6 +106,12 @@ identities:
     process: http
   pushdown: {}
 - node:
+    name: world_443
+    dns_pattern: .*
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*
+- node:
     name: world_80
     dns_pattern: .*
     dst_port: 80
@@ -126,14 +124,14 @@ authorizations:
   - ubuntu_security
 - name: dnf
   out:
-  - node_6
+  - world_443
   - world_80
 - name: fwupd_cdn
   in:
   - fwupdmgr
 - name: snapd
   out:
-  - api_snapcraft
+  - snapcraft_api
   - snapcraftcontent
 - name: ubuntu_changlogs
   in:
