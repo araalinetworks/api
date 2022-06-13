@@ -1,0 +1,20 @@
+identities:
+- node:
+    name: any
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: {}
+- node:
+    name: dev
+    dns_pattern: dev-.*.okta.com
+    dst_port: 443
+  pushdown: {}
+authorizations:
+- name: dev
+  in:
+  - any

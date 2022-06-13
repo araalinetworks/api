@@ -21,8 +21,7 @@ identities:
     binary_name: .*/bin/araali-cni
     parent_process: kubelet
     process: araali-cni
-  pushdown:
-    binary_name: ^.*/bin/araali-cni$
+  pushdown: {}
 - node:
     name: araalifw_grype
     zone: .*
@@ -43,12 +42,6 @@ identities:
     dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: {}
-- node:
-    name: cloudfront_net
-    dns_pattern: .*.cloudfront.net
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*.cloudfront.net:.*
 - node:
     name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
@@ -155,12 +148,6 @@ identities:
     dst_port: 443
   pushdown: {}
 - node:
-    name: s3
-    dns_pattern: .*s3.*.amazonaws.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*:.*s3.*.amazonaws.com:.*
-- node:
     name: sh_owasp_dependency_check
     zone: .*
     app: kube-system
@@ -200,7 +187,6 @@ authorizations:
   - anchore_io
   - aws_ecr
   - aws_ecr_public
-  - cloudfront_net
 - name: guarantor
   in:
   - araali_cni
@@ -214,7 +200,6 @@ authorizations:
   - anchore_io
   - gcr_io
   - quay_io
-  - s3
 - name: helper_owasp_dependency_check
   out:
   - jeremylong
