@@ -1,18 +1,26 @@
 identities:
 - node:
-    name: node_0
+    name: motd_curl
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/curl
+    parent_process: 50-motd-news
+    process: curl
+  pushdown: {}
+- node:
+    name: motd_ubuntu_com
+    dns_pattern: motd.ubuntu.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: motd.ubuntu.com
+- node:
+    name: motd_wget
     zone: .*
     app: .*
     binary_name: /usr/bin/wget
     parent_process: 50-motd-news
     process: wget
   pushdown: {}
-- node:
-    name: node_1
-    dns_pattern: motd.ubuntu.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: motd.ubuntu.com
 - node:
     name: node_10
     dns_pattern: api.snapcraft.io
@@ -48,14 +56,6 @@ identities:
     process: snapd
   pushdown:
     binary_name: /snap/core/.*/usr/lib/snapd/snapd
-- node:
-    name: node_15
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/curl
-    parent_process: 50-motd-news
-    process: curl
-  pushdown: {}
 - node:
     name: node_16
     zone: .*
@@ -127,10 +127,10 @@ identities:
   pushdown:
     binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
 authorizations:
-- name: node_1
+- name: motd_ubuntu_com
   in:
-  - node_0
-  - node_15
+  - motd_curl
+  - motd_wget
 - name: node_11
   out:
   - node_13
