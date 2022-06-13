@@ -23,6 +23,7 @@ identities:
   pushdown: {}
 - node:
     name: node_10
+    rename: api_snapcraft
     dns_pattern: api.snapcraft.io
     dst_port: 443
   pushdown:
@@ -37,18 +38,21 @@ identities:
   pushdown: {}
 - node:
     name: node_12
+    rename: snapcraftcontent
     dns_pattern: .*.snapcraftcontent.com
     dst_port: 443
   pushdown:
     dns_pattern: .*.snapcraftcontent.com
 - node:
     name: node_13
+    rename: ubuntu_security
     dns_pattern: security.ubuntu.com
     dst_port: 80
   pushdown:
     dns_pattern: security.ubuntu.com
 - node:
     name: node_14
+    rename: snapd
     zone: .*
     app: .*
     binary_name: /snap/core/.*/usr/lib/snapd/snapd
