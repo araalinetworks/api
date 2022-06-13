@@ -15,6 +15,7 @@ identities:
   pushdown: {}
 - node:
     name: motd_ubuntu_com
+    rename: ubuntu_motd
     dns_pattern: motd.ubuntu.com
     dst_port: 443
   pushdown:
@@ -29,6 +30,7 @@ identities:
   pushdown: {}
 - node:
     name: node_11
+    rename: upgrade_http
     zone: .*
     app: .*
     binary_name: /usr/lib/apt/methods/http
@@ -37,6 +39,7 @@ identities:
   pushdown: {}
 - node:
     name: node_16
+    rename: upgrade_check
     zone: .*
     app: .*
     binary_name: /usr/bin/python3.6
@@ -45,11 +48,13 @@ identities:
   pushdown: {}
 - node:
     name: node_17
+    rename: ubuntu_changlogs
     dns_pattern: changelogs.ubuntu.com
     dst_port: 443
   pushdown: {}
 - node:
     name: node_2
+    rename: apt_get_http
     zone: .*
     app: .*
     binary_name: /usr/lib/apt/methods/http
@@ -58,12 +63,14 @@ identities:
   pushdown: {}
 - node:
     name: node_3
+    rename: ubuntu_archive
     dns_pattern: archive.ubuntu.com
     dst_port: 80
   pushdown:
     dns_pattern: archive.ubuntu.com
 - node:
     name: node_4
+    rename: dnf
     zone: .*
     app: .*
     binary_name: /usr/libexec/platform-python.*
@@ -72,6 +79,7 @@ identities:
   pushdown: {}
 - node:
     name: node_5
+    rename: world
     dns_pattern: .*
     dst_port: 80
   pushdown:
@@ -84,6 +92,7 @@ identities:
     dns_pattern: .*
 - node:
     name: node_7
+    rename: fwupdmgr
     zone: .*
     app: .*
     binary_name: /usr/bin/fwupdmgr
@@ -92,12 +101,14 @@ identities:
   pushdown: {}
 - node:
     name: node_8
+    rename: fwupd_cdn
     dns_pattern: cdn.fwupd.org
     dst_port: 443
   pushdown:
     dns_pattern: cdn.fwupd.org
 - node:
     name: node_9
+    rename: snapd_nocore
     zone: .*
     app: .*
     binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
@@ -105,12 +116,6 @@ identities:
     process: snapd
   pushdown:
     binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
-- node:
-    name: snapcraftcontent
-    dns_pattern: .*.snapcraftcontent.com
-    dst_port: 443
-  pushdown:
-    dns_pattern: .*.snapcraftcontent.com
 - node:
     name: snapd
     zone: .*
@@ -120,6 +125,13 @@ identities:
     process: snapd
   pushdown:
     binary_name: /snap/core/.*/usr/lib/snapd/snapd
+- node:
+    name: snapcraftcontent
+    dns_pattern: .*.snapcraftcontent.com
+    dst_port: 443
+  pushdown:
+    dns_pattern: .*.snapcraftcontent.com
+
 - node:
     name: ubuntu_security
     dns_pattern: security.ubuntu.com
