@@ -1,0 +1,73 @@
+// Copyright(c) 2022-current. Araali Networks Inc.
+//
+// This file is subject to the terms and conditions defined in
+// file 'LICENSE.txt', which is part of this source code package.
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "proto.araali.api";
+option java_outer_classname = "APIServiceProto";
+option go_package = "proto/araali/araali_api_service";
+
+package araali_api_service;
+
+//////
+// API Interface to the backend
+//////
+
+message Tenant {
+	string id          = 1;
+	string admin_email = 2;
+}
+
+message User {
+	string email       = 1;
+	enum Role {
+		ADMIN = 0;
+		USER  = 1;
+	}
+	Role role          = 2;
+	bool is_site_admin = 3;
+}
+
+message TenantRequest {
+	Tenant tenant = 1;
+	enum Op {
+        ADD = 0;
+        DEL = 1;
+    }
+    Op op         = 2;
+}
+
+message UserRequest {
+	Tenant tenant = 1;
+	User   user   = 2;
+	enum Op {
+        ADD = 0;
+        DEL = 1;
+    }
+    Op op         = 3;
+}
+
+// Placeholder
+message AraaliAPIResponse {
+	enum ReturnCode {
+		SUCCESS = 0;
+		FAIL    = 1;
+		UNKNOWN = 2;
+	}
+    ReturnCode code = 1;
+    string msg      = 2;
+}
+
+service AraaliAPI {
+	  // Add a tenant
+	  rpc createTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	  // Delete a tenant
+	  rpc deleteTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	  // Add a user
+	  rpc addUser(UserRequest)  returns (AraaliAPIResponse) {}
+	  // Delete a user
+	  rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
+}
