@@ -8,12 +8,12 @@ identities:
     binary_name: .*
     parent_process: .*
     process: .*
-  pushdown: {}
+  pushdown: []
 - node:
     name: lifeworks
     dns_pattern: lifeworks.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: lifeworks
   in:

@@ -8,7 +8,7 @@ identities:
     binary_name: .*
     parent_process: .*
     process: .*
-  pushdown: {}
+  pushdown: []
 - node:
     name: kubelet
     zone: .*
@@ -16,7 +16,7 @@ identities:
     binary_name: .*/bin/kubelet
     parent_process: systemd
     process: kubelet
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: any
   in:

@@ -8,7 +8,7 @@ identities:
     binary_name: /usr/bin/curl
     parent_process: bash
     process: curl
-  pushdown: {}
+  pushdown: []
 - node:
     name: falco
     zone: .*
@@ -18,12 +18,12 @@ identities:
     binary_name: /usr/bin/falco
     parent_process: containerd-shim
     process: falco
-  pushdown: {}
+  pushdown: []
 - node:
     name: falco_download
     dns_pattern: download.falco.org
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: falcosidekick
     zone: .*
@@ -33,7 +33,7 @@ identities:
     binary_name: /app/falcosidekick
     parent_process: containerd-shim
     process: falcosidekick
-  pushdown: {}
+  pushdown: []
 - node:
     name: falcosidekick_ui
     zone: .*
@@ -43,12 +43,12 @@ identities:
     binary_name: /app/falcosidekick-ui
     parent_process: containerd-shim
     process: falcosidekick-ui
-  pushdown: {}
+  pushdown: []
 - node:
     name: slack_hooks
     dns_pattern: hooks.slack.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: falco_download
   in:
