@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: guarantor
     zone: .*
     app: .*
     binary_name: /opt/araali/bin/guarantor
@@ -9,18 +10,21 @@ identities:
   pushdown: {}
 - node:
     name: node_1
+    rename: fog
     dns_pattern: .*fog.*.aws.araalinetworks.com
     dst_port: 443
   pushdown:
     dns_pattern: .*fog.*.aws.araalinetworks.com
 - node:
     name: node_10
+    rename: githubusercontent_releases
     dns_pattern: github-releases.githubusercontent.com
     dst_port: 443
   pushdown:
     dns_pattern: github-releases.githubusercontent.com
 - node:
     name: node_11
+    rename: ubuntu_check_new_release
     zone: .*
     app: .*
     binary_name: /usr/bin/python3.8
@@ -29,12 +33,14 @@ identities:
   pushdown: {}
 - node:
     name: node_12
+    rename: ubuntu_changelogs
     dns_pattern: changelogs.ubuntu.com
     dst_port: 443
   pushdown:
     dns_pattern: changelogs.ubuntu.com
 - node:
     name: node_13
+    rename: curl
     zone: .*
     app: .*
     binary_name: /usr/bin/curl
@@ -43,12 +49,14 @@ identities:
   pushdown: {}
 - node:
     name: node_14
+    rename: metadata
     subnet: 169.254.169.254
     netmask: 32
     dst_port: 80
   pushdown: {}
 - node:
     name: node_15
+    rename: grype_sh
     zone: .*
     app: .*
     binary_name: /opt/araali/bin/grype
@@ -57,12 +65,14 @@ identities:
   pushdown: {}
 - node:
     name: node_16
+    rename: anchore_toolbox
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
   pushdown:
     dns_pattern: toolbox-data.anchore.io
 - node:
     name: node_17
+    rename: grype_helper
     zone: .*
     app: .*
     binary_name: /opt/araali/bin/grype
@@ -71,6 +81,7 @@ identities:
   pushdown: {}
 - node:
     name: node_18
+    rename: araalictl
     zone: .*
     app: .*
     binary_name: .*/araalictl.linux-.*
@@ -80,12 +91,14 @@ identities:
     binary_name: .*/araalictl.linux-.*
 - node:
     name: node_19
+    rename: backend
     dns_pattern: prod.aws.araalinetworks.com
     dst_port: 443
   pushdown:
     dns_pattern: prod.aws.araalinetworks.com
 - node:
     name: node_2
+    rename: dependencycheck_sh
     zone: .*
     app: .*
     binary_name: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
@@ -94,18 +107,21 @@ identities:
   pushdown: {}
 - node:
     name: node_20
+    rename: githubusercontent_objects
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
   pushdown:
     dns_pattern: objects.githubusercontent.com
 - node:
     name: node_3
+    rename: maven_search
     dns_pattern: search.maven.org
     dst_port: 443
   pushdown:
     dns_pattern: search.maven.org
 - node:
     name: node_4
+    rename: dependencycheck_helper
     zone: .*
     app: .*
     binary_name: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
@@ -114,12 +130,14 @@ identities:
   pushdown: {}
 - node:
     name: node_5
+    rename: nist_nvd
     dns_pattern: nvd.nist.gov
     dst_port: 443
   pushdown:
     dns_pattern: nvd.nist.gov
 - node:
     name: node_6
+    rename: wget
     zone: .*
     app: .*
     binary_name: /usr/bin/wget
@@ -128,18 +146,21 @@ identities:
   pushdown: {}
 - node:
     name: node_7
+    rename: github
     dns_pattern: github.com
     dst_port: 443
   pushdown:
     dns_pattern: github.com
 - node:
     name: node_8
+    rename: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
   pushdown:
     dns_pattern: ossindex.sonatype.org
 - node:
     name: node_9
+    rename: github_jeremylong
     dns_pattern: jeremylong.github.io
     dst_port: 443
   pushdown:

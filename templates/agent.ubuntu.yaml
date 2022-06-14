@@ -93,7 +93,7 @@ identities:
     name: upgrade_check
     zone: .*
     app: .*
-    binary_name: /usr/bin/python3.6
+    binary_name: /usr/bin/python.*
     parent_process: systemd
     process: /usr/lib/ubuntu-release-upgrader/check-new-release
   pushdown: {}
