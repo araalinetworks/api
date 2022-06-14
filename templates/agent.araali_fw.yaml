@@ -21,14 +21,6 @@ identities:
   pushdown:
     dns_pattern: prod.aws.araalinetworks.com
 - node:
-    name: curl
-    zone: .*
-    app: .*
-    binary_name: /usr/bin/curl
-    parent_process: sh
-    process: curl
-  pushdown: {}
-- node:
     name: dependencycheck_helper
     zone: .*
     app: .*
@@ -105,12 +97,6 @@ identities:
   pushdown:
     dns_pattern: search.maven.org
 - node:
-    name: metadata
-    subnet: 169.254.169.254
-    netmask: 32
-    dst_port: 80
-  pushdown: {}
-- node:
     name: nist_nvd
     dns_pattern: nvd.nist.gov
     dst_port: 443
@@ -137,7 +123,7 @@ identities:
     process: /usr/lib/ubuntu-release-upgrader/check-new-release
   pushdown: {}
 - node:
-    name: wget
+    name: wget_gtor_helper
     zone: .*
     app: .*
     binary_name: /usr/bin/wget
@@ -165,13 +151,10 @@ authorizations:
 - name: fog
   in:
   - guarantor
-- name: metadata
-  in:
-  - curl
 - name: ubuntu_changelogs
   in:
   - ubuntu_check_new_release
-- name: wget
+- name: wget_gtor_helper
   out:
   - github
   - githubusercontent_objects
