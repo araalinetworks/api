@@ -84,7 +84,7 @@ class Graph:
         
     def dump(self):
         global cfg
-        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name)
+        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name.replace("/", "_"))
         fname = basename
 
         files = glob.glob(fname+".*")
@@ -193,7 +193,7 @@ def represent_graph(dumper, obj):
                         if args.verbose >= 1: print("for", peer, "making", i, "ineligible")
                         ineligible.add(i)
                 if peer in reevaluate:
-                    revaluate.remove(peer)
+                    reevaluate.remove(peer)
             else: # peer is already in, add me as ingress
                 if args.verbose >= 1: print("adding", k, "as additional ingress to existing", peer)
                 eligible[peer].inlist.append(k)
