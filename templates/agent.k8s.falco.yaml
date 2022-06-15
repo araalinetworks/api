@@ -45,6 +45,16 @@ identities:
     process: falcosidekick-ui
   pushdown: []
 - node:
+    name: redis_server
+    zone: ap-southeast1-a
+    app: default
+    pod: falco-falcosidekick-ui-redis
+    container: redis
+    binary_name: /usr/local/bin/redis-server
+    parent_process: containerd-shim
+    process: redis-server
+  pushdown: []
+- node:
     name: slack_hooks
     dns_pattern: hooks.slack.com
     dst_port: 443
@@ -59,3 +69,6 @@ authorizations:
   out:
   - falcosidekick_ui
   - slack_hooks
+- name: redis_server
+  in:
+  - falcosidekick_ui

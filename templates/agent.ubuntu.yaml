@@ -4,7 +4,7 @@ identities:
     zone: .*
     app: .*
     binary_name: /usr/lib/apt/methods/http
-    parent_process: apt-get
+    parent_process: apt.*
     process: http
   pushdown: []
 - node:
