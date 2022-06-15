@@ -3,7 +3,7 @@ identities:
     name: anchore_io
     dns_pattern: toolbox-data.anchore.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: apt_http
     zone: .*
@@ -13,7 +13,7 @@ identities:
     binary_name: /usr/lib/apt/methods/http
     parent_process: apt
     process: http
-  pushdown: {}
+  pushdown: []
 - node:
     name: araali_cni
     zone: .*
@@ -21,7 +21,7 @@ identities:
     binary_name: .*/bin/araali-cni
     parent_process: kubelet
     process: araali-cni
-  pushdown: {}
+  pushdown: []
 - node:
     name: araalifw_grype
     zone: .*
@@ -31,47 +31,47 @@ identities:
     binary_name: /opt/araali/bin/grype
     parent_process: sh
     process: grype
-  pushdown: {}
+  pushdown: []
 - node:
     name: aws_ecr
     dns_pattern: .*ecr.*.amazonaws.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: aws_ecr_public
     dns_pattern: public.ecr.aws
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: fog
     dns_pattern: .*.fog.*.aws.araalinetworks.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: gcp_packages
     dns_pattern: packages.cloud.google.com
     dst_port: 80
-  pushdown: {}
+  pushdown: []
 - node:
     name: gcr_io
     dns_pattern: gcr.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: github
     dns_pattern: github.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: github_objects_usercontent
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: github_releases_usercontent
     dns_pattern: github-releases.githubusercontent.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: guarantor
     zone: .*
@@ -81,7 +81,7 @@ identities:
     binary_name: /opt/araali/bin/guarantor
     parent_process: araalictl
     process: guarantor
-  pushdown: {}
+  pushdown: []
 - node:
     name: guarantor_current
     zone: .*
@@ -91,7 +91,7 @@ identities:
     binary_name: /opt/araali/bin/guarantor.current
     parent_process: araalictl
     process: guarantor
-  pushdown: {}
+  pushdown: []
 - node:
     name: helper_grype
     zone: .*
@@ -101,7 +101,7 @@ identities:
     binary_name: /opt/araali/bin/grype
     parent_process: guarantor-helpe
     process: grype
-  pushdown: {}
+  pushdown: []
 - node:
     name: helper_owasp_dependency_check
     zone: .*
@@ -111,7 +111,7 @@ identities:
     binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
     parent_process: guarantor-helpe
     process: org.owasp.dependencycheck.App
-  pushdown: {}
+  pushdown: []
 - node:
     name: helper_wget
     zone: .*
@@ -121,32 +121,32 @@ identities:
     binary_name: /usr/bin/wget
     parent_process: guarantor-helpe
     process: wget
-  pushdown: {}
+  pushdown: []
 - node:
     name: jeremylong
     dns_pattern: jeremylong.github.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: maven_repo1
     dns_pattern: repo1.maven.org
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: maven_search
     dns_pattern: search.maven.org
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: nist_nvd
     dns_pattern: nvd.nist.gov
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: sh_owasp_dependency_check
     zone: .*
@@ -156,12 +156,12 @@ identities:
     binary_name: /usr/lib/jvm/java-[0-9]+-openjdk-amd64/bin/java
     parent_process: sh
     process: org.owasp.dependencycheck.App
-  pushdown: {}
+  pushdown: []
 - node:
     name: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: syft
     zone: .*
@@ -171,12 +171,12 @@ identities:
     binary_name: /opt/araali/bin/syft
     parent_process: sh
     process: syft
-  pushdown: {}
+  pushdown: []
 - node:
     name: ubuntu_archive
     dns_pattern: archive.ubuntu.com
     dst_port: 80
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: apt_http
   out:

@@ -84,7 +84,7 @@ class Graph:
         
     def dump(self):
         global cfg
-        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name)
+        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name.replace("/", "_"))
         fname = basename
 
         files = glob.glob(fname+".*")
@@ -193,7 +193,7 @@ def represent_graph(dumper, obj):
                         if args.verbose >= 1: print("for", peer, "making", i, "ineligible")
                         ineligible.add(i)
                 if peer in reevaluate:
-                    revaluate.remove(peer)
+                    reevaluate.remove(peer)
             else: # peer is already in, add me as ingress
                 if args.verbose >= 1: print("adding", k, "as additional ingress to existing", peer)
                 eligible[peer].inlist.append(k)
@@ -253,13 +253,9 @@ class NodeWithPushdown:
     def __init__(self, node, pushdown):
         self.node = node
         self.pushdown = pushdown
-        # XXX: temporary workaround - remove ^$ from binary_name, process etc
-        if self.pushdown.obj:
-            for k,v in self.pushdown.obj.items():
-                if v[0] == "^":
-                    self.pushdown.obj[k] = v[1:-1] # strip ^ and $
-                elif v[0:3] == ".*:":
-                    self.pushdown.obj[k] = v[3:-3] # strip .*: and :.*
+
+    def pushdown_dict(self):
+        return dict([(k, self.node.obj[k]) for k in self.pushdown.obj])
 
 def represent_node_with_pushdown(dumper, obj):
     value = []
@@ -273,6 +269,18 @@ def represent_node_with_pushdown(dumper, obj):
     value.append((node_key, node_value))
 
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+
+class Pushdown:
+    def __init__(self, obj):
+        if type(obj) == dict:
+            keys = [a for a in obj.keys()]
+        else:
+            keys = [a for a in obj]
+        keys.sort()
+        self.obj = keys
+
+def represent_pushdown(dumper, obj):
+    return dumper.represent_data(obj.obj)
 
 class Node:
     def __init__(self, obj, name="__no_name__"):
@@ -338,7 +346,7 @@ def push(args):
         # load identities
         for node in template["identities"]:
             name = node["node"]["name"]
-            nodes[name] = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+            nodes[name] = NodeWithPushdown(Node(node["node"]), Pushdown(node["pushdown"]))
 
         for node in template["authorizations"]:
             # name, in, out
@@ -352,9 +360,9 @@ def push(args):
                 if node_obj.pushdown.obj or peer_obj.pushdown.obj:
                     o["selector_change"] = {}
                     if peer_obj.pushdown.obj:
-                        o["selector_change"]["client"] = dict(peer_obj.pushdown.obj)
+                        o["selector_change"]["client"] = peer_obj.pushdown_dict()
                     if node_obj.pushdown.obj:
-                        o["selector_change"]["server"] = dict(node_obj.pushdown.obj)
+                        o["selector_change"]["server"] = node_obj.pushdown_dict()
                 obj["template"].append(o)
             for label in node.get("out", []):
                 peer_obj = nodes[label]
@@ -364,9 +372,9 @@ def push(args):
                 if node_obj.pushdown.obj or peer_obj.pushdown.obj:
                     o["selector_change"] = {}
                     if node_obj.pushdown.obj:
-                        o["selector_change"]["client"] = dict(node_obj.pushdown.obj)
+                        o["selector_change"]["client"] = node_obj.pushdown_dict()
                     if peer_obj.pushdown.obj:
-                        o["selector_change"]["server"] = dict(peer_obj.pushdown.obj)
+                        o["selector_change"]["server"] = peer_obj.pushdown_dict()
                 obj["template"].append(o)
  
     if args.verbose >= 1: print(obj)
@@ -530,7 +538,7 @@ def pull(args):
                 for node in template["identities"]:
                     name = node["node"]["name"]
                     node["node"]["name"] = None
-                    node = NodeWithPushdown(Node(node["node"]), Node(node["pushdown"]))
+                    node = NodeWithPushdown(Node(node["node"]), Pushdown(node["pushdown"]))
                     key = yaml.dump(node)
                     existing_nodes[key] = name
  
@@ -542,9 +550,9 @@ def pull(args):
             link_filter = link["link_filter"]
 
             client = NodeWithPushdown(Node(link_filter["client"], None),
-                        Node(link.get("selector_change", {}).get("client", {})))
+                        Pushdown(link.get("selector_change", {}).get("client", [])))
             server = NodeWithPushdown(Node(link_filter["server"], None),
-                        Node(link.get("selector_change", {}).get("server", {})))
+                        Pushdown(link.get("selector_change", {}).get("server", [])))
 
             # fix up names based on existing nodes
             key = yaml.dump(client)
@@ -577,7 +585,7 @@ def fmt(args):
         for node in template["identities"]:
             name = node["node"]["name"]
             nodes[name] = NodeWithPushdown(Node(node["node"]),
-                                                   Node(node["pushdown"]))
+                                                   Pushdown(node["pushdown"]))
         for link in template["authorizations"]:
             for l in link.get("in", []):
                 graph.add_link(nodes[l], nodes[link["name"]])
@@ -626,6 +634,7 @@ if __name__ == '__main__':
     parser_format.add_argument('template')
 
     yaml.add_representer(Node, represent_node)
+    yaml.add_representer(Pushdown, represent_pushdown)
     yaml.add_representer(NodeWithPushdown, represent_node_with_pushdown)
     yaml.add_representer(Graph, represent_graph)
     yaml.add_representer(NameWithInOut, represent_name_with_in_out)

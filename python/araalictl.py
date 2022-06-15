@@ -57,19 +57,18 @@ def deauth():
 
 def alerts(start_time=None, token=None, count=200, end_time=None, tenant=None):
     """get alerts"""
+    if start_time is None:
+        start_time = datetime.datetime.now() - datetime.timedelta(days=1)
+    if type(start_time) == datetime.datetime:
+        start_time = int(start_time.timestamp())
+    cmd = "-starttime %s" % (start_time)
+    if end_time is None:
+        end_time = datetime.datetime.now() - datetime.timedelta(days=1)
+    if type(end_time) == datetime.datetime:
+        end_time = int(end_time.timestamp())
+    cmd += " -endtime %s" % (end_time)
     if token:
-        cmd = "-paging-token %s" % token
-    else:
-        if start_time is None:
-            start_time = datetime.datetime.now() - datetime.timedelta(days=1)
-        if type(start_time) == datetime.datetime:
-            start_time = int(start_time.timestamp())
-        cmd = "-starttime %s" % (start_time)
-        if end_time is None:
-            end_time = datetime.datetime.now() - datetime.timedelta(days=1)
-        if type(end_time) == datetime.datetime:
-            end_time = int(end_time.timestamp())
-        cmd += " -endtime %s" % (end_time)
+        cmd += " -paging-token %s" % token
 
     tstr = " -tenant=%s " % (tenant) if tenant else ""
     rc = run_command("%s api -fetch-alerts %s -count %s %s" % (

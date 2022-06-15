@@ -6,27 +6,27 @@ identities:
     binary_name: .*/bin/containerd
     parent_process: systemd
     process: containerd
-  pushdown: {}
+  pushdown: []
 - node:
     name: docker
     dns_pattern: .*.docker.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: docker_cloudflare_prod
     dns_pattern: production.cloudflare.docker.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: gcr
     dns_pattern: .*.gcr.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: quay
     dns_pattern: .*.quay.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: containerd
   out:

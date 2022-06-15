@@ -8,12 +8,12 @@ identities:
     binary_name: .*
     parent_process: .*
     process: .*
-  pushdown: {}
+  pushdown: []
 - node:
     name: zendesk
     dns_pattern: .*.zendesk.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: zendesk
   in:

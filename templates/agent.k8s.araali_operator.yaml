@@ -8,12 +8,12 @@ identities:
     binary_name: /app/autok8s
     parent_process: bash
     process: autok8s
-  pushdown: {}
+  pushdown: []
 - node:
     name: fog
     dns_pattern: .*fog.*.aws.araalinetworks.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: guarantor
     zone: .*
@@ -23,7 +23,7 @@ identities:
     binary_name: /opt/araali/bin/guarantor.*
     parent_process: araalictl
     process: guarantor
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: autok8s
   in:

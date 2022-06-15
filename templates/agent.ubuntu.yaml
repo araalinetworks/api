@@ -6,7 +6,7 @@ identities:
     binary_name: /usr/lib/apt/methods/http
     parent_process: apt-get
     process: http
-  pushdown: {}
+  pushdown: []
 - node:
     name: dnf
     zone: .*
@@ -14,13 +14,13 @@ identities:
     binary_name: /usr/libexec/platform-python.*
     parent_process: systemd
     process: /usr/bin/dnf
-  pushdown: {}
+  pushdown: []
 - node:
     name: fwupd_cdn
     dns_pattern: cdn.fwupd.org
     dst_port: 443
   pushdown:
-    dns_pattern: cdn.fwupd.org
+  - dns_pattern
 - node:
     name: fwupdmgr
     zone: .*
@@ -28,7 +28,7 @@ identities:
     binary_name: /usr/bin/fwupdmgr
     parent_process: systemd
     process: fwupdmgr
-  pushdown: {}
+  pushdown: []
 - node:
     name: motd_curl
     zone: .*
@@ -36,7 +36,7 @@ identities:
     binary_name: /usr/bin/curl
     parent_process: 50-motd-news
     process: curl
-  pushdown: {}
+  pushdown: []
 - node:
     name: motd_wget
     zone: .*
@@ -44,19 +44,19 @@ identities:
     binary_name: /usr/bin/wget
     parent_process: 50-motd-news
     process: wget
-  pushdown: {}
+  pushdown: []
 - node:
     name: snapcraft_api
     dns_pattern: api.snapcraft.io
     dst_port: 443
   pushdown:
-    dns_pattern: api.snapcraft.io
+  - dns_pattern
 - node:
     name: snapcraftcontent
     dns_pattern: .*.snapcraftcontent.com
     dst_port: 443
   pushdown:
-    dns_pattern: .*.snapcraftcontent.com
+  - dns_pattern
 - node:
     name: snapd
     zone: .*
@@ -65,38 +65,38 @@ identities:
     parent_process: systemd
     process: snapd
   pushdown:
-    binary_name: /snap/.*/usr/lib/snapd/snapd
+  - binary_name
 - node:
     name: ubuntu_archive
     dns_pattern: archive.ubuntu.com
     dst_port: 80
   pushdown:
-    dns_pattern: archive.ubuntu.com
+  - dns_pattern
 - node:
     name: ubuntu_changlogs
     dns_pattern: changelogs.ubuntu.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: ubuntu_motd
     dns_pattern: motd.ubuntu.com
     dst_port: 443
   pushdown:
-    dns_pattern: motd.ubuntu.com
+  - dns_pattern
 - node:
     name: ubuntu_security
     dns_pattern: security.ubuntu.com
     dst_port: 80
   pushdown:
-    dns_pattern: security.ubuntu.com
+  - dns_pattern
 - node:
     name: upgrade_check
     zone: .*
     app: .*
-    binary_name: /usr/bin/python3.6
+    binary_name: /usr/bin/python.*
     parent_process: systemd
     process: /usr/lib/ubuntu-release-upgrader/check-new-release
-  pushdown: {}
+  pushdown: []
 - node:
     name: upgrade_http
     zone: .*
@@ -104,19 +104,19 @@ identities:
     binary_name: /usr/lib/apt/methods/http
     parent_process: unattended-upgr
     process: http
-  pushdown: {}
+  pushdown: []
 - node:
     name: world_443
     dns_pattern: .*
     dst_port: 443
   pushdown:
-    dns_pattern: .*
+  - dns_pattern
 - node:
     name: world_80
     dns_pattern: .*
     dst_port: 80
   pushdown:
-    dns_pattern: .*
+  - dns_pattern
 authorizations:
 - name: apt_get_http
   out:
