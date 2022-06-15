@@ -2,6 +2,11 @@ module araali/third_party/api/golang/v2/test
 
 go 1.14
 
-replace (
-	github.com/araalinetworks => ../../../..	
+require (
+	github.com/araalinetworks/araali/third_party/api/golang/v2/araalictl v0.0.0
+	google.golang.org/grpc v1.47.0 // indirect
+	araali.proto v0.0.0
 )
+
+replace araali.proto v0.0.0 => ../../../proto/araali
+replace github.com/araalinetworks/araali/third_party/api/golang/v2/araalictl v0.0.0 => ../araalictl

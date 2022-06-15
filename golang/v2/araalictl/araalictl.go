@@ -1,11 +1,12 @@
 package araalictl
 
 import (
-	"araali/third_party/api/proto/araali/araali_api_service"
 	"context"
 	"fmt"
 	"net"
 	"time"
+
+	"araali.proto/araali_api_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"araali/third_party/api/golang/v2/araalictl"
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/araalinetworks/araali/third_party/api/golang/v2/araalictl"
 )
 
 func main() {
