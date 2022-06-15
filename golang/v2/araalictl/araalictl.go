@@ -99,10 +99,24 @@ func TenantCreate(name, adminName, adminEmail string, freemium bool) (string, er
 		return "", fmt.Errorf("invalid adminEmail (%v)", adminEmail)
 	}
 
-	_, _, api := getApiClient()
+	ctx, cancel, api := getApiClient()
 	if api == nil {
 		return "", fmt.Errorf("Could not get API handle")
 	}
+	defer cancel()
+
+	req := &araali_api_service.TenantRequest{
+		Tenant: &araali_api_service.Tenant{
+			AdminEmail: adminEmail,
+		},
+		Op: araali_api_service.TenantRequest_ADD,
+	}
+	resp, err := api.CreateTenant(ctx, req)
+	if err != nil {
+		return "Error in calling CreateTenant API", err
+	}
+
+	fmt.Println(fmt.Sprintf("Create Tenant Response: %v", resp))
 
 	return "", nil
 }
@@ -113,10 +127,24 @@ func TenantDelete(tenantID string) error {
 		return fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
-	_, _, api := getApiClient()
+	ctx, cancel, api := getApiClient()
 	if api == nil {
 		return fmt.Errorf("Could not get API handle")
 	}
+	defer cancel()
+
+	req := &araali_api_service.TenantRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Op: araali_api_service.TenantRequest_DEL,
+	}
+	resp, err := api.DeleteTenant(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("Delete Tenant Response: %v", resp))
 
 	return nil
 }
@@ -129,10 +157,32 @@ func UserAdd(tenantID, userName, userEmail, role string) error {
 		return fmt.Errorf("invalid user email (%v)", userEmail)
 	}
 
-	_, _, api := getApiClient()
+	ctx, cancel, api := getApiClient()
 	if api == nil {
 		return fmt.Errorf("Could not get API handle")
 	}
+	defer cancel()
+
+	r := araali_api_service.AraaliUser_USER
+	if role == "ADMIN" {
+		r = araali_api_service.AraaliUser_ADMIN
+	}
+	req := &araali_api_service.UserRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		User: &araali_api_service.AraaliUser{
+			Email: userEmail,
+			Role: r,
+		},
+		Op: araali_api_service.UserRequest_ADD,
+	}
+	resp, err := api.AddUser(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("Create User Response: %v", resp))
 
 	return nil
 }
@@ -145,10 +195,27 @@ func UserDelete(tenantID, userEmail string) error {
 		return fmt.Errorf("invalid user email (%v)", userEmail)
 	}
 
-	_, _, api := getApiClient()
+	ctx, cancel, api := getApiClient()
 	if api == nil {
 		return fmt.Errorf("Could not get API handle")
 	}
+	defer cancel()
+
+	req := &araali_api_service.UserRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		User: &araali_api_service.AraaliUser{
+			Email: userEmail,
+		},
+		Op: araali_api_service.UserRequest_DEL,
+	}
+	resp, err := api.DeleteUser(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(fmt.Sprintf("Create User Response: %v", resp))
 
 	return nil
 }

@@ -21,7 +21,7 @@ message Tenant {
 	string admin_email = 2;
 }
 
-message User {
+message AraaliUser {
 	string email       = 1;
 	enum Role {
 		ADMIN = 0;
@@ -41,13 +41,13 @@ message TenantRequest {
 }
 
 message UserRequest {
-	Tenant tenant = 1;
-	User   user   = 2;
+	Tenant tenant     = 1;
+	AraaliUser user   = 2;
 	enum Op {
         ADD = 0;
         DEL = 1;
     }
-    Op op         = 3;
+    Op op             = 3;
 }
 
 // Placeholder
