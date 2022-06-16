@@ -5,6 +5,8 @@
 
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option java_multiple_files = true;
 option java_package = "proto.araali.api";
 option java_outer_classname = "APIServiceProto";
@@ -32,8 +34,8 @@ message AraaliUser {
 }
 
 message TimeSlice {
-	Timestamp start_time = 1;
-	Timestamp end_time   = 2;
+	google.protobuf.Timestamp start_time = 1;
+	google.protobuf.Timestamp end_time   = 2;
 }
 
 message AssetFilter {
@@ -90,7 +92,7 @@ enum AssetMode {
 }
 
 message ListAssetsResponse {
-	AraaliAPIResponse     = 1;
+	AraaliAPIResponse response    = 1;
 	repeated Asset assets = 2;
 }
 

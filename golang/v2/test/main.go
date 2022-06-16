@@ -11,7 +11,7 @@ import (
 func main() {
 
 	var op, tenantID, tenantName, userEmail, userName string
-	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER)")
+	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER/LIST-ASSETS)")
 	flag.StringVar(&tenantID, "id", "", "specify tenant")
 	flag.StringVar(&tenantName, "name", "", "specify tenant name")
 	flag.StringVar(&userEmail, "user-email", "", "specify user email")
@@ -46,5 +46,11 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println(araalictl.UserDelete(tenantID, userEmail))
+	} else if op == "LIST-ASSETS" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-ASSETS")
+			os.Exit(1)
+		}
+		fmt.Printf("Resp: %v\n", araalictl.ListAssets(tenantID, "app-chg", "app-chg"))
 	}
 }

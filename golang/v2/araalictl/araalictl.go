@@ -173,7 +173,7 @@ func UserAdd(tenantID, userName, userEmail, role string) error {
 		},
 		User: &araali_api_service.AraaliUser{
 			Email: userEmail,
-			Role: r,
+			Role:  r,
 		},
 		Op: araali_api_service.UserRequest_ADD,
 	}
@@ -216,6 +216,40 @@ func UserDelete(tenantID, userEmail string) error {
 	}
 
 	fmt.Println(fmt.Sprintf("Create User Response: %v", resp))
+
+	return nil
+}
+
+// ListAssets
+func ListAssets(tenantID, zone, app string) error {
+	if len(tenantID) == 0 {
+		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	assetFilter := &araali_api_service.AssetFilter{
+		ListActiveVm:        true,
+		ListActiveContainer: true,
+	}
+	req := &araali_api_service.ListAssetsRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Zone:   zone,
+		App:    app,
+		Filter: assetFilter,
+	}
+	resp, err := api.ListAssets(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("ListAssets Response: %v", resp)
 
 	return nil
 }
