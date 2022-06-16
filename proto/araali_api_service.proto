@@ -31,6 +31,18 @@ message AraaliUser {
 	bool is_site_admin = 3;
 }
 
+message TimeSlice {
+	Timestamp start_time = 1;
+	Timestamp end_time   = 2;
+}
+
+message AssetFilter {
+	bool list_active_vm          = 1;
+	bool list_inactive_vm        = 2;
+	bool list_active_container   = 3;
+	bool list_inactive_container = 4;
+}
+
 message TenantRequest {
 	Tenant tenant = 1;
 	enum Op {
@@ -50,7 +62,72 @@ message UserRequest {
     Op op             = 3;
 }
 
-// Placeholder
+message ListAssetsRequest {
+	Tenant tenant      = 1;
+	string zone        = 2;
+	string app         = 3;
+	TimeSlice time     = 4;
+	AssetFilter filter = 5;
+}
+
+enum AssetState {
+	DELETED  = 0;
+	ACTIVE   = 1;
+	INACTIVE = 2;
+}
+
+enum AssetType {
+	UNKNOWN_TYPE    = 0;
+	VIRTUAL_MACHINE = 1;
+	CONTAINER       = 2;
+}
+
+enum AssetMode {
+	TAP                         = 0;
+	INLINE                      = 1;
+	TRANSITIONING_TAP_TO_INLINE = 2;
+	TRANSITIONING_INLINE_TO_TAP = 3;
+}
+
+message ListAssetsResponse {
+	AraaliAPIResponse     = 1;
+	repeated Asset assets = 2;
+}
+
+message Asset {
+	string name                            = 1;
+	string ip_address                      = 2;
+	string uuid                            = 3;
+	string image                           = 4;
+	string zone                            = 5;
+	repeated string apps                   = 6;
+	AssetState state                       = 7;
+	AssetType type                         = 8;
+	repeated Vulnerability vulnerabilities = 9;
+	AssetMode mode                         = 10;
+	string os_name                         = 11;
+	string iam_role                        = 12;
+	bool docker_privileged                 = 13; // only applies to Docker containers
+	oneof capabilities {
+		string docker_capabilities         = 14;
+		string containerd_capabilities     = 15;
+	}
+	// could also return EnforcementStatus here
+}
+
+message Vulnerability {
+	string package_name    = 1;
+	repeated string cve_id = 2;
+	Severity severity = 3;
+	enum Severity {
+		NONE = 0;
+		LOW = 1;
+		MEDIUM = 2;
+		HIGH = 3;
+		CRITICAL = 4;
+	}
+}
+
 message AraaliAPIResponse {
 	enum ReturnCode {
 		SUCCESS = 0;
@@ -70,4 +147,6 @@ service AraaliAPI {
 	  rpc addUser(UserRequest)  returns (AraaliAPIResponse) {}
 	  // Delete a user
 	  rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
+	  // Get Asset
+	  rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
 }
