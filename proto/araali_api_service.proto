@@ -18,6 +18,7 @@ package araali_api_service;
 // API Interface to the backend
 //////
 
+///// Tenant and User API's
 message Tenant {
 	string id          = 1;
 	string admin_email = 2;
@@ -36,13 +37,6 @@ message AraaliUser {
 message TimeSlice {
 	google.protobuf.Timestamp start_time = 1;
 	google.protobuf.Timestamp end_time   = 2;
-}
-
-message AssetFilter {
-	bool list_active_vm          = 1;
-	bool list_inactive_vm        = 2;
-	bool list_active_container   = 3;
-	bool list_inactive_container = 4;
 }
 
 message TenantRequest {
@@ -64,12 +58,30 @@ message UserRequest {
     Op op             = 3;
 }
 
+///// List Asset API
+message AssetFilter {
+	bool list_active_vm          = 1;
+	bool list_inactive_vm        = 2;
+	bool list_active_container   = 3;
+	bool list_inactive_container = 4;
+}
+
 message ListAssetsRequest {
 	Tenant tenant      = 1;
 	string zone        = 2;
 	string app         = 3;
 	TimeSlice time     = 4;
 	AssetFilter filter = 5;
+}
+
+message AraaliAPIResponse {
+	enum ReturnCode {
+		SUCCESS = 0;
+		FAIL    = 1;
+		UNKNOWN = 2;
+	}
+    ReturnCode code = 1;
+    string msg      = 2;
 }
 
 enum AssetState {
@@ -92,8 +104,8 @@ enum AssetMode {
 }
 
 message ListAssetsResponse {
-	AraaliAPIResponse response    = 1;
-	repeated Asset assets = 2;
+	AraaliAPIResponse response = 1;
+	repeated Asset assets      = 2;
 }
 
 message Asset {
@@ -130,14 +142,30 @@ message Vulnerability {
 	}
 }
 
-message AraaliAPIResponse {
-	enum ReturnCode {
-		SUCCESS = 0;
-		FAIL    = 1;
-		UNKNOWN = 2;
-	}
-    ReturnCode code = 1;
-    string msg      = 2;
+///// List Alert API
+enum FlowRollupType {
+	BASELINE_ALERT = 0;
+}
+
+message AlertFilter {
+	bool new_alerts              = 1;
+	bool open_alerts             = 2;
+	bool closed_alerts           = 3;
+	bool perimeter_egress        = 4;
+	bool perimeter_ingress       = 5;
+	bool home_non_araali_egress  = 6;
+	bool home_non_araali_ingress = 7;
+	bool araali_to_araali        = 8;
+	bool list_all_alerts         = 9;
+	FlowRollupType rollup_type   = 10;
+	TimeSlice time               = 11;
+}
+
+message ListAlertsRequest {
+	Tenant tenant       = 1;
+	AlertFilter filter  = 2;
+	int32 count         = 3;
+	string paging_token = 4;
 }
 
 service AraaliAPI {
@@ -151,4 +179,6 @@ service AraaliAPI {
 	  rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
 	  // Get Asset
 	  rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
+	  // Get Alerts
+	  rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
 }
