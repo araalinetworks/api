@@ -10,7 +10,7 @@ import "google/protobuf/timestamp.proto";
 option java_multiple_files = true;
 option java_package = "proto.araali.api";
 option java_outer_classname = "APIServiceProto";
-option go_package = "proto/araali/araali_api_service";
+option go_package = "araali.golang/proto/araali/araali_api_service";
 
 package araali_api_service;
 
@@ -156,7 +156,7 @@ message AlertFilter {
 	bool home_non_araali_egress  = 6;
 	bool home_non_araali_ingress = 7;
 	bool araali_to_araali        = 8;
-	bool list_all_alerts         = 9;
+	bool list_all_alerts         = 9; // Fetch all alerts from all lenses, even ones not monitored by current user
 	FlowRollupType rollup_type   = 10;
 	TimeSlice time               = 11;
 }
@@ -176,14 +176,18 @@ message ListAlertsResponse {
 message EndPoint {
 	string zone                = 1;
 	string app                 = 2;
-	string outer_app           = 3;
-	string process             = 4;
-	string binary_name         = 5;
-	string parent_process      = 6;
-	string dns_pattern         = 7;
-	string subnet              = 8;
-	uint32 net_mask            = 9;
-	uint32 dst_port            = 10;
+	string unmapped_app        = 3;
+	string outer_app           = 4;
+	string process             = 5;
+	string binary_name         = 6;
+	string parent_process      = 7;
+	string dns_pattern         = 8;
+	string subnet              = 9;
+	uint32 net_mask            = 10;
+	uint32 dst_port            = 11;
+	bool private_subnet        = 12;
+	string endpoint_group      = 13;
+	string organization        = 14;
 }
 
 message AlertInfo {
@@ -193,19 +197,37 @@ message AlertInfo {
 	string status                  = 4;
 }
 
+enum LinkType {
+	UNKNOWN = 0;
+	NON_ARAALI_INGRESS = 1;
+	ARAALI_INGRESS = 2;
+	NON_ARAALI_EGRESS = 3;
+	ARAALI_EGRESS = 4;
+	INTERNAL = 5;
+
+}
+
+// Could make state and error_code enum fields as well
 message Link {
-	EndPoint client      = 1;
-	EndPoint orig_client = 2;
-	EndPoint server      = 3;
-	EndPoint orig_server = 4;
-	string type          = 5;
-	bool speculative     = 6;
-	string state         = 7;
-	google.protobuf.Timestamp timestamp  = 8;
-	string unique_id     = 9;
-	string new_state     = 10;
-	string paging_token  = 11;
-	AlertInfo alert_info = 12;
+	EndPoint client                = 1;
+	EndPoint orig_client           = 2;
+	EndPoint server                = 3;
+	EndPoint orig_server           = 4;
+	LinkType type                  = 5;
+	TimeSlice timestamp            = 6;
+	string unique_id               = 7;
+	string new_state               = 8;
+	string paging_token            = 9;
+	AlertInfo alert_info           = 10;
+	repeated string roll_up_ids    = 11;
+	repeated uint32 active_ports   = 12;
+	repeated uint32 inactive_ports = 13;
+	string template_name           = 14;
+	string template_user           = 15;
+	string policy_skip_reason      = 16;
+	string error_code              = 17;
+	bool speculative               = 18;
+	string state                   = 19;
 }
 
 message DirectionCounts {

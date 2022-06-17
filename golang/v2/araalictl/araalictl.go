@@ -406,3 +406,92 @@ func GetAlerts(tenantID string, startTime, endTime time.Time,
 
 	return alertPage, nil
 }
+
+// ListZones
+func ListZones(tenantID, zone, app string, fetchLinks bool) error {
+	if len(tenantID) == 0 {
+		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	req := &araali_api_service.ListZonesRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Zone:       zone,
+		App:        app,
+		FetchLinks: fetchLinks,
+		Time:       &araali_api_service.TimeSlice{},
+	}
+	resp, err := api.ListZones(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("ListZones Response: %v", resp)
+
+	return nil
+}
+
+// ListLinks
+func ListLinks(tenantID, zone, app string) error {
+	if len(tenantID) == 0 {
+		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	req := &araali_api_service.ListLinksRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Zone: zone,
+		App:  app,
+		Time: &araali_api_service.TimeSlice{},
+	}
+	resp, err := api.ListLinks(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("ListLinks Response: %v", resp)
+
+	return nil
+}
+
+// ListInsights
+func ListInsights(tenantID, zone string) error {
+	if len(tenantID) == 0 {
+		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	req := &araali_api_service.ListInsightsRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Zone: zone,
+	}
+	resp, err := api.ListInsights(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("ListInsights Response: %v", resp)
+
+	return nil
+}

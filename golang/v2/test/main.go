@@ -61,5 +61,23 @@ func main() {
 		}
 		resp, err := araalictl.GetAlerts(tenantID, time.Now(), time.Now(), 100, true, "")
 		fmt.Printf("Resp: %v/%v\n", resp, err)
+	} else if op == "LIST-ZONES" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-ZONES")
+			os.Exit(1)
+		}
+		fmt.Printf("Resp: %v\n", araalictl.ListZones(tenantID, "app-chg", "app-chg", true))
+	} else if op == "LIST-LINKS" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-LINKS")
+			os.Exit(1)
+		}
+		fmt.Printf("Resp: %v\n", araalictl.ListLinks(tenantID, "app-chg", "app-chg"))
+	} else if op == "LIST-INSIGHTS" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-ASSETS")
+			os.Exit(1)
+		}
+		fmt.Printf("Resp: %v\n", araalictl.ListInsights(tenantID, "app-chg"))
 	}
 }
