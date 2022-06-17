@@ -2,6 +2,7 @@ package araalictl
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"net"
 	"time"
@@ -10,6 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const ApiDialTimeout = 30
@@ -221,14 +223,14 @@ func UserDelete(tenantID, userEmail string) error {
 }
 
 // ListAssets
-func ListAssets(tenantID, zone, app string) error {
+func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("Could not get API handle")
 	}
 	defer cancel()
 
@@ -246,10 +248,147 @@ func ListAssets(tenantID, zone, app string) error {
 	}
 	resp, err := api.ListAssets(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Printf("ListAssets Response: %v", resp)
 
-	return nil
+	return resp, nil
+}
+
+type AlertPage struct {
+	tenantID    string
+	start       time.Time
+	end         time.Time
+	all         bool
+	count       int32
+	PagingToken []byte
+	Alerts      []*araali_api_service.Link
+}
+
+func (alertPage *AlertPage) HasNext() bool {
+	if string(alertPage.PagingToken) == "" {
+		return false
+	}
+	return true
+}
+
+func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
+	listOfLinks := []*araali_api_service.Link{}
+	if !alertPage.HasNext() {
+		return listOfLinks, fmt.Errorf("Next page doesn't exist")
+	}
+
+	// Get Alerts with paging token
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return listOfLinks, fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	alertFilter := &araali_api_service.AlertFilter{
+		RollupType: araali_api_service.FlowRollupType_BASELINE_ALERT,
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(alertPage.start),
+			EndTime:   timestamppb.New(alertPage.end),
+		},
+		ListAllAlerts: alertPage.all,
+	}
+
+	req := &araali_api_service.ListAlertsRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: alertPage.tenantID,
+		},
+		Count:       alertPage.count,
+		PagingToken: string(alertPage.PagingToken),
+		Filter:      alertFilter,
+	}
+	resp, err := api.ListAlerts(ctx, req)
+	if err != nil {
+		return listOfLinks, err
+	}
+
+	fmt.Printf("ListAlerts GetNext Response: %v", resp)
+
+	if resp.Response.Code != araali_api_service.AraaliAPIResponse_SUCCESS {
+		return listOfLinks, fmt.Errorf("ListAlerts API failed")
+	}
+
+	if err != nil || len(resp.Links) == 0 {
+		alertPage.PagingToken = []byte{}
+		return listOfLinks, err
+	}
+
+	listOfLinks = resp.Links
+	token, err := hex.DecodeString(listOfLinks[len(listOfLinks)-1].PagingToken)
+	if err != nil {
+		return listOfLinks, fmt.Errorf("Error decoding token")
+	}
+
+	alertPage.PagingToken = token
+	alertPage.Alerts = listOfLinks
+	return listOfLinks, nil
+}
+
+func GetAlerts(tenantID string, startTime, endTime time.Time,
+	count int32, all bool, pagingToken string) (AlertPage, error) {
+	alertPage := AlertPage{
+		tenantID: tenantID,
+		start:    startTime,
+		end:      endTime,
+		all:      all,
+		count:    count,
+	}
+	if len(tenantID) == 0 {
+		return alertPage, fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+	if len(pagingToken) != 0 {
+		token, err := hex.DecodeString(pagingToken)
+		if err == nil {
+			alertPage.PagingToken = token
+		}
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return alertPage, fmt.Errorf("Could not get API handle")
+	}
+	defer cancel()
+
+	alertFilter := &araali_api_service.AlertFilter{
+		RollupType: araali_api_service.FlowRollupType_BASELINE_ALERT,
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(alertPage.start),
+			EndTime:   timestamppb.New(alertPage.end),
+		},
+		ListAllAlerts: alertPage.all,
+	}
+
+	req := &araali_api_service.ListAlertsRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: alertPage.tenantID,
+		},
+		Count:       alertPage.count,
+		PagingToken: string(alertPage.PagingToken),
+		Filter:      alertFilter,
+	}
+	resp, err := api.ListAlerts(ctx, req)
+	if err != nil {
+		return alertPage, err
+	}
+
+	if resp.Response.Code != araali_api_service.AraaliAPIResponse_SUCCESS {
+		return alertPage, fmt.Errorf("ListAlerts API failed")
+	}
+
+	fmt.Printf("ListAlerts Response: %v", resp)
+
+	alertPage.Alerts = resp.Links
+	token, err := hex.DecodeString(alertPage.Alerts[len(alertPage.Alerts)-1].PagingToken)
+	if err != nil {
+		return alertPage, fmt.Errorf("Error decoding token")
+	}
+	alertPage.PagingToken = token
+
+	return alertPage, nil
 }

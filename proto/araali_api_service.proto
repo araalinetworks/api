@@ -168,17 +168,189 @@ message ListAlertsRequest {
 	string paging_token = 4;
 }
 
+message ListAlertsResponse {
+	AraaliAPIResponse response = 1;
+	repeated Link links        = 2;
+}
+
+message EndPoint {
+	string zone                = 1;
+	string app                 = 2;
+	string outer_app           = 3;
+	string process             = 4;
+	string binary_name         = 5;
+	string parent_process      = 6;
+	string dns_pattern         = 7;
+	string subnet              = 8;
+	uint32 net_mask            = 9;
+	uint32 dst_port            = 10;
+}
+
+message AlertInfo {
+	string commuication_alert_type = 1;
+	string process_alert_type      = 2;
+	uint32 re_open_count           = 3;
+	string status                  = 4;
+}
+
+message Link {
+	EndPoint client      = 1;
+	EndPoint orig_client = 2;
+	EndPoint server      = 3;
+	EndPoint orig_server = 4;
+	string type          = 5;
+	bool speculative     = 6;
+	string state         = 7;
+	google.protobuf.Timestamp timestamp  = 8;
+	string unique_id     = 9;
+	string new_state     = 10;
+	string paging_token  = 11;
+	AlertInfo alert_info = 12;
+}
+
+message DirectionCounts {
+	uint64 total             = 1;
+	uint64 ingress           = 2;
+	uint64 perimeter_ingress = 3;
+	uint64 internal          = 4;
+	uint64 egress            = 5;
+	uint64 perimeter_egress  = 6;
+}
+
+enum EnforcementState {
+	DISABLED      = 0;
+	TRANSITIONING = 1;
+	ENABLED       = 2;
+}
+
+message ComputeCounts {
+	uint64 virtual_machines = 1;
+	uint64 containers       = 2;
+}
+
+message App {
+	string name                        = 1;
+	string zone_name                   = 2;
+	string araali_url                  = 3;
+	DirectionCounts defined_counts     = 4;
+	DirectionCounts denied_counts      = 5;
+	DirectionCounts alert_counts       = 6;
+	DirectionCounts service_counts     = 7;
+	ComputeCounts compute_counts       = 8;
+	repeated Link links                = 9;
+	EnforcementState ingress_enforced  = 10;
+	EnforcementState internal_enforced = 11;
+	EnforcementState egress_enforced   = 12;
+}
+
+message Zone {
+	string name       = 1;
+	repeated App apps = 2;
+}
+
+message ListZonesRequest {
+	Tenant tenant     = 1;
+	string zone       = 2;
+	string app        = 3;
+	TimeSlice time    = 4;
+	bool fetch_links  = 5;
+}
+
+message ListZonesResponse {
+	AraaliAPIResponse response = 1;
+	repeated Zone zones        = 2;
+}
+
+message ListLinksRequest {
+	Tenant tenant     = 1;
+	string zone          = 2;
+	string app           = 3;
+	string service       = 4; // Required when zone and app are not specified. Must be in form of ip:port or fqdn:port
+	TimeSlice time       = 5;
+}
+
+message ListLinksResponse {
+	AraaliAPIResponse response = 1;
+	repeated Link links        = 2;
+}
+
+enum InsightReason {
+	NONE                           = 0;
+	DB_PROCESS                     = 1; // "Database Process"
+	DBAAS                          = 2;  //"Data Store as a Service"
+	WORLD_EXPOSED_PROCESS          = 3;
+	PRIVILEGE_PROCESS              = 4;
+	CRITICAL_CVE_CONTAINER         = 5;
+	HOME_EXPOSED_PROCESS           = 6;
+	HIGH_DEGREE_SERVICE            = 7;
+	CRITICAL_CVE_PROCESS           = 8;
+	// Do not use field num 9 in future
+	SAAS_SERVICE                   = 10;
+	POTENTIAL_C2_PROCESS           = 11;
+	PRIVILEGE_CONTAINER            = 12;
+	SECRETS_STORE                  = 13;
+	SPRING4SHELL_CVE_PROCESS       = 14;
+	ENFORCED_LENS                  = 15;
+	SECRET_IN_ENV                  = 16;
+	WORLD_EXPOSED_LB_PROCESS       = 17;
+	IAM_OVER_PROVISIONED_CONTAINER = 18;
+}
+
+message Lens {
+	enum LensType {
+		UNKNOWN  = 0;
+		ZONE_APP = 1;
+		SERVICE = 2;
+		ZONE = 3;
+		PROCESS = 4;
+		CONTAINER = 5;
+		TENANT = 6; // Use: Tenant Level Alert Email Registration
+	}
+	LensType type = 1;
+	string zone = 2;
+	string app = 3;
+	string pod = 4;
+	string container_name = 5;
+	string process = 6;
+	string parent_process = 7;
+	string binary_name = 8;
+	string service = 9;
+
+}
+message Insight {
+	InsightReason reason = 1;
+	string url           = 2;
+	uint32 count         = 3;
+	repeated Lens lens   = 4;
+}
+
+message ListInsightsRequest {
+	Tenant tenant = 1;
+	string zone      = 2; // Used by API to fetch per zone (as per Tenable requirements)
+}
+
+message ListInsightsResponse {
+	AraaliAPIResponse response = 1;
+	repeated Insight insights = 2;
+}
+
 service AraaliAPI {
-	  // Add a tenant
-	  rpc createTenant(TenantRequest) returns (AraaliAPIResponse) {}
-	  // Delete a tenant
-	  rpc deleteTenant(TenantRequest) returns (AraaliAPIResponse) {}
-	  // Add a user
-	  rpc addUser(UserRequest)  returns (AraaliAPIResponse) {}
-	  // Delete a user
-	  rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
-	  // Get Asset
-	  rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
-	  // Get Alerts
-	  rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
+	// Add a tenant
+	rpc createTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	// Delete a tenant
+	rpc deleteTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	// Add a user
+	rpc addUser(UserRequest)  returns (AraaliAPIResponse) {}
+	// Delete a user
+	rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
+	// Get asset
+	rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
+	// Get Alerts
+	rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
+	// Get zones/zone-apps
+	rpc listZones(ListZonesRequest) returns (ListZonesResponse) {}
+	// Get links within a zone-app
+	rpc listLinks(ListLinksRequest) returns (ListLinksResponse) {}
+	// Get tenant-wide insights
+	rpc listInsights(ListInsightsRequest) returns (ListInsightsResponse) {}
 }

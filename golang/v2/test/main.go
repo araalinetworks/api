@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/araalinetworks/araali/third_party/api/golang/v2/araalictl"
 )
@@ -11,7 +12,7 @@ import (
 func main() {
 
 	var op, tenantID, tenantName, userEmail, userName string
-	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER/LIST-ASSETS)")
+	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER/LIST-ASSETS/LIST-ALERTS)")
 	flag.StringVar(&tenantID, "id", "", "specify tenant")
 	flag.StringVar(&tenantName, "name", "", "specify tenant name")
 	flag.StringVar(&userEmail, "user-email", "", "specify user email")
@@ -51,6 +52,14 @@ func main() {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		fmt.Printf("Resp: %v\n", araalictl.ListAssets(tenantID, "app-chg", "app-chg"))
+		resp, err := araalictl.ListAssets(tenantID, "app-chg", "app-chg")
+		fmt.Printf("Resp: %v/%v\n", resp, err)
+	} else if op == "LIST-ALERTS" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-ASSETS")
+			os.Exit(1)
+		}
+		resp, err := araalictl.GetAlerts(tenantID, time.Now(), time.Now(), 100, true, "")
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	}
 }
