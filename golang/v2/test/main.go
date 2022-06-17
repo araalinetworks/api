@@ -52,8 +52,8 @@ func main() {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		resp, err := araalictl.ListAssets(tenantID, "app-chg", "app-chg")
-		fmt.Printf("Resp: %v/%v\n", resp, err)
+		resp, vmCount, contCnt, err := araalictl.ListAssets(tenantID, "app-chg", "app-chg")
+		fmt.Printf("Resp: %v/%v (%v, %v)\n", resp, err, vmCount, contCnt)
 	} else if op == "LIST-ALERTS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")

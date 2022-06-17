@@ -223,14 +223,15 @@ func UserDelete(tenantID, userEmail string) error {
 }
 
 // ListAssets
-func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsResponse, error) {
+func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsResponse,
+	int, int, error) {
 	if len(tenantID) == 0 {
-		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, -1, -1, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return nil, fmt.Errorf("Could not get API handle")
+		return nil, -1, -1, fmt.Errorf("Could not get API handle")
 	}
 	defer cancel()
 
@@ -248,12 +249,25 @@ func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsRespo
 	}
 	resp, err := api.ListAssets(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, -1, -1, err
 	}
 
 	fmt.Printf("ListAssets Response: %v", resp)
 
-	return resp, nil
+	vmCount := 0
+	containerCount := 0
+	for _, asset := range resp.Assets {
+		if asset.State == araali_api_service.AssetState_ACTIVE {
+			if asset.Type == araali_api_service.AssetType_CONTAINER {
+				containerCount++
+			}
+			if asset.Type == araali_api_service.AssetType_VIRTUAL_MACHINE {
+				vmCount++
+			}
+		}
+	}
+
+	return resp, vmCount, containerCount, nil
 }
 
 type AlertPage struct {
