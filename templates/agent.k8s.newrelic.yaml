@@ -60,13 +60,13 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: newrelic_log_api
-    dns_pattern: log-api.newrelic.com
+    name: newrelic_infra_command_api
+    dns_pattern: infrastructure-command-api.newrelic.com
     dst_port: 443
   pushdown: []
 - node:
-    name: newrelic_infra_command_api
-    dns_pattern: infrastructure-command-api.newrelic.com
+    name: newrelic_log_api
+    dns_pattern: log-api.newrelic.com
     dst_port: 443
   pushdown: []
 - node:
