@@ -65,6 +65,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: newrelic_infra_command_api
+    dns_pattern: infrastructure-command-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: nr_data_otlp
     dns_pattern: otlp.nr-data.net
     dst_port: 443
@@ -92,6 +97,7 @@ authorizations:
 - name: forwarder_newrelic_infra
   out:
   - newrelic_infra_api
+  - newrelic_infra_command_api
 - name: newrelic_log_api
   in:
   - fluent_bit
