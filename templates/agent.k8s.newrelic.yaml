@@ -60,6 +60,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: newrelic_identity_api
+    dns_pattern: identity-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: nr_data_otlp
     dns_pattern: otlp.nr-data.net
     dst_port: 443
@@ -80,10 +85,13 @@ identities:
     dst_port: 443
   pushdown: []
 authorizations:
-- name: newrelic_infra_api
-  in:
-  - agent_newrelic_infra
-  - forwarder_newrelic_infra
+- name: agent_newrelic_infra
+  out:
+  - newrelic_infra_api
+  - newrelic_identity_api
+- name: forwarder_newrelic_infra
+  out:
+  - newrelic_infra_api
 - name: newrelic_log_api
   in:
   - fluent_bit
