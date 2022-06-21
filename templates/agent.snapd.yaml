@@ -1,0 +1,32 @@
+identities:
+- node:
+    name: node_0
+    rename: snapd_snapd
+    zone: .*
+    app: .*
+    binary_name: /snap/snapd/.*/usr/lib/snapd/snapd
+    parent_process: systemd
+    process: snapd
+  pushdown:
+  - binary_name
+- node:
+    name: node_1
+    rename: snapcraftcontent.com
+    dns_pattern: .*.snapcraftcontent.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: node_2
+    rename: core_snapd
+    zone: .*
+    app: .*
+    binary_name: /snap/core/.*/usr/lib/snapd/snapd
+    parent_process: systemd
+    process: snapd
+  pushdown: []
+authorizations:
+- name: node_1
+  in:
+  - node_0
+  - node_2
