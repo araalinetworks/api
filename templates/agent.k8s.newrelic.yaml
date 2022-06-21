@@ -94,6 +94,7 @@ authorizations:
   out:
   - newrelic_identity_api
   - newrelic_infra_api
+  - newrelic_infra_command_api
 - name: forwarder_newrelic_infra
   out:
   - newrelic_infra_api
