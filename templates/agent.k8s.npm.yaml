@@ -8,7 +8,7 @@ identities:
     binary_name: /usr/local/bin/node
     parent_process: npm
     process: node
-  pushdown: {}
+  pushdown: []
 - node:
     name: npm
     zone: .*
@@ -18,12 +18,12 @@ identities:
     binary_name: /usr/local/bin/node
     parent_process: containerd-shim
     process: npm
-  pushdown: {}
+  pushdown: []
 - node:
     name: registry_npmjs
     dns_pattern: registry.npmjs.org
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: registry_npmjs
   in:

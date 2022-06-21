@@ -4,22 +4,22 @@ identities:
     subnet: 8.8.8.8
     netmask: 32
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: tailscale_controlplane
     dns_pattern: controlplane.tailscale.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: tailscale_log
     dns_pattern: log.tailscale.io
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: tailscale_login
     dns_pattern: login.tailscale.com
     dst_port: 443
-  pushdown: {}
+  pushdown: []
 - node:
     name: tailscaled
     zone: .*
@@ -29,7 +29,7 @@ identities:
     binary_name: /usr/local/bin/tailscaled
     parent_process: bash
     process: tailscaled
-  pushdown: {}
+  pushdown: []
 authorizations:
 - name: tailscaled
   out:

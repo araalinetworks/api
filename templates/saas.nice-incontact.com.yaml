@@ -10,14 +10,11 @@ identities:
     process: .*
   pushdown: []
 - node:
-    name: kubelet
-    zone: .*
-    app: k8s-nodes
-    binary_name: .*/bin/kubelet
-    parent_process: systemd
-    process: kubelet
+    name: nice_incontact
+    dns_pattern: .*.nice-incontact.com
+    dst_port: 443
   pushdown: []
 authorizations:
-- name: any
+- name: nice_incontact
   in:
-  - kubelet
+  - any

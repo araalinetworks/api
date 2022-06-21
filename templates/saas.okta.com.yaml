@@ -10,14 +10,11 @@ identities:
     process: .*
   pushdown: []
 - node:
-    name: kubelet
-    zone: .*
-    app: k8s-nodes
-    binary_name: .*/bin/kubelet
-    parent_process: systemd
-    process: kubelet
+    name: dev
+    dns_pattern: dev-.*.okta.com
+    dst_port: 443
   pushdown: []
 authorizations:
-- name: any
+- name: dev
   in:
-  - kubelet
+  - any
