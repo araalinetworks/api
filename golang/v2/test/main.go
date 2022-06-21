@@ -28,56 +28,70 @@ func main() {
 			fmt.Println("-user-email and -user-name must be specified when op=ADD")
 			os.Exit(1)
 		}
-		fmt.Println(araalictl.TenantCreate(tenantName, userName, userEmail, true))
+		resp, err := araalictl.TenantCreate(tenantName, userName, userEmail, true)
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "DEL" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=DEL")
 			os.Exit(1)
 		}
-		fmt.Println(araalictl.TenantDelete(tenantID))
+		resp, err := araalictl.TenantDelete(tenantID)
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "ADD-USER" {
 		if tenantID == "" || userEmail == "" || userName == "" {
 			fmt.Println("-id, -user-email and -user-name must be specified when op=ADD-USER")
 			os.Exit(1)
 		}
-		fmt.Println(araalictl.UserAdd(tenantID, userName, userEmail, "ADMIN"))
+		resp, err := araalictl.UserAdd(tenantID, userName, userEmail, "ADMIN")
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "DEL-USER" {
 		if tenantID == "" || userEmail == "" || userName == "" {
 			fmt.Println("-id, -user-email and -user-name must be specified when op=DEL-USER")
 			os.Exit(1)
 		}
-		fmt.Println(araalictl.UserDelete(tenantID, userEmail))
+		resp, err := araalictl.UserDelete(tenantID, userEmail)
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-ASSETS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		resp, vmCount, contCnt, err := araalictl.ListAssets(tenantID, "app-chg", "app-chg")
+		resp, vmCount, contCnt, err := araalictl.ListAssets(tenantID, "app-chg", "app-chg", true, false, true, false, time.Now().Add(time.Duration(-10)*time.Minute), time.Now())
 		fmt.Printf("Resp: %v/%v (%v, %v)\n", resp, err, vmCount, contCnt)
 	} else if op == "LIST-ALERTS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		resp, err := araalictl.GetAlerts(tenantID, time.Now(), time.Now(), 100, true, "")
+		resp, err := araalictl.ListAlerts(tenantID, time.Now().Add(time.Duration(-10)*time.Minute), time.Now(), 100, true, "")
+		fmt.Printf("Resp: %v/%v\n", resp, err)
+	} else if op == "GET-ALERT-CARD" {
+		if tenantID == "" {
+			fmt.Println("-id must be specified when op=LIST-ASSETS")
+			os.Exit(1)
+		}
+		resp, err := araalictl.GetAlertCard(tenantID, time.Now(), time.Now())
 		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-ZONES" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-ZONES")
 			os.Exit(1)
 		}
-		fmt.Printf("Resp: %v\n", araalictl.ListZones(tenantID, "app-chg", "app-chg", true))
+		resp, err := araalictl.ListZones(tenantID, "app-chg", "app-chg", time.Now().Add(time.Duration(-10)*time.Minute), time.Now(), true)
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-LINKS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-LINKS")
 			os.Exit(1)
 		}
-		fmt.Printf("Resp: %v\n", araalictl.ListLinks(tenantID, "app-chg", "app-chg"))
+		resp, err := araalictl.ListLinks(tenantID, "app-chg", "app-chg", "", time.Now().Add(time.Duration(-10)*time.Minute), time.Now())
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-INSIGHTS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		fmt.Printf("Resp: %v\n", araalictl.ListInsights(tenantID, "app-chg"))
+		resp, err := araalictl.ListInsights(tenantID, "app-chg")
+		fmt.Printf("Resp: %v/%v\n", resp, err)
 	}
 }

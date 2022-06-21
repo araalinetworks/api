@@ -96,14 +96,14 @@ func getApiClient() (context.Context, context.CancelFunc, araali_api_service.Ara
 //
 
 // TenantCreate - returns tenant-id
-func TenantCreate(name, adminName, adminEmail string, freemium bool) (string, error) {
+func TenantCreate(name, adminName, adminEmail string, freemium bool) (*araali_api_service.CreateTenantResponse, error) {
 	if len(adminEmail) == 0 {
-		return "", fmt.Errorf("invalid adminEmail (%v)", adminEmail)
+		return nil, fmt.Errorf("invalid adminEmail (%v)", adminEmail)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return "", fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -115,23 +115,20 @@ func TenantCreate(name, adminName, adminEmail string, freemium bool) (string, er
 	}
 	resp, err := api.CreateTenant(ctx, req)
 	if err != nil {
-		return "Error in calling CreateTenant API", err
+		return nil, err
 	}
-
-	fmt.Println(fmt.Sprintf("Create Tenant Response: %v", resp))
-
-	return "", nil
+	return resp, nil
 }
 
 // TenantDelete
-func TenantDelete(tenantID string) error {
+func TenantDelete(tenantID string) (*araali_api_service.AraaliAPIResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -143,25 +140,22 @@ func TenantDelete(tenantID string) error {
 	}
 	resp, err := api.DeleteTenant(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Println(fmt.Sprintf("Delete Tenant Response: %v", resp))
-
-	return nil
+	return resp, nil
 }
 
 // UserAdd
-func UserAdd(tenantID, userName, userEmail, role string) error {
+func UserAdd(tenantID, userName, userEmail, role string) (*araali_api_service.AraaliAPIResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	} else if len(userEmail) == 0 {
-		return fmt.Errorf("invalid user email (%v)", userEmail)
+		return nil, fmt.Errorf("invalid user email (%v)", userEmail)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -181,25 +175,22 @@ func UserAdd(tenantID, userName, userEmail, role string) error {
 	}
 	resp, err := api.AddUser(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Println(fmt.Sprintf("Create User Response: %v", resp))
-
-	return nil
+	return resp, nil
 }
 
 // UserDelete
-func UserDelete(tenantID, userEmail string) error {
+func UserDelete(tenantID, userEmail string) (*araali_api_service.AraaliAPIResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	} else if len(userEmail) == 0 {
-		return fmt.Errorf("invalid user email (%v)", userEmail)
+		return nil, fmt.Errorf("invalid user email (%v)", userEmail)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -214,30 +205,29 @@ func UserDelete(tenantID, userEmail string) error {
 	}
 	resp, err := api.DeleteUser(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Println(fmt.Sprintf("Create User Response: %v", resp))
-
-	return nil
+	return resp, nil
 }
 
 // ListAssets
-func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsResponse,
-	int, int, error) {
+func ListAssets(tenantID, zone, app string, activeVm, inactiveVm, activeContainer, inactiveContainer bool,
+	startTime, endTime time.Time) (*araali_api_service.ListAssetsResponse, int, int, error) {
 	if len(tenantID) == 0 {
 		return nil, -1, -1, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return nil, -1, -1, fmt.Errorf("Could not get API handle")
+		return nil, -1, -1, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
 	assetFilter := &araali_api_service.AssetFilter{
-		ListActiveVm:        true,
-		ListActiveContainer: true,
+		ListActiveVm:          activeVm,
+		ListActiveContainer:   activeContainer,
+		ListInactiveVm:        inactiveVm,
+		ListInactiveContainer: inactiveContainer,
 	}
 	req := &araali_api_service.ListAssetsRequest{
 		Tenant: &araali_api_service.Tenant{
@@ -246,14 +236,15 @@ func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsRespo
 		Zone:   zone,
 		App:    app,
 		Filter: assetFilter,
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(startTime),
+			EndTime:   timestamppb.New(endTime),
+		},
 	}
 	resp, err := api.ListAssets(ctx, req)
 	if err != nil {
 		return nil, -1, -1, err
 	}
-
-	fmt.Printf("ListAssets Response: %v", resp)
-
 	vmCount := 0
 	containerCount := 0
 	for _, asset := range resp.Assets {
@@ -266,7 +257,6 @@ func ListAssets(tenantID, zone, app string) (*araali_api_service.ListAssetsRespo
 			}
 		}
 	}
-
 	return resp, vmCount, containerCount, nil
 }
 
@@ -301,7 +291,7 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	defer cancel()
 
 	alertFilter := &araali_api_service.AlertFilter{
-		RollupType: araali_api_service.FlowRollupType_BASELINE_ALERT,
+		RollupType: araali_api_service.LinkState_BASELINE_ALERT,
 		Time: &araali_api_service.TimeSlice{
 			StartTime: timestamppb.New(alertPage.start),
 			EndTime:   timestamppb.New(alertPage.end),
@@ -344,7 +334,7 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	return listOfLinks, nil
 }
 
-func GetAlerts(tenantID string, startTime, endTime time.Time,
+func ListAlerts(tenantID string, startTime, endTime time.Time,
 	count int32, all bool, pagingToken string) (AlertPage, error) {
 	alertPage := AlertPage{
 		tenantID: tenantID,
@@ -365,12 +355,12 @@ func GetAlerts(tenantID string, startTime, endTime time.Time,
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return alertPage, fmt.Errorf("Could not get API handle")
+		return alertPage, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
 	alertFilter := &araali_api_service.AlertFilter{
-		RollupType: araali_api_service.FlowRollupType_BASELINE_ALERT,
+		RollupType: araali_api_service.LinkState_BASELINE_ALERT,
 		Time: &araali_api_service.TimeSlice{
 			StartTime: timestamppb.New(alertPage.start),
 			EndTime:   timestamppb.New(alertPage.end),
@@ -400,22 +390,50 @@ func GetAlerts(tenantID string, startTime, endTime time.Time,
 	alertPage.Alerts = resp.Links
 	token, err := hex.DecodeString(alertPage.Alerts[len(alertPage.Alerts)-1].PagingToken)
 	if err != nil {
-		return alertPage, fmt.Errorf("Error decoding token")
+		return alertPage, fmt.Errorf("error decoding token")
 	}
 	alertPage.PagingToken = token
 
 	return alertPage, nil
 }
 
-// ListZones
-func ListZones(tenantID, zone, app string, fetchLinks bool) error {
+// GetAlertCard
+
+func GetAlertCard(tenantID string, startTime, endTime time.Time) (*araali_api_service.GetAlertCardResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
+	}
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return nil, fmt.Errorf("could not get API handle")
+	}
+	defer cancel()
+
+	req := &araali_api_service.GetAlertCardRequest{
+		Tenant: &araali_api_service.Tenant{
+			Id: tenantID,
+		},
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(startTime),
+			EndTime:   timestamppb.New(endTime),
+		},
+	}
+	resp, err := api.GetAlertCard(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// ListZones
+func ListZones(tenantID, zone, app string, startTime, endTime time.Time, fetchLinks bool) (*araali_api_service.ListZonesResponse, error) {
+	if len(tenantID) == 0 {
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
 
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -426,27 +444,26 @@ func ListZones(tenantID, zone, app string, fetchLinks bool) error {
 		Zone:       zone,
 		App:        app,
 		FetchLinks: fetchLinks,
-		Time:       &araali_api_service.TimeSlice{},
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(startTime),
+			EndTime:   timestamppb.New(endTime),
+		},
 	}
 	resp, err := api.ListZones(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Printf("ListZones Response: %v", resp)
-
-	return nil
+	return resp, nil
 }
 
 // ListLinks
-func ListLinks(tenantID, zone, app string) error {
+func ListLinks(tenantID, zone, app, service string, startTime, endTime time.Time) (*araali_api_service.ListLinksResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
-
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -454,29 +471,29 @@ func ListLinks(tenantID, zone, app string) error {
 		Tenant: &araali_api_service.Tenant{
 			Id: tenantID,
 		},
-		Zone: zone,
-		App:  app,
-		Time: &araali_api_service.TimeSlice{},
+		Zone:    zone,
+		App:     app,
+		Service: service,
+		Time: &araali_api_service.TimeSlice{
+			StartTime: timestamppb.New(startTime),
+			EndTime:   timestamppb.New(endTime),
+		},
 	}
 	resp, err := api.ListLinks(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Printf("ListLinks Response: %v", resp)
-
-	return nil
+	return resp, nil
 }
 
 // ListInsights
-func ListInsights(tenantID, zone string) error {
+func ListInsights(tenantID, zone string) (*araali_api_service.ListInsightsResponse, error) {
 	if len(tenantID) == 0 {
-		return fmt.Errorf("invalid tenantid (%v)", tenantID)
+		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
-
 	ctx, cancel, api := getApiClient()
 	if api == nil {
-		return fmt.Errorf("Could not get API handle")
+		return nil, fmt.Errorf("could not get API handle")
 	}
 	defer cancel()
 
@@ -488,10 +505,7 @@ func ListInsights(tenantID, zone string) error {
 	}
 	resp, err := api.ListInsights(ctx, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Printf("ListInsights Response: %v", resp)
-
-	return nil
+	return resp, nil
 }

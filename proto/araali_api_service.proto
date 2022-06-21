@@ -40,22 +40,27 @@ message TimeSlice {
 }
 
 message TenantRequest {
-	Tenant tenant = 1;
 	enum Op {
         ADD = 0;
         DEL = 1;
-    }
-    Op op         = 2;
+	}
+	Tenant tenant = 1;
+	Op op         = 2;
+}
+
+message CreateTenantResponse {
+	AraaliAPIResponse response = 1;
+	Tenant tenant              = 2;
 }
 
 message UserRequest {
+	enum Op {
+		ADD = 0;
+		DEL = 1;
+	}
 	Tenant tenant     = 1;
 	AraaliUser user   = 2;
-	enum Op {
-        ADD = 0;
-        DEL = 1;
-    }
-    Op op             = 3;
+	Op op             = 3;
 }
 
 ///// List Asset API
@@ -80,8 +85,8 @@ message AraaliAPIResponse {
 		FAIL    = 1;
 		UNKNOWN = 2;
 	}
-    ReturnCode code = 1;
-    string msg      = 2;
+	ReturnCode code = 1;
+	string msg      = 2;
 }
 
 enum AssetState {
@@ -142,11 +147,6 @@ message Vulnerability {
 	}
 }
 
-///// List Alert API
-enum FlowRollupType {
-	BASELINE_ALERT = 0;
-}
-
 message AlertFilter {
 	bool new_alerts              = 1;
 	bool open_alerts             = 2;
@@ -157,7 +157,7 @@ message AlertFilter {
 	bool home_non_araali_ingress = 7;
 	bool araali_to_araali        = 8;
 	bool list_all_alerts         = 9; // Fetch all alerts from all lenses, even ones not monitored by current user
-	FlowRollupType rollup_type   = 10;
+	LinkState rollup_type   = 10;
 	TimeSlice time               = 11;
 }
 
@@ -188,6 +188,8 @@ message EndPoint {
 	bool private_subnet        = 12;
 	string endpoint_group      = 13;
 	string organization        = 14;
+	string pod                 = 15;
+	string container_name      = 16;
 }
 
 message AlertInfo {
@@ -204,7 +206,13 @@ enum LinkType {
 	NON_ARAALI_EGRESS = 3;
 	ARAALI_EGRESS = 4;
 	INTERNAL = 5;
+}
 
+enum LinkState {
+	BASELINE_ALERT = 0;
+	DEFINED_POLICY = 1;
+	SNOOZED_POLICY = 2;
+	DENIED_POLICY = 3;
 }
 
 // Could make state and error_code enum fields as well
@@ -216,18 +224,18 @@ message Link {
 	LinkType type                  = 5;
 	TimeSlice timestamp            = 6;
 	string unique_id               = 7;
-	string new_state               = 8;
-	string paging_token            = 9;
-	AlertInfo alert_info           = 10;
-	repeated string roll_up_ids    = 11;
-	repeated uint32 active_ports   = 12;
-	repeated uint32 inactive_ports = 13;
-	string template_name           = 14;
-	string template_user           = 15;
-	string policy_skip_reason      = 16;
-	string error_code              = 17;
-	bool speculative               = 18;
-	string state                   = 19;
+	bool speculative               = 8;
+	LinkState state                = 9;
+	LinkState new_state            = 10;
+	string paging_token            = 11;
+	AlertInfo alert_info           = 12;
+	repeated string roll_up_ids    = 13;
+	repeated uint32 active_ports   = 14;
+	repeated uint32 inactive_ports = 15;
+	string template_name           = 16;
+	string template_user           = 17;
+	string policy_skip_reason      = 18;
+	string error_code              = 19;
 }
 
 message DirectionCounts {
@@ -246,8 +254,8 @@ enum EnforcementState {
 }
 
 message ComputeCounts {
-	uint64 virtual_machines = 1;
-	uint64 containers       = 2;
+	uint32 virtual_machines = 1;
+	uint32 containers       = 2;
 }
 
 message App {
@@ -284,38 +292,16 @@ message ListZonesResponse {
 }
 
 message ListLinksRequest {
-	Tenant tenant     = 1;
-	string zone          = 2;
-	string app           = 3;
-	string service       = 4; // Required when zone and app are not specified. Must be in form of ip:port or fqdn:port
-	TimeSlice time       = 5;
+	Tenant tenant  = 1;
+	string zone    = 2;
+	string app     = 3;
+	string service = 4; // Required when zone and app are not specified. Must be in form of ip:port or fqdn:port
+	TimeSlice time = 5;
 }
 
 message ListLinksResponse {
 	AraaliAPIResponse response = 1;
 	repeated Link links        = 2;
-}
-
-enum InsightReason {
-	NONE                           = 0;
-	DB_PROCESS                     = 1; // "Database Process"
-	DBAAS                          = 2;  //"Data Store as a Service"
-	WORLD_EXPOSED_PROCESS          = 3;
-	PRIVILEGE_PROCESS              = 4;
-	CRITICAL_CVE_CONTAINER         = 5;
-	HOME_EXPOSED_PROCESS           = 6;
-	HIGH_DEGREE_SERVICE            = 7;
-	CRITICAL_CVE_PROCESS           = 8;
-	// Do not use field num 9 in future
-	SAAS_SERVICE                   = 10;
-	POTENTIAL_C2_PROCESS           = 11;
-	PRIVILEGE_CONTAINER            = 12;
-	SECRETS_STORE                  = 13;
-	SPRING4SHELL_CVE_PROCESS       = 14;
-	ENFORCED_LENS                  = 15;
-	SECRET_IN_ENV                  = 16;
-	WORLD_EXPOSED_LB_PROCESS       = 17;
-	IAM_OVER_PROVISIONED_CONTAINER = 18;
 }
 
 message Lens {
@@ -340,6 +326,27 @@ message Lens {
 
 }
 message Insight {
+	enum InsightReason {
+		NONE                           = 0;
+		DB_PROCESS                     = 1; // "Database Process"
+		DBAAS                          = 2;  //"Data Store as a Service"
+		WORLD_EXPOSED_PROCESS          = 3;
+		PRIVILEGE_PROCESS              = 4;
+		CRITICAL_CVE_CONTAINER         = 5;
+		HOME_EXPOSED_PROCESS           = 6;
+		HIGH_DEGREE_SERVICE            = 7;
+		CRITICAL_CVE_PROCESS           = 8;
+		// Do not use field num 9 in future
+		SAAS_SERVICE                   = 10;
+		POTENTIAL_C2_PROCESS           = 11;
+		PRIVILEGE_CONTAINER            = 12;
+		SECRETS_STORE                  = 13;
+		SPRING4SHELL_CVE_PROCESS       = 14;
+		ENFORCED_LENS                  = 15;
+		SECRET_IN_ENV                  = 16;
+		WORLD_EXPOSED_LB_PROCESS       = 17;
+		IAM_OVER_PROVISIONED_CONTAINER = 18;
+	}
 	InsightReason reason = 1;
 	string url           = 2;
 	uint32 count         = 3;
@@ -353,12 +360,28 @@ message ListInsightsRequest {
 
 message ListInsightsResponse {
 	AraaliAPIResponse response = 1;
-	repeated Insight insights = 2;
+	repeated Insight insights  = 2;
+}
+
+message GetAlertCardRequest {
+	Tenant tenant  = 1;
+	TimeSlice time = 2;
+}
+
+message GetAlertCardResponse {
+	AraaliAPIResponse response  = 1;
+	uint64 total_alerts         = 2;
+	repeated Zone alert_details = 3;
+}
+
+message UpdateLinksRequest {
+	Tenant tenant       = 1;
+	repeated Link links = 2;
 }
 
 service AraaliAPI {
 	// Add a tenant
-	rpc createTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	rpc createTenant(TenantRequest) returns (CreateTenantResponse) {}
 	// Delete a tenant
 	rpc deleteTenant(TenantRequest) returns (AraaliAPIResponse) {}
 	// Add a user
@@ -369,10 +392,14 @@ service AraaliAPI {
 	rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
 	// Get Alerts
 	rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
+	// Get Alert Card
+	rpc getAlertCard(GetAlertCardRequest) returns (GetAlertCardResponse) {}
 	// Get zones/zone-apps
 	rpc listZones(ListZonesRequest) returns (ListZonesResponse) {}
 	// Get links within a zone-app
 	rpc listLinks(ListLinksRequest) returns (ListLinksResponse) {}
 	// Get tenant-wide insights
 	rpc listInsights(ListInsightsRequest) returns (ListInsightsResponse) {}
+	// Update links (Define/remove policies or snooze alerts)
+	rpc updateLinks(UpdateLinksRequest) returns (AraaliAPIResponse) {}
 }
