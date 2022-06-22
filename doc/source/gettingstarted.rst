@@ -9,7 +9,7 @@ you to **single-click install as well as uninstall Araali.**
 **Overview:** Installing Araali is simple. The first step is to create an
 account for using `Araali UI <https://console.araalinetworks.com>`_ . After
 that, download the “command-line tool,” araalictl onto your your machine from
-where you typically use kubectl. Authorize araalictl, start the assessment, install 
+where you typically use kubectl. Authorize araalictl, start the assessment, install
 the Software you want to assess, and see the results on the Araali UI.
 
 Step 1: Sign In or Register in the Araali Console
@@ -41,7 +41,7 @@ araalictl for your Linux or Mac machine.
 
    # On Linux
    curl -O https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64
-   
+
    # On Mac
    curl -O https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.darwin-amd64
 
@@ -52,7 +52,7 @@ First, make your araalictl executable::
    chmod +x araali*
 
    ln -sf araali* araalictl
-              
+
 
 Authorize your session::
 
@@ -150,6 +150,8 @@ If araalictl and kubectl are not running on the same machine::
 VM
 --
 
+**NOTE: If you have already fortified your Kubernetes cluster, you do not need to fortify your VM as well.**
+
 Requirements
 ^^^^^^^^^^^^
 
@@ -169,7 +171,19 @@ Self Fortification
 
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
-3. Self-Fortify::
+3. Edit the sudoers file::
+
+    sudo visudo
+
+4. Allow for password-less sudo::
+
+    # Scroll to the very bottom of the file, add the following line
+    # Replace <user> with the user for the VM
+    <user> ALL=(ALL) NOPASSWD: ALL
+
+    # ^X to save and exit editor
+
+5. Self-Fortify::
 
     ./araalictl fortify-live  -fortify -tags=zone=<zone_name>,app=<app_name> localhost
 
@@ -220,7 +234,7 @@ Araali UI
 
 Go to the Araali UI (`console.araalinetworks.com
 <https://console.araalinetworks.com>`_) and log in with the same email that was
-used to authorize araalictl. 
+used to authorize araalictl.
 
 .. image:: images/top_risk_buckets.png
   :width: 650
@@ -243,4 +257,3 @@ yaml file
 ::
 
    ./araalictl assessment -report
-
