@@ -1,0 +1,20 @@
+identities:
+- node:
+    name: amazonaws_shield
+    dns_pattern: .*shield.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: aws_load_balancer_controller
+    zone: .*
+    app: kube-system
+    pod: aws-load-balancer-controller
+    container: aws-load-balancer-controller
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
+  pushdown: []
+authorizations:
+- name: amazonaws_shield
+  in:
+  - aws_load_balancer_controller
