@@ -107,11 +107,10 @@ func TenantCreate(name, adminName, adminEmail string, freemium bool) (*araali_ap
 	}
 	defer cancel()
 
-	req := &araali_api_service.TenantRequest{
+	req := &araali_api_service.CreateTenantRequest{
 		Tenant: &araali_api_service.Tenant{
 			AdminEmail: adminEmail,
 		},
-		Op: araali_api_service.TenantRequest_ADD,
 	}
 	resp, err := api.CreateTenant(ctx, req)
 	if err != nil {
@@ -132,11 +131,10 @@ func TenantDelete(tenantID string) (*araali_api_service.AraaliAPIResponse, error
 	}
 	defer cancel()
 
-	req := &araali_api_service.TenantRequest{
+	req := &araali_api_service.DeleteTenantRequest{
 		Tenant: &araali_api_service.Tenant{
 			Id: tenantID,
 		},
-		Op: araali_api_service.TenantRequest_DEL,
 	}
 	resp, err := api.DeleteTenant(ctx, req)
 	if err != nil {
@@ -163,7 +161,7 @@ func UserAdd(tenantID, userName, userEmail, role string) (*araali_api_service.Ar
 	if role == "ADMIN" {
 		r = araali_api_service.AraaliUser_ADMIN
 	}
-	req := &araali_api_service.UserRequest{
+	req := &araali_api_service.AddUserRequest{
 		Tenant: &araali_api_service.Tenant{
 			Id: tenantID,
 		},
@@ -171,7 +169,6 @@ func UserAdd(tenantID, userName, userEmail, role string) (*araali_api_service.Ar
 			Email: userEmail,
 			Role:  r,
 		},
-		Op: araali_api_service.UserRequest_ADD,
 	}
 	resp, err := api.AddUser(ctx, req)
 	if err != nil {
@@ -194,14 +191,13 @@ func UserDelete(tenantID, userEmail string) (*araali_api_service.AraaliAPIRespon
 	}
 	defer cancel()
 
-	req := &araali_api_service.UserRequest{
+	req := &araali_api_service.DeleteUserRequest{
 		Tenant: &araali_api_service.Tenant{
 			Id: tenantID,
 		},
 		User: &araali_api_service.AraaliUser{
 			Email: userEmail,
 		},
-		Op: araali_api_service.UserRequest_DEL,
 	}
 	resp, err := api.DeleteUser(ctx, req)
 	if err != nil {
@@ -211,8 +207,9 @@ func UserDelete(tenantID, userEmail string) (*araali_api_service.AraaliAPIRespon
 }
 
 // ListAssets
-func ListAssets(tenantID, zone, app string, activeVm, inactiveVm, activeContainer, inactiveContainer bool,
-	startTime, endTime time.Time) (*araali_api_service.ListAssetsResponse, int, int, error) {
+func ListAssets(tenantID, zone, app string, activeVm, inactiveVm,
+	activeContainer, inactiveContainer bool, startTime, endTime time.Time) (
+	*araali_api_service.ListAssetsResponse, int, int, error) {
 	if len(tenantID) == 0 {
 		return nil, -1, -1, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
@@ -248,11 +245,11 @@ func ListAssets(tenantID, zone, app string, activeVm, inactiveVm, activeContaine
 	vmCount := 0
 	containerCount := 0
 	for _, asset := range resp.Assets {
-		if asset.State == araali_api_service.AssetState_ACTIVE {
-			if asset.Type == araali_api_service.AssetType_CONTAINER {
+		if asset.State == araali_api_service.Asset_ACTIVE {
+			if asset.AssetType == araali_api_service.Asset_CONTAINER {
 				containerCount++
 			}
-			if asset.Type == araali_api_service.AssetType_VIRTUAL_MACHINE {
+			if asset.AssetType == araali_api_service.Asset_VIRTUAL_MACHINE {
 				vmCount++
 			}
 		}
@@ -264,7 +261,7 @@ type AlertPage struct {
 	tenantID    string
 	start       time.Time
 	end         time.Time
-	all         bool
+	filter      *araali_api_service.AlertFilter
 	count       int32
 	PagingToken []byte
 	Alerts      []*araali_api_service.Link
@@ -290,22 +287,13 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	}
 	defer cancel()
 
-	alertFilter := &araali_api_service.AlertFilter{
-		RollupType: araali_api_service.LinkState_BASELINE_ALERT,
-		Time: &araali_api_service.TimeSlice{
-			StartTime: timestamppb.New(alertPage.start),
-			EndTime:   timestamppb.New(alertPage.end),
-		},
-		ListAllAlerts: alertPage.all,
-	}
-
 	req := &araali_api_service.ListAlertsRequest{
 		Tenant: &araali_api_service.Tenant{
 			Id: alertPage.tenantID,
 		},
 		Count:       alertPage.count,
 		PagingToken: string(alertPage.PagingToken),
-		Filter:      alertFilter,
+		Filter:      alertPage.filter,
 	}
 	resp, err := api.ListAlerts(ctx, req)
 	if err != nil {
@@ -324,7 +312,7 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	}
 
 	listOfLinks = resp.Links
-	token, err := hex.DecodeString(listOfLinks[len(listOfLinks)-1].PagingToken)
+	token, err := hex.DecodeString(resp.PagingToken)
 	if err != nil {
 		return listOfLinks, fmt.Errorf("Error decoding token")
 	}
@@ -334,13 +322,11 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	return listOfLinks, nil
 }
 
-func ListAlerts(tenantID string, startTime, endTime time.Time,
-	count int32, all bool, pagingToken string) (AlertPage, error) {
+func ListAlerts(tenantID string,  filter *araali_api_service.AlertFilter,
+	count int32, pagingToken string) (AlertPage, error) {
 	alertPage := AlertPage{
 		tenantID: tenantID,
-		start:    startTime,
-		end:      endTime,
-		all:      all,
+		filter:   filter,
 		count:    count,
 	}
 	if len(tenantID) == 0 {
@@ -359,22 +345,13 @@ func ListAlerts(tenantID string, startTime, endTime time.Time,
 	}
 	defer cancel()
 
-	alertFilter := &araali_api_service.AlertFilter{
-		RollupType: araali_api_service.LinkState_BASELINE_ALERT,
-		Time: &araali_api_service.TimeSlice{
-			StartTime: timestamppb.New(alertPage.start),
-			EndTime:   timestamppb.New(alertPage.end),
-		},
-		ListAllAlerts: alertPage.all,
-	}
-
 	req := &araali_api_service.ListAlertsRequest{
 		Tenant: &araali_api_service.Tenant{
 			Id: alertPage.tenantID,
 		},
 		Count:       alertPage.count,
 		PagingToken: string(alertPage.PagingToken),
-		Filter:      alertFilter,
+		Filter:      alertPage.filter,
 	}
 	resp, err := api.ListAlerts(ctx, req)
 	if err != nil {
@@ -388,7 +365,7 @@ func ListAlerts(tenantID string, startTime, endTime time.Time,
 	fmt.Printf("ListAlerts Response: %v", resp)
 
 	alertPage.Alerts = resp.Links
-	token, err := hex.DecodeString(alertPage.Alerts[len(alertPage.Alerts)-1].PagingToken)
+	token, err := hex.DecodeString(resp.PagingToken)
 	if err != nil {
 		return alertPage, fmt.Errorf("error decoding token")
 	}
@@ -397,67 +374,9 @@ func ListAlerts(tenantID string, startTime, endTime time.Time,
 	return alertPage, nil
 }
 
-// GetAlertCard
-
-func GetAlertCard(tenantID string, startTime, endTime time.Time) (*araali_api_service.GetAlertCardResponse, error) {
-	if len(tenantID) == 0 {
-		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
-	}
-	ctx, cancel, api := getApiClient()
-	if api == nil {
-		return nil, fmt.Errorf("could not get API handle")
-	}
-	defer cancel()
-
-	req := &araali_api_service.GetAlertCardRequest{
-		Tenant: &araali_api_service.Tenant{
-			Id: tenantID,
-		},
-		Time: &araali_api_service.TimeSlice{
-			StartTime: timestamppb.New(startTime),
-			EndTime:   timestamppb.New(endTime),
-		},
-	}
-	resp, err := api.GetAlertCard(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// ListZones
-func ListZones(tenantID, zone, app string, startTime, endTime time.Time, fetchLinks bool) (*araali_api_service.ListZonesResponse, error) {
-	if len(tenantID) == 0 {
-		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
-	}
-
-	ctx, cancel, api := getApiClient()
-	if api == nil {
-		return nil, fmt.Errorf("could not get API handle")
-	}
-	defer cancel()
-
-	req := &araali_api_service.ListZonesRequest{
-		Tenant: &araali_api_service.Tenant{
-			Id: tenantID,
-		},
-		Zone:       zone,
-		App:        app,
-		FetchLinks: fetchLinks,
-		Time: &araali_api_service.TimeSlice{
-			StartTime: timestamppb.New(startTime),
-			EndTime:   timestamppb.New(endTime),
-		},
-	}
-	resp, err := api.ListZones(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
 // ListLinks
-func ListLinks(tenantID, zone, app, service string, startTime, endTime time.Time) (*araali_api_service.ListLinksResponse, error) {
+func ListLinks(tenantID, zone, app, service string, startTime, endTime time.Time) (
+	*araali_api_service.ListLinksResponse, error) {
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}
@@ -487,7 +406,8 @@ func ListLinks(tenantID, zone, app, service string, startTime, endTime time.Time
 }
 
 // ListInsights
-func ListInsights(tenantID, zone string) (*araali_api_service.ListInsightsResponse, error) {
+func ListInsights(tenantID, zone string) (
+	*araali_api_service.ListInsightsResponse, error) {
 	if len(tenantID) == 0 {
 		return nil, fmt.Errorf("invalid tenantid (%v)", tenantID)
 	}

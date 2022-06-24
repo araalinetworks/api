@@ -10,396 +10,539 @@ import "google/protobuf/timestamp.proto";
 option java_multiple_files = true;
 option java_package = "proto.araali.api";
 option java_outer_classname = "APIServiceProto";
-option go_package = "araali.golang/proto/araali/araali_api_service";
+option go_package = "proto/araali/araali_api_service";
 
 package araali_api_service;
 
-//////
-// API Interface to the backend
-//////
-
-///// Tenant and User API's
+/**
+ * Tenant object identifying the tenant in API calls.
+ */
 message Tenant {
+	/** Id of the tenant */
 	string id          = 1;
+	/** Admin e-mail of the tenant.
+	 *  Also adds an ADMIN role user in this tenant.
+	 */
 	string admin_email = 2;
 }
 
+/**
+ * User object identifying the user in API calls.
+ */
 message AraaliUser {
+	/** E-mail of the registering user */
 	string email       = 1;
+	/** Enum for specifying the role of a user */
 	enum Role {
-		ADMIN = 0;
-		USER  = 1;
+		ADMIN = 0;	// Enables user to create, modify other users
+		USER  = 1;	// Set if the user is not an administrator
 	}
+	/** Role of the registering user */
 	Role role          = 2;
+	/** Enables role to have access to zone-apps
+	 * 		TRUE  - Enable modify access to zone-apps
+	 *		FALSE - Enable read-only access to zone-apps.
+	 */
 	bool is_site_admin = 3;
 }
 
-message TimeSlice {
-	google.protobuf.Timestamp start_time = 1;
-	google.protobuf.Timestamp end_time   = 2;
-}
-
-message TenantRequest {
-	enum Op {
-        ADD = 0;
-        DEL = 1;
-	}
+message CreateTenantRequest {
+	/** Information required to create the tenant */
 	Tenant tenant = 1;
-	Op op         = 2;
 }
 
 message CreateTenantResponse {
+	/** Success/Failure of the API call */
 	AraaliAPIResponse response = 1;
+	/** Handle for the newly created tenant */
 	Tenant tenant              = 2;
 }
 
-message UserRequest {
-	enum Op {
-		ADD = 0;
-		DEL = 1;
-	}
-	Tenant tenant     = 1;
-	AraaliUser user   = 2;
-	Op op             = 3;
+message DeleteTenantRequest {
+	/** Tenant being deleted */
+	Tenant tenant = 1;
 }
 
-///// List Asset API
+message AddUserRequest {
+	/** Tenant of the user being added */
+	Tenant tenant     = 1;
+	/** Information required to create the tenant */
+	AraaliUser user   = 2;
+}
+
+message DeleteUserRequest {
+	/** Tenant of the user being deleted */
+	Tenant tenant     = 1;
+	/** Handle of the user being deleted */
+	AraaliUser user   = 2;
+}
+
+/**
+ * Generic API response object.
+ */
+message AraaliAPIResponse {
+	/** Return status codes for the Araali APIs */
+	enum ReturnCode {
+		SUCCESS = 0;	// API call succeeded
+		FAILURE = 1;	// API call failed
+		UNKNOWN = 2;	// Status unknown (Should never happen)
+	}
+	/** Success/Failure of API call */
+	ReturnCode code = 1;
+	/** Custom message returned by the service if any */
+	string message  = 2;
+}
+
+/**
+ * Object for specifying start and end time in varous API calls.
+ */
+message TimeSlice {
+	/** Start time to fetch from. Specify 0 to indicate beginning of time  */
+	google.protobuf.Timestamp start_time = 1;
+	/** End time to fetch up to */
+	google.protobuf.Timestamp end_time   = 2;
+}
+
+/**
+ * Flags to filter assets in the ListAssets API.
+ */
 message AssetFilter {
+	/** Return active virtual machines */
 	bool list_active_vm          = 1;
+	/** Return inactive virtual machines */
 	bool list_inactive_vm        = 2;
+	/** Return active containers */
 	bool list_active_container   = 3;
+	/** Return inactive containers */
 	bool list_inactive_container = 4;
 }
 
+/**
+ * Request for the list of assets (virtual machines/containers) in a tenant.
+ */
 message ListAssetsRequest {
+	/** Handle of the tenant */
 	Tenant tenant      = 1;
+	/** Zone from which to return assets */
 	string zone        = 2;
+	/** App/Namespace from which to return assets */
 	string app         = 3;
+	/** Start/End time range from which to return assets */
 	TimeSlice time     = 4;
+	/** Filter assets based on type and active/inactive */
 	AssetFilter filter = 5;
 }
 
-message AraaliAPIResponse {
-	enum ReturnCode {
-		SUCCESS = 0;
-		FAIL    = 1;
-		UNKNOWN = 2;
-	}
-	ReturnCode code = 1;
-	string msg      = 2;
-}
-
-enum AssetState {
-	DELETED  = 0;
-	ACTIVE   = 1;
-	INACTIVE = 2;
-}
-
-enum AssetType {
-	UNKNOWN_TYPE    = 0;
-	VIRTUAL_MACHINE = 1;
-	CONTAINER       = 2;
-}
-
-enum AssetMode {
-	TAP                         = 0;
-	INLINE                      = 1;
-	TRANSITIONING_TAP_TO_INLINE = 2;
-	TRANSITIONING_INLINE_TO_TAP = 3;
-}
-
 message ListAssetsResponse {
+	/** ListAsset API call response */
 	AraaliAPIResponse response = 1;
+	/** List of assets */
 	repeated Asset assets      = 2;
 }
 
-message Asset {
-	string name                            = 1;
-	string ip_address                      = 2;
-	string uuid                            = 3;
-	string image                           = 4;
-	string zone                            = 5;
-	repeated string apps                   = 6;
-	AssetState state                       = 7;
-	AssetType type                         = 8;
-	repeated Vulnerability vulnerabilities = 9;
-	AssetMode mode                         = 10;
-	string os_name                         = 11;
-	string iam_role                        = 12;
-	bool docker_privileged                 = 13; // only applies to Docker containers
-	oneof capabilities {
-		string docker_capabilities         = 14;
-		string containerd_capabilities     = 15;
-	}
-	// could also return EnforcementStatus here
+/**
+ * List of capabilities
+ */
+message Capabilities {
+	repeated string capabilities = 1;
 }
 
+/**
+ * Representation of container/virtual machine information.
+ */
+message Asset {
+	/** State of the asset */
+	enum AssetState {
+		DELETED  = 0;	// Asset has been deleted
+		ACTIVE   = 1;	// Asset is active
+		INACTIVE = 2;	// Asset is inactive
+	}
+	/** Type of the asset */
+	enum AssetType {
+		UNKNOWN_ASSET   = 0; 	// Unknown asset type
+		VIRTUAL_MACHINE = 1;	// Virtual Machine type
+		CONTAINER       = 2;	// Container type
+	}
+	/** Mode the asset is in
+	 * 		TAP    - Tap's into telemetry to discover policies (no enforcement).
+	 *		INLINE - Firewall embedded inline to enforce policies if needed (enforcement).
+	 */
+	enum AssetMode {
+		TAP                         = 0;	// No enforcement/visibility mode
+		INLINE                      = 1;	// Inline enforcement mode
+		TRANSITIONING_TAP_TO_INLINE = 2;	// Transitioning from TAP to INLINE
+		TRANSITIONING_INLINE_TO_TAP = 3;	// Transitioning from INLINE to TAP
+	}
+	/** Host name of asset */
+	string host_name                       = 1;
+	/** IP address assigned to the asset */
+	string ip_address                      = 2;
+	/** UUID if virtual machine or container-id if container */
+	string uuid                            = 3;
+	/** Container image or ami-id for virtual machines */
+	string image                           = 4;
+	/** Zone the asset belongs to */
+	string zone                            = 5;
+	/** Apps the asset belongs to */
+	repeated string apps                   = 6;
+	/** State of the asset active, inactive etc */
+	AssetState state                       = 7;
+	/** Type of the asset */
+	AssetType asset_type                   = 8;
+	/** Vulnerabilities in the asset */
+	repeated Vulnerability vulnerabilities = 9;
+	/** Visibility/Enforcement mode of the asset */
+	AssetMode mode                         = 10;
+	/** OS name of the asset */
+	string os_name                         = 11;
+	/** AWS IAM Role assigned to the asset */
+	string iam_role                        = 12;
+	/** Docker privilege assigned to the container (Docker containers only) */
+	bool docker_privileged                 = 13;
+	/** Capabilities of the container (container only) */
+	oneof capabilities {
+		/** Capabilities exported by docker */
+		Capabilities docker     		   = 14;
+		/** Capabilities exported by containerd */
+		Capabilities containerd            = 15;
+	}
+}
+
+/**
+ * Captures an instance of vulnerability package name, cve info etc
+ */
 message Vulnerability {
+	/** Package name with the vulnerability */
 	string package_name    = 1;
+	/** CVE id of the vulnerability */
 	repeated string cve_id = 2;
+	/** Severity of the vulnerability */
 	Severity severity = 3;
 	enum Severity {
-		NONE = 0;
-		LOW = 1;
-		MEDIUM = 2;
-		HIGH = 3;
-		CRITICAL = 4;
+		NONE 	 = 0;	// No severity
+		LOW 	 = 1;	// Low severity
+		MEDIUM 	 = 2;	// Medium severity
+		HIGH 	 = 3;	// High severity
+		CRITICAL = 4;	// Critical severity
 	}
 }
 
+/**
+ * Fields to filter alerts in the ListAlerts API.
+ */
 message AlertFilter {
-	bool new_alerts              = 1;
-	bool open_alerts             = 2;
-	bool closed_alerts           = 3;
-	bool perimeter_egress        = 4;
-	bool perimeter_ingress       = 5;
-	bool home_non_araali_egress  = 6;
-	bool home_non_araali_ingress = 7;
-	bool araali_to_araali        = 8;
-	bool list_all_alerts         = 9; // Fetch all alerts from all lenses, even ones not monitored by current user
-	LinkState rollup_type   = 10;
-	TimeSlice time               = 11;
+	/** Fetch open alerts */
+	bool open_alerts             = 1;
+	/** Fetch closed alerts */
+	bool closed_alerts           = 2;
+	/** Fetch perimeter egress alerts */
+	bool perimeter_egress        = 3;
+	/** Fetch perimeter ingress alerts */
+	bool perimeter_ingress       = 4;
+	/** Fetch non araali egress alerts from private subnets */
+	bool home_non_araali_egress  = 5;
+	/** Fetch non araali ingress alerts from private subnets */
+	bool home_non_araali_ingress = 6;
+	/** Fetch araali to araali alerts */
+	bool araali_to_araali        = 7;
+	/** Fetch all alerts from all lenses, even ones not monitored by current user */
+	bool list_all_alerts         = 8;
+	/** Time range in which to fetch alerts */
+	TimeSlice time               = 9;
 }
 
+/**
+ * Request for alerts received by tenant
+ */
 message ListAlertsRequest {
+	/** Handle to tenant */
 	Tenant tenant       = 1;
+	/** Filter responses */
 	AlertFilter filter  = 2;
+	/** Number of alerts to be returned each API call */
 	int32 count         = 3;
+	/** Token to be sent in the next API call to retrieve the next set of alerts (paging) */
 	string paging_token = 4;
 }
 
 message ListAlertsResponse {
+	/** ListAsset API call response */
 	AraaliAPIResponse response = 1;
+	/** List of alerts */
 	repeated Link links        = 2;
+	/** Token to be passed to the next API call (indicating there are more alerts to be retrieved) */
+	string paging_token        = 3;
 }
 
-message EndPoint {
+/*
+ * Represents an araali endpoint
+ */
+message AraaliEndpoint {
+	/** Zone the endpoint belongs to */
 	string zone                = 1;
+	/** Mapped app the endpoint belongs to */
 	string app                 = 2;
+	/** Original app/namespace the endpoint belongs to */
 	string unmapped_app        = 3;
-	string outer_app           = 4;
-	string process             = 5;
-	string binary_name         = 6;
-	string parent_process      = 7;
-	string dns_pattern         = 8;
-	string subnet              = 9;
-	uint32 net_mask            = 10;
-	uint32 dst_port            = 11;
-	bool private_subnet        = 12;
-	string endpoint_group      = 13;
-	string organization        = 14;
-	string pod                 = 15;
-	string container_name      = 16;
+	/** Namespace of the endpoint */
+	string namespace           = 4;
+	/** Pod the endpoint belongs to */
+	string pod                 = 5;
+	/** Container the endpoint belongs to */
+	string container_name      = 6;
+	/** Process of the endpoint belongs to */
+	string process             = 7;
+	/** Binary name of the endpoint process */
+	string binary_name         = 8;
+	/** Parent of the endpoint process */
+	string parent_process      = 9;
 }
 
+/**
+ * Represents the subnet/mask
+ */
+message Subnet {
+	/** Client subnet */
+	string subnet       = 1;
+	/** Client netmask */
+	uint32 net_mask     = 2;
+}
+
+/*
+ * Represents a non araali client endpoint
+ */
+message NonAraaliClientEndpoint {
+	/** Client subnet */
+	Subnet subnet = 1;
+}
+
+/*
+ * Represents a non araali server endpoint
+ */
+message NonAraaliServerEndpoint {
+	oneof dns_or_subnet {
+		/** DNS/FQDN of endpoint */
+		string dns_pattern = 1;
+		/** Server subnet */
+		Subnet subnet      = 2;
+	}
+	/** Service destination port */
+	uint32 dst_port            = 13;
+}
+
+/*
+ * Represents a non araali endpoint
+ */
+message NonAraaliEndpoint {
+	enum EndpointGroup {
+		UNKNOWN_GROUP = 0;
+		WORLD =         1;
+		HOME =          2;
+	}
+	oneof info {
+		/** Non araali client */
+		NonAraaliClientEndpoint client = 1;
+		/** Non araali server */
+		NonAraaliServerEndpoint server = 2;
+	}
+	/** WORLD if public subnet. HOME if private subnet. */
+	EndpointGroup endpoint_group = 3;
+	/** Autonomous System Organization of the IP address if available */
+	string organization   = 4;
+}
+
+/**
+ * Represents one end of a link/alert_counts
+ */
+message EndPoint {
+	oneof info {
+		/** Araali endpoint info */
+		AraaliEndpoint araali        = 1;
+		/** Non-Araali endpoint info */
+		NonAraaliEndpoint non_araali = 2;
+	}
+}
+
+/**
+ * Additional information about alerts
+ */
 message AlertInfo {
-	string commuication_alert_type = 1;
+	enum Status {
+		UNKNOWN_STATUS = 0;
+		OPEN           = 1;
+		CLOSED         = 2;
+	}
+	/** Alert type */
+	string communication_alert_type = 1;
+	/** Process alert type */
 	string process_alert_type      = 2;
+	/** Number of times transitioned from SNOOZED -> ALERT */
 	uint32 re_open_count           = 3;
-	string status                  = 4;
+	/** Whether OPEN or CLOSED */
+	Status status              = 4;
 }
 
-enum LinkType {
-	UNKNOWN = 0;
-	NON_ARAALI_INGRESS = 1;
-	ARAALI_INGRESS = 2;
-	NON_ARAALI_EGRESS = 3;
-	ARAALI_EGRESS = 4;
-	INTERNAL = 5;
-}
-
+/**
+ * Type of a link Alert or PolicyInfo
+ */
 enum LinkState {
-	BASELINE_ALERT = 0;
-	DEFINED_POLICY = 1;
-	SNOOZED_POLICY = 2;
-	DENIED_POLICY = 3;
+	BASELINE_ALERT = 0;	// Alert
+	DEFINED_POLICY = 1;	// Currently active policy
+	SNOOZED_POLICY = 2;	// Policy that was discovered but removed/snoozed
+	DENIED_POLICY  = 3;	// Deny policy
 }
 
-// Could make state and error_code enum fields as well
+message Ports {
+	/** Active aggregated ports in the link */
+	repeated uint32 active_ports   = 1;
+	/** Inactive aggregated ports in the link */
+	repeated uint32 inactive_ports = 2;
+}
+
+/**
+ * Represents an alert or policy link
+ */
 message Link {
-	EndPoint client                = 1;
-	EndPoint orig_client           = 2;
-	EndPoint server                = 3;
-	EndPoint orig_server           = 4;
-	LinkType type                  = 5;
-	TimeSlice timestamp            = 6;
-	string unique_id               = 7;
-	bool speculative               = 8;
-	LinkState state                = 9;
-	LinkState new_state            = 10;
-	string paging_token            = 11;
-	AlertInfo alert_info           = 12;
-	repeated string roll_up_ids    = 13;
-	repeated uint32 active_ports   = 14;
-	repeated uint32 inactive_ports = 15;
-	string template_name           = 16;
-	string template_user           = 17;
-	string policy_skip_reason      = 18;
-	string error_code              = 19;
+	/** Direction of the link araali-araali, araali-ingress etc */
+	enum LinkDirection {
+		UNKNOWN_DIRECTION  = 0;	// Unknown
+		NON_ARAALI_INGRESS = 1;	// Ingress from an unprotected non-araali endpoint
+		ARAALI_INGRESS     = 2;	// Ingress from an araali protected endpoint
+		NON_ARAALI_EGRESS  = 3;	// Egress to an unprotected non-araali endpoint
+		ARAALI_EGRESS      = 4; // Egress to an araali protected endpoint
+		INTERNAL           = 5;	// Link between two araali endpoints within an app
+	}
+	/** Client endpoint */
+	EndPoint client                                = 1;
+	/** Server endpoint */
+	EndPoint server                                = 2;
+	/** Direction of client-server link */
+	LinkDirection direction                        = 3;
+	/** Timestamp when link was discovered */
+	google.protobuf.Timestamp timestamp            = 4;
+	/** Unique handle to the link */
+	string unique_id                               = 5;
+	/** State of the link alert, active/snoozed etc */
+	LinkState state                                = 6;
+	/** Aggregated active/inactive ports */
+	Ports ports								       = 7;
+	oneof info {
+		/** Additional information for alerts */
+		AlertInfo alert_info                       = 8;
+		/** Additional information for policy links */
+		PolicyInfo policy_info                     = 9;
+	}
 }
 
-message DirectionCounts {
-	uint64 total             = 1;
-	uint64 ingress           = 2;
-	uint64 perimeter_ingress = 3;
-	uint64 internal          = 4;
-	uint64 egress            = 5;
-	uint64 perimeter_egress  = 6;
-}
-
-enum EnforcementState {
-	DISABLED      = 0;
-	TRANSITIONING = 1;
-	ENABLED       = 2;
-}
-
-message ComputeCounts {
-	uint32 virtual_machines = 1;
-	uint32 containers       = 2;
-}
-
-message App {
-	string name                        = 1;
-	string zone_name                   = 2;
-	string araali_url                  = 3;
-	DirectionCounts defined_counts     = 4;
-	DirectionCounts denied_counts      = 5;
-	DirectionCounts alert_counts       = 6;
-	DirectionCounts service_counts     = 7;
-	ComputeCounts compute_counts       = 8;
-	repeated Link links                = 9;
-	EnforcementState ingress_enforced  = 10;
-	EnforcementState internal_enforced = 11;
-	EnforcementState egress_enforced   = 12;
-}
-
-message Zone {
-	string name       = 1;
-	repeated App apps = 2;
-}
-
-message ListZonesRequest {
-	Tenant tenant     = 1;
-	string zone       = 2;
-	string app        = 3;
-	TimeSlice time    = 4;
-	bool fetch_links  = 5;
-}
-
-message ListZonesResponse {
-	AraaliAPIResponse response = 1;
-	repeated Zone zones        = 2;
+/**
+ * Additional information about policy
+ */
+message PolicyInfo {
+	/** Template name used to validate the link */
+	string template_name      = 1;
+	/** User who created the template to validate the link */
+	string template_user      = 2;
+	/** Reason for skipping policy evaluation at agents when enforced */
+	string policy_skip_reason = 3;
 }
 
 message ListLinksRequest {
+	/** Handle for the tenant */
 	Tenant tenant  = 1;
+	/** Zone for the request */
 	string zone    = 2;
+	/** App for the request */
 	string app     = 3;
-	string service = 4; // Required when zone and app are not specified. Must be in form of ip:port or fqdn:port
+	/** Required when zone and app are not specified. Must be in form of ip:port or fqdn:port */
+	string service = 4;
+	/** Time range for the list links request */
 	TimeSlice time = 5;
 }
 
 message ListLinksResponse {
+	/** ListLinks API call response */
 	AraaliAPIResponse response = 1;
+	/** List of links */
 	repeated Link links        = 2;
 }
 
+/**
+ * Drilled down entity/lens
+ */
 message Lens {
+	/** Type of lens */
 	enum LensType {
-		UNKNOWN  = 0;
-		ZONE_APP = 1;
-		SERVICE = 2;
-		ZONE = 3;
-		PROCESS = 4;
-		CONTAINER = 5;
-		TENANT = 6; // Use: Tenant Level Alert Email Registration
+		UNKNOWN_LENS = 0;	// Unspecified
+		ZONE_APP     = 1;	// Zone/App level
+		SERVICE      = 2;	// Service level
+		ZONE         = 3;	// Zone level
+		PROCESS      = 4;	// Process level
+		CONTAINER    = 5;	// Container level
+		TENANT       = 6;	// Tenant level
 	}
-	LensType type = 1;
-	string zone = 2;
-	string app = 3;
-	string pod = 4;
+	/** Lens type */
+	LensType type         = 1;
+	/** Zone of the lens */
+	string zone           = 2;
+	/** App lens */
+	string app            = 3;
+	/** Pod of the lens */
+	string pod            = 4;
+	/** Container of the lens */
 	string container_name = 5;
-	string process = 6;
+	/** Process of the lens */
+	string process        = 6;
+	/** Parent process of the lens */
 	string parent_process = 7;
-	string binary_name = 8;
-	string service = 9;
-
+	/** Binary name of the lens */
+	string binary_name    = 8;
+	/** Service lens */
+	string service        = 9;
 }
+
+/**
+ * Instance of the insight Representation
+ */
 message Insight {
-	enum InsightReason {
-		NONE                           = 0;
-		DB_PROCESS                     = 1; // "Database Process"
-		DBAAS                          = 2;  //"Data Store as a Service"
-		WORLD_EXPOSED_PROCESS          = 3;
-		PRIVILEGE_PROCESS              = 4;
-		CRITICAL_CVE_CONTAINER         = 5;
-		HOME_EXPOSED_PROCESS           = 6;
-		HIGH_DEGREE_SERVICE            = 7;
-		CRITICAL_CVE_PROCESS           = 8;
-		// Do not use field num 9 in future
-		SAAS_SERVICE                   = 10;
-		POTENTIAL_C2_PROCESS           = 11;
-		PRIVILEGE_CONTAINER            = 12;
-		SECRETS_STORE                  = 13;
-		SPRING4SHELL_CVE_PROCESS       = 14;
-		ENFORCED_LENS                  = 15;
-		SECRET_IN_ENV                  = 16;
-		WORLD_EXPOSED_LB_PROCESS       = 17;
-		IAM_OVER_PROVISIONED_CONTAINER = 18;
-	}
-	InsightReason reason = 1;
+	/** The kind of insight captured */
+	string reason        = 1;
+	/** The URL to view the insights */
 	string url           = 2;
+	/** Number of insights */
 	uint32 count         = 3;
+	/** The zone/app the insights belong to */
 	repeated Lens lens   = 4;
 }
 
 message ListInsightsRequest {
+	/** Handle of tenant */
 	Tenant tenant = 1;
-	string zone      = 2; // Used by API to fetch per zone (as per Tenable requirements)
+	/** Zone where insights are requested */
+	string zone   = 2;
 }
 
 message ListInsightsResponse {
+	/** ListInsights API call response */
 	AraaliAPIResponse response = 1;
+	/** List of insights */
 	repeated Insight insights  = 2;
-}
-
-message GetAlertCardRequest {
-	Tenant tenant  = 1;
-	TimeSlice time = 2;
-}
-
-message GetAlertCardResponse {
-	AraaliAPIResponse response  = 1;
-	uint64 total_alerts         = 2;
-	repeated Zone alert_details = 3;
-}
-
-message UpdateLinksRequest {
-	Tenant tenant       = 1;
-	repeated Link links = 2;
 }
 
 service AraaliAPI {
 	// Add a tenant
-	rpc createTenant(TenantRequest) returns (CreateTenantResponse) {}
+	rpc createTenant(CreateTenantRequest) returns (CreateTenantResponse) {}
 	// Delete a tenant
-	rpc deleteTenant(TenantRequest) returns (AraaliAPIResponse) {}
+	rpc deleteTenant(DeleteTenantRequest) returns (AraaliAPIResponse) {}
 	// Add a user
-	rpc addUser(UserRequest)  returns (AraaliAPIResponse) {}
+	rpc addUser(AddUserRequest)  returns (AraaliAPIResponse) {}
 	// Delete a user
-	rpc deleteUser(UserRequest) returns (AraaliAPIResponse) {}
-	// Get asset
+	rpc deleteUser(DeleteUserRequest) returns (AraaliAPIResponse) {}
+	// Get assets
 	rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
-	// Get Alerts
+	// Get alerts
 	rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
-	// Get Alert Card
-	rpc getAlertCard(GetAlertCardRequest) returns (GetAlertCardResponse) {}
-	// Get zones/zone-apps
-	rpc listZones(ListZonesRequest) returns (ListZonesResponse) {}
-	// Get links within a zone-app
+	// Get links within a zone/app
 	rpc listLinks(ListLinksRequest) returns (ListLinksResponse) {}
-	// Get tenant-wide insights
+	// Get tenant wide insights
 	rpc listInsights(ListInsightsRequest) returns (ListInsightsResponse) {}
-	// Update links (Define/remove policies or snooze alerts)
-	rpc updateLinks(UpdateLinksRequest) returns (AraaliAPIResponse) {}
 }

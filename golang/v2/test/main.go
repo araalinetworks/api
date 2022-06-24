@@ -6,13 +6,17 @@ import (
 	"os"
 	"time"
 
+	"araali.proto/araali_api_service"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/araalinetworks/araali/third_party/api/golang/v2/araalictl"
 )
 
 func main() {
 
 	var op, tenantID, tenantName, userEmail, userName string
-	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER/LIST-ASSETS/LIST-ALERTS)")
+	flag.StringVar(&op, "op", "ADD", "specify op(ADD/DEL/ADD-USER/DEL-USER/LIST-ASSETS/LIST-ALERTS/LIST-LINKS/LIST-INSIGHTS)")
 	flag.StringVar(&tenantID, "id", "", "specify tenant")
 	flag.StringVar(&tenantName, "name", "", "specify tenant name")
 	flag.StringVar(&userEmail, "user-email", "", "specify user email")
@@ -63,28 +67,25 @@ func main() {
 			fmt.Println("-id must be specified when op=LIST-ASSETS")
 			os.Exit(1)
 		}
-		resp, err := araalictl.ListAlerts(tenantID, time.Now().Add(time.Duration(-10)*time.Minute), time.Now(), 100, true, "")
-		fmt.Printf("Resp: %v/%v\n", resp, err)
-	} else if op == "GET-ALERT-CARD" {
-		if tenantID == "" {
-			fmt.Println("-id must be specified when op=LIST-ASSETS")
-			os.Exit(1)
+		filter := araali_api_service.AlertFilter{
+			Time: &araali_api_service.TimeSlice{
+				StartTime: timestamppb.New(time.Now().Add(time.Duration(-10) * time.Minute)),
+				EndTime:   timestamppb.New(time.Now()),
+			},
+			ListAllAlerts: true,
+			OpenAlerts:    true,
+			ClosedAlerts:  true,
+			// TODO: Add others to test
 		}
-		resp, err := araalictl.GetAlertCard(tenantID, time.Now(), time.Now())
-		fmt.Printf("Resp: %v/%v\n", resp, err)
-	} else if op == "LIST-ZONES" {
-		if tenantID == "" {
-			fmt.Println("-id must be specified when op=LIST-ZONES")
-			os.Exit(1)
-		}
-		resp, err := araalictl.ListZones(tenantID, "app-chg", "app-chg", time.Now().Add(time.Duration(-10)*time.Minute), time.Now(), true)
+		resp, err := araalictl.ListAlerts(tenantID, &filter, 100, "")
 		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-LINKS" {
 		if tenantID == "" {
 			fmt.Println("-id must be specified when op=LIST-LINKS")
 			os.Exit(1)
 		}
-		resp, err := araalictl.ListLinks(tenantID, "app-chg", "app-chg", "", time.Now().Add(time.Duration(-10)*time.Minute), time.Now())
+		resp, err := araalictl.ListLinks(tenantID, "app-chg", "app-chg", "",
+			time.Now().Add(time.Duration(-10)*time.Minute), time.Now())
 		fmt.Printf("Resp: %v/%v\n", resp, err)
 	} else if op == "LIST-INSIGHTS" {
 		if tenantID == "" {
