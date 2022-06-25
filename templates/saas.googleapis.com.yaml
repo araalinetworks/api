@@ -33,6 +33,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: pubsub
+    dns_pattern: pubsub.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: storage
     dns_pattern: .*storage.googleapis.com
     dst_port: 443
@@ -50,5 +55,6 @@ authorizations:
   - maps
   - monitoring
   - oauth2
+  - pubsub
   - storage
   - www
