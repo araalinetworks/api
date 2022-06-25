@@ -8,6 +8,11 @@ identities:
     process: .*
   pushdown: []
 - node:
+    name: cloudkms
+    dns_pattern: cloudkms.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: cloudtrace
     dns_pattern: .*cloudtrace.googleapis.com
     dst_port: 443
@@ -55,6 +60,7 @@ identities:
 authorizations:
 - name: any
   out:
+  - cloudkms
   - cloudtrace
   - compute
   - logging
