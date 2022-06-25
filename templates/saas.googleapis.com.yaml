@@ -28,6 +28,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: container
+    dns_pattern: container.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: logging
     dns_pattern: .*logging.googleapis.com
     dst_port: 443
@@ -74,6 +79,7 @@ authorizations:
   - cloudresourcemanager
   - cloudtrace
   - compute
+  - container
   - logging
   - maps
   - monitoring
