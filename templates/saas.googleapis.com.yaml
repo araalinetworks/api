@@ -53,6 +53,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: servicecontrol
+    dns_pattern: servicecontrol.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: storage
     dns_pattern: .*storage.googleapis.com
     dst_port: 443
@@ -74,5 +79,6 @@ authorizations:
   - monitoring
   - oauth2
   - pubsub
+  - servicecontrol
   - storage
   - www
