@@ -13,6 +13,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: cloudresourcemanager
+    dns_pattern: .*cloudresourcemanager.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: cloudtrace
     dns_pattern: .*cloudtrace.googleapis.com
     dst_port: 443
@@ -61,6 +66,7 @@ authorizations:
 - name: any
   out:
   - cloudkms
+  - cloudresourcemanager
   - cloudtrace
   - compute
   - logging
