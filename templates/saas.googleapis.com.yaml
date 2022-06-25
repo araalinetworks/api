@@ -18,6 +18,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: maps
+    dns_pattern: .*maps.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: monitoring
     dns_pattern: .*monitoring.googleapis.com
     dst_port: 443
@@ -42,6 +47,7 @@ authorizations:
   out:
   - cloudtrace
   - logging
+  - maps
   - monitoring
   - oauth2
   - storage
