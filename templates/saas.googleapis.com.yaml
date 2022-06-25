@@ -13,6 +13,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: compute
+    dns_pattern: compute.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: logging
     dns_pattern: .*logging.googleapis.com
     dst_port: 443
@@ -51,6 +56,7 @@ authorizations:
 - name: any
   out:
   - cloudtrace
+  - compute
   - logging
   - maps
   - monitoring
