@@ -59,6 +59,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: rds
+    dns_pattern: .*rds.*.amazonaws.com
+    dst_port: 5432
+  pushdown: []
+- node:
     name: s3
     dns_pattern: .*s3.*.amazonaws.com
     dst_port: 443
@@ -96,6 +101,7 @@ authorizations:
   - email
   - es
   - mq
+  - rds
   - s3
   - sns
   - sqs
