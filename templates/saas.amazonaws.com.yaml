@@ -19,6 +19,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: connect
+    dns_pattern: .*connect.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: ec2messages
     dns_pattern: .*ec2messages.*.amazonaws.com
     dst_port: 443
@@ -83,6 +88,7 @@ authorizations:
   out:
   - cache
   - cognito-identity
+  - connect
   - ec2messages
   - efs
   - eks
