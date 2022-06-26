@@ -64,6 +64,11 @@ identities:
     dst_port: 5432
   pushdown: []
 - node:
+    name: route53
+    dns_pattern: .*route53.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: s3
     dns_pattern: .*s3.*.amazonaws.com
     dst_port: 443
@@ -102,6 +107,7 @@ authorizations:
   - es
   - mq
   - rds
+  - route53
   - s3
   - sns
   - sqs
