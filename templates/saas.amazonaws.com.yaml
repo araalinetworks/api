@@ -29,6 +29,11 @@ identities:
     dst_port: 10250
   pushdown: []
 - node:
+    name: elasticfilesystem
+    dns_pattern: .*elasticfilesystem.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: email
     dns_pattern: .*email.*.amazonaws.com
     dst_port: 443
@@ -75,6 +80,7 @@ authorizations:
   - ec2messages
   - efs
   - eks
+  - elasticfilesystem
   - email
   - es
   - mq
