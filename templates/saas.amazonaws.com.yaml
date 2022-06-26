@@ -34,6 +34,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: es
+    dns_pattern: .*es.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: mq
     dns_pattern: .*mq.*.amazonaws.com
     dst_port: 443
@@ -71,6 +76,7 @@ authorizations:
   - efs
   - eks
   - email
+  - es
   - mq
   - s3
   - sns
