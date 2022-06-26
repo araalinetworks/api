@@ -64,6 +64,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: pricing
+    dns_pattern: .*pricing.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: rds
     dns_pattern: .*rds.*.amazonaws.com
     dst_port: 5432
@@ -112,6 +117,7 @@ authorizations:
   - es
   - mq
   - pinpoint
+  - pricing
   - rds
   - route53
   - s3
