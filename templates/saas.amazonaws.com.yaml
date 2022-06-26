@@ -1,5 +1,10 @@
 identities:
 - node:
+    name: amazonlinux.us-west-2
+    dns_pattern: amazonlinux.us-west-2.amazonaws.com
+    dst_port: 80
+  pushdown: []
+- node:
     name: any
     zone: .*
     app: .*
@@ -125,3 +130,4 @@ authorizations:
   - sqs
   - ssm
   - sts
+  - amazonlinux.us-west-2
