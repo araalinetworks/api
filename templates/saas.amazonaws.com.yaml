@@ -14,6 +14,11 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: cognito-identity
+    dns_pattern: cognito-identity.*amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: ec2messages
     dns_pattern: .*ec2messages.*.amazonaws.com
     dst_port: 443
@@ -77,6 +82,7 @@ authorizations:
 - name: any
   out:
   - cache
+  - cognito-identity
   - ec2messages
   - efs
   - eks
