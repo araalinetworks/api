@@ -59,6 +59,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: pinpoint
+    dns_pattern: pinpoint.*amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: rds
     dns_pattern: .*rds.*.amazonaws.com
     dst_port: 5432
@@ -106,6 +111,7 @@ authorizations:
   - email
   - es
   - mq
+  - pinpoint
   - rds
   - route53
   - s3
