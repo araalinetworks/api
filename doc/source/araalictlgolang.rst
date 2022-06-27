@@ -1,5 +1,5 @@
-Golang API V1
-=============
+Golang API Doc
+==============
 
 Setup
 -----

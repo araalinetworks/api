@@ -7,9 +7,7 @@ all: gen
 
 doc: $(PROTOWRAP)
 	echo "Generating documentation"
-	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=html,araali_api.html -I. ./araali_api_service.proto
-	./pandoc -s -r html araali_api.html -o araali_api.rst
-	cp araali_api.rst ../doc/source/araalictlgolangv2.rst
+	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=html,index.html -I. ./araali_api_service.proto
 
 $(PROTOC_GEN_GO): doc
 	go get -u github.com/golang/protobuf/protoc-gen-go
@@ -21,8 +19,5 @@ $(PROTOWRAP):
 
 gen: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	PATH=${GOPATH}/bin:${PATH} protowrap --go_out=plugins=grpc:../ -I. ./*.proto
-
-clean:
-	rm -rf araali_api.html araali_api.rst araali
 
 .PHONY: 

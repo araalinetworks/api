@@ -40,7 +40,6 @@ So let the show begin!
    araalictlcommandline
    araalictlpython
    araalictlgolang
-   araalictlgolangv2
    araalictlnotebook
    araalipolicy
    policy_as_code

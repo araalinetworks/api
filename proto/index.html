@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#araali_api_service.proto">araali_api_service.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#araali_api_service.AddUserRequest"><span class="badge">M</span>AddUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AlertFilter"><span class="badge">M</span>AlertFilter</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AlertInfo"><span class="badge">M</span>AlertInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AraaliAPIResponse"><span class="badge">M</span>AraaliAPIResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AraaliEndpoint"><span class="badge">M</span>AraaliEndpoint</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AraaliUser"><span class="badge">M</span>AraaliUser</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Asset"><span class="badge">M</span>Asset</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AssetFilter"><span class="badge">M</span>AssetFilter</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Capabilities"><span class="badge">M</span>Capabilities</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.CreateTenantRequest"><span class="badge">M</span>CreateTenantRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.CreateTenantResponse"><span class="badge">M</span>CreateTenantResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.DeleteTenantRequest"><span class="badge">M</span>DeleteTenantRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.DeleteUserRequest"><span class="badge">M</span>DeleteUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.EndPoint"><span class="badge">M</span>EndPoint</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Insight"><span class="badge">M</span>Insight</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Lens"><span class="badge">M</span>Lens</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Link"><span class="badge">M</span>Link</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListAlertsRequest"><span class="badge">M</span>ListAlertsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListAlertsResponse"><span class="badge">M</span>ListAlertsResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListAssetsRequest"><span class="badge">M</span>ListAssetsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListAssetsResponse"><span class="badge">M</span>ListAssetsResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListInsightsRequest"><span class="badge">M</span>ListInsightsRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListInsightsResponse"><span class="badge">M</span>ListInsightsResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListLinksRequest"><span class="badge">M</span>ListLinksRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.ListLinksResponse"><span class="badge">M</span>ListLinksResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.NonAraaliClientEndpoint"><span class="badge">M</span>NonAraaliClientEndpoint</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.NonAraaliEndpoint"><span class="badge">M</span>NonAraaliEndpoint</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.NonAraaliServerEndpoint"><span class="badge">M</span>NonAraaliServerEndpoint</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.PolicyInfo"><span class="badge">M</span>PolicyInfo</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Ports"><span class="badge">M</span>Ports</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Subnet"><span class="badge">M</span>Subnet</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Tenant"><span class="badge">M</span>Tenant</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.TimeSlice"><span class="badge">M</span>TimeSlice</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Vulnerability"><span class="badge">M</span>Vulnerability</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#araali_api_service.AlertInfo.Status"><span class="badge">E</span>AlertInfo.Status</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AraaliAPIResponse.ReturnCode"><span class="badge">E</span>AraaliAPIResponse.ReturnCode</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.AraaliUser.Role"><span class="badge">E</span>AraaliUser.Role</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Asset.AssetMode"><span class="badge">E</span>Asset.AssetMode</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Asset.AssetState"><span class="badge">E</span>Asset.AssetState</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Asset.AssetType"><span class="badge">E</span>Asset.AssetType</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Lens.LensType"><span class="badge">E</span>Lens.LensType</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Link.LinkDirection"><span class="badge">E</span>Link.LinkDirection</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.LinkState"><span class="badge">E</span>LinkState</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.NonAraaliEndpoint.EndpointGroup"><span class="badge">E</span>NonAraaliEndpoint.EndpointGroup</a>
+                </li>
+              
+                <li>
+                  <a href="#araali_api_service.Vulnerability.Severity"><span class="badge">E</span>Vulnerability.Severity</a>
+                </li>
+              
+              
+              
+                <li>
+                  <a href="#araali_api_service.AraaliAPI"><span class="badge">S</span>AraaliAPI</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="araali_api_service.proto">araali_api_service.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="araali_api_service.AddUserRequest">AddUserRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Tenant of the user being added </p></td>
+                </tr>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#araali_api_service.AraaliUser">AraaliUser</a></td>
+                  <td></td>
+                  <td><p>Information required to create the tenant </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AlertFilter">AlertFilter</h3>
+        <p>Fields to filter alerts in the ListAlerts API.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>open_alerts</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch open alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>closed_alerts</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch closed alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>perimeter_egress</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch perimeter egress alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>perimeter_ingress</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch perimeter ingress alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>home_non_araali_egress</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch non araali egress alerts from private subnets </p></td>
+                </tr>
+              
+                <tr>
+                  <td>home_non_araali_ingress</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch non araali ingress alerts from private subnets </p></td>
+                </tr>
+              
+                <tr>
+                  <td>araali_to_araali</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch araali to araali alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list_all_alerts</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Fetch all alerts from all lenses, even ones not monitored by current user </p></td>
+                </tr>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#araali_api_service.TimeSlice">TimeSlice</a></td>
+                  <td></td>
+                  <td><p>Time range in which to fetch alerts </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AlertInfo">AlertInfo</h3>
+        <p>Additional information about alerts</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>communication_alert_type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Alert type </p></td>
+                </tr>
+              
+                <tr>
+                  <td>process_alert_type</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Process alert type </p></td>
+                </tr>
+              
+                <tr>
+                  <td>re_open_count</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Number of times transitioned from SNOOZED -&gt; ALERT </p></td>
+                </tr>
+              
+                <tr>
+                  <td>status</td>
+                  <td><a href="#araali_api_service.AlertInfo.Status">AlertInfo.Status</a></td>
+                  <td></td>
+                  <td><p>Whether OPEN or CLOSED </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AraaliAPIResponse">AraaliAPIResponse</h3>
+        <p>Generic API response object.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>code</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse.ReturnCode">AraaliAPIResponse.ReturnCode</a></td>
+                  <td></td>
+                  <td><p>Success/Failure of API call </p></td>
+                </tr>
+              
+                <tr>
+                  <td>message</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Custom message returned by the service if any </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AraaliEndpoint">AraaliEndpoint</h3>
+        <p>Represents an araali endpoint</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>app</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Mapped app the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>unmapped_app</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Original app/namespace the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>namespace</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Namespace of the endpoint </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pod</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Pod the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>container_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Container the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>process</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Process of the endpoint belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>binary_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Binary name of the endpoint process </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parent_process</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Parent of the endpoint process </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AraaliUser">AraaliUser</h3>
+        <p>User object identifying the user in API calls.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>E-mail of the registering user </p></td>
+                </tr>
+              
+                <tr>
+                  <td>role</td>
+                  <td><a href="#araali_api_service.AraaliUser.Role">AraaliUser.Role</a></td>
+                  <td></td>
+                  <td><p>Role of the registering user </p></td>
+                </tr>
+              
+                <tr>
+                  <td>is_site_admin</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Enables role to have access to zone-apps
+		TRUE  - Enable modify access to zone-apps
+		FALSE - Enable read-only access to zone-apps. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Asset">Asset</h3>
+        <p>Representation of container/virtual machine information.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>host_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Host name of asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ip_address</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>IP address assigned to the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>uuid</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>UUID if virtual machine or container-id if container </p></td>
+                </tr>
+              
+                <tr>
+                  <td>image</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Container image or ami-id for virtual machines </p></td>
+                </tr>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone the asset belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>apps</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>Apps the asset belongs to </p></td>
+                </tr>
+              
+                <tr>
+                  <td>state</td>
+                  <td><a href="#araali_api_service.Asset.AssetState">Asset.AssetState</a></td>
+                  <td></td>
+                  <td><p>State of the asset active, inactive etc </p></td>
+                </tr>
+              
+                <tr>
+                  <td>asset_type</td>
+                  <td><a href="#araali_api_service.Asset.AssetType">Asset.AssetType</a></td>
+                  <td></td>
+                  <td><p>Type of the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>vulnerabilities</td>
+                  <td><a href="#araali_api_service.Vulnerability">Vulnerability</a></td>
+                  <td>repeated</td>
+                  <td><p>Vulnerabilities in the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>mode</td>
+                  <td><a href="#araali_api_service.Asset.AssetMode">Asset.AssetMode</a></td>
+                  <td></td>
+                  <td><p>Visibility/Enforcement mode of the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>os_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>OS name of the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>iam_role</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>AWS IAM Role assigned to the asset </p></td>
+                </tr>
+              
+                <tr>
+                  <td>docker_privileged</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Docker privilege assigned to the container (Docker containers only) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>docker</td>
+                  <td><a href="#araali_api_service.Capabilities">Capabilities</a></td>
+                  <td></td>
+                  <td><p>Capabilities exported by docker </p></td>
+                </tr>
+              
+                <tr>
+                  <td>containerd</td>
+                  <td><a href="#araali_api_service.Capabilities">Capabilities</a></td>
+                  <td></td>
+                  <td><p>Capabilities exported by containerd </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.AssetFilter">AssetFilter</h3>
+        <p>Flags to filter assets in the ListAssets API.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>list_active_vm</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Return active virtual machines </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list_inactive_vm</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Return inactive virtual machines </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list_active_container</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Return active containers </p></td>
+                </tr>
+              
+                <tr>
+                  <td>list_inactive_container</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Return inactive containers </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Capabilities">Capabilities</h3>
+        <p>List of capabilities</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>capabilities</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.CreateTenantRequest">CreateTenantRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Information required to create the tenant </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.CreateTenantResponse">CreateTenantResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>response</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                  <td></td>
+                  <td><p>Success/Failure of the API call </p></td>
+                </tr>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Handle for the newly created tenant </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.DeleteTenantRequest">DeleteTenantRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Tenant being deleted </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.DeleteUserRequest">DeleteUserRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Tenant of the user being deleted </p></td>
+                </tr>
+              
+                <tr>
+                  <td>user</td>
+                  <td><a href="#araali_api_service.AraaliUser">AraaliUser</a></td>
+                  <td></td>
+                  <td><p>Handle of the user being deleted </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.EndPoint">EndPoint</h3>
+        <p>Represents one end of a link/alert_counts</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>araali</td>
+                  <td><a href="#araali_api_service.AraaliEndpoint">AraaliEndpoint</a></td>
+                  <td></td>
+                  <td><p>Araali endpoint info </p></td>
+                </tr>
+              
+                <tr>
+                  <td>non_araali</td>
+                  <td><a href="#araali_api_service.NonAraaliEndpoint">NonAraaliEndpoint</a></td>
+                  <td></td>
+                  <td><p>Non-Araali endpoint info </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Insight">Insight</h3>
+        <p>Instance of the insight Representation</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>reason</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The kind of insight captured </p></td>
+                </tr>
+              
+                <tr>
+                  <td>url</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>The URL to view the insights </p></td>
+                </tr>
+              
+                <tr>
+                  <td>count</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Number of insights </p></td>
+                </tr>
+              
+                <tr>
+                  <td>lens</td>
+                  <td><a href="#araali_api_service.Lens">Lens</a></td>
+                  <td>repeated</td>
+                  <td><p>The zone/app the insights belong to </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Lens">Lens</h3>
+        <p>Drilled down entity/lens</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>type</td>
+                  <td><a href="#araali_api_service.Lens.LensType">Lens.LensType</a></td>
+                  <td></td>
+                  <td><p>Lens type </p></td>
+                </tr>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>app</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>App lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pod</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Pod of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>container_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Container of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>process</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Process of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>parent_process</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Parent process of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>binary_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Binary name of the lens </p></td>
+                </tr>
+              
+                <tr>
+                  <td>service</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Service lens </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Link">Link</h3>
+        <p>Represents an alert or policy link</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>client</td>
+                  <td><a href="#araali_api_service.EndPoint">EndPoint</a></td>
+                  <td></td>
+                  <td><p>Client endpoint </p></td>
+                </tr>
+              
+                <tr>
+                  <td>server</td>
+                  <td><a href="#araali_api_service.EndPoint">EndPoint</a></td>
+                  <td></td>
+                  <td><p>Server endpoint </p></td>
+                </tr>
+              
+                <tr>
+                  <td>direction</td>
+                  <td><a href="#araali_api_service.Link.LinkDirection">Link.LinkDirection</a></td>
+                  <td></td>
+                  <td><p>Direction of client-server link </p></td>
+                </tr>
+              
+                <tr>
+                  <td>timestamp</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Timestamp when link was discovered </p></td>
+                </tr>
+              
+                <tr>
+                  <td>unique_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Unique handle to the link </p></td>
+                </tr>
+              
+                <tr>
+                  <td>state</td>
+                  <td><a href="#araali_api_service.LinkState">LinkState</a></td>
+                  <td></td>
+                  <td><p>State of the link alert, active/snoozed etc </p></td>
+                </tr>
+              
+                <tr>
+                  <td>ports</td>
+                  <td><a href="#araali_api_service.Ports">Ports</a></td>
+                  <td></td>
+                  <td><p>Aggregated active/inactive ports </p></td>
+                </tr>
+              
+                <tr>
+                  <td>alert_info</td>
+                  <td><a href="#araali_api_service.AlertInfo">AlertInfo</a></td>
+                  <td></td>
+                  <td><p>Additional information for alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>policy_info</td>
+                  <td><a href="#araali_api_service.PolicyInfo">PolicyInfo</a></td>
+                  <td></td>
+                  <td><p>Additional information for policy links </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListAlertsRequest">ListAlertsRequest</h3>
+        <p>Request for alerts received by tenant</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Handle to tenant </p></td>
+                </tr>
+              
+                <tr>
+                  <td>filter</td>
+                  <td><a href="#araali_api_service.AlertFilter">AlertFilter</a></td>
+                  <td></td>
+                  <td><p>Filter responses </p></td>
+                </tr>
+              
+                <tr>
+                  <td>count</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Number of alerts to be returned each API call </p></td>
+                </tr>
+              
+                <tr>
+                  <td>paging_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Token to be sent in the next API call to retrieve the next set of alerts (paging) </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListAlertsResponse">ListAlertsResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>response</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                  <td></td>
+                  <td><p>ListAsset API call response </p></td>
+                </tr>
+              
+                <tr>
+                  <td>links</td>
+                  <td><a href="#araali_api_service.Link">Link</a></td>
+                  <td>repeated</td>
+                  <td><p>List of alerts </p></td>
+                </tr>
+              
+                <tr>
+                  <td>paging_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Token to be passed to the next API call (indicating there are more alerts to be retrieved) </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListAssetsRequest">ListAssetsRequest</h3>
+        <p>Request for the list of assets (virtual machines/containers) in a tenant.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Handle of the tenant </p></td>
+                </tr>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone from which to return assets </p></td>
+                </tr>
+              
+                <tr>
+                  <td>app</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>App/Namespace from which to return assets </p></td>
+                </tr>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#araali_api_service.TimeSlice">TimeSlice</a></td>
+                  <td></td>
+                  <td><p>Start/End time range from which to return assets </p></td>
+                </tr>
+              
+                <tr>
+                  <td>filter</td>
+                  <td><a href="#araali_api_service.AssetFilter">AssetFilter</a></td>
+                  <td></td>
+                  <td><p>Filter assets based on type and active/inactive </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListAssetsResponse">ListAssetsResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>response</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                  <td></td>
+                  <td><p>ListAsset API call response </p></td>
+                </tr>
+              
+                <tr>
+                  <td>assets</td>
+                  <td><a href="#araali_api_service.Asset">Asset</a></td>
+                  <td>repeated</td>
+                  <td><p>List of assets </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListInsightsRequest">ListInsightsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Handle of tenant </p></td>
+                </tr>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone where insights are requested </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListInsightsResponse">ListInsightsResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>response</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                  <td></td>
+                  <td><p>ListInsights API call response </p></td>
+                </tr>
+              
+                <tr>
+                  <td>insights</td>
+                  <td><a href="#araali_api_service.Insight">Insight</a></td>
+                  <td>repeated</td>
+                  <td><p>List of insights </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListLinksRequest">ListLinksRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>tenant</td>
+                  <td><a href="#araali_api_service.Tenant">Tenant</a></td>
+                  <td></td>
+                  <td><p>Handle for the tenant </p></td>
+                </tr>
+              
+                <tr>
+                  <td>zone</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Zone for the request </p></td>
+                </tr>
+              
+                <tr>
+                  <td>app</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>App for the request </p></td>
+                </tr>
+              
+                <tr>
+                  <td>service</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Required when zone and app are not specified. Must be in form of ip:port or fqdn:port </p></td>
+                </tr>
+              
+                <tr>
+                  <td>time</td>
+                  <td><a href="#araali_api_service.TimeSlice">TimeSlice</a></td>
+                  <td></td>
+                  <td><p>Time range for the list links request </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.ListLinksResponse">ListLinksResponse</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>response</td>
+                  <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                  <td></td>
+                  <td><p>ListLinks API call response </p></td>
+                </tr>
+              
+                <tr>
+                  <td>links</td>
+                  <td><a href="#araali_api_service.Link">Link</a></td>
+                  <td>repeated</td>
+                  <td><p>List of links </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.NonAraaliClientEndpoint">NonAraaliClientEndpoint</h3>
+        <p>Represents a non araali client endpoint</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>subnet</td>
+                  <td><a href="#araali_api_service.Subnet">Subnet</a></td>
+                  <td></td>
+                  <td><p>Client subnet </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.NonAraaliEndpoint">NonAraaliEndpoint</h3>
+        <p>Represents a non araali endpoint</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>client</td>
+                  <td><a href="#araali_api_service.NonAraaliClientEndpoint">NonAraaliClientEndpoint</a></td>
+                  <td></td>
+                  <td><p>Non araali client </p></td>
+                </tr>
+              
+                <tr>
+                  <td>server</td>
+                  <td><a href="#araali_api_service.NonAraaliServerEndpoint">NonAraaliServerEndpoint</a></td>
+                  <td></td>
+                  <td><p>Non araali server </p></td>
+                </tr>
+              
+                <tr>
+                  <td>endpoint_group</td>
+                  <td><a href="#araali_api_service.NonAraaliEndpoint.EndpointGroup">NonAraaliEndpoint.EndpointGroup</a></td>
+                  <td></td>
+                  <td><p>WORLD if public subnet. HOME if private subnet. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>organization</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Autonomous System Organization of the IP address if available </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.NonAraaliServerEndpoint">NonAraaliServerEndpoint</h3>
+        <p>Represents a non araali server endpoint</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>dns_pattern</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>DNS/FQDN of endpoint </p></td>
+                </tr>
+              
+                <tr>
+                  <td>subnet</td>
+                  <td><a href="#araali_api_service.Subnet">Subnet</a></td>
+                  <td></td>
+                  <td><p>Server subnet </p></td>
+                </tr>
+              
+                <tr>
+                  <td>dst_port</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Service destination port </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.PolicyInfo">PolicyInfo</h3>
+        <p>Additional information about policy</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>template_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Template name used to validate the link </p></td>
+                </tr>
+              
+                <tr>
+                  <td>template_user</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>User who created the template to validate the link </p></td>
+                </tr>
+              
+                <tr>
+                  <td>policy_skip_reason</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Reason for skipping policy evaluation at agents when enforced </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Ports">Ports</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>active_ports</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td>repeated</td>
+                  <td><p>Active aggregated ports in the link </p></td>
+                </tr>
+              
+                <tr>
+                  <td>inactive_ports</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td>repeated</td>
+                  <td><p>Inactive aggregated ports in the link </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Subnet">Subnet</h3>
+        <p>Represents the subnet/mask</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>subnet</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Client subnet </p></td>
+                </tr>
+              
+                <tr>
+                  <td>net_mask</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Client netmask </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Tenant">Tenant</h3>
+        <p>Tenant object identifying the tenant in API calls.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Id of the tenant </p></td>
+                </tr>
+              
+                <tr>
+                  <td>admin_email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Admin e-mail of the tenant.
+ Also adds an ADMIN role user in this tenant. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.TimeSlice">TimeSlice</h3>
+        <p>Object for specifying start and end time in varous API calls.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>start_time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Start time to fetch from. Specify 0 to indicate beginning of time </p></td>
+                </tr>
+              
+                <tr>
+                  <td>end_time</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>End time to fetch up to </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="araali_api_service.Vulnerability">Vulnerability</h3>
+        <p>Captures an instance of vulnerability package name, cve info etc</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>package_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Package name with the vulnerability </p></td>
+                </tr>
+              
+                <tr>
+                  <td>cve_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>CVE id of the vulnerability </p></td>
+                </tr>
+              
+                <tr>
+                  <td>severity</td>
+                  <td><a href="#araali_api_service.Vulnerability.Severity">Vulnerability.Severity</a></td>
+                  <td></td>
+                  <td><p>Severity of the vulnerability </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+        <h3 id="araali_api_service.AlertInfo.Status">AlertInfo.Status</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_STATUS</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>OPEN</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>CLOSED</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.AraaliAPIResponse.ReturnCode">AraaliAPIResponse.ReturnCode</h3>
+        <p>Return status codes for the Araali APIs</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>SUCCESS</td>
+                <td>0</td>
+                <td><p>API call succeeded</p></td>
+              </tr>
+            
+              <tr>
+                <td>FAILURE</td>
+                <td>1</td>
+                <td><p>API call failed</p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>2</td>
+                <td><p>Status unknown (Should never happen)</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.AraaliUser.Role">AraaliUser.Role</h3>
+        <p>Enum for specifying the role of a user</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>ADMIN</td>
+                <td>0</td>
+                <td><p>Enables user to create, modify other users</p></td>
+              </tr>
+            
+              <tr>
+                <td>USER</td>
+                <td>1</td>
+                <td><p>Set if the user is not an administrator</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Asset.AssetMode">Asset.AssetMode</h3>
+        <p>Mode the asset is in</p><p>TAP    - Tap's into telemetry to discover policies (no enforcement).</p><p>INLINE - Firewall embedded inline to enforce policies if needed (enforcement).</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>TAP</td>
+                <td>0</td>
+                <td><p>No enforcement/visibility mode</p></td>
+              </tr>
+            
+              <tr>
+                <td>INLINE</td>
+                <td>1</td>
+                <td><p>Inline enforcement mode</p></td>
+              </tr>
+            
+              <tr>
+                <td>TRANSITIONING_TAP_TO_INLINE</td>
+                <td>2</td>
+                <td><p>Transitioning from TAP to INLINE</p></td>
+              </tr>
+            
+              <tr>
+                <td>TRANSITIONING_INLINE_TO_TAP</td>
+                <td>3</td>
+                <td><p>Transitioning from INLINE to TAP</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Asset.AssetState">Asset.AssetState</h3>
+        <p>State of the asset</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>DELETED</td>
+                <td>0</td>
+                <td><p>Asset has been deleted</p></td>
+              </tr>
+            
+              <tr>
+                <td>ACTIVE</td>
+                <td>1</td>
+                <td><p>Asset is active</p></td>
+              </tr>
+            
+              <tr>
+                <td>INACTIVE</td>
+                <td>2</td>
+                <td><p>Asset is inactive</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Asset.AssetType">Asset.AssetType</h3>
+        <p>Type of the asset</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_ASSET</td>
+                <td>0</td>
+                <td><p>Unknown asset type</p></td>
+              </tr>
+            
+              <tr>
+                <td>VIRTUAL_MACHINE</td>
+                <td>1</td>
+                <td><p>Virtual Machine type</p></td>
+              </tr>
+            
+              <tr>
+                <td>CONTAINER</td>
+                <td>2</td>
+                <td><p>Container type</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Lens.LensType">Lens.LensType</h3>
+        <p>Type of lens</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_LENS</td>
+                <td>0</td>
+                <td><p>Unspecified</p></td>
+              </tr>
+            
+              <tr>
+                <td>ZONE_APP</td>
+                <td>1</td>
+                <td><p>Zone/App level</p></td>
+              </tr>
+            
+              <tr>
+                <td>SERVICE</td>
+                <td>2</td>
+                <td><p>Service level</p></td>
+              </tr>
+            
+              <tr>
+                <td>ZONE</td>
+                <td>3</td>
+                <td><p>Zone level</p></td>
+              </tr>
+            
+              <tr>
+                <td>PROCESS</td>
+                <td>4</td>
+                <td><p>Process level</p></td>
+              </tr>
+            
+              <tr>
+                <td>CONTAINER</td>
+                <td>5</td>
+                <td><p>Container level</p></td>
+              </tr>
+            
+              <tr>
+                <td>TENANT</td>
+                <td>6</td>
+                <td><p>Tenant level</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Link.LinkDirection">Link.LinkDirection</h3>
+        <p>Direction of the link araali-araali, araali-ingress etc</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_DIRECTION</td>
+                <td>0</td>
+                <td><p>Unknown</p></td>
+              </tr>
+            
+              <tr>
+                <td>NON_ARAALI_INGRESS</td>
+                <td>1</td>
+                <td><p>Ingress from an unprotected non-araali endpoint</p></td>
+              </tr>
+            
+              <tr>
+                <td>ARAALI_INGRESS</td>
+                <td>2</td>
+                <td><p>Ingress from an araali protected endpoint</p></td>
+              </tr>
+            
+              <tr>
+                <td>NON_ARAALI_EGRESS</td>
+                <td>3</td>
+                <td><p>Egress to an unprotected non-araali endpoint</p></td>
+              </tr>
+            
+              <tr>
+                <td>ARAALI_EGRESS</td>
+                <td>4</td>
+                <td><p>Egress to an araali protected endpoint</p></td>
+              </tr>
+            
+              <tr>
+                <td>INTERNAL</td>
+                <td>5</td>
+                <td><p>Link between two araali endpoints within an app</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.LinkState">LinkState</h3>
+        <p>Type of a link Alert or PolicyInfo</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>BASELINE_ALERT</td>
+                <td>0</td>
+                <td><p>Alert</p></td>
+              </tr>
+            
+              <tr>
+                <td>DEFINED_POLICY</td>
+                <td>1</td>
+                <td><p>Currently active policy</p></td>
+              </tr>
+            
+              <tr>
+                <td>SNOOZED_POLICY</td>
+                <td>2</td>
+                <td><p>Policy that was discovered but removed/snoozed</p></td>
+              </tr>
+            
+              <tr>
+                <td>DENIED_POLICY</td>
+                <td>3</td>
+                <td><p>Deny policy</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.NonAraaliEndpoint.EndpointGroup">NonAraaliEndpoint.EndpointGroup</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>UNKNOWN_GROUP</td>
+                <td>0</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>WORLD</td>
+                <td>1</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>HOME</td>
+                <td>2</td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+        <h3 id="araali_api_service.Vulnerability.Severity">Vulnerability.Severity</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>NONE</td>
+                <td>0</td>
+                <td><p>No severity</p></td>
+              </tr>
+            
+              <tr>
+                <td>LOW</td>
+                <td>1</td>
+                <td><p>Low severity</p></td>
+              </tr>
+            
+              <tr>
+                <td>MEDIUM</td>
+                <td>2</td>
+                <td><p>Medium severity</p></td>
+              </tr>
+            
+              <tr>
+                <td>HIGH</td>
+                <td>3</td>
+                <td><p>High severity</p></td>
+              </tr>
+            
+              <tr>
+                <td>CRITICAL</td>
+                <td>4</td>
+                <td><p>Critical severity</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      
+
+      
+
+      
+        <h3 id="araali_api_service.AraaliAPI">AraaliAPI</h3>
+        <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>createTenant</td>
+                <td><a href="#araali_api_service.CreateTenantRequest">CreateTenantRequest</a></td>
+                <td><a href="#araali_api_service.CreateTenantResponse">CreateTenantResponse</a></td>
+                <td><p>Add a tenant</p></td>
+              </tr>
+            
+              <tr>
+                <td>deleteTenant</td>
+                <td><a href="#araali_api_service.DeleteTenantRequest">DeleteTenantRequest</a></td>
+                <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                <td><p>Delete a tenant</p></td>
+              </tr>
+            
+              <tr>
+                <td>addUser</td>
+                <td><a href="#araali_api_service.AddUserRequest">AddUserRequest</a></td>
+                <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                <td><p>Add a user</p></td>
+              </tr>
+            
+              <tr>
+                <td>deleteUser</td>
+                <td><a href="#araali_api_service.DeleteUserRequest">DeleteUserRequest</a></td>
+                <td><a href="#araali_api_service.AraaliAPIResponse">AraaliAPIResponse</a></td>
+                <td><p>Delete a user</p></td>
+              </tr>
+            
+              <tr>
+                <td>listAssets</td>
+                <td><a href="#araali_api_service.ListAssetsRequest">ListAssetsRequest</a></td>
+                <td><a href="#araali_api_service.ListAssetsResponse">ListAssetsResponse</a></td>
+                <td><p>Get assets</p></td>
+              </tr>
+            
+              <tr>
+                <td>listAlerts</td>
+                <td><a href="#araali_api_service.ListAlertsRequest">ListAlertsRequest</a></td>
+                <td><a href="#araali_api_service.ListAlertsResponse">ListAlertsResponse</a></td>
+                <td><p>Get alerts</p></td>
+              </tr>
+            
+              <tr>
+                <td>listLinks</td>
+                <td><a href="#araali_api_service.ListLinksRequest">ListLinksRequest</a></td>
+                <td><a href="#araali_api_service.ListLinksResponse">ListLinksResponse</a></td>
+                <td><p>Get links within a zone/app</p></td>
+              </tr>
+            
+              <tr>
+                <td>listInsights</td>
+                <td><a href="#araali_api_service.ListInsightsRequest">ListInsightsRequest</a></td>
+                <td><a href="#araali_api_service.ListInsightsResponse">ListInsightsResponse</a></td>
+                <td><p>Get tenant wide insights</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+            <td>float64</td>
+            <td>double</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+            <td>float32</td>
+            <td>float</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+            <td>bool</td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>TrueClass/FalseClass</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+            <td>string</td>
+            <td>string</td>
+            <td>string</td>
+            <td>String (UTF-8)</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+            <td>[]byte</td>
+            <td>ByteString</td>
+            <td>string</td>
+            <td>String (ASCII-8BIT)</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+
