@@ -7,7 +7,7 @@ all: gen
 
 doc: $(PROTOWRAP)
 	echo "Generating documentation"
-	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=html,index.html -I. ./araali_api_service.proto
+	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=markdown,araali_api.md -I. ./araali_api_service.proto
 
 $(PROTOC_GEN_GO): doc
 	go get -u github.com/golang/protobuf/protoc-gen-go
