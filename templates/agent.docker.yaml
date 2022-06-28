@@ -1,0 +1,70 @@
+identities:
+- node:
+    name: node_0
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/dockerd
+    parent_process: systemd
+    process: dockerd
+  pushdown: []
+- node:
+    name: node_1
+    dns_pattern: auth.docker.io
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: node_2
+    dns_pattern: production.cloudflare.docker.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: node_3
+    dns_pattern: docker-images-.*amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: node_4
+    dns_pattern: .*cloudfront.net
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_5
+    dns_pattern: public.ecr.aws
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_6
+    dns_pattern: quay.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_7
+    dns_pattern: .*docker.io
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: node_8
+    dns_pattern: .*storage.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_9
+    dns_pattern: k8s.gcr.io
+    dst_port: 443
+  pushdown: []
+authorizations:
+- name: node_0
+  out:
+  - node_1
+  - node_2
+  - node_3
+  - node_4
+  - node_5
+  - node_6
+  - node_7
+  - node_8
+  - node_9
