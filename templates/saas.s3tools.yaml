@@ -8,7 +8,20 @@ identities:
     process: https
   pushdown: []
 - node:
-    name: s3tools
+    name: s3tools_80
+    dns_pattern: s3tools.org
+    dst_port: 80
+  pushdown: []
+- node:
+    name: http_apt_get
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: http
+  pushdown: []
+- node:
+    name: s3tools_443
     dns_pattern: s3tools.org
     dst_port: 443
   pushdown: []
@@ -29,8 +42,17 @@ identities:
     process: wget
   pushdown: []
 authorizations:
-- name: s3tools
-  in:
-  - https_apt_get
-  - wget_bash
-  - wget_sudo
+- name: https_apt_get
+  out:
+  - s3tools_443
+- name: http_apt_get
+  out:
+  - s3tools_80
+- name: wget_bash
+  out:
+  - s3tools_80
+  - s3tools_443
+- name: wget_sudo
+  out:
+  - s3tools_80
+  - s3tools_443
