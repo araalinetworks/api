@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: dockerd
     zone: .*
     app: .*
     binary_name: /usr/bin/dockerd
@@ -9,50 +10,59 @@ identities:
   pushdown: []
 - node:
     name: node_1
+    rename: docker_auth
     dns_pattern: auth.docker.io
     dst_port: 443
   pushdown:
   - dns_pattern
 - node:
     name: node_2
+    rename: docker_cloudflare
     dns_pattern: production.cloudflare.docker.com
     dst_port: 443
   pushdown:
   - dns_pattern
 - node:
     name: node_3
+    rename: amazonaws_docker
     dns_pattern: docker-images-.*amazonaws.com
     dst_port: 443
   pushdown:
   - dns_pattern
 - node:
     name: node_4
+    rename: cloudfront
     dns_pattern: .*cloudfront.net
     dst_port: 443
   pushdown: []
 - node:
     name: node_5
+    rename: ecr_public
     dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: []
 - node:
     name: node_6
+    rename: quay
     dns_pattern: quay.io
     dst_port: 443
   pushdown: []
 - node:
     name: node_7
+    rename: docker_io
     dns_pattern: .*docker.io
     dst_port: 443
   pushdown:
   - dns_pattern
 - node:
     name: node_8
+    rename: googleapis_storage
     dns_pattern: .*storage.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
     name: node_9
+    rename: gcr_k8s
     dns_pattern: k8s.gcr.io
     dst_port: 443
   pushdown: []
