@@ -6,6 +6,11 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: amazonaws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: cloudfront
     dns_pattern: .*cloudfront.net
     dst_port: 443
@@ -42,16 +47,6 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: gcr_k8s
-    dns_pattern: k8s.gcr.io
-    dst_port: 443
-  pushdown: []
-- node:
-    name: googleapis_storage
-    dns_pattern: .*storage.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: gcr_io
     dns_pattern: gcr.io
     dst_port: 443
@@ -62,8 +57,13 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: amazonaws_ecr
-    dns_pattern: .*ecr.*.amazonaws.com
+    name: gcr_k8s
+    dns_pattern: k8s.gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: googleapis_storage
+    dns_pattern: .*storage.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
@@ -75,14 +75,14 @@ authorizations:
 - name: dockerd
   out:
   - amazonaws_docker
+  - amazonaws_ecr
   - cloudfront
   - docker_auth
   - docker_cloudflare
   - docker_io
   - ecr_public
+  - gcr_io
+  - gcr_io_asia
   - gcr_k8s
   - googleapis_storage
   - quay
-  - gcr_io
-  - gcr_io_asia
-  - amazonaws_ecr
