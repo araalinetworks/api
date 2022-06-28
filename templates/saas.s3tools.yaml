@@ -1,0 +1,36 @@
+identities:
+- node:
+    name: https_apt_get
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: https
+  pushdown: []
+- node:
+    name: s3tools
+    dns_pattern: s3tools.org
+    dst_port: 443
+  pushdown: []
+- node:
+    name: wget_bash
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/wget
+    parent_process: bash
+    process: wget
+  pushdown: []
+- node:
+    name: wget_sudo
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/wget
+    parent_process: sudo
+    process: wget
+  pushdown: []
+authorizations:
+- name: s3tools
+  in:
+  - https_apt_get
+  - wget_bash
+  - wget_sudo
