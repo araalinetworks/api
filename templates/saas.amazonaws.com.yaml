@@ -8,47 +8,6 @@ identities:
     process: .*
   pushdown: []
 - node:
-    name: cache
-    dns_pattern: .*cache.amazonaws.com
-    dst_port: 6379
-  pushdown:
-  - dns_pattern
-- node:
-    name: ec2
-    dns_pattern: .*ec2.*.amazonaws.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: ec2messages
-    dns_pattern: .*ec2messages.*.amazonaws.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: eks
-    dns_pattern: .*eks.*.amazonaws.com
-    dst_port: 10250
-  pushdown: []
-- node:
-    name: email
-    dns_pattern: .*email.*.amazonaws.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: eks
-    dns_pattern: .*eks.*.amazonaws.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: cluster_autoscaler
-    zone: .*
-    app: kube-system
-    pod: cluster-autoscaler
-    container: cluster-autoscaler
-    binary_name: /cluster-autoscaler
-    parent_process: containerd-shim
-    process: cluster-autoscaler
-  pushdown: []
-- node:
     name: autoscaling
     dns_pattern: .*autoscaling.*.amazonaws.com
     dst_port: 443
@@ -64,18 +23,44 @@ identities:
     process: controller
   pushdown: []
 - node:
+    name: cache
+    dns_pattern: .*cache.amazonaws.com
+    dst_port: 6379
+  pushdown:
+  - dns_pattern
+- node:
+    name: cluster_autoscaler
+    zone: .*
+    app: kube-system
+    pod: cluster-autoscaler
+    container: cluster-autoscaler
+    binary_name: /cluster-autoscaler
+    parent_process: containerd-shim
+    process: cluster-autoscaler
+  pushdown: []
+- node:
+    name: ec2
+    dns_pattern: .*ec2.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: ec2messages
+    dns_pattern: .*ec2messages.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: eks
+    dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: elasticloadbalancing
     dns_pattern: .*elasticloadbalancing.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
-    name: shield
-    dns_pattern: .*shield.*.amazonaws.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: waf
-    dns_pattern: .*waf.*.amazonaws.com
+    name: email
+    dns_pattern: .*email.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -89,6 +74,11 @@ identities:
     dst_port: 443
   pushdown:
   - dns_pattern
+- node:
+    name: shield
+    dns_pattern: .*shield.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
 - node:
     name: sns
     dns_pattern: .*sns.*.amazonaws.com
@@ -105,6 +95,11 @@ identities:
     dns_pattern: .*sts.*.amazonaws.com
     dst_port: 443
   pushdown: []
+- node:
+    name: waf
+    dns_pattern: .*waf.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
 authorizations:
 - name: any
   out:
@@ -112,8 +107,8 @@ authorizations:
   - ec2
   - ec2messages
   - eks
-  - email
   - eks
+  - email
   - rabbitmq
   - s3
   - sns
