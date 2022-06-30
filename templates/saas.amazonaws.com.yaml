@@ -34,6 +34,51 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: eks
+    dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: cluster_autoscaler
+    zone: .*
+    app: kube-system
+    pod: cluster-autoscaler
+    container: cluster-autoscaler
+    binary_name: /cluster-autoscaler
+    parent_process: containerd-shim
+    process: cluster-autoscaler
+  pushdown: []
+- node:
+    name: autoscaling
+    dns_pattern: .*autoscaling.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: aws_load_balancer_controller
+    zone: .*
+    app: kube-system
+    pod: aws-load-balancer-controller
+    container: controller
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
+  pushdown: []
+- node:
+    name: elasticloadbalancing
+    dns_pattern: .*elasticloadbalancing.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: shield
+    dns_pattern: .*shield.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: waf
+    dns_pattern: .*waf.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: rabbitmq
     dns_pattern: .*mq.*.amazonaws.com
     dst_port: 443
@@ -68,8 +113,17 @@ authorizations:
   - ec2messages
   - eks
   - email
+  - eks
   - rabbitmq
   - s3
   - sns
   - ssm
   - sts
+- name: autoscaling
+  in:
+  - cluster_autoscaler
+- name: aws_load_balancer_controller
+  out:
+  - elasticloadbalancing
+  - shield
+  - waf
