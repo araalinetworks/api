@@ -1,0 +1,75 @@
+identities:
+- node:
+    name: any
+    zone: .*
+    app: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: []
+- node:
+    name: cache
+    dns_pattern: .*cache.amazonaws.com
+    dst_port: 6379
+  pushdown:
+  - dns_pattern
+- node:
+    name: ec2
+    dns_pattern: .*ec2.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: ec2messages
+    dns_pattern: .*ec2messages.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: eks
+    dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 10250
+  pushdown: []
+- node:
+    name: email
+    dns_pattern: .*email.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: rabbitmq
+    dns_pattern: .*mq.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: s3
+    dns_pattern: .*s3.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: sns
+    dns_pattern: .*sns.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: ssm
+    dns_pattern: .*ssm.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: sts
+    dns_pattern: .*sts.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+authorizations:
+- name: any
+  out:
+  - cache
+  - ec2
+  - ec2messages
+  - eks
+  - email
+  - rabbitmq
+  - s3
+  - sns
+  - ssm
+  - sts
