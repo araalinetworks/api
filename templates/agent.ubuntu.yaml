@@ -46,6 +46,33 @@ identities:
     process: wget
   pushdown: []
 - node:
+    name: license_check
+    zone: .*
+    app: .*
+    binary_name: /usr/bin/python.*
+    parent_process: systemd
+    process: /usr/lib/ubuntu-advantage/license_check.py
+  pushdown: []
+- node:
+    name: meta_data
+    subnet: 169.254.169.254
+    netmask: 32
+    dst_port: 80
+  pushdown: []
+- node:
+    name: apt_get_https
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: https
+  pushdown: []
+- node:
+    name: mongodb_repo
+    dns_pattern: repo.mongodb.org
+    dst_port: 443
+  pushdown: []
+- node:
     name: snapcraft_api
     dns_pattern: api.snapcraft.io
     dst_port: 443
@@ -129,6 +156,12 @@ authorizations:
 - name: fwupd_cdn
   in:
   - fwupdmgr
+- name: meta_data
+  in:
+  - license_check
+- name: mongodb_repo
+  in:
+  - apt_get_https
 - name: snapd
   out:
   - snapcraft_api
