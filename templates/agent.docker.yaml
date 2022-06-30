@@ -67,6 +67,21 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: gcr_io
+    dns_pattern: gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: gcr_io_asia
+    dns_pattern: asia.gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: amazonaws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: quay
     dns_pattern: quay.io
     dst_port: 443
@@ -86,3 +101,6 @@ authorizations:
   - gcr_k8s
   - googleapis_storage
   - quay
+  - gcr_io
+  - gcr_io_asia
+  - amazonaws_ecr
