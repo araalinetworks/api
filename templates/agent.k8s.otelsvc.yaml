@@ -32,3 +32,4 @@ authorizations:
   out:
   - kube_proxy
   - kubelet
+  - otelsvc
