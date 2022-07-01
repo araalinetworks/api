@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: fluent_bit
     zone: .*
     app: kube-system
     pod: fluentbit-gke
@@ -11,6 +12,7 @@ identities:
   pushdown: []
 - node:
     name: node_1
+    rename: fluent_bit_gke_exporter
     zone: .*
     app: kube-system
     pod: fluentbit-gke
