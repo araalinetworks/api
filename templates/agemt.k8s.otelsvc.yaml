@@ -1,6 +1,7 @@
 identities:
 - node:
     name: node_0
+    rename: otelsvc
     zone: .*
     app: kube-system
     pod: .*
@@ -11,6 +12,7 @@ identities:
   pushdown: []
 - node:
     name: node_1
+    rename: kube-proxy
     zone: .*
     app: kube-system
     pod: .*
@@ -21,6 +23,7 @@ identities:
   pushdown: []
 - node:
     name: node_2
+    rename: kubelet
     zone: .*
     app: k8s-nodes
     binary_name: .*/bin/kubelet
