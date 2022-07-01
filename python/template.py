@@ -390,7 +390,7 @@ def alerts(args):
 
     if args.tenant:
         tenants = [{"name": args.tenant, "id": args.tenant}]
-    else:
+    elif cfg.get("tenants", None):
         tenants = cfg["tenants"]
         if not tenants:
             tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
@@ -398,6 +398,8 @@ def alerts(args):
             # we are doing a full run
             if not args.nopull:
                 shutil.rmtree("%s/%s" % (args.progdir, ".alerts.template.py"), ignore_errors=True)
+    else:
+        tenants = [{"name": "account", "id": cfg["tenant"]}]
 
     if args.nopull:
         if args.ago:
@@ -430,7 +432,11 @@ def alerts(args):
             skipped_count = 0
             token = None
             while True:
-                for obj in araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"]):
+                alerts = araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"])
+                if not alerts:
+                    break
+
+                for obj in alerts:
                     if obj["alert_info"]["status"] == "CLOSE":
                         skipped_count += 1
                         continue
