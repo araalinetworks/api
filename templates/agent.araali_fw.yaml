@@ -6,7 +6,16 @@ identities:
   pushdown:
   - dns_pattern
 - node:
-    name: araalictl
+    name: araalictl_bash
+    zone: .*
+    app: .*
+    binary_name: .*/araalictl.linux-amd64_v.*
+    parent_process: bash
+    process: araalictl
+  pushdown:
+  - binary_name
+- node:
+    name: araalictl_systemd
     zone: .*
     app: .*
     binary_name: .*/araalictl.linux-.*
@@ -137,7 +146,8 @@ authorizations:
   - grype_sh
 - name: backend
   in:
-  - araalictl
+  - araalictl_bash
+  - araalictl_systemd
 - name: dependencycheck_helper
   out:
   - github_jeremylong

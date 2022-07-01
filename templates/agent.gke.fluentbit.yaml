@@ -1,0 +1,25 @@
+identities:
+- node:
+    name: fluent_bit
+    zone: .*
+    app: kube-system
+    pod: fluentbit-gke
+    container: fluentbit
+    binary_name: /fluent-bit/bin/fluent-bit
+    parent_process: containerd-shim
+    process: fluent-bit
+  pushdown: []
+- node:
+    name: fluent_bit_gke_exporter
+    zone: .*
+    app: kube-system
+    pod: fluentbit-gke
+    container: fluentbit-gke
+    binary_name: /fluent-bit-gke-exporter
+    parent_process: containerd-shim
+    process: fluent-bit-gke-exporter
+  pushdown: []
+authorizations:
+- name: fluent_bit_gke_exporter
+  in:
+  - fluent_bit

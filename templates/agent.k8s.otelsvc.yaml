@@ -1,0 +1,35 @@
+identities:
+- node:
+    name: kube_proxy
+    zone: .*
+    app: kube-system
+    pod: .*
+    container: kube-proxy
+    binary_name: /usr/local/bin/kube-proxy
+    parent_process: containerd-shim
+    process: kube-proxy
+  pushdown: []
+- node:
+    name: kubelet
+    zone: .*
+    app: k8s-nodes
+    binary_name: .*/bin/kubelet
+    parent_process: systemd
+    process: kubelet
+  pushdown: []
+- node:
+    name: otelsvc
+    zone: .*
+    app: kube-system
+    pod: .*
+    container: .*
+    binary_name: /otelsvc
+    parent_process: containerd-shim
+    process: otelsvc
+  pushdown: []
+authorizations:
+- name: otelsvc
+  out:
+  - kube_proxy
+  - kubelet
+  - otelsvc
