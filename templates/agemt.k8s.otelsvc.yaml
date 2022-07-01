@@ -1,18 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: otelsvc
-    zone: .*
-    app: kube-system
-    pod: .*
-    container: gke-metrics-agent
-    binary_name: /otelsvc
-    parent_process: containerd-shim
-    process: otelsvc
-  pushdown: []
-- node:
-    name: node_1
-    rename: kube-proxy
+    name: kube_proxy
     zone: .*
     app: kube-system
     pod: .*
@@ -22,16 +10,25 @@ identities:
     process: kube-proxy
   pushdown: []
 - node:
-    name: node_2
-    rename: kubelet
+    name: kubelet
     zone: .*
     app: k8s-nodes
     binary_name: .*/bin/kubelet
     parent_process: systemd
     process: kubelet
   pushdown: []
+- node:
+    name: otelsvc
+    zone: .*
+    app: kube-system
+    pod: .*
+    container: gke-metrics-agent
+    binary_name: /otelsvc
+    parent_process: containerd-shim
+    process: otelsvc
+  pushdown: []
 authorizations:
-- name: node_0
+- name: otelsvc
   out:
-  - node_1
-  - node_2
+  - kube_proxy
+  - kubelet
