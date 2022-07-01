@@ -1,7 +1,6 @@
 identities:
 - node:
-    name: node_0
-    rename: fluent_bit
+    name: fluent_bit
     zone: .*
     app: kube-system
     pod: fluentbit-gke
@@ -11,8 +10,7 @@ identities:
     process: fluent-bit
   pushdown: []
 - node:
-    name: node_1
-    rename: fluent_bit_gke_exporter
+    name: fluent_bit_gke_exporter
     zone: .*
     app: kube-system
     pod: fluentbit-gke
@@ -22,6 +20,6 @@ identities:
     process: fluent-bit-gke-exporter
   pushdown: []
 authorizations:
-- name: node_1
+- name: fluent_bit_gke_exporter
   in:
-  - node_0
+  - fluent_bit
