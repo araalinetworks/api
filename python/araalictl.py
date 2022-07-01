@@ -122,7 +122,18 @@ def assess(tenant=None):
     return yaml.load(rc[1], yaml.SafeLoader)
 
 def get_lenses(enforced=False, starred=False, tenant=None):
-    """get lenses"""
+    """Get Lenses
+
+    Gets all lenses for the tenant (if specified)
+
+    Args:
+        enforced (bool): If True, outputs only enforced lenses. Default: False
+        starred (bool): If True, outputs only starred lenses. Default: False
+        tenant (str): If given, outputs only lenses from this tenant.Default: None
+
+    Returns:
+        yaml: All lenses with specified parameters
+    """
     flags = ""
     if enforced: flags += " -enforced"
     if starred: flags += " -starred"

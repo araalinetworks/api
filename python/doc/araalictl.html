@@ -1,0 +1,85 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module araalictl</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>araalictl</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/abhinavtata/opensrc/api/temp/araalictl.py">/Users/abhinavtata/opensrc/api/temp/araalictl.py</a></font></td></tr></table>
+    <p><tt>Wrappers&nbsp;for&nbsp;araalictl&nbsp;for&nbsp;python&nbsp;use</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-add_mapping"><strong>add_mapping</strong></a>(data, tenant<font color="#909090">=None</font>)</dt><dd><tt>add&nbsp;app&nbsp;remapping&nbsp;config</tt></dd></dl>
+ <dl><dt><a name="-alerts"><strong>alerts</strong></a>(start_time<font color="#909090">=None</font>, token<font color="#909090">=None</font>, count<font color="#909090">=200</font>, end_time<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>get&nbsp;alerts</tt></dd></dl>
+ <dl><dt><a name="-assess"><strong>assess</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>get&nbsp;assessment&nbsp;report&nbsp;to&nbsp;fetch&nbsp;important&nbsp;lenses</tt></dd></dl>
+ <dl><dt><a name="-auth"><strong>auth</strong></a>(token)</dt></dl>
+ <dl><dt><a name="-deauth"><strong>deauth</strong></a>()</dt></dl>
+ <dl><dt><a name="-enforce"><strong>enforce</strong></a>(data, service<font color="#909090">=False</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Enforce&nbsp;zone&nbsp;app&nbsp;or&nbsp;service.</tt></dd></dl>
+ <dl><dt><a name="-fetch"><strong>fetch</strong></a>()</dt><dd><tt>For&nbsp;downloading&nbsp;and&nbsp;upgrading&nbsp;araalictl</tt></dd></dl>
+ <dl><dt><a name="-fetch_flows"><strong>fetch_flows</strong></a>(data, tenant<font color="#909090">=None</font>)</dt><dd><tt>Update&nbsp;actions&nbsp;on&nbsp;a&nbsp;link</tt></dd></dl>
+ <dl><dt><a name="-fetch_templates"><strong>fetch_templates</strong></a>(public<font color="#909090">=False</font>, template<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Fetch&nbsp;templates&nbsp;(or&nbsp;public&nbsp;ones)</tt></dd></dl>
+ <dl><dt><a name="-fog_install"><strong>fog_install</strong></a>(tenant, force<font color="#909090">=False</font>, nodes<font color="#909090">=None</font>)</dt><dd><tt>Install&nbsp;AWS&nbsp;mode&nbsp;fog</tt></dd></dl>
+ <dl><dt><a name="-fog_setupconfig"><strong>fog_setupconfig</strong></a>(tenant_id, dns_name, vpc_id, subnet_id, key_name, dns_hosted_zone_id, instance_type<font color="#909090">='m5.large'</font>)</dt><dd><tt>Setup&nbsp;config&nbsp;required&nbsp;to&nbsp;install&nbsp;a&nbsp;fog</tt></dd></dl>
+ <dl><dt><a name="-fog_uninstall"><strong>fog_uninstall</strong></a>(tenant_id)</dt><dd><tt>Uninstall&nbsp;AWS&nbsp;mode&nbsp;fog</tt></dd></dl>
+ <dl><dt><a name="-get_agents"><strong>get_agents</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;all&nbsp;agents</tt></dd></dl>
+ <dl><dt><a name="-get_apps"><strong>get_apps</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;all&nbsp;apps</tt></dd></dl>
+ <dl><dt><a name="-get_compute"><strong>get_compute</strong></a>(zone, app, tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;compute&nbsp;for&nbsp;a&nbsp;zone&nbsp;and&nbsp;app</tt></dd></dl>
+ <dl><dt><a name="-get_fogs"><strong>get_fogs</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;all&nbsp;fogs</tt></dd></dl>
+ <dl><dt><a name="-get_lenses"><strong>get_lenses</strong></a>(enforced<font color="#909090">=False</font>, starred<font color="#909090">=False</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;Lenses<br>
+&nbsp;<br>
+Gets&nbsp;all&nbsp;lenses&nbsp;for&nbsp;the&nbsp;tenant&nbsp;(if&nbsp;specified)<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enforced&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;outputs&nbsp;only&nbsp;enforced&nbsp;lenses.&nbsp;Default:&nbsp;False<br>
+&nbsp;&nbsp;&nbsp;&nbsp;starred&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;outputs&nbsp;only&nbsp;starred&nbsp;lenses.&nbsp;Default:&nbsp;False<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tenant&nbsp;(str):&nbsp;If&nbsp;given,&nbsp;outputs&nbsp;only&nbsp;lenses&nbsp;from&nbsp;this&nbsp;tenant.Default:&nbsp;None<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;yaml:&nbsp;All&nbsp;lenses&nbsp;with&nbsp;specified&nbsp;parameters</tt></dd></dl>
+ <dl><dt><a name="-get_links"><strong>get_links</strong></a>(zone<font color="#909090">=None</font>, app<font color="#909090">=None</font>, service<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;links&nbsp;for&nbsp;a&nbsp;zone&nbsp;and&nbsp;app</tt></dd></dl>
+ <dl><dt><a name="-get_mapping"><strong>get_mapping</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>get&nbsp;app&nbsp;remapping&nbsp;config</tt></dd></dl>
+ <dl><dt><a name="-get_pod_apps"><strong>get_pod_apps</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;zones&nbsp;and&nbsp;apps&nbsp;for&nbsp;tenant</tt></dd></dl>
+ <dl><dt><a name="-get_starred"><strong>get_starred</strong></a>(user_email<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>show&nbsp;starred</tt></dd></dl>
+ <dl><dt><a name="-get_zones"><strong>get_zones</strong></a>(full<font color="#909090">=False</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;zones&nbsp;and&nbsp;apps&nbsp;for&nbsp;tenant</tt></dd></dl>
+ <dl><dt><a name="-help"><strong>help</strong></a>()</dt><dd><tt>get&nbsp;araalictl&nbsp;help</tt></dd></dl>
+ <dl><dt><a name="-monitor"><strong>monitor</strong></a>(on<font color="#909090">=True</font>, zone<font color="#909090">=None</font>, app<font color="#909090">=None</font>, service<font color="#909090">=None</font>, email<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>monitor&nbsp;lens</tt></dd></dl>
+ <dl><dt><a name="-ping"><strong>ping</strong></a>(zone, app, dst, port, agent_id, tenant<font color="#909090">=None</font>)</dt><dd><tt>ping&nbsp;dst&nbsp;from&nbsp;src</tt></dd></dl>
+ <dl><dt><a name="-push_pod_apps"><strong>push_pod_apps</strong></a>(data, tenant<font color="#909090">=None</font>)</dt><dd><tt>Get&nbsp;zones&nbsp;and&nbsp;apps&nbsp;for&nbsp;tenant</tt></dd></dl>
+ <dl><dt><a name="-rbac_add_role"><strong>rbac_add_role</strong></a>(name, zone, app, tenant<font color="#909090">=None</font>)</dt><dd><tt>add&nbsp;new&nbsp;role</tt></dd></dl>
+ <dl><dt><a name="-rbac_assign_roles"><strong>rbac_assign_roles</strong></a>(email, roles, tenant<font color="#909090">=None</font>)</dt><dd><tt>assign&nbsp;a&nbsp;list&nbsp;of&nbsp;roles&nbsp;to&nbsp;email</tt></dd></dl>
+ <dl><dt><a name="-rbac_create_user"><strong>rbac_create_user</strong></a>(email, name, tenant<font color="#909090">=None</font>)</dt><dd><tt>create&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-rbac_del_role"><strong>rbac_del_role</strong></a>(name, tenant<font color="#909090">=None</font>)</dt><dd><tt>del&nbsp;role</tt></dd></dl>
+ <dl><dt><a name="-rbac_delete_user"><strong>rbac_delete_user</strong></a>(email, name, tenant<font color="#909090">=None</font>)</dt><dd><tt>delete&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-rbac_show_roles"><strong>rbac_show_roles</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>show&nbsp;rbac</tt></dd></dl>
+ <dl><dt><a name="-rbac_show_users"><strong>rbac_show_users</strong></a>(tenant<font color="#909090">=None</font>)</dt><dd><tt>show&nbsp;rbac</tt></dd></dl>
+ <dl><dt><a name="-rbac_unassign_roles"><strong>rbac_unassign_roles</strong></a>(email, roles, tenant<font color="#909090">=None</font>)</dt><dd><tt>assign&nbsp;a&nbsp;list&nbsp;of&nbsp;roles&nbsp;to&nbsp;email</tt></dd></dl>
+ <dl><dt><a name="-rm_mapping"><strong>rm_mapping</strong></a>(data, tenant<font color="#909090">=None</font>)</dt><dd><tt>rm&nbsp;app&nbsp;remapping&nbsp;config</tt></dd></dl>
+ <dl><dt><a name="-set_araalictl_path"><strong>set_araalictl_path</strong></a>(new_path)</dt></dl>
+ <dl><dt><a name="-star_lens"><strong>star_lens</strong></a>(zone<font color="#909090">=''</font>, app<font color="#909090">=''</font>, service<font color="#909090">=None</font>, email<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>star&nbsp;lens</tt></dd></dl>
+ <dl><dt><a name="-template"><strong>template</strong></a>(data, save<font color="#909090">=False</font>, use<font color="#909090">=False</font>, name<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt></dl>
+ <dl><dt><a name="-tenant_create"><strong>tenant_create</strong></a>(user_email, tenant_name<font color="#909090">=''</font>, user_name<font color="#909090">=''</font>)</dt><dd><tt>Create&nbsp;a&nbsp;subtenant</tt></dd></dl>
+ <dl><dt><a name="-tenant_delete"><strong>tenant_delete</strong></a>(tenant_id)</dt><dd><tt>Delete&nbsp;a&nbsp;subtenant</tt></dd></dl>
+ <dl><dt><a name="-unstar_all"><strong>unstar_all</strong></a>(email<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>unstar&nbsp;all&nbsp;lenses</tt></dd></dl>
+ <dl><dt><a name="-update_lens_owner"><strong>update_lens_owner</strong></a>(email<font color="#909090">=None</font>, add<font color="#909090">=True</font>, zone<font color="#909090">=None</font>, app<font color="#909090">=None</font>, service<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>update&nbsp;lens&nbsp;owner</tt></dd></dl>
+ <dl><dt><a name="-update_links"><strong>update_links</strong></a>(zone, app, data, tenant<font color="#909090">=None</font>)</dt><dd><tt>Update&nbsp;actions&nbsp;on&nbsp;a&nbsp;link</tt></dd></dl>
+ <dl><dt><a name="-update_template"><strong>update_template</strong></a>(data, public<font color="#909090">=False</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Update&nbsp;template</tt></dd></dl>
+ <dl><dt><a name="-world"><strong>world</strong></a>(direction<font color="#909090">='ingress_world,egress_world'</font>, on<font color="#909090">=True</font>, email<font color="#909090">=None</font>, tenant<font color="#909090">=None</font>)</dt><dd><tt>Monitor&nbsp;perimeter&nbsp;ingress/egress</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>g_araalictl_path</strong> = './araalictl'<br>
+<strong>g_debug</strong> = False</td></tr></table>
+</body></html>
