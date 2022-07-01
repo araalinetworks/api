@@ -1,7 +1,7 @@
 identities:
 - node:
-    name: amazonlinux.us-west-2
-    dns_pattern: amazonlinux.us-west-2.amazonaws.com
+    name: amazonlinux..*
+    dns_pattern: amazonlinux..*.amazonaws.com
     dst_port: 80
   pushdown: []
 - node:
@@ -11,6 +11,21 @@ identities:
     binary_name: .*
     parent_process: .*
     process: .*
+  pushdown: []
+- node:
+    name: autoscaling
+    dns_pattern: .*autoscaling.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: aws_load_balancer_controller
+    zone: .*
+    app: kube-system
+    pod: aws-load-balancer-controller
+    container: controller
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
   pushdown: []
 - node:
     name: cache
@@ -26,6 +41,21 @@ identities:
 - node:
     name: connect
     dns_pattern: .*connect.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: cluster_autoscaler
+    zone: .*
+    app: kube-system
+    pod: cluster-autoscaler
+    container: cluster-autoscaler
+    binary_name: /cluster-autoscaler
+    parent_process: containerd-shim
+    process: cluster-autoscaler
+  pushdown: []
+- node:
+    name: ec2
+    dns_pattern: .*ec2.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -49,6 +79,16 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: eks
+    dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: elasticloadbalancing
+    dns_pattern: .*elasticloadbalancing.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: email
     dns_pattern: .*email.*.amazonaws.com
     dst_port: 443
@@ -59,7 +99,7 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: mq
+    name: rabbitmq
     dns_pattern: .*mq.*.amazonaws.com
     dst_port: 443
   pushdown: []
@@ -99,6 +139,23 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: s3
+    dns_pattern: .*s3.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: shield
+    dns_pattern: .*shield.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: sns
+    dns_pattern: .*sns.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
     name: ssm
     dns_pattern: .*ssm.*.amazonaws.com
     dst_port: 443
@@ -106,6 +163,11 @@ identities:
 - node:
     name: sts
     dns_pattern: .*sts.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: waf
+    dns_pattern: .*waf.*.amazonaws.com
     dst_port: 443
   pushdown: []
 authorizations:
@@ -120,7 +182,6 @@ authorizations:
   - elasticfilesystem
   - email
   - es
-  - mq
   - pinpoint
   - pricing
   - rds
@@ -130,4 +191,14 @@ authorizations:
   - sqs
   - ssm
   - sts
-  - amazonlinux.us-west-2
+  - amazonlinux..*
+  - ec2
+  - rabbitmq
+- name: autoscaling
+  in:
+  - cluster_autoscaler
+- name: aws_load_balancer_controller
+  out:
+  - elasticloadbalancing
+  - shield
+  - waf

@@ -1,0 +1,111 @@
+identities:
+- node:
+    name: agent_newrelic_infra
+    zone: .*
+    app: .*
+    pod: .*
+    container: agent
+    binary_name: /usr/bin/newrelic-infra
+    parent_process: tini
+    process: newrelic-infra
+  pushdown: []
+- node:
+    name: cloud_connector_server
+    zone: .*
+    app: .*
+    pod: .*
+    container: app
+    binary_name: /app/src/vizier/services/cloud_connector/cloud_connector_server.runfiles/px/src/vizier/services/cloud_connector/cloud_connector_server_/cloud_connector_server
+    parent_process: containerd-shim
+    process: cloud_connector_server
+  pushdown: []
+- node:
+    name: fluent_bit
+    zone: .*
+    app: .*
+    pod: .*
+    container: newrelic-logging
+    binary_name: /fluent-bit/bin/fluent-bit
+    parent_process: containerd-shim
+    process: fluent-bit
+  pushdown: []
+- node:
+    name: forwarder_newrelic_infra
+    zone: .*
+    app: .*
+    pod: .*
+    container: forwarder
+    binary_name: /usr/bin/newrelic-infra
+    parent_process: newrelic-infra-
+    process: newrelic-infra
+  pushdown: []
+- node:
+    name: kelvin
+    zone: .*
+    app: .*
+    pod: .*
+    container: app
+    binary_name: /app/src/vizier/services/agent/kelvin/kelvin.runfiles/px/src/vizier/services/agent/kelvin/kelvin
+    parent_process: containerd-shim
+    process: kelvin
+  pushdown: []
+- node:
+    name: newrelic_identity_api
+    dns_pattern: identity-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: newrelic_infra_api
+    dns_pattern: infra-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: newrelic_infra_command_api
+    dns_pattern: infrastructure-command-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: newrelic_log_api
+    dns_pattern: log-api.newrelic.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: nr_data_otlp
+    dns_pattern: otlp.nr-data.net
+    dst_port: 443
+  pushdown: []
+- node:
+    name: operator
+    zone: .*
+    app: .*
+    pod: .*
+    container: app
+    binary_name: /app/src/operator/operator.runfiles/px/src/operator/operator_/operator
+    parent_process: containerd-shim
+    process: operator
+  pushdown: []
+- node:
+    name: withpixie
+    dns_pattern: withpixie.ai
+    dst_port: 443
+  pushdown: []
+authorizations:
+- name: agent_newrelic_infra
+  out:
+  - newrelic_identity_api
+  - newrelic_infra_api
+  - newrelic_infra_command_api
+- name: forwarder_newrelic_infra
+  out:
+  - newrelic_infra_api
+  - newrelic_infra_command_api
+- name: newrelic_log_api
+  in:
+  - fluent_bit
+- name: nr_data_otlp
+  in:
+  - kelvin
+- name: withpixie
+  in:
+  - cloud_connector_server
+  - operator

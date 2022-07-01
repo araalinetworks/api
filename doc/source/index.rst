@@ -43,6 +43,7 @@ So let the show begin!
    araalictlnotebook
    araalipolicy
    policy_as_code
+   template_as_code
    araalislackwebhook
    remapping_apps
    araalifaq

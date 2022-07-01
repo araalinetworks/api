@@ -1,0 +1,19 @@
+identities:
+- node:
+    name: any
+    zone: .*
+    app: .*
+    binary_name: .*
+    parent_process: .*
+    process: .*
+  pushdown: []
+- node:
+    name: azmk8s_io
+    dns_pattern: .*.azmk8s.io
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+authorizations:
+- name: any
+  out:
+  - azmk8s_io

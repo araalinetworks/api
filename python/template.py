@@ -400,7 +400,26 @@ def alerts(args):
                 shutil.rmtree("%s/%s" % (args.progdir, ".alerts.template.py"), ignore_errors=True)
 
     if args.nopull:
-        print("ls .alerts.template.py/*.json | xargs wc -l")
+        if args.ago:
+            import datetime
+            def make_map(kv):
+                k, v = kv.split("=")
+                return k, int(v)
+            ago = dict([make_map(a) for a in args.ago.split(",")])
+            cutoff = datetime.datetime.now() - datetime.timedelta(**ago)
+            for t in tenants:
+                count = 0
+                with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "r") as f:
+                    for line in f:
+                        line = json.loads(line)
+                        # print(line.keys())
+                        alert_t = datetime.datetime.fromtimestamp(int(line["timestamp"])/1000)
+                        if alert_t > cutoff:
+                            count += 1
+                if count:
+                    print("%-60s %s" % (t, count))
+        else:
+            print("ls .alerts.template.py/*.json | xargs wc -l")
         return
 
     if args.verbose >= 1: araalictl.g_debug = True
@@ -603,6 +622,7 @@ if __name__ == '__main__':
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_alerts.add_argument('-a', '--ago', help="dont pull from araali")
     
     parser_drift = subparsers.add_parser("drift", help="get drift (from template as code)")
     parser_drift.add_argument('-t', '--tenant', help="get drift for a specific tenant")
