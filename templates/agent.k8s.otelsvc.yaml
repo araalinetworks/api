@@ -22,7 +22,7 @@ identities:
     zone: .*
     app: kube-system
     pod: .*
-    container: gke-metrics-agent
+    container: .*
     binary_name: /otelsvc
     parent_process: containerd-shim
     process: otelsvc
