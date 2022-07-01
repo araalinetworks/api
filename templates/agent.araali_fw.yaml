@@ -6,7 +6,7 @@ identities:
   pushdown:
   - dns_pattern
 - node:
-    name: araalictl
+    name: araalictl_systemd
     zone: .*
     app: .*
     binary_name: .*/araalictl.linux-.*
@@ -103,6 +103,14 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: araalictl_bash
+    zone: .*
+    app: .*
+    binary_name: .*/araalictl.linux-amd64_v.*
+    parent_process: bash
+    process: araalictl
+  pushdown: []
+- node:
     name: sonatype_ossindex
     dns_pattern: ossindex.sonatype.org
     dst_port: 443
@@ -137,7 +145,8 @@ authorizations:
   - grype_sh
 - name: backend
   in:
-  - araalictl
+  - araalictl_systemd
+  - araalictl_bash
 - name: dependencycheck_helper
   out:
   - github_jeremylong

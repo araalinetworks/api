@@ -495,9 +495,9 @@ def drift(args):
         if args.tenant:
             tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
         else:
-            tenants = cfg["tenants"]
+            tenants = cfg.get("tenants", None)
             if not tenants:
-                tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == cfg["tenant"]][0]["name"], "id": cfg["tenant"]}]
+                tenants = [{"name": "account", "id": cfg["tenant"]}]
             else:
                 # full run
                 if not args.nopull:
