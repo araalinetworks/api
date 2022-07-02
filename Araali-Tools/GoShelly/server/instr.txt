@@ -1,5 +1,0 @@
-uname -a
-whoami
-pwd
-env
-ls
