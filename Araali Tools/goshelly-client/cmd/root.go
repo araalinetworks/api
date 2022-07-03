@@ -1,7 +1,4 @@
-/*
-Copyright © 2022 Soham Arora arorasoham9@gmail.com
 
-*/
 package cmd
 
 import (
