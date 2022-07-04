@@ -2,6 +2,7 @@ package araalictl
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/hex"
 	"fmt"
 	"net"
@@ -10,6 +11,7 @@ import (
 	"araali.proto/araali_api_service"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -71,7 +73,13 @@ func getApiClient() (context.Context, context.CancelFunc, araali_api_service.Ara
 
 	// Get the gRPC handle
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Minute)
-	conn, err := grpc.DialContext(ctx, url, grpc.WithInsecure())
+	//conn, err := grpc.DialContext(ctx, url, grpc.WithInsecure())
+	// Setup secure gRPC without mTLS
+	config := &tls.Config{
+		InsecureSkipVerify: false,
+	}
+	transport := grpc.WithTransportCredentials(credentials.NewTLS(config))
+	conn, err := grpc.DialContext(ctx, url, transport)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Could not connect to %v (Token: %v). Err: %v",
 			url, token, err))
@@ -322,7 +330,7 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 	return listOfLinks, nil
 }
 
-func ListAlerts(tenantID string,  filter *araali_api_service.AlertFilter,
+func ListAlerts(tenantID string, filter *araali_api_service.AlertFilter,
 	count int32, pagingToken string) (AlertPage, error) {
 	alertPage := AlertPage{
 		tenantID: tenantID,
