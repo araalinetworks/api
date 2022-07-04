@@ -1,12 +1,11 @@
 package basic
 
 import (
-	// "bufio"
+
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	t "goshelly-client/template"
-	// "flag"
 	"fmt"
 	"io"
 	"io/ioutil"
