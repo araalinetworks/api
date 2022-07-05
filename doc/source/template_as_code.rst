@@ -2,24 +2,22 @@ Template as Code
 ================
 
 In order to work with templates from the command line as opposed to
-the UI, there are a few commands we can use.
+the UI, there are a few commands we can use. Before you get started,
+make sure you are in the Python directory, and run::
+
+    ./setup.sh
+    
+Commands
+********
 
 Config
 ------
 
 The config command is the first command that should be used. It will
-specify the Araali user::
+specify the git directory::
 
-    # The <tenant-name> is optional
-
-    # To specify 1 tenant
-    ./template.py config -t=<tenant-name>:<tenant-id>
-
-    # To specify multiple tenants
-    ./template.py config --tenants=<tenant-name>:<tenant-id>,<tenant-name>:<tenant-id>,<tenant-name>:<tenant-id>,<tenant-name>:<tenant-id>
-
-    # To specify template directory
-    ./template.py config -d=<template-directory>
+    # To specify directory for git
+    ./template.py config -d=<git-directory>
 
 List
 ----
@@ -27,12 +25,10 @@ List
 The list command can be used to list the templates for a tenant::
 
     # To access local templates
-    ./template.py ls -T=<optional-template-name-or-path>
+    ./template.py ls
 
     # To access public templates
-    ./template.py ls -p -T=<optional-template-name-or-path>
-
-    # If no template is provided, defaults to all templates
+    ./template.py ls -p
 
 Pull
 ----
@@ -49,7 +45,7 @@ Format
 
 The format command is used to apply edits to the template::
 
-    ./template.py fmt <template>
+    ./template.py fmt <template-path>
 
 Push
 ----
@@ -57,7 +53,7 @@ Push
 The push command is used to push the local branch template to the public branch. **NOTE: This is a dangerous command.**
 Only run if you are confident in your changes to the template::
 
-    ./template.py push -p -T=<template-name-or-path>
+    ./template.py push -T=<template-name-or-path>
 
     # If no template is provided, defaults to all templates
 
@@ -76,6 +72,22 @@ Alerts
 ------
 The alerts command can be used to check any alerts::
 
-    ./template.py alerts -n
+    ./template.py alerts
 
 
+Example Videos
+**************
+
+Updating a Docker Template
+--------------------------
+
+.. raw:: html
+
+   <script id="asciicast-De3oYu2yjoZL5TYSxlCoxwsSv" src="https://asciinema.org/a/De3oYu2yjoZL5TYSxlCoxwsSv.js" async></script>
+
+Adding a New Link from UI to git
+--------------------------------
+
+.. raw:: html
+
+   <script id="asciicast-haEeqegDMT1cwWTpJb0KYHCX6" src="https://asciinema.org/a/haEeqegDMT1cwWTpJb0KYHCX6.js" async></script>
