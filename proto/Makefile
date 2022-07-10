@@ -17,11 +17,17 @@ $(PROTOC_GEN_GO): doc
 $(PROTOWRAP):
 	go get -u github.com/square/goprotowrap/cmd/protowrap
 
-genpy:
-	mkdir -p pygen
-	python -m grpc_tools.protoc -I. --python_out=pygen --grpc_python_out=pygen ./*.proto
+gen: gengo genpy
+	echo "Generating proto stubs for golang and python"
 
-gen: $(PROTOC_GEN_GO) $(PROTOWRAP)
+genpy:
+	mkdir -p araali/pygen
+	python -m grpc_tools.protoc -I. --python_out=araali/pygen --grpc_python_out=araali/pygen ./*.proto
+
+gengo: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	PATH=${GOPATH}/bin:${PATH} protowrap --go_out=plugins=grpc:../ -I. ./*.proto
+
+clean:
+	rm -rf araali
 
 .PHONY: 

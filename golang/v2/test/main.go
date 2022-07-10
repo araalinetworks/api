@@ -69,13 +69,18 @@ func main() {
 		}
 		filter := araali_api_service.AlertFilter{
 			Time: &araali_api_service.TimeSlice{
-				StartTime: timestamppb.New(time.Now().Add(time.Duration(-10) * time.Minute)),
+				//StartTime: timestamppb.New(time.Now().Add(time.Duration(-10) * time.Minute)),
+				StartTime: timestamppb.New(time.Date(1979, time.November, 0, 0, 0, 0, 0, time.UTC)),
 				EndTime:   timestamppb.New(time.Now()),
 			},
-			ListAllAlerts: true,
+			ListAllAlerts: false,
 			OpenAlerts:    true,
-			ClosedAlerts:  true,
-			// TODO: Add others to test
+			ClosedAlerts:  false,
+			PerimeterEgress: true,
+			PerimeterIngress: true,
+			HomeNonAraaliEgress: true,
+			HomeNonAraaliIngress: true,
+			AraaliToAraali: true,
 		}
 		resp, err := api.ListAlerts(tenantID, &filter, 100, "")
 		fmt.Printf("Resp: %v/%v\n", resp, err)
