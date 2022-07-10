@@ -432,7 +432,7 @@ def alerts(args):
             skipped_count = 0
             token = None
             while True:
-                alerts = araalictl.alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"])
+                alerts = araalictl.get_alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"])
                 if not alerts:
                     break
 
