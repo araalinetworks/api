@@ -3,6 +3,8 @@
 """
 import argparse
 import os
+import platform
+import subprocess
 import sys
 
 from . import api
@@ -12,6 +14,23 @@ def config(args):
 
 def alerts(args):
     print(len(api.API().get_alerts()[0]), "alerts")
+
+def ctl(args, remaining):
+    cmdline = {
+                "Linux": "araalictl.linux-amd64",
+                "Darwin": "araalictl.darwin-amd64"
+              }[platform.system()]
+    cmdline = args.progdir + "/bin/" + cmdline
+
+    if remaining[0] == "--": remaining = remaining[1:]
+
+    p = subprocess.Popen(["sudo", cmdline, "authorize", "-token=-"], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
+    auth_stdout = p.communicate(input=api.cfg["token"].encode())[0]
+    print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
+    print(auth_stdout.decode())
+
+    rc = subprocess.run([cmdline] + remaining)
+    return rc.returncode
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
@@ -31,8 +50,16 @@ if __name__ == "__main__":
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     parser_alerts.add_argument('-a', '--ago', help="dont pull from araali")
 
-    args = parser.parse_args()
+    parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
+
+    args, remaining = parser.parse_known_args()
     args.progdir, args.prog = os.path.split(sys.argv[0])
+
+    if args.subparser_name == "ctl":
+        sys.exit(ctl(args, remaining))
+    elif remaining:
+        raise Exception("*** unknown flags: %s" % remaining)
+
     if args.template: # template can be specified by name or file path
         args.dirname, args.pathname = os.path.split(args.template)
         args.template = args.pathname.split(".yaml")[0]
