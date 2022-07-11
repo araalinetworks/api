@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling", "grpcio", "protobuf"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
@@ -17,7 +17,13 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+  "grpcio",
+  "protobuf",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/araalinetworks/api/tree/main/python/api"
 "Bug Tracker" = "https://github.com/araalinetworks/api/issues"
+
+[tool]

@@ -2,8 +2,8 @@
 
 This is a python library to expose access to Araali APIs
 
-## Usage
+## Help
 ```
-import araali
-help(araali)
+python -m pydoc araali
+python -m araali -h
 ```

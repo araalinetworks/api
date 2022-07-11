@@ -2,8 +2,8 @@ import datetime
 import grpc
 import os
 
-import araali_api_service_pb2
-import araali_api_service_pb2_grpc
+from . import araali_api_service_pb2
+from . import araali_api_service_pb2_grpc
 
 class API:
     def __init__(self):
