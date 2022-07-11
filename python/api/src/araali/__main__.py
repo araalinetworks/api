@@ -4,44 +4,16 @@
 import argparse
 import os
 import sys
-import yaml
 
 from . import api
 
-cfg_fname = os.environ['HOME']+"/.araalirc"
-
-def read_config():
-    if os.path.isfile(cfg_fname):
-        with open(cfg_fname, "r") as f:
-            cfg = yaml.load(f, Loader=yaml.SafeLoader)
-            if not cfg.get("tenant", None): cfg["tenant"] = None
-            if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
-            return cfg
-    return {"tenant": None, "template_dir": "../templates"}
-
 def config(args):
-    global cfg
-    if args.tenant is not None:
-        if not args.tenant: # passed as empty string
-            args.tenant = None # store it as nil in yaml
-        cfg["tenant"] = args.tenant
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    if args.tenants is not None:
-        cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in args.tenants.split(",")]
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    if args.template_dir is not None:
-        cfg["template_dir"] = args.template_dir
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    print(yaml.dump(cfg))
+    return api.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
 
 def alerts(args):
     print(len(api.API().get_alerts()[0]), "alerts")
 
 if __name__ == "__main__":
-    cfg = read_config()
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     parser.add_argument('-T', '--template', help="apply operation for a specific template")
@@ -50,6 +22,8 @@ if __name__ == "__main__":
     parser_config = subparsers.add_parser("config", help="list/change config params")
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
     parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
+    parser_config.add_argument('--backend', help="setup a custom backend (internal unit testing)")
+    parser_config.add_argument('--token', help="api access token")
     parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")

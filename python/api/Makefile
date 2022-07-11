@@ -10,11 +10,13 @@ build: genpy
 push:
 	python3 -m twine upload dist/*
 
-test:
+install: build
 	python3 -m venv araaliapienv
 	source araaliapienv/bin/activate && python3 -m pip install --upgrade pip
 	source araaliapienv/bin/activate && pip install -r tests/requirements.txt
 	source araaliapienv/bin/activate && pip install dist/*.tar.gz
+
+test:
 	-source araaliapienv/bin/activate && pytest
 
 shell:
