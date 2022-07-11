@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/araalinetworks/api"
+"Homepage" = "https://github.com/araalinetworks/api/tree/main/python/api"
 "Bug Tracker" = "https://github.com/araalinetworks/api/issues"
