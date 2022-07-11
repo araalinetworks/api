@@ -1,0 +1,2 @@
+araali/bin/araalictl.darwin-amd64 filter=lfs diff=lfs merge=lfs -text
+araali/bin/araalictl.linux-amd64 filter=lfs diff=lfs merge=lfs -text
