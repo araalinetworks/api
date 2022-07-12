@@ -15,6 +15,7 @@ def config(args):
 def alerts(args):
     alerts, page, status = api.API().get_alerts(args.count, args.ago)
     if status == 0:
+        print("Got %s alerts" % len(alerts))
         api.dump_table(alerts)
 
 def assets(args):

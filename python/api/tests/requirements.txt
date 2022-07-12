@@ -1,4 +1,5 @@
 build
 grpcio
+grpcio-tools
 pytest
 twine

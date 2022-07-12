@@ -104,19 +104,20 @@ def init_alertreq(count, ago):
     
     req.filter.open_alerts = True
     req.filter.closed_alerts = False
-    req.filter.list_all_alerts = True
+    req.filter.list_all_alerts = False
     req.filter.perimeter_ingress = True
     req.filter.perimeter_egress = True
     req.filter.home_non_araali_ingress = True
     req.filter.home_non_araali_egress = True
     req.filter.araali_to_araali = True
     if not ago:
-        ago = "days=1"
-    ago = dict([make_map(a) for a in ago.split(",")])
-    req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
-    req.filter.time.end_time.FromDatetime(datetime.datetime.now())
+        ago = "infinite"
+    if ago != "infinite":
+        ago = dict([make_map(a) for a in ago.split(",")])
+        req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
+        req.filter.time.end_time.FromDatetime(datetime.datetime.now())
     
-    if count is None: count = 10
+    if count is None: count = 1000
     req.count = count
     print(req)
 

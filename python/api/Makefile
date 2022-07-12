@@ -1,27 +1,46 @@
 GENDIR=src/araali
 
-genpy: clean
-	python3 -m grpc_tools.protoc -I../../proto --python_out=$(GENDIR) --grpc_python_out=$(GENDIR) ../../proto/*.proto
+# the default, full thing
+all: genpy build install test
+
+# publish to pypi
+push: venv
+	source araaliapienv/bin/activate && python3 -m twine upload dist/*
+
+# if you want to rerun tests to see if they succeed
+test: venv
+	-source araaliapienv/bin/activate && pytest
+
+# if you are fixing install
+install: venv
+	source araaliapienv/bin/activate && pip install dist/*.tar.gz
+
+# if you are fixing build
+build: venv
+	rm -f dist/*
+	source araaliapienv/bin/activate && python3 -m build
+
+# regenerating proto stubs
+genpy: venv
+	rm -f $(GENDIR)/araali_api_service_pb2.py*
+	rm -f $(GENDIR)/araali_api_service_pb2_grpc.py*
+	source araaliapienv/bin/activate && python3 -m grpc_tools.protoc -I../../proto --python_out=$(GENDIR) --grpc_python_out=$(GENDIR) ../../proto/*.proto
 	sed -i -e 's/import araali_api_service_pb2/from . import araali_api_service_pb2/g' src/araali/araali_api_service_pb2_grpc.py
 
-build: genpy
-	python3 -m build
+# isolated and fully controlled python environment
+venv: araaliapienv/exists.h
 
-push:
-	python3 -m twine upload dist/*
-
-install: build
+# to keep a marker so we dont do this unnecessarily. Do "make clean" to start from scratch
+araaliapienv/exists.h:
 	python3 -m venv araaliapienv
 	source araaliapienv/bin/activate && python3 -m pip install --upgrade pip
 	source araaliapienv/bin/activate && pip install -r tests/requirements.txt
-	source araaliapienv/bin/activate && pip install dist/*.tar.gz
+	touch araaliapienv/exists.h
 
-test:
-	-source araaliapienv/bin/activate && pytest
-
+# work in the python enviroment
 shell:
-	source araaliapienv/bin/activate && bash
+	-source araaliapienv/bin/activate && bash
+
+# get a new life, wash all karma
 clean:
-	rm -f dist/*
-	rm -f $(GENDIR)/araali_api_service_pb2.py*
-	rm -f $(GENDIR)/araali_api_service_pb2_grpc.py*
+	rm -rf araaliapienv
