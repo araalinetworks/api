@@ -52,7 +52,11 @@ def dump_table(objs):
         print("%s %s %s" % ("="*40, idx, "="*40))
         print(yaml.dump(o))
 
-def init_assetsreq(zone, app):
+def make_map(kvstr):
+    k, v = kvstr.split("=")
+    return k, int(v)
+
+def init_assetsreq(zone, app, ago):
     req = araali_api_service_pb2.ListAssetsRequest()
     
     if cfg["tenant"]: req.tenant.id = cfg["tenant"]
@@ -65,14 +69,17 @@ def init_assetsreq(zone, app):
     req.filter.list_active_container = True
     req.filter.list_inactive_container = False
 
-    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(days=1))
+    if not ago:
+        ago = "days=1"
+    ago = dict([make_map(a) for a in ago.split(",")])
+    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.now())
     
     print(req)
 
     return req
 
-def init_linksreq(zone, app, svc):
+def init_linksreq(zone, app, svc, ago):
     req = araali_api_service_pb2.ListLinksRequest()
     
     if cfg["tenant"]: req.tenant.id = cfg["tenant"]
@@ -80,14 +87,17 @@ def init_linksreq(zone, app, svc):
     if app: req.app = app
     if svc: req.service = svc
 
-    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(days=1))
+    if not ago:
+        ago = "days=1"
+    ago = dict([make_map(a) for a in ago.split(",")])
+    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.now())
     
     print(req)
 
     return req
 
-def init_alertreq():
+def init_alertreq(ago):
     req = araali_api_service_pb2.ListAlertsRequest()
     
     if cfg["tenant"]: req.tenant.id = cfg["tenant"]
@@ -100,7 +110,10 @@ def init_alertreq():
     req.filter.home_non_araali_ingress = True
     req.filter.home_non_araali_egress = True
     req.filter.araali_to_araali = True
-    req.filter.time.start_time.FromDatetime(datetime.datetime(year=2012,day=2,month=2))
+    if not ago:
+        ago = "days=1"
+    ago = dict([make_map(a) for a in ago.split(",")])
+    req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.filter.time.end_time.FromDatetime(datetime.datetime.now())
     
     req.count = 10
@@ -142,29 +155,29 @@ class API:
 
         self.stub = araali_api_service_pb2_grpc.AraaliAPIStub(channel)
 
-    def get_alerts(self):
+    def get_alerts(self, ago=None):
         """Fetches alerts
             Usage: alerts, next_page, status = api.get_alerts()
         """
-        resp = self.stub.listAlerts(init_alertreq())
+        resp = self.stub.listAlerts(init_alertreq(ago))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.paging_token, resp.response.code)
 
-    def get_assets(self, zone=None, app=None):
+    def get_assets(self, zone=None, app=None, ago=None):
         """Fetches assets
             Usage: assets, status = api.get_assets()
         """
-        resp = self.stub.listAssets(init_assetsreq(zone, app))
+        resp = self.stub.listAssets(init_assetsreq(zone, app, ago))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.assets], resp.response.code)
 
-    def get_links(self, zone=None, app=None, svc=None):
+    def get_links(self, zone=None, app=None, svc=None, ago=None):
         """Fetches links
             Usage: links, status = api.get_links()
         """
-        resp = self.stub.listLinks(init_linksreq(zone, app, svc))
+        resp = self.stub.listLinks(init_linksreq(zone, app, svc, ago))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.response.code)

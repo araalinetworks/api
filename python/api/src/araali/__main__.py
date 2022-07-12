@@ -13,17 +13,17 @@ def config(args):
     return api.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
 
 def alerts(args):
-    alerts, page, status = api.API().get_alerts()
+    alerts, page, status = api.API().get_alerts(args.ago)
     if status == 0:
         api.dump_table(alerts)
 
 def assets(args):
-    assets, status = api.API().get_assets(args.zone, args.app)
+    assets, status = api.API().get_assets(args.zone, args.app, args.ago)
     if status == 0:
         api.dump_table(assets)
 
 def links(args):
-    links, status = api.API().get_links(args.zone, args.app, args.svc)
+    links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago)
     if status == 0:
         api.dump_table(links)
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
-    parser_alerts.add_argument('-a', '--ago', help="dont pull from araali")
+    parser_alerts.add_argument('--ago', help="lookback")
 
     parser_insights = subparsers.add_parser("insights", help="get insights")
     parser_insights.add_argument('-t', '--tenant', help="get insights for a specific tenant")
@@ -80,12 +80,14 @@ if __name__ == "__main__":
     parser_assets.add_argument('-t', '--tenant', help="get assets for a specific tenant")
     parser_assets.add_argument('-z', '--zone', help="assets for a specific zone")
     parser_assets.add_argument('-a', '--app', help="links for a specific app")
+    parser_assets.add_argument('--ago', help="lookback")
 
     parser_links = subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")
     parser_links.add_argument('-z', '--zone', help="links for a specific zone")
     parser_links.add_argument('-a', '--app', help="links for a specific app")
     parser_links.add_argument('-s', '--svc', help="links for a specific svc")
+    parser_links.add_argument('--ago', help="lookback")
 
     parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
 
