@@ -33,11 +33,13 @@ def insights(args):
         api.dump_table(insights)
 
 def ctl(args, remaining):
-    cmdline = {
-                "Linux": "araalictl.linux-amd64",
-                "Darwin": "araalictl.darwin-amd64"
-              }[platform.system()]
-    cmdline = args.progdir + "/bin/" + cmdline
+    if os.path.isfile(args.progdir + "/bin/araalictl"):
+        cmdline = args.progdir + "/bin/araalictl"
+    else:
+        cmdline = args.progdir + "/bin/" + {
+                                            "Linux": "araalictl.linux-amd64",
+                                            "Darwin": "araalictl.darwin-amd64"
+                                           }[platform.system()]
 
     if remaining[0] == "--": remaining = remaining[1:]
 
