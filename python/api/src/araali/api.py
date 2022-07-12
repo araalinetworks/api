@@ -97,7 +97,7 @@ def init_linksreq(zone, app, svc, ago):
 
     return req
 
-def init_alertreq(ago):
+def init_alertreq(count, ago):
     req = araali_api_service_pb2.ListAlertsRequest()
     
     if cfg["tenant"]: req.tenant.id = cfg["tenant"]
@@ -116,7 +116,8 @@ def init_alertreq(ago):
     req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.filter.time.end_time.FromDatetime(datetime.datetime.now())
     
-    req.count = 10
+    if count is None: count = 10
+    req.count = count
     print(req)
 
     return req
@@ -155,11 +156,11 @@ class API:
 
         self.stub = araali_api_service_pb2_grpc.AraaliAPIStub(channel)
 
-    def get_alerts(self, ago=None):
+    def get_alerts(self, count=None, ago=None):
         """Fetches alerts
             Usage: alerts, next_page, status = api.get_alerts()
         """
-        resp = self.stub.listAlerts(init_alertreq(ago))
+        resp = self.stub.listAlerts(init_alertreq(count, ago))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.paging_token, resp.response.code)

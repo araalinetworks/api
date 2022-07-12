@@ -13,7 +13,7 @@ def config(args):
     return api.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
 
 def alerts(args):
-    alerts, page, status = api.API().get_alerts(args.ago)
+    alerts, page, status = api.API().get_alerts(args.count, args.ago)
     if status == 0:
         api.dump_table(alerts)
 
@@ -72,6 +72,7 @@ if __name__ == "__main__":
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_alerts.add_argument('-c', '--count', type=int, help="dont pull from araali")
     parser_alerts.add_argument('--ago', help="lookback")
 
     parser_insights = subparsers.add_parser("insights", help="get insights")
