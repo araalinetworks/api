@@ -1,5 +1,7 @@
 import datetime
 import grpc
+from google.protobuf.json_format import MessageToJson
+import json
 import os
 import yaml
 
@@ -45,11 +47,50 @@ def config(tenant=None, tenants=None, template_dir=None, backend=None, token=Non
                 yaml.dump(cfg, f)
     print(yaml.dump(cfg))
 
+def dump_table(objs):
+    for idx, o in enumerate(objs):
+        print("%s %s %s" % ("="*40, idx, "="*40))
+        print(yaml.dump(o))
+
+def init_assetsreq(zone, app):
+    req = araali_api_service_pb2.ListAssetsRequest()
+    
+    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    
+    if zone: req.zone = zone
+    if app: req.app = app
+
+    req.filter.list_active_vm = True
+    req.filter.list_inactive_vm = False
+    req.filter.list_active_container = True
+    req.filter.list_inactive_container = False
+
+    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(days=1))
+    req.time.end_time.FromDatetime(datetime.datetime.now())
+    
+    print(req)
+
+    return req
+
+def init_linksreq(zone, app, svc):
+    req = araali_api_service_pb2.ListLinksRequest()
+    
+    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if zone: req.zone = zone
+    if app: req.app = app
+    if svc: req.service = svc
+
+    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(days=1))
+    req.time.end_time.FromDatetime(datetime.datetime.now())
+    
+    print(req)
+
+    return req
+
 def init_alertreq():
     req = araali_api_service_pb2.ListAlertsRequest()
     
-    # XXX: default it to None, and pick up from rc file
-    req.tenant.id = cfg["tenant"]
+    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
     
     req.filter.open_alerts = True
     req.filter.closed_alerts = False
@@ -63,6 +104,16 @@ def init_alertreq():
     req.filter.time.end_time.FromDatetime(datetime.datetime.now())
     
     req.count = 10
+    print(req)
+
+    return req
+
+def init_insightsreq(zone):
+    req = araali_api_service_pb2.ListInsightsRequest()
+    
+    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if zone: req.zone = zone
+    
     print(req)
 
     return req
@@ -98,4 +149,31 @@ class API:
         resp = self.stub.listAlerts(init_alertreq())
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
-        return (resp.links, resp.paging_token, resp.response.code)
+        return ([json.loads(MessageToJson(a)) for a in resp.links], resp.paging_token, resp.response.code)
+
+    def get_assets(self, zone=None, app=None):
+        """Fetches assets
+            Usage: assets, status = api.get_assets()
+        """
+        resp = self.stub.listAssets(init_assetsreq(zone, app))
+        if resp.response.code != 0:
+            print("*** Error fetching alerts:", resp.response.message)
+        return ([json.loads(MessageToJson(a)) for a in resp.assets], resp.response.code)
+
+    def get_links(self, zone=None, app=None, svc=None):
+        """Fetches links
+            Usage: links, status = api.get_links()
+        """
+        resp = self.stub.listLinks(init_linksreq(zone, app, svc))
+        if resp.response.code != 0:
+            print("*** Error fetching alerts:", resp.response.message)
+        return ([json.loads(MessageToJson(a)) for a in resp.links], resp.response.code)
+
+    def get_insights(self, zone=None):
+        """Fetches insights
+            Usage: insights, status = api.get_insights()
+        """
+        resp = self.stub.listInsights(init_insightsreq(zone))
+        if resp.response.code != 0:
+            print("*** Error fetching alerts:", resp.response.message)
+        return ([json.loads(MessageToJson(a)) for a in resp.insights], resp.response.code)

@@ -7,7 +7,7 @@
             api.get_alerts()
 
         # The module can also be run from the command line
-        python -m araali
+        python -m araali -h
 """
 
 from .api import API
