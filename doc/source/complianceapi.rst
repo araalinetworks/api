@@ -87,12 +87,12 @@ Gets all alerts for the tenant (if specified).
 .. tabs::
   .. code-tab:: sh Command Line
 
-       # use -starttime and -endtime to specify start and end times
+       # use -starttime and -endtime to specify start and end times (epoch)
        ./araalictl api -fetch-alerts -paging-token <token> -count <count>
 
   .. code-tab:: py
 
-       # use start_time and end_time to specify start and end times
+       # use start_time and end_time to specify start and end times (epoch)
        import araalictl
        araalictl.get_alerts(token=<token>, count=<count>)
 
