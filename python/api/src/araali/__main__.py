@@ -8,30 +8,31 @@ import subprocess
 import sys
 
 from . import api
+from . import utils
 
 def config(args):
-    return api.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
+    return utils.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
 
 def alerts(args):
     alerts, page, status = api.API().get_alerts(args.count, args.ago)
     if status == 0:
         print("Got %s alerts" % len(alerts))
-        api.dump_table(alerts)
+        utils.dump_table(alerts)
 
 def assets(args):
     assets, status = api.API().get_assets(args.zone, args.app, args.ago)
     if status == 0:
-        api.dump_table(assets)
+        utils.dump_table(assets)
 
 def links(args):
     links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago)
     if status == 0:
-        api.dump_table(links)
+        utils.dump_table(links)
 
 def insights(args):
     insights, status = api.API().get_insights(args.zone)
     if status == 0:
-        api.dump_table(insights)
+        utils.dump_table(insights)
 
 def ctl(args, remaining):
     if os.path.isfile(args.progdir + "/bin/araalictl"):

@@ -32,7 +32,7 @@
             alerts, page, status = api.get_alerts(count, ago)
             if status == 0:
                 print("Got %s alerts" % len(alerts))
-                araali.api.dump_table(alerts)
+                araali.utils.dump_table(alerts)
 
             ###
             # assets and CVEs
@@ -41,7 +41,7 @@
             ###
             assets, status = api.get_assets(zone, app, ago)
             if status == 0:
-                araali.api.dump_table(assets)
+                araali.utils.dump_table(assets)
 
             ###
             # polices for apps and services
@@ -50,7 +50,7 @@
             ###
             links, status = api.get_links(zone, app, svc, ago)
             if status == 0:
-                araali.api.dump_table(links)
+                araali.utils.dump_table(links)
 
             ###
             # insights
@@ -58,7 +58,7 @@
             ###
             insights, status = api.get_insights(zone)
             if status == 0:
-                araali.api.dump_table(insights)
+                araali.utils.dump_table(insights)
 
         # The module can also be run from the command line
 

@@ -2,64 +2,15 @@ import datetime
 import grpc
 from google.protobuf.json_format import MessageToJson
 import json
-import os
-import yaml
 
 from . import araali_api_service_pb2
 from . import araali_api_service_pb2_grpc
-
-cfg_fname = os.environ['HOME']+"/.araalirc"
-
-def read_config():
-    if os.path.isfile(cfg_fname):
-        with open(cfg_fname, "r") as f:
-            cfg = yaml.load(f, Loader=yaml.SafeLoader)
-            if not cfg.get("tenant", None): cfg["tenant"] = None
-            if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
-            if not cfg.get("token", None): cfg["token"] = os.getenv('ARAALI_API_TOKEN')
-            if not cfg.get("backend", None): cfg["backend"] = os.getenv('ARAALI_BACKEND')
-            return cfg
-
-    return {
-            "tenant": None, "template_dir": "../templates",
-            "token": os.getenv('ARAALI_API_TOKEN'),
-            "backend": os.getenv("ARAALI_BACKEND")
-           }
-
-cfg = read_config()
-
-def config(tenant=None, tenants=None, template_dir=None, backend=None, token=None):
-    global cfg
-    if tenant is not None:
-        if not tenant: # passed as empty string
-            tenant = None # store it as nil in yaml
-        cfg["tenant"] = tenant
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    if tenants is not None:
-        cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in tenants.split(",")]
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    for k in ["template_dir", "backend", "token"]:
-        if eval(k) is not None:
-            cfg[k] = eval(k)
-            with open(cfg_fname, "w") as f:
-                yaml.dump(cfg, f)
-    print(yaml.dump(cfg))
-
-def dump_table(objs):
-    for idx, o in enumerate(objs):
-        print("%s %s %s" % ("="*40, idx, "="*40))
-        print(yaml.dump(o))
-
-def make_map(kvstr):
-    k, v = kvstr.split("=")
-    return k, int(v)
+from . import utils
 
 def init_assetsreq(zone, app, ago):
     req = araali_api_service_pb2.ListAssetsRequest()
     
-    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
     
     if zone: req.zone = zone
     if app: req.app = app
@@ -71,7 +22,7 @@ def init_assetsreq(zone, app, ago):
 
     if not ago:
         ago = "days=1"
-    ago = dict([make_map(a) for a in ago.split(",")])
+    ago = dict([utils.make_map(a) for a in ago.split(",")])
     req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.now())
     
@@ -82,14 +33,14 @@ def init_assetsreq(zone, app, ago):
 def init_linksreq(zone, app, svc, ago):
     req = araali_api_service_pb2.ListLinksRequest()
     
-    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
     if zone: req.zone = zone
     if app: req.app = app
     if svc: req.service = svc
 
     if not ago:
         ago = "days=1"
-    ago = dict([make_map(a) for a in ago.split(",")])
+    ago = dict([utils.make_map(a) for a in ago.split(",")])
     req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.now())
     
@@ -100,7 +51,7 @@ def init_linksreq(zone, app, svc, ago):
 def init_alertreq(count, ago):
     req = araali_api_service_pb2.ListAlertsRequest()
     
-    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
     
     req.filter.open_alerts = True
     req.filter.closed_alerts = False
@@ -113,7 +64,7 @@ def init_alertreq(count, ago):
     if not ago:
         ago = "infinite"
     if ago != "infinite":
-        ago = dict([make_map(a) for a in ago.split(",")])
+        ago = dict([utils.make_map(a) for a in ago.split(",")])
         req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
         req.filter.time.end_time.FromDatetime(datetime.datetime.now())
     
@@ -126,7 +77,7 @@ def init_alertreq(count, ago):
 def init_insightsreq(zone):
     req = araali_api_service_pb2.ListInsightsRequest()
     
-    if cfg["tenant"]: req.tenant.id = cfg["tenant"]
+    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
     if zone: req.zone = zone
     
     print(req)
@@ -135,8 +86,7 @@ def init_insightsreq(zone):
 
 class API:
     def __init__(self):
-        global cfg
-        if cfg["token"] is None:
+        if utils.cfg["token"] is None:
             raise Exception("*** ARAALI_API_TOKEN environment variable is not set")
 
         class GrpcAuth(grpc.AuthMetadataPlugin):
@@ -146,11 +96,11 @@ class API:
             def __call__(self, context, callback):
                 callback((('authorization', self._key),), None)
 
-        token_cred = grpc.metadata_call_credentials(GrpcAuth("Bearer %s" % cfg["token"]))
+        token_cred = grpc.metadata_call_credentials(GrpcAuth("Bearer %s" % utils.cfg["token"]))
         channel_cred = grpc.ssl_channel_credentials()
         creds = grpc.composite_channel_credentials(channel_cred, token_cred)
 
-        backend = cfg["backend"]
+        backend = utils.cfg["backend"]
         if not backend:
             backend = "prod"
         channel = grpc.secure_channel('api-%s.aws.araalinetworks.com:443' % (backend), creds)
