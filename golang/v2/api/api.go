@@ -370,7 +370,7 @@ func ListAlerts(tenantID string, filter *araali_api_service.AlertFilter,
 		return alertPage, fmt.Errorf("ListAlerts API failed")
 	}
 
-	//fmt.Printf("ListAlerts Response: %v", resp)
+	fmt.Printf("ListAlerts Response: %v", resp)
 
 	alertPage.Alerts = resp.Links
 	token, err := hex.DecodeString(resp.PagingToken)
