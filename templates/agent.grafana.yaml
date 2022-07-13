@@ -1,0 +1,41 @@
+identities:
+- node:
+    name: githubusercontent
+    dns_pattern: raw.githubusercontent.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: grafana_server
+    zone: .*
+    app: .*
+    pod: .*
+    container: grafana
+    binary_name: /usr/share/grafana/bin/grafana-server
+    parent_process: containerd-shim
+    process: grafana-server
+  pushdown: []
+- node:
+    name: grafana_stats
+    dns_pattern: stats.grafana.org
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: gravatar_secure
+    dns_pattern: secure.gravatar.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: slack
+    dns_pattern: hooks.slack.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+authorizations:
+- name: grafana_server
+  out:
+  - githubusercontent
+  - grafana_stats
+  - gravatar_secure
+  - slack
