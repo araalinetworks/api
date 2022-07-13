@@ -42,7 +42,7 @@ def ctl(args, remaining):
                                             "Darwin": "araalictl.darwin-amd64"
                                            }[platform.system()]
 
-    if remaining[0] == "--": remaining = remaining[1:]
+    if remaining and remaining[0] == "--": remaining = remaining[1:]
 
     if remaining and remaining[0] in ["authorize", "upgrade"]:
         prepend = ["sudo"]
