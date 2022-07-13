@@ -5,6 +5,10 @@ cd araalinetworks
 git clone https://github.com/araalinetworks/api.git
 cd api/python
 
+# setup lfs
+brew install git-lfs
+git lfs install
+
 # install/upgrade
 python araalictl.py
 
