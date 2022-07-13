@@ -1,0 +1,32 @@
+identities:
+- node:
+    name: argocd_server
+    zone: .*
+    app: argocd
+    pod: argocd-server
+    container: argocd-server
+    binary_name: /usr/local/bin/argocd
+    parent_process: containerd-shim
+    process: argocd-server
+  pushdown: []
+- node:
+    name: github
+    dns_pattern: github.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: redis_server
+    zone: .*
+    app: argocd
+    pod: argocd-redis
+    container: redis
+    binary_name: /usr/local/bin/redis-server
+    parent_process: containerd-shim
+    process: redis-server
+  pushdown: []
+authorizations:
+- name: argocd_server
+  out:
+  - argocd_server
+  - github
+  - redis_server
