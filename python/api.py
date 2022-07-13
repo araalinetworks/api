@@ -205,11 +205,11 @@ class Alerts(object):
         if self.paging_token is None: return []
 
         if self.paging_token == "":
-            alerts = araalictl.alerts(self.start_time, count=self.count,
-                                      tenant=self.tenant)
+            alerts = araalictl.get_alerts(self.start_time, count=self.count,
+                                          tenant=self.tenant)
         else:
-            alerts = araalictl.alerts(token=self.paging_token, count=self.count,
-                                      tenant=self.tenant)
+            alerts = araalictl.get_alerts(token=self.paging_token, count=self.count,
+                                          tenant=self.tenant)
         if alerts:
             self.paging_token = alerts[-1].get("paging_token", None)
         else:

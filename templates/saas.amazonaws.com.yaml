@@ -1,5 +1,10 @@
 identities:
 - node:
+    name: amazonlinux
+    dns_pattern: amazonlinux..*.amazonaws.com
+    dst_port: 80
+  pushdown: []
+- node:
     name: any
     zone: .*
     app: .*
@@ -39,6 +44,16 @@ identities:
     process: cluster-autoscaler
   pushdown: []
 - node:
+    name: cognito-identity
+    dns_pattern: cognito-identity.*amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: connect
+    dns_pattern: .*connect.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: ec2
     dns_pattern: .*ec2.*.amazonaws.com
     dst_port: 443
@@ -49,8 +64,18 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: efs
+    dns_pattern: .*efs.*.amazonaws.com
+    dst_port: 2049
+  pushdown: []
+- node:
     name: eks
     dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 10250
+  pushdown: []
+- node:
+    name: elasticfilesystem
+    dns_pattern: .*elasticfilesystem.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -64,8 +89,28 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: pinpoint
+    dns_pattern: pinpoint.*amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: pricing
+    dns_pattern: .*pricing.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: rabbitmq
     dns_pattern: .*mq.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: rds
+    dns_pattern: .*rds.*.amazonaws.com
+    dst_port: 5432
+  pushdown: []
+- node:
+    name: route53
+    dns_pattern: .*route53.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -86,6 +131,11 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: sqs
+    dns_pattern: sqs.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: ssm
     dns_pattern: .*ssm.*.amazonaws.com
     dst_port: 443
@@ -103,15 +153,24 @@ identities:
 authorizations:
 - name: any
   out:
+  - amazonlinux
   - cache
+  - cognito-identity
+  - connect
   - ec2
   - ec2messages
+  - efs
   - eks
-  - eks
+  - elasticfilesystem
   - email
+  - pinpoint
+  - pricing
   - rabbitmq
+  - rds
+  - route53
   - s3
   - sns
+  - sqs
   - ssm
   - sts
 - name: autoscaling

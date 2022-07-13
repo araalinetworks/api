@@ -55,7 +55,7 @@ def deauth():
     rc = run_command(cmd, result=True, strip=False)
     assert rc[0] == 0, rc[1]
 
-def alerts(start_time=None, token=None, count=200, end_time=None, tenant=None):
+def get_alerts(start_time=None, token=None, count=200, end_time=None, tenant=None):
     """get alerts"""
     if start_time is None:
         start_time = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -122,7 +122,18 @@ def assess(tenant=None):
     return yaml.load(rc[1], yaml.SafeLoader)
 
 def get_lenses(enforced=False, starred=False, tenant=None):
-    """get lenses"""
+    """Get Lenses
+
+    Gets all lenses for the tenant (if specified)
+
+    Args:
+        enforced (bool): If True, outputs only enforced lenses. Default: False
+        starred (bool): If True, outputs only starred lenses. Default: False
+        tenant (str): If given, outputs only lenses from this tenant.Default: None
+
+    Returns:
+        yaml: All lenses with specified parameters
+    """
     flags = ""
     if enforced: flags += " -enforced"
     if starred: flags += " -starred"
@@ -372,6 +383,13 @@ def get_links(zone=None, app=None, service=None, tenant=None):
     assert rc[0] == 0, rc[1]
     return yaml.load(rc[1], yaml.SafeLoader)
 
+def get_enforced_links(tenant=None):
+    links = {}
+    for lens in get_lenses(enforced=True, tenant=tenant):
+        if "zone" in lens.keys() and "app" in lens.keys():
+            links["%s:%s" % (lens["zone"], lens["app"])] = get_links(zone=lens["zone"], app=lens["app"], tenant=tenant)
+    return links
+
 def get_fogs(tenant=None):
     """Get all fogs"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
@@ -419,10 +437,10 @@ def ping(zone, app, dst, port, agent_id, tenant=None):
 def get_compute(zone, app, tenant=None):
     """Get compute for a zone and app"""
     tstr = " -tenant=%s " % (tenant) if tenant else ""
-    rc = run_command("%s api -zone %s -app %s -fetch-compute %s" % (
+    rc = run_command("%s api -zone %s -app %s %s -fetch-compute" % (
         g_araalictl_path, zone, app, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return json.loads(rc[1])
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def world(direction="ingress_world,egress_world", on=True, email=None,
           tenant=None):

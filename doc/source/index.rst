@@ -64,6 +64,7 @@ So let the show begin!
    getting_started_with_rafay
    guide_templates
    guide_lenses
+   complianceapi
 
 
 .. toctree::
