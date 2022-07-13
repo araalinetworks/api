@@ -2,6 +2,7 @@
     Fetches alerts and prints the count
 """
 import argparse
+import datetime
 import os
 import platform
 import subprocess
@@ -16,9 +17,22 @@ def config(args):
 
 def alerts(args):
     alerts, page, status = api.API().get_alerts(args.count, args.ago)
+    day_dict = {}
     if status == 0:
         print("Got %s alerts" % len(alerts))
         utils.dump_table(alerts)
+
+        for a in alerts:
+            dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
+            #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
+            dts = dt.strftime("%Y/%m/%d")
+            day_dict.setdefault(dts, []).append(a)
+
+        keys = [a for a in day_dict.keys()]
+        keys.sort()
+        print("frequency count")
+        for k in keys:
+            print("%s %s" % (k, len(day_dict[k])))
 
 def assets(args):
     assets, status = api.API().get_assets(args.zone, args.app, args.ago)
