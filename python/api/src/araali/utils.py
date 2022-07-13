@@ -1,4 +1,6 @@
 import os
+import shlex
+import subprocess
 import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
@@ -48,3 +50,40 @@ def dump_table(objs):
 def make_map(kvstr):
     k, v = kvstr.split("=")
     return k, int(v)
+
+def eprint(*args, **kwargs):
+    args = [a.decode() for a in args]
+    print(*args, file=sys.stderr, **kwargs)
+
+def run_command(command, result=False, strip=True, in_text=None, debug=False, env=os.environ):
+    def collect_output(ret, output):
+        if output:
+            if strip:
+                output = output.strip()
+            if result:
+                ret.append(output.decode())
+            else:
+                eprint(output)
+
+    if debug:
+        print(command, result)
+    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+                                stdin=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env=env)
+    ret = []
+    if result:
+        if in_text:
+            outs, errs = process.communicate(input=in_text.encode())
+        else:
+            outs, errs = process.communicate()
+        return process.poll(), outs+errs
+    else:
+        while True:
+            rc = process.poll()
+            err = process.stderr.readline()
+            out = process.stdout.readline()
+            if rc is not None and not out and not err:
+                return rc, "\n".join(ret)
+            collect_output(ret, out)
+            collect_output(ret, err)

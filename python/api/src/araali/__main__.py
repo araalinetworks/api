@@ -7,7 +7,8 @@ import platform
 import subprocess
 import sys
 
-from . import api
+#from . import api
+from . import araalictl as api
 from . import utils
 
 def config(args):
