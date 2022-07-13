@@ -142,7 +142,7 @@ def get_lenses(enforced=False, starred=False, tenant=None):
     rc = run_command("%s api -fetch-enforcement-status %s %s" % (
                      g_araalictl_path, flags, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return json.dumps(yaml.load(rc[1], yaml.SafeLoader), indent=4)
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def update_lens_owner(email=None, add=True, zone=None, app=None, service=None,
                       tenant=None):
@@ -388,7 +388,7 @@ def get_enforced_links(tenant=None):
     for lens in get_lenses(enforced=True, tenant=tenant):
         if "zone" in lens.keys() and "app" in lens.keys():
             links["%s:%s" % (lens["zone"], lens["app"])] = get_links(zone=lens["zone"], app=lens["app"], tenant=tenant)
-    return json.dumps(links, indent=4)
+    return links
 
 def get_fogs(tenant=None):
     """Get all fogs"""
@@ -440,7 +440,7 @@ def get_compute(zone, app, tenant=None):
     rc = run_command("%s api -zone %s -app %s %s -fetch-compute" % (
         g_araalictl_path, zone, app, tstr), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return json.dumps(yaml.load(rc[1],yaml.SafeLoader), indent=4)
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def world(direction="ingress_world,egress_world", on=True, email=None,
           tenant=None):
@@ -483,7 +483,7 @@ def fetch_flows(data, tenant=None):
     rc = run_command("%s api -fetch-flows %s" % (g_araalictl_path, tstr),
                      in_text=yaml.dump(data), result=True, strip=False)
     assert rc[0] == 0, rc[1]
-    return json.dumps(yaml.load(rc[1], yaml.SafeLoader), indent=4)
+    return yaml.load(rc[1], yaml.SafeLoader)
 
 def fetch_templates(public=False, template=None, tenant=None):
     """Fetch templates (or public ones)"""
