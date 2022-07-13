@@ -7,10 +7,13 @@ from . import araali_api_service_pb2
 from . import araali_api_service_pb2_grpc
 from . import utils
 
-def init_assetsreq(zone, app, ago):
+def init_assetsreq(zone, app, ago, tenant=None):
     req = araali_api_service_pb2.ListAssetsRequest()
     
-    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    if tenant is None:
+        if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    else:
+        req.tenant.id = tenant
     
     if zone: req.zone = zone
     if app: req.app = app
@@ -30,10 +33,13 @@ def init_assetsreq(zone, app, ago):
 
     return req
 
-def init_linksreq(zone, app, svc, ago):
+def init_linksreq(zone, app, svc, ago, tenant=None):
     req = araali_api_service_pb2.ListLinksRequest()
     
-    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    if tenant is None:
+        if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    else:
+        req.tenant.id = tenant
     if zone: req.zone = zone
     if app: req.app = app
     if svc: req.service = svc
@@ -48,10 +54,13 @@ def init_linksreq(zone, app, svc, ago):
 
     return req
 
-def init_alertreq(count, ago):
+def init_alertreq(count, ago, tenant=None):
     req = araali_api_service_pb2.ListAlertsRequest()
     
-    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    if tenant is None:
+        if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    else:
+        req.tenant.id = tenant
     
     req.filter.open_alerts = True
     req.filter.closed_alerts = False
@@ -74,10 +83,13 @@ def init_alertreq(count, ago):
 
     return req
 
-def init_insightsreq(zone):
+def init_insightsreq(zone, tenant=None):
     req = araali_api_service_pb2.ListInsightsRequest()
     
-    if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    if tenant is None:
+        if utils.cfg["tenant"]: req.tenant.id = utils.cfg["tenant"]
+    else:
+        req.tenant.id = tenant
     if zone: req.zone = zone
     
     print(req)
@@ -107,38 +119,38 @@ class API:
 
         self.stub = araali_api_service_pb2_grpc.AraaliAPIStub(channel)
 
-    def get_alerts(self, count=None, ago=None):
+    def get_alerts(self, count=None, ago=None, tenant=None):
         """Fetches alerts
             Usage: alerts, next_page, status = api.get_alerts()
         """
-        resp = self.stub.listAlerts(init_alertreq(count, ago))
+        resp = self.stub.listAlerts(init_alertreq(count, ago, tenant))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.paging_token, resp.response.code)
 
-    def get_assets(self, zone=None, app=None, ago=None):
+    def get_assets(self, zone=None, app=None, ago=None, tenant=None):
         """Fetches assets
             Usage: assets, status = api.get_assets()
         """
-        resp = self.stub.listAssets(init_assetsreq(zone, app, ago))
+        resp = self.stub.listAssets(init_assetsreq(zone, app, ago, tenant))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.assets], resp.response.code)
 
-    def get_links(self, zone=None, app=None, svc=None, ago=None):
+    def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
         """Fetches links
             Usage: links, status = api.get_links()
         """
-        resp = self.stub.listLinks(init_linksreq(zone, app, svc, ago))
+        resp = self.stub.listLinks(init_linksreq(zone, app, svc, ago, tenant))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.response.code)
 
-    def get_insights(self, zone=None):
+    def get_insights(self, zone=None, tenant=None):
         """Fetches insights
             Usage: insights, status = api.get_insights()
         """
-        resp = self.stub.listInsights(init_insightsreq(zone))
+        resp = self.stub.listInsights(init_insightsreq(zone, tenant))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.insights], resp.response.code)

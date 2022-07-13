@@ -26,10 +26,10 @@ class API:
                                                 "Darwin": "araalictl.darwin-amd64"
                                                }[platform.system()]
 
-    def get_alerts(self, count=None, ago=None, token=None):
+    def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
 
-        tenant = utils.cfg["tenant"]
+        if tenant is None: tenant = utils.cfg["tenant"]
         if count is None: count = 1000
 
         if not ago:

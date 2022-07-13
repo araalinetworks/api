@@ -16,7 +16,7 @@ def config(args):
     return utils.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
 
 def alerts(args):
-    alerts, page, status = api.API().get_alerts(args.count, args.ago)
+    alerts, page, status = api.API().get_alerts(args.count, args.ago, tenant=args.tenant)
     day_dict = {}
     if status == 0:
         print("Got %s alerts" % len(alerts))
@@ -35,17 +35,17 @@ def alerts(args):
             print("%s %s" % (k, len(day_dict[k])))
 
 def assets(args):
-    assets, status = api.API().get_assets(args.zone, args.app, args.ago)
+    assets, status = api.API().get_assets(args.zone, args.app, args.ago, tenant=args.tenant)
     if status == 0:
         utils.dump_table(assets)
 
 def links(args):
-    links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago)
+    links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago, tenant=args.tenant)
     if status == 0:
         utils.dump_table(links)
 
 def insights(args):
-    insights, status = api.API().get_insights(args.zone)
+    insights, status = api.API().get_insights(args.zone, tenant=args.tenant)
     if status == 0:
         utils.dump_table(insights)
 
