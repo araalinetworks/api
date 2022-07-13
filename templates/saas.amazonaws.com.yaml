@@ -117,7 +117,8 @@ identities:
     name: s3
     dns_pattern: .*s3.*.amazonaws.com
     dst_port: 443
-  pushdown: []
+  pushdown:
+  - dns_pattern
 - node:
     name: shield
     dns_pattern: .*shield.*.amazonaws.com
@@ -127,7 +128,8 @@ identities:
     name: sns
     dns_pattern: .*sns.*.amazonaws.com
     dst_port: 443
-  pushdown: []
+  pushdown:
+  - dns_pattern
 - node:
     name: sqs
     dns_pattern: sqs.*.amazonaws.com
