@@ -17,10 +17,6 @@ $(PROTOC_GEN_GO): doc
 $(PROTOWRAP):
 	go get -u github.com/square/goprotowrap/cmd/protowrap
 
-genpy:
-	mkdir -p pygen
-	python -m grpc_tools.protoc -I. --python_out=pygen --grpc_python_out=pygen ./*.proto
-
 gen: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	PATH=${GOPATH}/bin:${PATH} protowrap --go_out=plugins=grpc:../ -I. ./*.proto
 
