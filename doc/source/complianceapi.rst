@@ -40,6 +40,14 @@ These are enforced processes belonging to certain Zone/Cluster and App/Namespace
 
 For SOC2 Type2 compliance a customer has to show that **they have ongoing security controls in place and it can be proved via periodic capture of evidence.** To prove the above controls Araali can take periodic snapshots of all the items above, and put it in a report that can be used by the auditor.
 
+Python Usage
+************
+
+1. Fork the open source `Github Repo<https://github.com/araalinetworks/api>`_
+2. Download the fork to your local machine
+3. Navigate to the fork through command line
+4. Run Python in the command line
+
 Commands
 --------
 To specify tenant through the command line, use the ``-t`` or ``--tenant`` flags. To do so through Python, use the ``tenant`` argument.
@@ -79,12 +87,12 @@ Gets all alerts for the tenant (if specified).
 .. tabs::
   .. code-tab:: sh Command Line
 
-       # use -starttime and -endtime to specify start and end times
+       # use -starttime and -endtime to specify start and end times (epoch)
        ./araalictl api -fetch-alerts -paging-token <token> -count <count>
 
   .. code-tab:: py
 
-       # use start_time and end_time to specify start and end times
+       # use start_time and end_time to specify start and end times (epoch)
        import araalictl
        araalictl.get_alerts(token=<token>, count=<count>)
 

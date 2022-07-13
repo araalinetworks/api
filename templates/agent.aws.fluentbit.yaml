@@ -1,0 +1,21 @@
+identities:
+- node:
+    name: fluentbit
+    zone: .*
+    app: amazon-cloudwatch
+    pod: fluent-bit
+    container: fluent-bit
+    binary_name: /fluent-bit/bin/fluent-bit
+    parent_process: containerd-shim
+    process: fluent-bit
+  pushdown: []
+- node:
+    name: logs
+    dns_pattern: logs..*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+authorizations:
+- name: logs
+  in:
+  - fluentbit

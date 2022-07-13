@@ -44,8 +44,8 @@ identities:
     process: cluster-autoscaler
   pushdown: []
 - node:
-    name: cognito-identity
-    dns_pattern: cognito-identity.*amazonaws.com
+    name: cognito_identity
+    dns_pattern: .*cognito-identity.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -90,7 +90,7 @@ identities:
   pushdown: []
 - node:
     name: pinpoint
-    dns_pattern: pinpoint.*amazonaws.com
+    dns_pattern: .*pinpoint.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -120,6 +120,11 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: secretsmanager
+    dns_pattern: .*secretsmanager.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: shield
     dns_pattern: .*shield.*.amazonaws.com
     dst_port: 443
@@ -132,7 +137,7 @@ identities:
   - dns_pattern
 - node:
     name: sqs
-    dns_pattern: sqs.*.amazonaws.com
+    dns_pattern: .*sqs.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -155,7 +160,7 @@ authorizations:
   out:
   - amazonlinux
   - cache
-  - cognito-identity
+  - cognito_identity
   - connect
   - ec2
   - ec2messages
@@ -169,6 +174,7 @@ authorizations:
   - rds
   - route53
   - s3
+  - secretsmanager
   - sns
   - sqs
   - ssm

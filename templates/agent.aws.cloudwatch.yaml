@@ -1,0 +1,21 @@
+identities:
+- node:
+    name: cloudwatch_agent
+    zone: .*
+    app: amazon-cloudwatch
+    pod: cloudwatch-agent
+    container: cloudwatch-agent
+    binary_name: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent
+    parent_process: .*
+    process: amazon-cloudwatch-agent
+  pushdown: []
+- node:
+    name: logs
+    dns_pattern: logs..*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+authorizations:
+- name: logs
+  in:
+  - cloudwatch_agent
