@@ -40,6 +40,16 @@ identities:
     process: argocd-server
   pushdown: []
 - node:
+    name: git_remote_https
+    zone: .*
+    app: argocd
+    pod: argocd-repo-server
+    container: argocd-repo-server
+    binary_name: /usr/lib/git-core/git-remote-http
+    parent_process: git
+    process: git-remote-https
+  pushdown: []
+- node:
     name: github
     dns_pattern: github.com
     dst_port: 443
@@ -76,3 +86,6 @@ authorizations:
   - argocd_server
   - github
   - redis_server
+- name: git_remote_https
+  out:
+  - github
