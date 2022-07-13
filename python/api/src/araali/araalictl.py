@@ -8,6 +8,7 @@
 """
 import datetime
 import os
+import platform
 import sys
 from . import utils
 import yaml
@@ -16,7 +17,7 @@ g_debug = False
 
 class API:
     def __init__(self):
-        progdir = os.path.split(sys.argv[0])[0]
+        progdir = os.path.dirname(os.path.abspath(__file__))
         if os.path.isfile(progdir + "/bin/araalictl"):
             self.cmdline = progdir + "/bin/araalictl"
         else:

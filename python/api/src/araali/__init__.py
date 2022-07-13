@@ -66,4 +66,5 @@
             python -m araali -h
 """
 
-from .api import API
+#from .api import API
+from .araalictl import API
