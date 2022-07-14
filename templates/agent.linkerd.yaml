@@ -1,0 +1,169 @@
+identities:
+- node:
+    name: am_service_bin
+    zone: .*
+    app: rubrik-spark-platform
+    pod: am-service
+    container: am-service
+    binary_name: /am-service.bin
+    parent_process: containerd-shim
+    process: am-service.bin
+  pushdown: []
+- node:
+    name: authz_service_bin
+    zone: .*
+    app: rubrik-spark-mds
+    pod: authz-service
+    container: authz-service
+    binary_name: /authz-service.bin
+    parent_process: containerd-shim
+    process: authz-service.bin
+  pushdown: []
+- node:
+    name: azure_management
+    dns_pattern: .*management.*.azure.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: cloud_sql_proxy
+    zone: .*
+    app: rubrik-spark
+    pod: cloudsql-datastore-.*
+    container: cloudsql-proxy
+    binary_name: /cloud_sql_proxy
+    parent_process: containerd-shim
+    process: cloud_sql_proxy
+  pushdown: []
+- node:
+    name: db_service_bin
+    zone: .*
+    app: rubrik-spark-platform
+    pod: db-service
+    container: db-service
+    binary_name: /db-service.bin
+    parent_process: containerd-shim
+    process: db-service.bin
+  pushdown: []
+- node:
+    name: destination_controller
+    zone: .*
+    app: linkerd
+    pod: linkerd-destination
+    container: destination
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
+  pushdown: []
+- node:
+    name: identity_controller
+    zone: .*
+    app: linkerd
+    pod: linkerd-identity
+    container: identity
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
+  pushdown: []
+- node:
+    name: kubelet
+    zone: .*
+    app: .*
+    binary_name: /home/kubernetes/bin/kubelet
+    parent_process: systemd
+    process: kubelet
+  pushdown: []
+- node:
+    name: linkerd2_proxy
+    zone: .*
+    app: .*
+    pod: .*
+    container: linkerd-proxy
+    binary_name: /usr/lib/linkerd/linkerd2-proxy
+    parent_process: containerd-shim
+    process: linkerd2-proxy
+  pushdown: []
+- node:
+    name: linkerd_await
+    zone: .*
+    app: .*
+    pod: .*
+    container: linkerd-proxy
+    binary_name: /usr/lib/linkerd/linkerd-await
+    parent_process: runc
+    process: linkerd-await
+  pushdown: []
+- node:
+    name: linkerd_policy_controller
+    zone: .*
+    app: linkerd
+    pod: linkerd-destination
+    container: policy
+    binary_name: /bin/linkerd-policy-controller
+    parent_process: containerd-shim
+    process: linkerd-policy-controller
+  pushdown: []
+- node:
+    name: main_bin
+    zone: .*
+    app: .*
+    pod: .*
+    container: azure-native-backup-sql-database
+    binary_name: /main.bin
+    parent_process: containerd-shim
+    process: main.bin
+  pushdown: []
+- node:
+    name: microsoftonline_login
+    dns_pattern: login.microsoftonline.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: org_springframework_boot_loader_PropertiesLauncher
+    zone: .*
+    app: monitoring
+    pod: tracing-service
+    container: tracing-service
+    binary_name: /usr/lib/jvm/java-15-openjdk/bin/java
+    parent_process: containerd-shim
+    process: org.springframework.boot.loader.PropertiesLauncher
+  pushdown: []
+- node:
+    name: service_bin
+    zone: .*
+    app: rubrik-spark-cloudaccounts
+    pod: cloudaccounts-service
+    container: cloudaccounts-service
+    binary_name: /service.bin
+    parent_process: containerd-shim
+    process: service.bin
+  pushdown: []
+- node:
+    name: sla_service_bin
+    zone: .*
+    app: rubrik-spark-dlc
+    pod: sla-service
+    container: sla-service
+    binary_name: /sla-service.bin
+    parent_process: containerd-shim
+    process: sla-service.bin
+  pushdown: []
+authorizations:
+- name: linkerd2_proxy
+  in:
+  - kubelet
+  - linkerd_await
+  - main_bin
+  out:
+  - am_service_bin
+  - authz_service_bin
+  - azure_management
+  - cloud_sql_proxy
+  - db_service_bin
+  - destination_controller
+  - identity_controller
+  - linkerd2_proxy
+  - linkerd_policy_controller
+  - microsoftonline_login
+  - org_springframework_boot_loader_PropertiesLauncher
+  - service_bin
+  - sla_service_bin
