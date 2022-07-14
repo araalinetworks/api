@@ -264,7 +264,6 @@ func StartServer(port string, sslEmail string, notEmail string, hookSlack string
 	}
 	defer servfile.Close()
 
-	// servlog = log.New(os.Stdout, "", log.LstdFlags)
 	servlog = log.New(servfile, "", log.LstdFlags)
 	if err != nil {
 		servlog = log.New(os.Stdout, "", log.LstdFlags)

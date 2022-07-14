@@ -111,7 +111,7 @@ func sendSlackMessage(conn net.Conn, connData []t.SlackSchemaOne) {
 	},
 	}}, t.SlackSchemaOne{Type: "context", Elements: []t.SlackSchemaTwo{{
 		Type: "mrkdwn",
-		Text: "Connection received, ID: " + conn.RemoteAddr().String() + "-" + time.Now().Format(time.RFC1123),
+		Text: "Connection received, ID: " + conn.RemoteAddr().String() + "_" + time.Now().Format(time.RFC1123),
 	},
 	}})
 
@@ -121,7 +121,7 @@ func sendSlackMessage(conn net.Conn, connData []t.SlackSchemaOne) {
 
 	resp, err := http.Post(SERVCONFIG.SLACKHOOK, "application/json", bytes.NewBuffer(body))
 	if err == nil && resp.StatusCode == http.StatusOK {
-		servlog.Println("Slack Notification sent successfully, ID: ", conn.RemoteAddr().String()+"-"+time.Now().Format(time.RFC1123))
+		servlog.Println("Slack Notification sent successfully, ID: ", conn.RemoteAddr().String()+"_"+time.Now().Format(time.RFC1123))
 		// fmt.Println(string(body),resp.StatusCode)
 		resp.Body.Close()
 
@@ -147,7 +147,7 @@ func genCert() {
 
 func handleClient(conn net.Conn) {
 
-	file, err := os.OpenFile("./logs/server-connections/"+conn.RemoteAddr().String()+"-"+time.Now().Format(time.RFC1123)+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("./logs/server_connections/"+conn.RemoteAddr().String()+"_"+time.Now().Format(time.RFC1123)+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func handleClient(conn net.Conn) {
 	// }
 	sendSlackMessage(conn, data)
 	logClean("./logs/serverlogs/")
-	logClean("./logs/server-connections/")
+	logClean("./logs/server_connections/")
 
 }
 
@@ -261,7 +261,7 @@ func StartServer(port string, sslEmail string, notEmail string, hookSlack string
 		MAXLOGSTORE : logmax,
 	}
 
-	servfile, err := os.OpenFile("./logs/serverlogs/"+"GoShellyServerLogs"+"-"+time.Now().Format(time.RFC1123)+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	servfile, err := os.OpenFile("./logs/serverlogs/"+"GoShellyServerLogs"+"_"+time.Now().Format(time.RFC1123)+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Server log open error: ", err)
 		os.Exit(1)

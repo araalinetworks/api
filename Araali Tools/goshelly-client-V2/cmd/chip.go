@@ -29,10 +29,8 @@ var chipCmd = &cobra.Command{
 		file, _ := json.MarshalIndent(t.ApiConnIP{
 			IP: base64.StdEncoding.EncodeToString([]byte(temp)),
 		}, "", " ")
-
 		_ = ioutil.WriteFile("./config/api_conn_config.json", file, 0644)
 		fmt.Println("Connection IP settings for this session will be stored as a json config in a non-encrypted format.")
-
 	},
 }
 

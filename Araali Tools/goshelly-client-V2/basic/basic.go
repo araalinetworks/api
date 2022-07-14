@@ -151,7 +151,7 @@ func dialReDial(serviceID string, config *tls.Config) *tls.Conn {
 func GetLoggedUser() t.LoggedUser {
 	var user t.LoggedUser
 	var temp []byte
-	file, _ := ioutil.ReadFile("./config/token-config.json")
+	file, _ := ioutil.ReadFile("./config/token_config.json")
 	err := json.Unmarshal([]byte(file), &user)
 	if err != nil {
 		// fmt.Println("Could not fetch user auth data.")
@@ -270,7 +270,7 @@ func readStartConfigJSON(EN bool, CONFIG t.Config) t.Config {
 		return CONFIG
 	}
 	var config t.Config
-	file, err := ioutil.ReadFile("./config/client-config.json")
+	file, err := ioutil.ReadFile("./config/client_config.json")
 	if err != nil {
 		fmt.Println("Could not read in configuration. Err: ", err)
 		return CONFIG
@@ -318,7 +318,7 @@ func SaveLoginResult(resp *http.Response, email string) {
 		return
 	default:
 		os.MkdirAll("./config/", os.ModePerm)
-		fo, err := os.Create("./config/token-config.json")
+		fo, err := os.Create("./config/token_config.json")
 		if err != nil {
 			fmt.Println("Could not save login config. Try logging in again later.")
 		}
@@ -328,7 +328,7 @@ func SaveLoginResult(resp *http.Response, email string) {
 			EMAIL: base64.StdEncoding.EncodeToString([]byte(email)),
 		}, "", " ")
 
-		_ = ioutil.WriteFile("./config/token-config.json", file, 0644)
+		_ = ioutil.WriteFile("./config/token_config.json", file, 0644)
 		fmt.Println("Warning. Your access token and identiy for this session will be stored as a json config in a non-encrypted format.")
 
 	}
@@ -340,7 +340,7 @@ func StartClient(HOST string, PORT string, SSLEMAIL string, logmax int) {
 	CONFIG.PORT = PORT
 	CONFIG.SSLEMAIL = PORT
 	CONFIG.MAXLOGSTORE = logmax
-	CONFIG.LOGNAME = "./logs/" + "GoShelly" + "-" + time.Now().Format(time.RFC1123) + ".log"
+	CONFIG.LOGNAME = "./logs/" + "GoShelly" + "_" + time.Now().Format(time.RFC1123) + ".log"
 	os.MkdirAll("./logs/", os.ModePerm)
 	clientfile, err := os.OpenFile(CONFIG.LOGNAME, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -424,7 +424,7 @@ func introduceUserToBackdoor(conn *tls.Conn, user t.LoggedUser) {
 		CONFIG.CLIENTLOG.Println("Fatal. Could not introduce client to backdoor. " + string(buffer))
 		os.Exit(1)
 	}
-	CONFIG.CLIENTLOG.Println("Client-Server-Intro=" + string(sDec))
+	CONFIG.CLIENTLOG.Println("Client_Server_Intro=" + string(sDec))
 	buffer = nil
 	time.Sleep(time.Second * 2)
 

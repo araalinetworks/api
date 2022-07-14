@@ -15,7 +15,7 @@ var configCmd = &cobra.Command{
 	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		
-		os.MkdirAll("./logs/server-connections/", os.ModePerm)
+		os.MkdirAll("./logs/server_connections/", os.ModePerm)
 		os.MkdirAll("./logs/serverlogs/", os.ModePerm)
 		fmt.Println("GoShelly configured. You are good to go :)")
 	},

@@ -38,7 +38,7 @@ var deleteCmd = &cobra.Command{
 		}
 
 		b.DeleteUser(confirm, URLHEAD+deleteURL)
-		os.Remove("./config/token-config.json")
+		os.Remove("./config/token_config.json")
 	},
 }
 
