@@ -52,20 +52,65 @@ class API:
         rc = utils.run_command("%s api -fetch-alerts %s -count %s %s" % (
                             self.cmdline, cmd, count, tstr),
                          debug=g_debug, result=True, strip=False)
-        assert rc[0] == 0, rc[1]
 
         token = None
         objs = yaml.load(rc[1], yaml.SafeLoader)
         if objs:
             token=objs[-1].get("paging_token", None)
 
-        return objs, token, 0
+        return objs, token, rc[0]
 
-    def get_assets(self, zone, app, ago):
-        pass
+    def get_assets(self, zone=None, app=None, ago=None, tenant=None):
+        """Get assets for a zone (required) and app (optional)
+            Usage: assets, status = api.get_assets()
+        """
+        if not ago:
+            ago = "days=1"
+        ago = dict([utils.make_map(a) for a in ago.split(",")])
+        start_time = datetime.datetime.now() - datetime.timedelta(**ago)
+        end_time = datetime.datetime.now()
 
-    def get_links(self, zone, app, svc, ago):
-        pass
+        cmd = "-starttime %s" % (int(start_time.timestamp()))
+        cmd += " -endtime %s" % (int(end_time.timestamp()))
+        if zone: cmd += " -zone %s" % zone
+        if app: cmd += " -app %s" % app
+        if tenant is None: tenant = utils.cfg["tenant"]
+        if tenant: cmd += " -tenant %s" % tenant
 
-    def get_insights(self, zone):
-        pass
+        rc = utils.run_command("%s api %s -fetch-compute" % (
+            self.cmdline, cmd), debug=g_debug, result=True, strip=False)
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
+        """Get links for a zone and app, or svc"""
+        assert svc is not None or zone is not None and app is not None
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        if svc:
+            tstr += " -service=%s " % (svc)
+        else:
+            tstr += " -zone=%s -app=%s " % (zone, app)
+    
+        if not ago:
+            ago = "days=1"
+        ago = dict([utils.make_map(a) for a in ago.split(",")])
+        start_time = datetime.datetime.now() - datetime.timedelta(**ago)
+        end_time = datetime.datetime.now()
+        tstr += " -starttime %s" % (int(start_time.timestamp()))
+        tstr += " -endtime %s" % (int(end_time.timestamp()))
+
+        rc = utils.run_command("%s api -fetch-links %s" % (self.cmdline, tstr),
+                         debug=g_debug, result=True, strip=False)
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_insights(self, zone=None, tenant=None):
+        """Get insights for a zone (optional)"""
+        cmd = ""
+        if zone: cmd += " -zone %s" % zone
+        if tenant is None: tenant = utils.cfg["tenant"]
+        if tenant: cmd += " -tenant %s" % tenant
+
+        rc = utils.run_command("%s api %s -fetch-insights" % (
+            self.cmdline, cmd), debug=g_debug, result=True, strip=False)
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]

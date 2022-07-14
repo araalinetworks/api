@@ -37,11 +37,13 @@ def alerts(args):
 def assets(args):
     assets, status = api.API().get_assets(args.zone, args.app, args.ago, tenant=args.tenant)
     if status == 0:
+        print("Got %s assets" % len(assets))
         utils.dump_table(assets)
 
 def links(args):
     links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago, tenant=args.tenant)
     if status == 0:
+        print("Got %s links" % len(links))
         utils.dump_table(links)
 
 def insights(args):
@@ -113,6 +115,9 @@ if __name__ == "__main__":
 
     args, remaining = parser.parse_known_args()
     args.progdir, args.prog = os.path.split(sys.argv[0])
+
+    if args.verbose:
+        api.g_debug = True
 
     if args.subparser_name == "ctl":
         sys.exit(ctl(args, remaining))

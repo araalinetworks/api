@@ -2,11 +2,13 @@
 
     Setup (one time):
         # setup a python3 virtualenv to run araali                                      
+        cd ~/
         python3 -m venv araaliapienv                                                    
         source araaliapienv/bin/activate                                                
         pip install araali
 
     Every other time (enter the virtualenv and use it):
+        cd ~/
         source araaliapienv/bin/activate                                                
         pip install --upgrade araali
 
