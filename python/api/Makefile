@@ -18,6 +18,8 @@ install: venv
 # if you are fixing build
 build: venv
 	rm -f dist/*
+	rm -f $(GENDIR)/bin/araalictl
+	rm -f $(GENDIR)/bin/araalictl.*-amd64_*
 	source araaliapienv/bin/activate && python3 -m build
 
 # regenerating proto stubs
