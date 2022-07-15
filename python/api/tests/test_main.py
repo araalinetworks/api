@@ -3,6 +3,8 @@ import pytest
 
 @pytest.fixture(scope="session")
 def api():
+    araali.utils.config(backend="nightly")
+    araali.utils.config(tenant="meta-tap")
     return araali.API()
 
 def test_alerts(api):

@@ -28,15 +28,25 @@ class API:
                                                }[platform.system()]
 
     def check(self):
+        # nightly.aws.araalinetworks.com
+        rc = utils.run_command("%s config InternalCfgBackend" % (self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+        backend = rc[1].decode().split("=", 1)[1].split(".")[0]
+        if backend != utils.cfg["backend"]:
+            print("*** backend doesnt match, invoking deauth ...")
+            subprocess.run(("sudo %s authorize -clean" % (self.cmdline)).split())
+            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
+
         rc = utils.run_command("%s authorize check" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
         ret = rc[1].decode().strip()
         if ret != "copy is authorized":
-            print("*** not authorized")
+            print("*** not authorized for %s, must re-authorize in Araali UI" % utils.cfg["backend"])
             rc = utils.run_command("sudo %s authorize -clean" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
             rc = utils.run_command("sudo rm -rf /tmp/actl* /tmp/av.port",
                                 debug=g_debug, result=True, strip=False)
+            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
             cmdline = "sudo %s authorize" % (self.cmdline)
             subprocess.run(cmdline.split())
 
@@ -57,7 +67,7 @@ class API:
 
             start_time = int(start_time.timestamp())
             end_time = int(end_time.timestamp())
- 
+
         cmd = "-starttime %s" % (start_time)
         cmd += " -endtime %s" % (end_time)
         if token:
@@ -110,7 +120,7 @@ class API:
             tstr += " -service=%s " % (svc)
         else:
             tstr += " -zone=%s -app=%s " % (zone, app)
-    
+
         if not ago:
             ago = "days=1"
         ago = dict([utils.make_map(a) for a in ago.split(",")])

@@ -164,5 +164,7 @@ if __name__ == "__main__":
 
     if args.subparser_name:
         sys.exit(locals()[args.subparser_name](args))
+    else:
+        araalictl.API().check()
 
     sys.exit(0)
