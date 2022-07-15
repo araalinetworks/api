@@ -8,53 +8,13 @@ identities:
     process: .*
   pushdown: []
 - node:
-    name: clouddebugger
-    dns_pattern: clouddebugger.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: cloudprofiler
-    dns_pattern: cloudprofiler.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: stackdriver
-    dns_pattern: stackdriver.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: cloudkms
-    dns_pattern: cloudkms.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: cloudresourcemanager
-    dns_pattern: .*cloudresourcemanager.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: cloudtrace
     dns_pattern: .*cloudtrace.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
-    name: compute
-    dns_pattern: compute.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: container
-    dns_pattern: container.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: logging
     dns_pattern: .*logging.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: maps
-    dns_pattern: .*maps.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
@@ -65,16 +25,6 @@ identities:
 - node:
     name: oauth2
     dns_pattern: .*oauth2.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: pubsub
-    dns_pattern: pubsub.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: servicecontrol
-    dns_pattern: servicecontrol.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
@@ -90,19 +40,9 @@ identities:
 authorizations:
 - name: any
   out:
-  - cloudkms
-  - cloudresourcemanager
   - cloudtrace
-  - compute
-  - container
   - logging
-  - maps
   - monitoring
   - oauth2
-  - pubsub
-  - servicecontrol
   - storage
   - www
-  - clouddebugger
-  - cloudprofiler
-  - stackdriver

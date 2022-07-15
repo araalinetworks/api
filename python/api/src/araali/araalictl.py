@@ -149,3 +149,16 @@ class API:
         rc = utils.run_command("%s api -list-templates %s" % (
             self.cmdline, tstr), debug=g_debug, result=True, strip=False)
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def update_template(self, data, public=False, tenant=None):
+        """Update template"""
+
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+
+        command = "-update-template" if not public else "-export-template"
+        rc = utils.run_command("%s api %s %s" % (
+            self.cmdline, command, tstr), in_text=yaml.dump(data), debug=g_debug, result=True, strip=False)
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]

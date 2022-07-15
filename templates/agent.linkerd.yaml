@@ -1,18 +1,114 @@
 identities:
 - node:
+    name: aws_autoscaling
+    dns_pattern: .*autoscaling.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: aws_ebs
+    dns_pattern: .*ebs.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: aws_eks
+    dns_pattern: .*eks.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: aws_kms
+    dns_pattern: .*kms.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: aws_rds
+    dns_pattern: .*rds.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: aws_tagging
+    dns_pattern: .*tagging.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
     name: azure_management
     dns_pattern: .*management.*.azure.com
     dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
+    name: blobstore_service
+    zone: .*
+    app: rubrik-spark.*
+    pod: blobstore-service
+    container: blobstore-service
+    binary_name: /usr/lib/jvm/java-11-openjdk/bin/java
+    parent_process: containerd-shim
+    process: rubrik.spark.blobstore.BlobstoreServiceMain
+  pushdown: []
+- node:
+    name: cloud_manager_bin
+    zone: .*
+    app: .*
+    pod: o365-cloud-manager
+    container: o365-cloud-manager
+    binary_name: /cloud-manager.bin
+    parent_process: containerd-shim
+    process: cloud-manager.bin
   pushdown: []
 - node:
     name: cloud_sql_proxy
     zone: .*
-    app: rubrik-spark
+    app: rubrik-spark.*
     pod: cloudsql-datastore-.*
     container: cloudsql-proxy
     binary_name: /cloud_sql_proxy
     parent_process: containerd-shim
     process: cloud_sql_proxy
+  pushdown: []
+- node:
+    name: exocompute_aws_linkerd2_proxy
+    zone: .*
+    app: rubrik-spark-exocompute
+    pod: exocompute.*aws.*
+    container: linkerd-proxy
+    binary_name: /usr/lib/linkerd/linkerd2-proxy
+    parent_process: containerd-shim
+    process: linkerd2-proxy
+  pushdown: []
+- node:
+    name: exocompute_bin
+    zone: .*
+    app: rubrik-spark-exocompute
+    pod: exocompute
+    container: exocompute
+    binary_name: /exocompute.bin
+    parent_process: containerd-shim
+    process: exocompute.bin
+  pushdown: []
+- node:
+    name: flagr
+    zone: .*
+    app: rubrik-spark.*
+    pod: .*flagr
+    container: .*flagr
+    binary_name: /go/src/github.com/checkr/flagr/flagr
+    parent_process: containerd-shim
+    process: flagr
+  pushdown: []
+- node:
+    name: goddess_updater
+    zone: .*
+    app: rubrik-spark.*
+    pod: goddess-updater
+    container: goddess-updater
+    binary_name: /goddess-updater.bin
+    parent_process: containerd-shim
+    process: goddess-updater.bin
   pushdown: []
 - node:
     name: kubelet
@@ -21,16 +117,6 @@ identities:
     binary_name: /home/kubernetes/bin/kubelet
     parent_process: systemd
     process: kubelet
-  pushdown: []
-- node:
-    name: linkerd-policy-controller
-    zone: .*
-    app: linkerd
-    pod: linkerd-.*
-    container: policy
-    binary_name: /bin/linkerd-policy-controller
-    parent_process: containerd-shim
-    process: linkerd-policy-controller
   pushdown: []
 - node:
     name: linkerd2_proxy
@@ -63,9 +149,34 @@ identities:
     process: controller
   pushdown: []
 - node:
+    name: linkerd_hearbeat_controller
+    zone: .*
+    app: linkerd
+    pod: linkerd-heartbeat
+    container: heartbeat
+    binary_name: /controller
+    parent_process: containerd-shim
+    process: controller
+  pushdown: []
+- node:
+    name: linkerd_policy_controller
+    zone: .*
+    app: linkerd
+    pod: linkerd-.*
+    container: policy
+    binary_name: /bin/linkerd-policy-controller
+    parent_process: containerd-shim
+    process: linkerd-policy-controller
+  pushdown: []
+- node:
     name: linkerd_svc_cluster_local
     dns_pattern: linkerd-policy.linkerd.svc.cluster.local
     dst_port: 8090
+  pushdown: []
+- node:
+    name: linkerd_versioncheck
+    dns_pattern: versioncheck.linkerd.io
+    dst_port: 443
   pushdown: []
 - node:
     name: main_bin
@@ -78,8 +189,38 @@ identities:
     process: main.bin
   pushdown: []
 - node:
+    name: main_bin
+    zone: .*
+    app: rubrik-spark.*
+    pod: .*
+    container: .*
+    binary_name: /main.bin
+    parent_process: containerd-shim
+    process: main.bin
+  pushdown: []
+- node:
+    name: microsoft_graph
+    dns_pattern: graph.microsoft.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: microsoftonline_login
     dns_pattern: login.microsoftonline.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: o365_linkerd2_proxy
+    zone: .*
+    app: rubrik-spark-o365
+    pod: .*
+    container: linkerd-proxy
+    binary_name: /usr/lib/linkerd/linkerd2-proxy
+    parent_process: containerd-shim
+    process: linkerd2-proxy
+  pushdown: []
+- node:
+    name: office_outlook
+    dns_pattern: outlook.office.com
     dst_port: 443
   pushdown: []
 - node:
@@ -93,19 +234,9 @@ identities:
     process: org.springframework.boot.loader.PropertiesLauncher
   pushdown: []
 - node:
-    name: spark_linkerd_proxy
-    zone: dev
-    app: rubrik-spark-.*
-    pod: .*
-    container: linkerd-proxy
-    binary_name: /usr/lib/linkerd/linkerd2-proxy
-    parent_process: containerd-shim
-    process: linkerd2-proxy
-  pushdown: []
-- node:
-    name: spark_service_bin
+    name: service_bin
     zone: .*
-    app: rubrik-spark-.*
+    app: rubrik-spark.*
     pod: .*-service
     container: .*-service
     binary_name: /.*service.bin
@@ -114,21 +245,66 @@ identities:
   pushdown:
   - binary_name
   - process
+- node:
+    name: sharepoint_rdnn14
+    dns_pattern: rdnn14.sharepoint.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: simulator
+    zone: .*
+    app: rubrik-spark.*
+    pod: .*simulator
+    container: .*simulator
+    binary_name: /simulator.bin
+    parent_process: containerd-shim
+    process: simulator.bin
+  pushdown: []
+- node:
+    name: windows_blob_core
+    dns_pattern: .*blob.core.*.windows.net
+    dst_port: 443
+  pushdown:
+  - dns_pattern
 authorizations:
+- name: exocompute_aws_linkerd2_proxy
+  out:
+  - aws_autoscaling
+  - aws_eks
+  - exocompute_bin
 - name: linkerd2_proxy
   in:
   - kubelet
   - linkerd_await
-  - main_bin
   out:
+  - aws_ebs
+  - aws_kms
+  - aws_rds
+  - aws_tagging
   - azure_management
+  - blobstore_service
   - cloud_sql_proxy
-  - linkerd-policy-controller
+  - flagr
+  - goddess_updater
   - linkerd2_proxy
   - linkerd_controller
+  - linkerd_policy_controller
+  - linkerd_svc_cluster_local
   - microsoftonline_login
   - org_springframework_boot_loader_PropertiesLauncher
-  - spark_service_bin
-- name: linkerd_svc_cluster_local
+  - service_bin
+  - simulator
+  - windows_blob_core
+- name: linkerd_versioncheck
   in:
-  - spark_linkerd_proxy
+  - linkerd_hearbeat_controller
+- name: main_bin
+  out:
+  - linkerd2_proxy
+  - linkerd2_proxy
+- name: o365_linkerd2_proxy
+  out:
+  - cloud_manager_bin
+  - microsoft_graph
+  - office_outlook
+  - sharepoint_rdnn14
