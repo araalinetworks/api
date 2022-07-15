@@ -53,6 +53,20 @@ def insights(args):
     if status == 0:
         utils.dump_table(insights)
 
+def token(args):
+    if args.add:
+        op = "add"
+        name = args.add
+    elif args.delete:
+        op = "delete"
+        name = args.delete
+    elif args.list:
+        op = "show"
+        name = None
+    tokens, status = api.API().token(op=op, name=name, tenant=args.tenant)
+    if status == 0:
+        utils.dump_table(tokens["tokens"])
+
 def ctl(args, remaining):
     api = araalictl.API()
     api.check()
@@ -103,6 +117,12 @@ if __name__ == "__main__":
     parser_assets.add_argument('-z', '--zone', help="assets for a specific zone")
     parser_assets.add_argument('-a', '--app', help="links for a specific app")
     parser_assets.add_argument('--ago', help="lookback")
+
+    parser_token = subparsers.add_parser("token", help="manage api tokens")
+    parser_token.add_argument('-t', '--tenant', help="token management for a specific tenant")
+    parser_token.add_argument('-a', '--add', help="create new token")
+    parser_token.add_argument('-d', '--delete', help="delete token by name")
+    parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
 
     parser_links = subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")

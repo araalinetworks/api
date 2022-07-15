@@ -50,6 +50,12 @@ class API:
             cmdline = "sudo %s authorize" % (self.cmdline)
             subprocess.run(cmdline.split())
 
+        if "email" not in utils.cfg:
+            # DevName=blah@blah.com
+            rc = utils.run_command("%s config DevName" % (self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+            utils.cfg["email"] = rc[1].decode().split("=", 1)[1].split(".")[0]
+
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
 
@@ -78,6 +84,8 @@ class API:
                                 self.cmdline, cmd, count, tstr),
                                 debug=g_debug, result=True, strip=False)
 
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         token = None
         objs = yaml.load(rc[1], yaml.SafeLoader)
         if objs:
@@ -106,6 +114,8 @@ class API:
 
         rc = utils.run_command("%s api %s -fetch-compute" % (
             self.cmdline, cmd), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
     def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
@@ -131,6 +141,8 @@ class API:
 
         rc = utils.run_command("%s api -fetch-links %s" % (self.cmdline, tstr),
                          debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
     def get_insights(self, zone=None, tenant=None):
@@ -144,6 +156,31 @@ class API:
 
         rc = utils.run_command("%s api %s -fetch-insights" % (
             self.cmdline, cmd), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def token(self, op=None, name=None, tenant=None):
+        """token management"""
+
+        self.check()
+        if op == None:
+            print("*** operation not specified")
+            return
+        if op == "add":
+            cmd = "-name=%s %s" % (name, utils.cfg["email"])
+        elif op == "delete":
+            cmd = "-delete -name=%s %s" % (name, utils.cfg["email"])
+        else:
+            cmd = "-list"
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        if tenant: cmd += " -tenant=%s" % tenant
+
+        rc = utils.run_command("%s token -api-access %s" % (
+            self.cmdline, cmd), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
     def get_templates(self, public=None, template=None, tenant=None):
@@ -158,4 +195,6 @@ class API:
 
         rc = utils.run_command("%s api -list-templates %s" % (
             self.cmdline, tstr), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
