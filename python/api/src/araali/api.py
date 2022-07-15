@@ -7,6 +7,8 @@ from . import araali_api_service_pb2
 from . import araali_api_service_pb2_grpc
 from . import utils
 
+g_debug = False
+
 def init_assetsreq(zone, app, ago, tenant=None):
     req = araali_api_service_pb2.ListAssetsRequest()
     
@@ -134,7 +136,7 @@ class API:
         """
         resp = self.stub.listAssets(init_assetsreq(zone, app, ago, tenant))
         if resp.response.code != 0:
-            print("*** Error fetching alerts:", resp.response.message)
+            print("*** Error fetching assets:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.assets], resp.response.code)
 
     def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
@@ -143,7 +145,7 @@ class API:
         """
         resp = self.stub.listLinks(init_linksreq(zone, app, svc, ago, tenant))
         if resp.response.code != 0:
-            print("*** Error fetching alerts:", resp.response.message)
+            print("*** Error fetching links:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.response.code)
 
     def get_insights(self, zone=None, tenant=None):
@@ -152,5 +154,5 @@ class API:
         """
         resp = self.stub.listInsights(init_insightsreq(zone, tenant))
         if resp.response.code != 0:
-            print("*** Error fetching alerts:", resp.response.message)
+            print("*** Error fetching insights:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.insights], resp.response.code)

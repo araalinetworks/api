@@ -1,12 +1,5 @@
 #!/usr/bin/env python
-"""
-    Usage:
-        ./setup.sh
-        ./template.py pull -t control |less
-        ./template.py pull -p -t agent.k8s.araali_fw|less
-        ./template.py fmt ../templates/control.yaml.1
-"""
-import araalictl
+from . import araalictl as api
 import argparse
 import difflib
 import glob
@@ -14,41 +7,13 @@ import json
 import os
 import shutil
 import sys
+from . import utils
 import yaml
 
 class NoAliasDumper(yaml.Dumper):
     def ignore_aliases(self, data):
         return True
 
-cfg_fname = os.environ['HOME']+"/.araali_templates.cfg"
-
-def read_config():
-    if os.path.isfile(cfg_fname):
-        with open(cfg_fname, "r") as f:
-            cfg = yaml.load(f, Loader=yaml.SafeLoader)
-            if not cfg.get("tenant", None): cfg["tenant"] = None
-            if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
-            return cfg
-    return {"tenant": None, "template_dir": "../templates"}
-
-def config(args):
-    global cfg
-    if args.tenant is not None:
-        if not args.tenant: # passed as empty string
-            args.tenant = None # store it as nil in yaml
-        cfg["tenant"] = args.tenant
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    if args.tenants is not None:
-        cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in args.tenants.split(",")]
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    if args.template_dir is not None:
-        cfg["template_dir"] = args.template_dir
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
-    print(yaml.dump(cfg))
-    
 class Graph:
     def __init__(self, name):
         self.name = name
@@ -83,8 +48,7 @@ class Graph:
         self.link_count += 1
         
     def dump(self):
-        global cfg
-        basename = "%s/%s.yaml" % (cfg.get("out_dir", cfg["template_dir"]), self.name.replace("/", "_"))
+        basename = "%s/%s.yaml" % (utils.cfg.get("out_dir", utils.cfg["template_dir"]), self.name.replace("/", "_"))
         fname = basename
 
         files = glob.glob(fname+".*")
@@ -98,21 +62,22 @@ class Graph:
 
         if os.path.isfile(basename): # yaml already exists
             os.rename(basename, fname) # backup current yaml
-            if args.verbose >= 0: print("backing up", basename, "to", fname)
+            if g_debug: print("backing up", basename, "to", fname)
         else:
             fname = None # we didnt need to backup
 
         with open(basename, "w") as f:
             yaml.dump(self, f, default_flow_style=False, default_style='', canonical=False, Dumper=NoAliasDumper)
-        if args.verbose >= 0: print("saving template", basename, "links:", self.link_count)
+        if g_debug: print("saving template", basename, "links:", self.link_count)
 
         if fname: # dont want to keep a backup if nothing changed
             with open(fname) as prev, open(basename) as curr:
                 if next(difflib.unified_diff(prev.readlines(), curr.readlines()), None) == None:
                     # there is no difference, remove this one
                     os.remove(fname)
-                    if args.verbose >= 0: print("removing", fname, "same as", basename)
+                    if g_debug: print("removing", fname, "same as", basename)
 
+g_debug = False
 def represent_graph(dumper, obj):
     value = []
 
@@ -152,7 +117,7 @@ def represent_graph(dumper, obj):
     reevaluate = set()
     for k,v in obj.out_dict.items():
         if k in eligible: # we already took care of it
-            if args.verbose >= 3: print(k, "eligible", eligible)
+            if g_debug: print(k, "eligible", eligible)
             continue
 
         if len(v) > 1: # we keep it if it has more than one egress
@@ -165,14 +130,14 @@ def represent_graph(dumper, obj):
                 if i in ineligible: # it is already marked ineligible
                     continue
                 if i not in obj.out_dict: # it is a pure server (3rd column)
-                    if args.verbose >= 1: print("for", k, "marking", i, "ineligible")
+                    if g_debug: print("for", k, "marking", i, "ineligible")
                     ineligible.add(i)
             continue
 
         # single peer case
         peer = v[0]
         if peer in ineligible:
-            if args.verbose >= 1: print("adding singleton", k, "because", peer, "ineligible")
+            if g_debug: print("adding singleton", k, "because", peer, "ineligible")
             n = NameWithInOut(k, outlist=v)
             eligible[k] = n
             values.append(n)
@@ -184,24 +149,24 @@ def represent_graph(dumper, obj):
         if peer in obj.out_dict:
             # its not already added
             if peer not in eligible:
-                if args.verbose >= 1: print("processing singleton", k, "adding peer with egress", peer)
+                if g_debug: print("processing singleton", k, "adding peer with egress", peer)
                 n = NameWithInOut(peer, outlist=obj.out_dict[peer], inlist=[k])
                 eligible[peer] = n
                 values.append(n)
                 for i in obj.out_dict[peer]:
                     if i not in obj.out_dict:
-                        if args.verbose >= 1: print("for", peer, "making", i, "ineligible")
+                        if g_debug: print("for", peer, "making", i, "ineligible")
                         ineligible.add(i)
                 if peer in reevaluate:
                     reevaluate.remove(peer)
             else: # peer is already in, add me as ingress
-                if args.verbose >= 1: print("adding", k, "as additional ingress to existing", peer)
+                if g_debug: print("adding", k, "as additional ingress to existing", peer)
                 eligible[peer].inlist.append(k)
         else: # peer has no egress, it might get marked ineligible
             reevaluate.add(k)
 
     # only single peer case need to be re-evaluated
-    if args.verbose >= 1: print("reevaluate", reevaluate)
+    if g_debug: print("reevaluate", reevaluate)
     for k in reevaluate:
         peer = obj.out_dict[k][0]
         if peer in ineligible:
@@ -313,22 +278,21 @@ def represent_node(dumper, obj):
     return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
 def push(args):
-    global cfg
     ans = input("are you sure? (yes/no)> ")
     if ans != "yes":
         print("This is a dangerous command, thanks for exercising caution!")
         return
 
     if args.verbose >= 1: print(args, ans)
-    if args.verbose >= 1: araalictl.g_debug = True
+    if args.verbose >= 1: api.g_debug = True
 
-    basename = "%s/%s.yaml" % (cfg["template_dir"], args.template)
+    basename = "%s/%s.yaml" % (utils.cfg["template_dir"], args.template)
     if not os.path.isfile(basename): # yaml already exists
         print(basename, "does not exist")
         return
 
     # read a sample template from araali
-    obj = [a for a in araalictl.fetch_templates(public=True, template="agent.k8s.araali_fw")][0]
+    obj = [a for a in api.API().API().get_templates(public=True, template="agent.k8s.araali_fw")[0]][0]
     # name, template, use, author, version
     if args.verbose >= 2: print(obj["name"], obj["use"], obj["author"], obj["version"])
     obj["name"] = args.template
@@ -381,25 +345,23 @@ def push(args):
     if args.tenant:
         tenant = args.tenant
     else:
-        tenant = cfg["tenant"]
+        tenant = utils.cfg["tenant"]
     rc = araalictl.update_template([obj], args.public, tenant)
     print(rc)
 
 def alerts(args):
-    global cfg
-
     if args.tenant:
         tenants = [{"name": args.tenant, "id": args.tenant}]
-    elif cfg.get("tenants", None):
-        tenants = cfg["tenants"]
+    elif utils.cfg.get("tenants", None):
+        tenants = utils.cfg["tenants"]
         if not tenants:
-            tenants = [{"name": cfg["tenant"], "id": cfg["tenant"]}]
+            tenants = [{"name": utils.cfg["tenant"], "id": utils.cfg["tenant"]}]
         else:
             # we are doing a full run
             if not args.nopull:
                 shutil.rmtree("%s/%s" % (args.progdir, ".alerts.template.py"), ignore_errors=True)
     else:
-        tenants = [{"name": "account", "id": cfg["tenant"]}]
+        tenants = [{"name": "account", "id": utils.cfg["tenant"]}]
 
     if args.nopull:
         if args.ago:
@@ -424,7 +386,7 @@ def alerts(args):
             print("ls .alerts.template.py/*.json | xargs wc -l")
         return
 
-    if args.verbose >= 1: araalictl.g_debug = True
+    if args.verbose >= 1: api.g_debug = True
     os.makedirs("%s/%s" % (args.progdir, ".alerts.template.py"), exist_ok=True)
     for t in tenants:
         with open("%s/%s/%s.json" % (args.progdir, ".alerts.template.py", t["name"]), "w") as f:
@@ -432,7 +394,7 @@ def alerts(args):
             skipped_count = 0
             token = None
             while True:
-                alerts = araalictl.get_alerts(start_time=0, end_time=0, token=token, count=200000, tenant=t["id"])
+                alerts, _, _ = api.API().get_alerts(count=200000, token=token, tenant=t["id"])
                 if not alerts:
                     break
 
@@ -451,10 +413,8 @@ def alerts(args):
             print(t, "open=%s" % count, "closed=%s" % skipped_count)
 
 def eval_drift(tenant):
-    global cfg
-
-    git_files = set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % cfg["template_dir"])])
-    drift_files =set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % cfg["out_dir"])])
+    git_files = set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % utils.cfg["template_dir"])])
+    drift_files =set([os.path.split(a)[1] for a in glob.glob('%s/*.yaml' % utils.cfg["out_dir"])])
 
     not_in_git = list(drift_files - git_files)
     in_git = list(drift_files & git_files)
@@ -463,7 +423,7 @@ def eval_drift(tenant):
     in_git.sort()
     
     print('\nEvaluating drift for:', tenant)
-    if args.verbose >= 3: print("git:", git_files, "drift:", drift_files)
+    if g_debug: print("git:", git_files, "drift:", drift_files)
     if not_in_git:
         print("*** Files not in git:")
         for f in not_in_git:
@@ -478,36 +438,34 @@ def eval_drift(tenant):
                 print("\t", f)
             
     for fname in in_git:
-        prevfname = cfg["template_dir"] + "/" + fname
-        currfname = cfg["out_dir"] + "/" + fname
+        prevfname = utils.cfg["template_dir"] + "/" + fname
+        currfname = utils.cfg["out_dir"] + "/" + fname
         with open(prevfname) as prev, open(currfname) as curr:
             if next(difflib.unified_diff(prev.readlines(), curr.readlines()), None) != None:
                 print("***", prevfname, currfname, "have drifted")
             else:
-                if args.verbose >= 1:
+                if g_debug:
                     print(prevfname, currfname, "have not drifted")
 
 
 def drift(args):
-    global cfg
-
     if not args.public:
         if args.tenant:
-            tenants = [{"name": [a for a in cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
+            tenants = [{"name": [a for a in utils.cfg["tenants"] if a["id"] == args.tenant][0]["name"], "id": args.tenant}]
         else:
-            tenants = cfg.get("tenants", None)
+            tenants = utils.cfg.get("tenants", None)
             if not tenants:
-                tenants = [{"name": "account", "id": cfg["tenant"]}]
+                tenants = [{"name": "account", "id": utils.cfg["tenant"]}]
             else:
                 # full run
                 if not args.nopull:
                     shutil.rmtree("%s/%s" % (args.progdir, ".drift.template.py"), ignore_errors=True)
 
-    araalictl.g_debug = False
+    api.g_debug = False
     os.makedirs("%s/%s" % (args.progdir, ".drift.template.py"), exist_ok=True)
 
     if args.public:
-        cfg["out_dir"] = "%s/%s/public" % (args.progdir, ".drift.template.py")
+        utils.cfg["out_dir"] = "%s/%s/public" % (args.progdir, ".drift.template.py")
         if not args.nopull:
             shutil.rmtree("%s/%s/public" % (args.progdir, ".drift.template.py"), ignore_errors=True)
             os.makedirs("%s/%s/public" % (args.progdir, ".drift.template.py"), exist_ok=True)
@@ -517,7 +475,7 @@ def drift(args):
         return
 
     for t in tenants:
-        cfg["out_dir"] = "%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"])
+        utils.cfg["out_dir"] = "%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"])
         if not args.nopull:
             shutil.rmtree("%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"]), ignore_errors=True)
             os.makedirs("%s/%s/%s" % (args.progdir, ".drift.template.py", t["name"]), exist_ok=True)
@@ -526,35 +484,31 @@ def drift(args):
         eval_drift("%s (%s)" % (t["name"], t["id"]))
 
 def ls(args):
-    global cfg
-
     if args.tenant:
         tenant = args.tenant
     else:
-        tenant = cfg["tenant"]
-    for obj in araalictl.fetch_templates(public=args.public, tenant=tenant,
-                                       template=args.template):
+        tenant = utils.cfg["tenant"]
+    for obj in api.API().get_templates(public=args.public, tenant=tenant,
+                                       template=args.template)[0]:
         # keys: ['name', 'template', 'use', 'author', 'version']
         del obj["template"]
         print(obj)
 
 def pull(args):
-    global cfg
-
-    if args.verbose >= 1: araalictl.g_debug = True
+    if args.verbose >= 1: api.g_debug = True
 
     if args.tenant:
         tenant = args.tenant
     else:
-        tenant = cfg["tenant"]
+        tenant = utils.cfg["tenant"]
 
     found = False
-    for obj in araalictl.fetch_templates(public=args.public, tenant=tenant,
-                                       template=args.template):
+    for obj in api.API().get_templates(public=args.public, tenant=tenant,
+                                       template=args.template)[0]:
         # get the names from local file and apply it to pulled template
         existing_nodes = {}
 
-        basename = "%s/%s.yaml" % (cfg["template_dir"], obj["name"])
+        basename = "%s/%s.yaml" % (utils.cfg["template_dir"], obj["name"])
         if os.path.isfile(basename): # yaml already exists
             with open(basename) as f:
                 template = yaml.load(f, Loader=yaml.SafeLoader)
@@ -618,58 +572,8 @@ def fmt(args):
                 graph.add_link(nodes[link["name"]], nodes[l])
     graph.dump()
 
-if __name__ == '__main__':
-    cfg = read_config()
-    parser = argparse.ArgumentParser(description = 'Manage Templates as Code (in Git)')
-    parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
-    parser.add_argument('-T', '--template', help="apply operation for a specific template")
-    subparsers = parser.add_subparsers(dest="subparser_name")
-
-    parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
-    parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
-    parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
-    parser_alerts.add_argument('-a', '--ago', help="dont pull from araali")
-    
-    parser_drift = subparsers.add_parser("drift", help="get drift (from template as code)")
-    parser_drift.add_argument('-t', '--tenant', help="get drift for a specific tenant")
-    parser_drift.add_argument('-p', '--public', action="store_true", help="drift in public library")
-    parser_drift.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
-    parser_drift.add_argument('-T', '--template', help="get drift for a specific template (name or path)")
-    
-    parser_list = subparsers.add_parser("ls", help="list templates")
-    parser_list.add_argument('-p', '--public', action="store_true", help="list from public library")
-    parser_list.add_argument('-t', '--tenant', help="list for a sub-tenant")
-    parser_list.add_argument('-T', '--template', help="list a specific template (name or path)")
-    
-    parser_pull = subparsers.add_parser("pull", help="pull templates")
-    parser_pull.add_argument('-p', '--public', action="store_true", help="pull from public library")
-    parser_pull.add_argument('-T', '--template', help="pull a specific template (name or path)")
-    parser_pull.add_argument('-t', '--tenant')
-    
-    parser_push = subparsers.add_parser("push", help="push templates")
-    parser_push.add_argument('-p', '--public', action="store_true", help="push to public library")
-    parser_push.add_argument('-T', '--template', help="push a specific template (name or path)")
-    parser_push.add_argument('-t', '--tenant', help="push for a sub-tenant")
-    
-    parser_config = subparsers.add_parser("config", help="list/change config params")
-    parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
-    parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
-    parser_config.add_argument('-d', '--template_dir', help="custom template directory")
-
-    parser_format = subparsers.add_parser("fmt", help="rename template node name/ format into a normalized form")
-    parser_format.add_argument('template')
-
-    yaml.add_representer(Node, represent_node)
-    yaml.add_representer(Pushdown, represent_pushdown)
-    yaml.add_representer(NodeWithPushdown, represent_node_with_pushdown)
-    yaml.add_representer(Graph, represent_graph)
-    yaml.add_representer(NameWithInOut, represent_name_with_in_out)
-
-    args = parser.parse_args()
-    args.progdir, args.prog = os.path.split(sys.argv[0])
-    if args.template: # template can be specified by name or file path
-        args.dirname, args.pathname = os.path.split(args.template)
-        args.template = args.pathname.split(".yaml")[0]
-
-    if args.subparser_name:
-        locals()[args.subparser_name](args)
+yaml.add_representer(Node, represent_node)
+yaml.add_representer(Pushdown, represent_pushdown)
+yaml.add_representer(NodeWithPushdown, represent_node_with_pushdown)
+yaml.add_representer(Graph, represent_graph)
+yaml.add_representer(NameWithInOut, represent_name_with_in_out)

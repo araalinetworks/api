@@ -9,8 +9,10 @@ import subprocess
 import sys
 
 #from . import api
+from . import araalictl
 from . import araalictl as api
 from . import utils
+from . import template as module_template
 
 def config(args):
     return utils.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
@@ -37,11 +39,13 @@ def alerts(args):
 def assets(args):
     assets, status = api.API().get_assets(args.zone, args.app, args.ago, tenant=args.tenant)
     if status == 0:
+        print("Got %s assets" % len(assets))
         utils.dump_table(assets)
 
 def links(args):
     links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago, tenant=args.tenant)
     if status == 0:
+        print("Got %s links" % len(links))
         utils.dump_table(links)
 
 def insights(args):
@@ -50,13 +54,8 @@ def insights(args):
         utils.dump_table(insights)
 
 def ctl(args, remaining):
-    if os.path.isfile(args.progdir + "/bin/araalictl"):
-        cmdline = args.progdir + "/bin/araalictl"
-    else:
-        cmdline = args.progdir + "/bin/" + {
-                                            "Linux": "araalictl.linux-amd64",
-                                            "Darwin": "araalictl.darwin-amd64"
-                                           }[platform.system()]
+    api = araalictl.API()
+    api.check()
 
     if remaining and remaining[0] == "--": remaining = remaining[1:]
 
@@ -70,13 +69,16 @@ def ctl(args, remaining):
     #print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
     #print(auth_stdout.decode())
 
-    rc = subprocess.run(prepend + [cmdline] + remaining)
+    rc = subprocess.run(prepend + [api.cmdline] + remaining)
     return rc.returncode
+
+def template(args):
+    if args.t_subparser_name:
+        return getattr(module_template, args.t_subparser_name)(args)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
-    parser.add_argument('-T', '--template', help="apply operation for a specific template")
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     parser_config = subparsers.add_parser("config", help="list/change config params")
@@ -111,8 +113,45 @@ if __name__ == "__main__":
 
     parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
 
+    parser_template = subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
+    parser.add_argument('-T', '--template', help="apply operation for a specific template")
+
+    t_subparsers = parser_template.add_subparsers(dest="t_subparser_name")
+
+    parser_alerts = t_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
+    parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
+    parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_alerts.add_argument('-a', '--ago', help="dont pull from araali")
+    
+    parser_drift = t_subparsers.add_parser("drift", help="get drift (from template as code)")
+    parser_drift.add_argument('-t', '--tenant', help="get drift for a specific tenant")
+    parser_drift.add_argument('-p', '--public', action="store_true", help="drift in public library")
+    parser_drift.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_drift.add_argument('-T', '--template', help="get drift for a specific template (name or path)")
+    
+    parser_list = t_subparsers.add_parser("ls", help="list templates")
+    parser_list.add_argument('-p', '--public', action="store_true", help="list from public library")
+    parser_list.add_argument('-t', '--tenant', help="list for a sub-tenant")
+    parser_list.add_argument('-T', '--template', help="list a specific template (name or path)")
+    
+    parser_pull = t_subparsers.add_parser("pull", help="pull templates")
+    parser_pull.add_argument('-p', '--public', action="store_true", help="pull from public library")
+    parser_pull.add_argument('-T', '--template', help="pull a specific template (name or path)")
+    parser_pull.add_argument('-t', '--tenant')
+    
+    parser_push = t_subparsers.add_parser("push", help="push templates")
+    parser_push.add_argument('-p', '--public', action="store_true", help="push to public library")
+    parser_push.add_argument('-T', '--template', help="push a specific template (name or path)")
+    parser_push.add_argument('-t', '--tenant', help="push for a sub-tenant")
+    
+    parser_format = t_subparsers.add_parser("fmt", help="rename template node name/ format into a normalized form")
+    parser_format.add_argument('template')
+
     args, remaining = parser.parse_known_args()
     args.progdir, args.prog = os.path.split(sys.argv[0])
+
+    if args.verbose:
+        api.g_debug = True
 
     if args.subparser_name == "ctl":
         sys.exit(ctl(args, remaining))
