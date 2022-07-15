@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 #from . import api
+from . import araalictl
 from . import araalictl as api
 from . import utils
 
@@ -52,13 +53,8 @@ def insights(args):
         utils.dump_table(insights)
 
 def ctl(args, remaining):
-    if os.path.isfile(args.progdir + "/bin/araalictl"):
-        cmdline = args.progdir + "/bin/araalictl"
-    else:
-        cmdline = args.progdir + "/bin/" + {
-                                            "Linux": "araalictl.linux-amd64",
-                                            "Darwin": "araalictl.darwin-amd64"
-                                           }[platform.system()]
+    api = araalictl.API()
+    api.check()
 
     if remaining and remaining[0] == "--": remaining = remaining[1:]
 
@@ -72,7 +68,7 @@ def ctl(args, remaining):
     #print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
     #print(auth_stdout.decode())
 
-    rc = subprocess.run(prepend + [cmdline] + remaining)
+    rc = subprocess.run(prepend + [api.cmdline] + remaining)
     return rc.returncode
 
 if __name__ == "__main__":

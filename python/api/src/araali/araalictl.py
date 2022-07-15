@@ -9,6 +9,7 @@
 import datetime
 import os
 import platform
+import subprocess
 import sys
 from . import utils
 import yaml
@@ -26,9 +27,23 @@ class API:
                                                 "Darwin": "araalictl.darwin-amd64"
                                                }[platform.system()]
 
+    def check(self):
+        rc = utils.run_command("%s authorize check" % (self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+        ret = rc[1].decode().strip()
+        if ret != "copy is authorized":
+            print("*** not authorized")
+            rc = utils.run_command("sudo %s authorize -clean" % (self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+            rc = utils.run_command("sudo rm -rf /tmp/actl* /tmp/av.port",
+                                debug=g_debug, result=True, strip=False)
+            cmdline = "sudo %s authorize" % (self.cmdline)
+            subprocess.run(cmdline.split())
+
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
 
+        self.check()
         if tenant is None: tenant = utils.cfg["tenant"]
         if count is None: count = 1000
 
@@ -50,8 +65,8 @@ class API:
 
         tstr = " -tenant=%s " % (tenant) if tenant else ""
         rc = utils.run_command("%s api -fetch-alerts %s -count %s %s" % (
-                            self.cmdline, cmd, count, tstr),
-                         debug=g_debug, result=True, strip=False)
+                                self.cmdline, cmd, count, tstr),
+                                debug=g_debug, result=True, strip=False)
 
         token = None
         objs = yaml.load(rc[1], yaml.SafeLoader)
@@ -64,6 +79,8 @@ class API:
         """Get assets for a zone (required) and app (optional)
             Usage: assets, status = api.get_assets()
         """
+
+        self.check()
         if not ago:
             ago = "days=1"
         ago = dict([utils.make_map(a) for a in ago.split(",")])
@@ -83,6 +100,8 @@ class API:
 
     def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
         """Get links for a zone and app, or svc"""
+
+        self.check()
         assert svc is not None or zone is not None and app is not None
 
         if tenant is None: tenant = utils.cfg["tenant"]
@@ -106,6 +125,8 @@ class API:
 
     def get_insights(self, zone=None, tenant=None):
         """Get insights for a zone (optional)"""
+
+        self.check()
         cmd = ""
         if zone: cmd += " -zone %s" % zone
         if tenant is None: tenant = utils.cfg["tenant"]

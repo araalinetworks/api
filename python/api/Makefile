@@ -9,7 +9,7 @@ push: venv
 
 # if you want to rerun tests to see if they succeed
 test: venv
-	-source araaliapienv/bin/activate && pytest
+	-source araaliapienv/bin/activate && pytest -vs
 
 # if you are fixing install
 install: venv
