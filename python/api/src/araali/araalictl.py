@@ -135,3 +135,17 @@ class API:
         rc = utils.run_command("%s api %s -fetch-insights" % (
             self.cmdline, cmd), debug=g_debug, result=True, strip=False)
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_templates(self, public=None, template=None, tenant=None):
+        """Get templates (or public ones"""
+
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        tstr += " -public " if public else ""
+        tstr += " -template=%s " % (template) if template else ""
+
+        rc = utils.run_command("%s api -list-templates %s" % (
+            self.cmdline, tstr), debug=g_debug, result=True, strip=False)
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
