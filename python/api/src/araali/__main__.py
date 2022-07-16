@@ -63,9 +63,12 @@ def token(args):
     elif args.list:
         op = "show"
         name = None
-    tokens, status = api.API().token(op=op, name=name, tenant=args.tenant)
+    tokens, status = api.API().token(op=op, name=name, email=args.email, tenant=args.tenant)
     if status == 0:
-        utils.dump_table(tokens["tokens"])
+        if op == "show":
+            utils.dump_table(tokens["tokens"])
+        else:
+            print(tokens)
 
 def ctl(args, remaining):
     api = araalictl.API()
@@ -122,6 +125,7 @@ if __name__ == "__main__":
     parser_token.add_argument('-t', '--tenant', help="token management for a specific tenant")
     parser_token.add_argument('-a', '--add', help="create new token")
     parser_token.add_argument('-d', '--delete', help="delete token by name")
+    parser_token.add_argument('-e', '--email', help="user email")
     parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
 
     parser_links = subparsers.add_parser("links", help="get links")

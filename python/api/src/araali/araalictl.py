@@ -54,7 +54,7 @@ class API:
             # DevName=blah@blah.com
             rc = utils.run_command("%s config DevName" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
-            utils.cfg["email"] = rc[1].decode().split("=", 1)[1].split(".")[0]
+            utils.cfg["email"] = rc[1].decode().split("=", 1)[1]
 
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
@@ -160,22 +160,23 @@ class API:
             print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
-    def token(self, op=None, name=None, tenant=None):
+    def token(self, op=None, name=None, email=None, tenant=None):
         """token management"""
 
         self.check()
         if op == None:
             print("*** operation not specified")
             return
+        if email is None: email = utils.cfg["email"]
         if op == "add":
-            cmd = "-name=%s %s" % (name, utils.cfg["email"])
+            cmd = "-name=%s %s" % (name, email)
         elif op == "delete":
-            cmd = "-delete -name=%s %s" % (name, utils.cfg["email"])
+            cmd = "-delete -name=%s %s" % (name, email)
         else:
             cmd = "-list"
 
-        if tenant is None: tenant = utils.cfg["tenant"]
-        if tenant: cmd += " -tenant=%s" % tenant
+        #if tenant is None: tenant = utils.cfg["tenant"]
+        #if tenant: cmd += " -tenant=%s" % tenant
 
         rc = utils.run_command("%s token -api-access %s" % (
             self.cmdline, cmd), debug=g_debug, result=True, strip=False)
