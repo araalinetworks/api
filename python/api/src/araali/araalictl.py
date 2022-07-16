@@ -6,6 +6,7 @@
     links, status = api.get_links(args.zone, args.app, args.svc, args.ago)
     insights, status = api.get_insights(args.zone)
 """
+from . import api
 import datetime
 import os
 import platform
@@ -15,9 +16,14 @@ from . import utils
 import yaml
 
 g_debug = False
+g_use_api = False
 
 class API:
     def __init__(self):
+        if g_use_api:
+            self.api = api.API()
+            return
+
         progdir = os.path.dirname(os.path.abspath(__file__))
         if os.path.isfile(progdir + "/bin/araalictl"):
             self.cmdline = progdir + "/bin/araalictl"
@@ -59,6 +65,9 @@ class API:
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
 
+        if g_use_api:
+            return self.api.get_alerts(count, ago, token, tenant)
+
         self.check()
         if tenant is None: tenant = utils.cfg["tenant"]
         if count is None: count = 1000
@@ -98,6 +107,9 @@ class API:
             Usage: assets, status = api.get_assets()
         """
 
+        if g_use_api:
+            return self.api.get_assets(zone, app, ago, tenant)
+
         self.check()
         if not ago:
             ago = "days=1"
@@ -121,6 +133,8 @@ class API:
     def get_links(self, zone=None, app=None, svc=None, ago=None, tenant=None):
         """Get links for a zone and app, or svc"""
 
+        if g_use_api:
+            return self.api.get_links(zone, app, svc, ago, tenant)
         self.check()
         assert svc is not None or zone is not None and app is not None
 
@@ -148,6 +162,8 @@ class API:
     def get_insights(self, zone=None, tenant=None):
         """Get insights for a zone (optional)"""
 
+        if g_use_api:
+            return self.api.get_insights(zone, tenant)
         self.check()
         cmd = ""
         if zone: cmd += " -zone %s" % zone

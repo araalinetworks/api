@@ -3,6 +3,8 @@
 """
 import argparse
 import datetime
+from dateutil import parser as du_parser
+from dateutil import tz
 import os
 import platform
 import subprocess
@@ -20,12 +22,17 @@ def config(args):
 def alerts(args):
     alerts, page, status = api.API().get_alerts(args.count, args.ago, tenant=args.tenant)
     day_dict = {}
+    local_zone = tz.tzlocal()
     if status == 0:
         print("Got %s alerts" % len(alerts))
         utils.dump_table(alerts)
 
         for a in alerts:
-            dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
+            if type(a["timestamp"]) == str:
+                # '2022-07-15T04:45:18Z'
+                dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
+            else:
+                dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
             #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
             dts = dt.strftime("%Y/%m/%d")
             day_dict.setdefault(dts, []).append(a)
@@ -96,6 +103,7 @@ def template(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
+    parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     parser_config = subparsers.add_parser("config", help="list/change config params")
@@ -176,6 +184,9 @@ if __name__ == "__main__":
 
     if args.verbose:
         api.g_debug = True
+
+    if args.use_api:
+        araalictl.g_use_api = True
 
     if args.subparser_name == "ctl":
         sys.exit(ctl(args, remaining))

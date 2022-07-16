@@ -28,8 +28,8 @@ def init_assetsreq(zone, app, ago, tenant=None):
     if not ago:
         ago = "days=1"
     ago = dict([utils.make_map(a) for a in ago.split(",")])
-    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
-    req.time.end_time.FromDatetime(datetime.datetime.now())
+    req.time.start_time.FromDatetime(datetime.datetime.utcnow() - datetime.timedelta(**ago))
+    req.time.end_time.FromDatetime(datetime.datetime.utcnow())
     
     print(req)
 
@@ -49,14 +49,14 @@ def init_linksreq(zone, app, svc, ago, tenant=None):
     if not ago:
         ago = "days=1"
     ago = dict([utils.make_map(a) for a in ago.split(",")])
-    req.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
-    req.time.end_time.FromDatetime(datetime.datetime.now())
+    req.time.start_time.FromDatetime(datetime.datetime.utcnow() - datetime.timedelta(**ago))
+    req.time.end_time.FromDatetime(datetime.datetime.utcnow())
     
     print(req)
 
     return req
 
-def init_alertreq(count, ago, tenant=None):
+def init_alertreq(count, ago, token, tenant=None):
     req = araali_api_service_pb2.ListAlertsRequest()
     
     if tenant is None:
@@ -76,11 +76,13 @@ def init_alertreq(count, ago, tenant=None):
         ago = "infinite"
     if ago != "infinite":
         ago = dict([utils.make_map(a) for a in ago.split(",")])
-        req.filter.time.start_time.FromDatetime(datetime.datetime.now() - datetime.timedelta(**ago))
-        req.filter.time.end_time.FromDatetime(datetime.datetime.now())
+        req.filter.time.start_time.FromDatetime(datetime.datetime.utcnow() - datetime.timedelta(**ago))
+        req.filter.time.end_time.FromDatetime(datetime.datetime.utcnow())
     
     if count is None: count = 1000
     req.count = count
+
+    if token: req.paging_token = token
     print(req)
 
     return req
@@ -121,11 +123,11 @@ class API:
 
         self.stub = araali_api_service_pb2_grpc.AraaliAPIStub(channel)
 
-    def get_alerts(self, count=None, ago=None, tenant=None):
+    def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """Fetches alerts
             Usage: alerts, next_page, status = api.get_alerts()
         """
-        resp = self.stub.listAlerts(init_alertreq(count, ago, tenant))
+        resp = self.stub.listAlerts(init_alertreq(count, ago, token, tenant))
         if resp.response.code != 0:
             print("*** Error fetching alerts:", resp.response.message)
         return ([json.loads(MessageToJson(a)) for a in resp.links], resp.paging_token, resp.response.code)

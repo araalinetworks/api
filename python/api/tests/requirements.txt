@@ -2,4 +2,5 @@ build
 grpcio
 grpcio-tools
 pytest
+python-dateutil
 twine
