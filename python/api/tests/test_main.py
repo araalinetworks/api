@@ -3,8 +3,8 @@ import pytest
 
 @pytest.fixture(scope="session")
 def api():
-    araali.utils.config(backend="nightly")
-    araali.utils.config(tenant="meta-tap")
+    if araali.utils.cfg["backend"] != "nightly": araali.utils.config(backend="nightly")
+    if araali.utils.cfg["tenant"] != "meta-tap": araali.utils.config(tenant="meta-tap")
     return araali.API()
 
 def test_alerts(api):
@@ -22,3 +22,14 @@ def test_insights(api):
 
 def test_templates(api):
     assert len(api.get_templates()[0]) > 0
+
+def test_token(api):
+    api.token(op="delete", name="ars_ut")
+
+    api.token(op="add", name="ars_ut")
+    tokens = api.token(op="show")[0]
+    assert len([a for a in tokens["tokens"] if a["name"] == "ars_ut"]) == 1
+
+    tokens = api.token(op="delete", name="ars_ut")
+    tokens = api.token(op="show")[0]
+    assert [a for a in tokens["tokens"] if a["name"] == "ars_ut"] == []
