@@ -169,11 +169,6 @@ identities:
     process: linkerd-policy-controller
   pushdown: []
 - node:
-    name: linkerd_svc_cluster_local
-    dns_pattern: linkerd-policy.linkerd.svc.cluster.local
-    dst_port: 8090
-  pushdown: []
-- node:
     name: linkerd_versioncheck
     dns_pattern: versioncheck.linkerd.io
     dst_port: 443
@@ -289,7 +284,6 @@ authorizations:
   - linkerd2_proxy
   - linkerd_controller
   - linkerd_policy_controller
-  - linkerd_svc_cluster_local
   - microsoftonline_login
   - org_springframework_boot_loader_PropertiesLauncher
   - service_bin
