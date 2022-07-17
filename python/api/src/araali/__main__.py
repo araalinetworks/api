@@ -3,6 +3,8 @@
 """
 import argparse
 import datetime
+from dateutil import parser as du_parser
+from dateutil import tz
 import os
 import platform
 import subprocess
@@ -20,12 +22,17 @@ def config(args):
 def alerts(args):
     alerts, page, status = api.API().get_alerts(args.count, args.ago, tenant=args.tenant)
     day_dict = {}
+    local_zone = tz.tzlocal()
     if status == 0:
         print("Got %s alerts" % len(alerts))
         utils.dump_table(alerts)
 
         for a in alerts:
-            dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
+            if type(a["timestamp"]) == str:
+                # '2022-07-15T04:45:18Z'
+                dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
+            else:
+                dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
             #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
             dts = dt.strftime("%Y/%m/%d")
             day_dict.setdefault(dts, []).append(a)
@@ -53,6 +60,23 @@ def insights(args):
     if status == 0:
         utils.dump_table(insights)
 
+def token(args):
+    if args.add:
+        op = "add"
+        name = args.add
+    elif args.delete:
+        op = "delete"
+        name = args.delete
+    elif args.list:
+        op = "show"
+        name = None
+    tokens, status = api.API().token(op=op, name=name, email=args.email, tenant=args.tenant)
+    if status == 0:
+        if op == "show":
+            utils.dump_table(tokens["tokens"])
+        else:
+            print(tokens)
+
 def ctl(args, remaining):
     api = araalictl.API()
     api.check()
@@ -79,6 +103,7 @@ def template(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
+    parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
     subparsers = parser.add_subparsers(dest="subparser_name")
 
     parser_config = subparsers.add_parser("config", help="list/change config params")
@@ -103,6 +128,13 @@ if __name__ == "__main__":
     parser_assets.add_argument('-z', '--zone', help="assets for a specific zone")
     parser_assets.add_argument('-a', '--app', help="links for a specific app")
     parser_assets.add_argument('--ago', help="lookback")
+
+    parser_token = subparsers.add_parser("token", help="manage api tokens")
+    parser_token.add_argument('-t', '--tenant', help="token management for a specific tenant")
+    parser_token.add_argument('-a', '--add', help="create new token")
+    parser_token.add_argument('-d', '--delete', help="delete token by name")
+    parser_token.add_argument('-e', '--email', help="user email")
+    parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
 
     parser_links = subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")
@@ -153,6 +185,9 @@ if __name__ == "__main__":
     if args.verbose:
         api.g_debug = True
 
+    if args.use_api:
+        araalictl.g_use_api = True
+
     if args.subparser_name == "ctl":
         sys.exit(ctl(args, remaining))
     elif remaining:
@@ -164,5 +199,7 @@ if __name__ == "__main__":
 
     if args.subparser_name:
         sys.exit(locals()[args.subparser_name](args))
+    else:
+        araalictl.API().check()
 
     sys.exit(0)
