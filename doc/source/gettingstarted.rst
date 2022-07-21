@@ -155,7 +155,7 @@ If you want to use Helm without Araalictl, contact Araali team via Slack or emai
 We will send you a value.yaml file like the one below for your cluster::
 
     araali:
-      workload_id: <workloadiid>
+      workload_id: <workload-id>
       cluster_name: bar
       fog: foo
       zone: <poc>
