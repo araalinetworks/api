@@ -155,10 +155,10 @@ If you want to use Helm without Araalictl, contact Araali team via Slack or emai
 We will send you a value.yaml file like the one below for your cluster::
 
     araali:
-      workload_id: wrk-id-variable
+      workload_id: <workloadiid>
       cluster_name: bar
       fog: foo
-      zone: poc
+      zone: <poc>
       app: k8s-nodes
       enforce: true
       upgrade: true
@@ -166,7 +166,7 @@ We will send you a value.yaml file like the one below for your cluster::
       fw_image: quay.io/araalinetworks/araali_fw:prod
       fw_init_image: quay.io/araalinetworks/araali_fw_init:prod
 
-You can change the zone name. Zone is how your cluster will show up in Araali UI.
+You **must** change the zone name. Zone is how your cluster will show up in Araali UI.
 
 
 Install Araali Repo and Run the Helm Chart
