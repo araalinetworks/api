@@ -6,8 +6,13 @@ identities:
   pushdown:
   - dns_pattern
 - node:
-    name: cr.15d.io
-    dns_pattern: cr.l5d.io
+    name: amazonaws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: cloudfront
+    dns_pattern: .*cloudfront.net
     dst_port: 443
   pushdown: []
 - node:
@@ -23,8 +28,8 @@ identities:
   pushdown:
   - dns_pattern
 - node:
-    name: docker_registry
-    dns_pattern: registry.*.docker.io
+    name: docker_io
+    dns_pattern: .*docker.io
     dst_port: 443
   pushdown:
   - dns_pattern
@@ -37,29 +42,65 @@ identities:
     process: dockerd
   pushdown: []
 - node:
-    name: gcr
-    dns_pattern: gcr.io
-    dst_port: 443
-  pushdown:
-  - dns_pattern
-- node:
-    name: ghcr
-    dns_pattern: ghcr.io
+    name: ecr_public
+    dns_pattern: public.ecr.aws
     dst_port: 443
   pushdown: []
 - node:
-    name: githubusercontent_pkg_containers
-    dns_pattern: pkg-containers.githubusercontent.com
+    name: gcr_io
+    dns_pattern: gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: gcr_io_asia
+    dns_pattern: asia.gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: gcr_k8s
+    dns_pattern: k8s.gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: googleapis_storage
+    dns_pattern: .*storage.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: gcr_io
+    dns_pattern: gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: gcr_io_asia
+    dns_pattern: asia.gcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: amazonaws_ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: quay
+    dns_pattern: quay.io
     dst_port: 443
   pushdown: []
 authorizations:
 - name: dockerd
   out:
   - amazonaws_docker
-  - cr.15d.io
+  - amazonaws_ecr
+  - cloudfront
   - docker_auth
   - docker_cloudflare
-  - docker_registry
-  - gcr
-  - ghcr
-  - githubusercontent_pkg_containers
+  - docker_io
+  - ecr_public
+  - gcr_io
+  - gcr_io_asia
+  - gcr_k8s
+  - googleapis_storage
+  - quay
+  - gcr_io
+  - gcr_io_asia
+  - amazonaws_ecr
