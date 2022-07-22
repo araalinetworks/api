@@ -62,6 +62,17 @@ class API:
                                 debug=g_debug, result=True, strip=False)
             utils.cfg["email"] = rc[1].decode().split("=", 1)[1]
 
+    def get_tenants(self):
+        self.check()
+
+        rc = utils.run_command("%s api -fetch-active-subtenants" % (
+                                self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
 

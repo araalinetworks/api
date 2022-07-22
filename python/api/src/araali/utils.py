@@ -23,7 +23,7 @@ def read_config():
 
 cfg = read_config()
 
-def config(tenant=None, tenants=None, template_dir=None, backend=None, token=None):
+def config(tenant=None, tenants=None, template_dir=None, backend=None):
     global cfg
     if tenant is not None:
         if not tenant: # passed as empty string
@@ -35,7 +35,7 @@ def config(tenant=None, tenants=None, template_dir=None, backend=None, token=Non
         cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in tenants.split(",")]
         with open(cfg_fname, "w") as f:
             yaml.dump(cfg, f)
-    for k in ["template_dir", "backend", "token"]:
+    for k in ["template_dir", "backend"]:
         if eval(k) is not None:
             cfg[k] = eval(k)
             with open(cfg_fname, "w") as f:

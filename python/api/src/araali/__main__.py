@@ -10,17 +10,41 @@ import platform
 import subprocess
 import sys
 
-#from . import api
+from araali import API
 from . import araalictl
-from . import araalictl as api
 from . import utils
 from . import template as module_template
 
 def config(args):
-    return utils.config(args.tenant, args.tenants, args.template_dir, args.backend, args.token)
+    if args.get_tenants:
+        """
+        Current:
+            ./araalictl api -fetch-active-subtenants
+            ./araalictl api -fetch-subtenants
+            ./araalictl api -tenant=freemium -fetch-subtenants
+
+        Desired:
+            ./araalictl api -fetch-subtenants
+            ./araalictl api -fetch-subtenants -active
+        """
+        if utils.cfg["backend"] != "prod": utils.config(backend="prod")
+        tracking = [a["id"] for a in utils.cfg["tenants"]]
+        obj = araalictl.API().get_tenants()[0]["subtenantlist"]
+        # ['tenantid', 'adminemail', 'activevmcount', 'activecontainercount', 'perimeteralertcount', 'homealertcount', 'lastsignedin']
+        print("     %-22s %-42s %-7s %-10s %s" % ("tenant-id", "admin-email", "count", "tracked", "last-signed-in"))
+        agent_count = 0
+        for i, o in enumerate(obj):
+            o["lastsignedin"] = datetime.datetime.fromtimestamp(o["lastsignedin"]/1000) if o["lastsignedin"] else ""
+            print("%3s: t=%-20s e=%-40s c=%-5s tr=%-7s s=%s" % (i+1, o["tenantid"],
+                o["adminemail"], o["activevmcount"], o["tenantid"] in tracking,
+                o["lastsignedin"] if o["lastsignedin"] else "nil"))
+            agent_count += o["activevmcount"]
+        print("Total agents: %s" % agent_count)
+        return
+    return utils.config(args.tenant, args.tenants, args.template_dir, args.backend)
 
 def alerts(args):
-    alerts, page, status = api.API().get_alerts(args.count, args.ago, tenant=args.tenant)
+    alerts, page, status = API().get_alerts(args.count, args.ago, tenant=args.tenant)
     day_dict = {}
     local_zone = tz.tzlocal()
     if status == 0:
@@ -44,19 +68,19 @@ def alerts(args):
             print("%s %s" % (k, len(day_dict[k])))
 
 def assets(args):
-    assets, status = api.API().get_assets(args.zone, args.app, args.ago, tenant=args.tenant)
+    assets, status = API().get_assets(args.zone, args.app, args.ago, tenant=args.tenant)
     if status == 0:
         print("Got %s assets" % len(assets))
         utils.dump_table(assets)
 
 def links(args):
-    links, status = api.API().get_links(args.zone, args.app, args.svc, args.ago, tenant=args.tenant)
+    links, status = API().get_links(args.zone, args.app, args.svc, args.ago, tenant=args.tenant)
     if status == 0:
         print("Got %s links" % len(links))
         utils.dump_table(links)
 
 def insights(args):
-    insights, status = api.API().get_insights(args.zone, tenant=args.tenant)
+    insights, status = API().get_insights(args.zone, tenant=args.tenant)
     if status == 0:
         utils.dump_table(insights)
 
@@ -70,7 +94,7 @@ def token(args):
     elif args.list:
         op = "show"
         name = None
-    tokens, status = api.API().token(op=op, name=name, email=args.email, tenant=args.tenant)
+    tokens, status = araalictl.API().token(op=op, name=name, email=args.email, tenant=args.tenant)
     if status == 0:
         if op == "show":
             utils.dump_table(tokens["tokens"])
@@ -110,7 +134,7 @@ if __name__ == "__main__":
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
     parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
     parser_config.add_argument('--backend', help="setup a custom backend (internal unit testing)")
-    parser_config.add_argument('--token', help="api access token")
+    parser_config.add_argument('-g', '--get_tenants', action="store_true", help="get active tenants")
     parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
     parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
