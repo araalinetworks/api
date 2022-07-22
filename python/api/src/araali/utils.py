@@ -12,7 +12,7 @@ def read_config():
             if not cfg.get("tenant", None): cfg["tenant"] = None
             if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
             if not cfg.get("token", None): cfg["token"] = os.getenv('ARAALI_API_TOKEN')
-            if not cfg.get("backend", None): cfg["backend"] = os.getenv('ARAALI_BACKEND')
+            if not cfg.get("backend", None): cfg["backend"] = "prod"
             return cfg
 
     return {

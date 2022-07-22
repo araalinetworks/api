@@ -238,4 +238,18 @@ class API:
         command = "-update-template" if not public else "-export-template"
         rc = utils.run_command("%s api %s %s" % (
             self.cmdline, command, tstr), in_text=yaml.dump(data), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_zones_apps(self, full=False, tenant=None):
+        """Get zones and apps"""
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        rc = utils.run_command("%s api -fetch-zone-apps %s %s" % (self.cmdline, "-full" if full else "", tstr),
+                result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]

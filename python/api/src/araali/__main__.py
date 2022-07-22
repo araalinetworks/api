@@ -5,12 +5,17 @@ import argparse
 import datetime
 from dateutil import parser as du_parser
 from dateutil import tz
+import json
 import os
 import platform
+import re
+import shutil
 import subprocess
 import sys
+import yaml
 
 from araali import API
+from . import api
 from . import araalictl
 from . import utils
 from . import template as module_template
@@ -78,6 +83,52 @@ def links(args):
     if status == 0:
         print("Got %s links" % len(links))
         utils.dump_table(links)
+
+def za(args):
+    if not args.nopull:
+        shutil.rmtree("%s/%s" % (args.progdir, ".za.araali"), ignore_errors=True)
+        os.makedirs("%s/%s" % (args.progdir, ".za.araali"), exist_ok=True)
+        with open("%s/%s/dump.json" % (args.progdir, ".za.araali"), "w") as f:
+            zones_apps, status = API().get_zones_apps(full=args.full, tenant=args.tenant)
+            if status == 0:
+                # [{"zone_name": xx, "apps": [{"app_name": xx, "links": []}]}]
+                for za in zones_apps:
+                    json.dump(za, f)
+                    f.write("\n")
+    else:
+        def make_map(kv):
+            k, v = kv.split("=")
+            return k, v
+        if args.filters:
+            filters = dict([make_map(a) for a in args.filters.split(",")])
+        else:
+            filters = {}
+        for k in ["zone", "app", "pod", "container", "process"]:
+            if k not in filters:
+                filters[k] = ".*"
+
+        i = 0
+        with open("%s/%s/dump.json" % (args.progdir, ".za.araali"), "r") as f:
+            for line in f:
+                zapps = json.loads(line)
+                zname, apps = zapps["zone_name"], zapps["apps"]
+                if not re.search(filters["zone"], zname):
+                    continue
+                for app in apps:
+                    aname, links = app["app_name"], app.get("links", [])
+                    if not re.search(filters["app"], aname):
+                        continue
+                    for link in links:
+                        # ['client', 'server', 'type', 'policy_skip_reason', 'error_code',
+                        #  'state', 'timestamp', 'unique_id', 'alert_info', 'rollup_ids', 'active_ports']
+                        client = link["client"]
+                        server = link["server"]
+                        # ['zone', 'app', 'unmapped_app', 'process', 'binary_name', 'parent_process']
+                        if not re.search(filters["process"], client.get("process", "")) and not re.search(filters["process"], server.get("process", "")):
+                            continue
+                        print("="*40, i, "="*40)
+                        i += 1
+                        print(yaml.dump({"client": client, "server": server}))
 
 def insights(args):
     insights, status = API().get_insights(args.zone, tenant=args.tenant)
@@ -167,6 +218,12 @@ if __name__ == "__main__":
     parser_links.add_argument('-s', '--svc', help="links for a specific svc")
     parser_links.add_argument('--ago', help="lookback")
 
+    parser_za = subparsers.add_parser("za", help="get zones and apps")
+    parser_za.add_argument('-t', '--tenant', help="get zones and apps for a specific tenant")
+    parser_za.add_argument('-F', '--full', action="store_true", help="full dump")
+    parser_za.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
+    parser_za.add_argument('-f', '--filters', help="query filters")
+
     parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
 
     parser_template = subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
@@ -208,6 +265,7 @@ if __name__ == "__main__":
 
     if args.verbose:
         api.g_debug = True
+        araalictl.g_debug = True
 
     if args.use_api:
         araalictl.g_use_api = True
