@@ -54,6 +54,7 @@ class API:
                                 debug=g_debug, result=True, strip=False)
             subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
             cmdline = "sudo %s authorize" % (self.cmdline)
+            #cmdline = "sudo %s authorize -local" % (self.cmdline)
             subprocess.run(cmdline.split())
 
         if "email" not in utils.cfg:
@@ -249,7 +250,21 @@ class API:
         if tenant is None: tenant = utils.cfg["tenant"]
         tstr = " -tenant=%s " % (tenant) if tenant else ""
         rc = utils.run_command("%s api -fetch-zone-apps %s %s" % (self.cmdline, "-full" if full else "", tstr),
-                result=True, strip=False)
+                result=True, debug=g_debug, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_helm_values(self, zone=None, tenant=None):
+        """Get helm chart"""
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        if zone is not None:
+            tstr += " -tags=zone=%s " % zone
+        rc = utils.run_command("%s fortify-k8s -out helm %s" % (self.cmdline, tstr),
+                result=True, debug=g_debug, strip=False)
         if rc[0] != 0:
             print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
