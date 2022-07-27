@@ -48,6 +48,7 @@ So let the show begin!
    remapping_apps
    araalifaq
    araaliprivacypolicy
+   complianceapi
 
 .. toctree::
    :maxdepth: 2
@@ -64,7 +65,6 @@ So let the show begin!
    getting_started_with_rafay
    guide_templates
    guide_lenses
-   complianceapi
 
 
 .. toctree::

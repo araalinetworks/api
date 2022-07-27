@@ -37,3 +37,7 @@ def test_token(api):
     tokens = api.token(op="delete", name="ars_ut")
     tokens = api.token(op="show")[0]
     assert [a for a in tokens["tokens"] if a["name"] == "ars_ut"] == []
+
+def test_rbac(api):
+    users = api.rbac_show_users()[0]
+    assert "meta-tap@araalinetworks.com" in [u["email"] for u in users]
