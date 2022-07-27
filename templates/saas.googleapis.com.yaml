@@ -13,18 +13,13 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: cloudprofiler
-    dns_pattern: cloudprofiler.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: stackdriver
-    dns_pattern: stackdriver.googleapis.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: cloudkms
     dns_pattern: cloudkms.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: cloudprofiler
+    dns_pattern: cloudprofiler.googleapis.com
     dst_port: 443
   pushdown: []
 - node:
@@ -78,6 +73,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: stackdriver
+    dns_pattern: stackdriver.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: storage
     dns_pattern: .*storage.googleapis.com
     dst_port: 443
@@ -90,7 +90,9 @@ identities:
 authorizations:
 - name: any
   out:
+  - clouddebugger
   - cloudkms
+  - cloudprofiler
   - cloudresourcemanager
   - cloudtrace
   - compute
@@ -101,8 +103,6 @@ authorizations:
   - oauth2
   - pubsub
   - servicecontrol
+  - stackdriver
   - storage
   - www
-  - clouddebugger
-  - cloudprofiler
-  - stackdriver
