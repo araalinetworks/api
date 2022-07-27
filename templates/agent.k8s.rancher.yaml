@@ -8,8 +8,7 @@ identities:
     binary_name: /usr/lib/git/git-remote-http
     parent_process: git
     process: git-remote-https
-  pushdown:
-  - pod
+  pushdown: []
 - node:
     name: rancher_git
     dns_pattern: git.rancher.io
@@ -29,8 +28,7 @@ identities:
     binary_name: /usr/bin/rancher
     parent_process: tini
     process: rancher
-  pushdown:
-  - pod
+  pushdown: []
 authorizations:
 - name: git_remote_https
   out:
