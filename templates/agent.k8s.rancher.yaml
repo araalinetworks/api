@@ -10,6 +10,31 @@ identities:
     process: git-remote-https
   pushdown: []
 - node:
+    name: node_4
+    zone: .*
+    app: .*
+    pod: rancher-monitoring-grafana
+    container: grafana
+    binary_name: /usr/share/grafana/bin/grafana-server
+    parent_process: containerd-shim
+    process: grafana-server
+  pushdown: []
+- node:
+    name: node_5
+    dns_pattern: grafana.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_6
+    dns_pattern: objects.githubusercontent.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_7
+    dns_pattern: stats.grafana.org
+    dst_port: 443
+  pushdown: []
+- node:
     name: rancher_git
     dns_pattern: git.rancher.io
     dst_port: 443
@@ -33,6 +58,11 @@ authorizations:
 - name: git_remote_https
   out:
   - rancher_git
+- name: node_4
+  out:
+  - node_5
+  - node_6
+  - node_7
 - name: rancher_tini
   out:
   - rancher_git
