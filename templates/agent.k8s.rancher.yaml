@@ -1,7 +1,16 @@
 identities:
 - node:
-    name: node_0
-    rename: rancher_tini
+    name: rancher_git
+    dns_pattern: git.rancher.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: rancher_release
+    dns_pattern: releases.rancher.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: rancher_tini
     zone: .*
     app: .*
     pod: rancher-staging-ovj2y8l
@@ -10,21 +19,9 @@ identities:
     parent_process: tini
     process: rancher
   pushdown: []
-- node:
-    name: node_1
-    rename: rancher_git
-    dns_pattern: git.rancher.io
-    dst_port: 443
-  pushdown: []
-- node:
-    name: node_2
-    rename: rancher_release
-    dns_pattern: releases.rancher.com
-    dst_port: 443
-  pushdown: []
 authorizations:
-- name: node_0
+- name: rancher_tini
   out:
-  - node_0
-  - node_1
-  - node_2
+  - rancher_git
+  - rancher_release
+  - rancher_tini
