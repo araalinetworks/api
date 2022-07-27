@@ -1,5 +1,16 @@
 identities:
 - node:
+    name: git_remote_https
+    zone: .*
+    app: .*
+    pod: rancher-staging-.*
+    container: rancher
+    binary_name: /usr/lib/git/git-remote-http
+    parent_process: git
+    process: git-remote-https
+  pushdown:
+  - pod
+- node:
     name: rancher_git
     dns_pattern: git.rancher.io
     dst_port: 443
@@ -13,13 +24,17 @@ identities:
     name: rancher_tini
     zone: .*
     app: .*
-    pod: rancher-staging-ovj2y8l
+    pod: rancher-staging-.*
     container: rancher
     binary_name: /usr/bin/rancher
     parent_process: tini
     process: rancher
-  pushdown: []
+  pushdown:
+  - pod
 authorizations:
+- name: git_remote_https
+  out:
+  - rancher_git
 - name: rancher_tini
   out:
   - rancher_git
