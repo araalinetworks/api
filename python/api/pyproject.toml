@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.17"
+version = "0.0.18"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
 description = "Araali API"
 readme = "README.md"
 license = { file="LICENSE" }
-requires-python = ">=3.7"
+requires-python = ">=3.0"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -27,5 +27,17 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/araalinetworks/api/tree/main/python/api"
 "Bug Tracker" = "https://github.com/araalinetworks/api/issues"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py
+
+[testenv]
+deps = pytest
+commands = pytest -sv
+passenv = HOME ARAALI_API_TOKEN
+"""
 
 [tool]

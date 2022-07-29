@@ -31,7 +31,7 @@ func TestAlerts(t *testing.T) {
 			StartTime: timestamppb.New(time.Date(1980, time.November, 0, 0, 0, 0, 0, time.UTC)),
 			EndTime:   timestamppb.New(time.Now()),
 		},
-		ListAllAlerts:        true,
+		ListAllAlerts:        false,
 		OpenAlerts:           true,
 		ClosedAlerts:         false,
 		PerimeterIngress:     true,

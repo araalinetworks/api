@@ -13,6 +13,10 @@
         pip install --upgrade araali
 
     Usage:
+        # export your api token
+
+        export ARAALI_API_TOKEN="<your-token-here>"
+
         # from python REPL
 
             >>> import araali                                                               

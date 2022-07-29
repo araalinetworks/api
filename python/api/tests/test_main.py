@@ -8,7 +8,8 @@ def api():
     return araali.API()
 
 def test_alerts(api):
-    assert len(api.get_alerts()[0]) > 0
+    alerts = api.get_alerts()
+    assert len(alerts[0]) > 0
 
 def test_assets(api):
     assert len(api.get_assets()[0]) > len(api.get_assets("scale")[0])

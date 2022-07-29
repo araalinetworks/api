@@ -1,7 +1,7 @@
 GENDIR=src/araali
 
 # the default, full thing
-all: genpy build install test
+all: genpy build install tox
 
 # publish to pypi
 push: venv
@@ -39,6 +39,10 @@ araaliapienv/exists.h:
 	source araaliapienv/bin/activate && pip install -r tests/requirements.txt
 	touch araaliapienv/exists.h
 
+# official clean blackbox tessting
+tox:
+	tox
+
 # work in the python enviroment
 shell:
 	-source araaliapienv/bin/activate && bash
@@ -46,3 +50,4 @@ shell:
 # get a new life, wash all karma
 clean:
 	rm -rf araaliapienv
+	rm -rf .tox

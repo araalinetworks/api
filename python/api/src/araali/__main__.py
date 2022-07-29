@@ -108,9 +108,14 @@ def assets(args):
         return False
 
     def match_filters(filters, line):
+        def get_app_name(a):
+            if type(a) == dict:
+                return a["app_name"]
+            return a
+
         for k,v in filters.items():
             if k == "app":
-                if not re.search(":[^:]*" + v + "[^:]*:", ":"+ ":".join([a["app_name"] for a in line["apps"]]) + ":"):
+                if not re.search(":[^:]*" + v + "[^:]*:", ":"+ ":".join([get_app_name(a) for a in line["apps"]]) + ":"):
                     return False
             elif k not in line:
                 return False
@@ -143,7 +148,7 @@ def assets(args):
                 # 'package_name', 'cve_id', 'severity'
                 #print("cve", line["vulnerabilities"][0].keys()) # always empty
 
-            line["cve_count"] = str(len(line["vulnerabilities"]))
+            line["cve_count"] = str(len(line.get("vulnerabilities", [])))
             if search_type == "cve":
                 if "vulnerabilities" not in line or not line["vulnerabilities"]:
                     continue
@@ -154,19 +159,29 @@ def assets(args):
                     line["max_severity"] = max([cve_sev_map[a["severity"]] for a in line["vulnerabilities"]])
                     if not args.verbose:
                         del line["vulnerabilities"]
+                    if "containerd" in line:
+                        line["caps"] = len(line["containerd"]["capabilities"])
+                        del line["containerd"]["capabilities"]
                     print(yaml.dump(line))
                 elif "cve_sev" in filters and max([cve_sev_map[a["severity"]] for a in line["vulnerabilities"]]) == int(filters["cve_sev"]):
                     print("="*40, i, "="*40)
                     i += 1
                     line["max_severity"] = max([cve_sev_map[a["severity"]] for a in line["vulnerabilities"]])
                     del line["vulnerabilities"]
+                    if "containerd" in line:
+                        line["caps"] = len(line["containerd"]["capabilities"])
+                        del line["containerd"]["capabilities"]
                     print(yaml.dump(line))
 
             else:
                 if match_filters(filters, line):
                     print("="*40, i, "="*40)
                     i += 1
-                    del line["vulnerabilities"]
+                    if "vulnerabilities" in line:
+                        del line["vulnerabilities"]
+                    if "containerd" in line:
+                        line["caps"] = len(line["containerd"]["capabilities"])
+                        #del line["containerd"]["capabilities"]
                     print(yaml.dump(line))
 
 

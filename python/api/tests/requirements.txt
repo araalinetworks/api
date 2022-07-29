@@ -3,4 +3,5 @@ grpcio
 grpcio-tools
 pytest
 python-dateutil
+tox
 twine
