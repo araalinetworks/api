@@ -16,7 +16,16 @@ install: venv
 	source araaliapienv/bin/activate && pip install dist/*.tar.gz
 
 # if you are fixing build
-build: venv
+checkbuild:
+	@echo "*** checking if there are junk files in src ***"
+	git -c color.status=false status src | grep src| wc -l | grep 0
+
+# this is a dangerous command, but safe to do after you review the output of
+# git -c color.status=false status src | grep src
+prepbuild:
+	git -c color.status=false status src | grep src| xargs rm -rf
+
+build: venv checkbuild
 	rm -f dist/*
 	rm -f $(GENDIR)/bin/araalictl
 	rm -f $(GENDIR)/bin/araalictl.*-amd64_*

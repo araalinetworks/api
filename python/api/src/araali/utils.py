@@ -25,21 +25,25 @@ cfg = read_config()
 
 def config(tenant=None, tenants=None, template_dir=None, backend=None):
     global cfg
+
+    def save(cfg):
+        with open(cfg_fname, "w") as f:
+            cfg2 = dict(cfg)
+            del cfg2["token"]
+            yaml.dump(cfg2, f)
+
     if tenant is not None:
         if not tenant: # passed as empty string
             tenant = None # store it as nil in yaml
         cfg["tenant"] = tenant
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
+        save(cfg)
     if tenants is not None:
         cfg["tenants"] = [dict(zip(["name", "id"], a.split(":"))) for a in tenants.split(",")]
-        with open(cfg_fname, "w") as f:
-            yaml.dump(cfg, f)
+        save(cfg)
     for k in ["template_dir", "backend"]:
         if eval(k) is not None:
             cfg[k] = eval(k)
-            with open(cfg_fname, "w") as f:
-                yaml.dump(cfg, f)
+            save(cfg)
     print(yaml.dump(cfg))
 
 def dump_table(objs):

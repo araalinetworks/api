@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.18"
+version = "0.0.20"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
   "grpcio",
-  "protobuf",
+  "protobuf<4.21.0",
   "python-dateutil",
   "pyyaml",
 ]
