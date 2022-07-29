@@ -276,7 +276,7 @@ class API:
                                                      
         tstr = " -tenant=%s " % (tenant) if tenant else ""
         rc = utils.run_command("%s user-role -op list-user-roles %s" % (
-                         self.cmdline, tstr), result=True, strip=False,
+                         self.cmdline, tstr), result=True, debug=g_debug, strip=False)
         if rc[0] != 0:
             print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
