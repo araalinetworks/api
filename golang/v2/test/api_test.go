@@ -20,6 +20,8 @@ func setup(t *testing.T) {
 	api.SetToken(os.Getenv("ARAALI_API_TOKEN"))
 }
 
+var verbose = 0
+
 // TestAlerts calls ListAlerts since the beginning of time,
 // checking for consistency with last baseline
 func TestAlerts(t *testing.T) {
@@ -41,7 +43,9 @@ func TestAlerts(t *testing.T) {
 		AraaliToAraali:       true,
 	}
 	resp, err := api.ListAlerts(tenantID, &filter, 10, "")
-	fmt.Printf("\nR: %+v/%v\n", len(resp.Alerts), err)
+	if verbose > 0 {
+		fmt.Printf("\nR: %+v/%v\n", len(resp.Alerts), err)
+	}
 	if len(resp.Alerts) != 10 {
 		t.Fatalf("ListAlerts() = %v, want 10", len(resp.Alerts))
 	}
