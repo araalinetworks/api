@@ -52,7 +52,7 @@ func TestAlerts(t *testing.T) {
 }
 
 //Testing ListAlerts with specific Zone passed. Return only those zone specific alerts
-func TestAlertsZoneFilter(t *testing.T) {
+func TestAlertsFilterValidZone(t *testing.T) {
 	setup(t)
 
 	zone := "nightlycommon"
@@ -97,15 +97,15 @@ func TestAlertsZoneFilter(t *testing.T) {
 }
 
 //Testing ListAlerts with specific Zone passed which returns ZERO count
-func TestAlertsZoneFilterNoResults(t *testing.T) {
+func TestAlertsFilterInvalidZone(t *testing.T) {
 	setup(t)
 
-	zone := "intern-nightly"
+	zone := "invalidzone"
 	tenantID := "meta-tap"
 	filter := araali_api_service.AlertFilter{
 		Time: &araali_api_service.TimeSlice{
-			StartTime: timestamppb.New(time.Date(2022, time.July, 25, 3, 8, 0, 0, time.UTC)),
-			EndTime:   timestamppb.New(time.Date(2022, time.July, 25, 3, 9, 0, 0, time.UTC)),
+			StartTime: timestamppb.New(time.Date(1980, time.November, 0, 0, 0, 0, 0, time.UTC)),
+			EndTime:   timestamppb.New(time.Now()),
 		},
 		ListAllAlerts:        false,
 		OpenAlerts:           true,
