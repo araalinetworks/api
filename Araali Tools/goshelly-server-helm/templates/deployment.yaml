@@ -46,7 +46,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: goshelly
-  namespace: default #goshelly
+  namespace: goshelly
   labels:
     app: goshelly
 spec:
