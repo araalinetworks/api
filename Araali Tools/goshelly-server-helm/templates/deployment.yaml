@@ -1,0 +1,73 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: goshelly
+  labels:
+    name: goshelly
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: goshelly
+spec:
+  storageClassName: goshelly
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: goshelly
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/goshelly"
+  storageClassName: goshelly
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-all
+  namespace: goshelly
+spec:
+  podSelector:
+    matchLabels:
+      app: goshelly
+  ingress:
+    - {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goshelly
+  namespace: default #goshelly
+  labels:
+    app: goshelly
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: goshelly
+  template:
+    metadata:
+      labels:
+        app: goshelly
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: goshelly
+          image: arorasoham9/goshelly-server:linux
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/mnt/goshelly"
+              name: goshelly
+      volumes:
+        - name: goshelly
+          persistentVolumeClaim:
+            claimName: goshelly
