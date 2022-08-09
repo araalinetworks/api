@@ -33,7 +33,7 @@ def config(args):
             ./araalictl api -fetch-subtenants -active
         """
         if utils.cfg["backend"] != "prod": utils.config(backend="prod")
-        tracking = [a["id"] for a in utils.cfg["tenants"]]
+        tracking = [a["id"] for a in utils.cfg.get("tenants", [])]
         obj = araalictl.API().get_tenants()[0]["subtenantlist"]
         # ['tenantid', 'adminemail', 'activevmcount', 'activecontainercount', 'perimeteralertcount', 'homealertcount', 'lastsignedin']
         print("     %-22s %-42s %-7s %-10s %s" % ("tenant-id", "admin-email", "count", "tracked", "last-signed-in"))
@@ -192,6 +192,17 @@ def links(args):
         utils.dump_table(links)
 
 def search(args):
+    def match_filters(filters, line):
+        for k,v in filters.items():
+            if k not in line:
+                if args.verbose: print("***", k, "not in", line)
+                return False
+            else:
+                if not re.search(v, line[k]):
+                    if args.verbose: print("***", v, "doesnt match", line[k])
+                    return False
+        return True
+
     if not args.nopull or not os.path.isfile("%s/%s/dump.json" % (args.progdir, ".za.araali")):
         shutil.rmtree("%s/%s" % (args.progdir, ".za.araali"), ignore_errors=True)
         os.makedirs("%s/%s" % (args.progdir, ".za.araali"), exist_ok=True)
@@ -225,7 +236,8 @@ def search(args):
             if k not in filters:
                 filters[k] = ".*"
 
-    if args.verbose: print(filters)
+    if args.verbose: print("filter:", filters)
+    if args.verbose: print("search_type:", search_type)
     i = 0
     workload_dict = {}
     with open("%s/%s/dump.json" % (args.progdir, ".za.araali"), "r") as f:
@@ -258,16 +270,11 @@ def search(args):
                     server = link["server"]
                     # ['zone', 'app', 'unmapped_app', 'process', 'binary_name', 'parent_process']
                     if search_type == "workload":
-                        if "process" in client:
-                            client_m = re.search(filters["process"], client["process"])
-                        else:
-                            # {'subnet': '0.0.0.0', 'private_subnet': True} HOME
-                            client_m = None
-                        if "process" in server:
-                            server_m = re.search(filters["process"], server["process"])
-                        else:
-                            # {'dns_pattern': '.*:dynamodb.*amazonaws.com:.*', 'dst_port': 443}
-                            server_m = None
+                        nfilters = dict([a for a in filters.items() if a[0] not in ["zone", "app", "pod", "container"]])
+                        client_m = match_filters(nfilters, client)
+                        # {'subnet': '0.0.0.0', 'private_subnet': True} HOME
+                        server_m = match_filters(nfilters, server)
+                        # {'dns_pattern': '.*:dynamodb.*amazonaws.com:.*', 'dst_port': 443}
 
                         if search_type == "link":
                             if client_m or server_m:
@@ -318,6 +325,15 @@ def search(args):
                                 workload_dict[wkey] = 1
                             else:
                                 workload_dict[wkey] += 1
+        if 1:
+            keys = list(workload_dict.keys())
+            keys.sort(key=lambda x: -workload_dict[x])
+            print("Found %s items" % len(keys))
+            count = 0
+            for i, k in enumerate(keys):
+                print("%3s: %05s %s" % (i, workload_dict[k], k))
+                count += workload_dict[k]
+            print("Total count: %s" % count)
 
 def helm(args):
     print(yaml.dump(araalictl.API().get_helm_values(args.zone, args.tenant)[0]))

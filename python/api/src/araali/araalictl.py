@@ -10,6 +10,7 @@ from . import api
 import datetime
 import os
 import platform
+import requests
 import subprocess
 import sys
 from . import utils
@@ -24,14 +25,33 @@ class API:
             self.api = api.API()
             return
 
-        progdir = os.path.dirname(os.path.abspath(__file__))
-        if os.path.isfile(progdir + "/bin/araalictl"):
-            self.cmdline = progdir + "/bin/araalictl"
-        else:
-            self.cmdline = progdir + "/bin/" + {
-                                                "Linux": "araalictl.linux-amd64",
-                                                "Darwin": "araalictl.darwin-amd64"
-                                               }[platform.system()]
+        def fetch():
+            """For downloading and upgrading araalictl"""
+            progdir = os.path.dirname(os.path.abspath(__file__))
+            afile = progdir + "/bin/araalictl"
+            rc = utils.run_command("mkdir -p %s/bin" % (progdir), debug=g_debug, result=True, strip=False)
+            afile = progdir + "/bin/araalictl"
+            if os.path.isfile(afile):
+                #print("upgrading araalictl ...")
+                #rc = utils.run_command("sudo %s upgrade" % (afile), debug=g_debug, result=True, strip=False)
+                return afile
+
+            url = {
+                    "Linux": "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.linux-amd64",
+                    "Darwin": "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.darwin-amd64"
+                  }.get(platform.system(), None)
+            if url is None:
+                raise Exception("*** only linux and mac are currently supported: %s" % platform)
+
+            print("Fetching araalictl ...")
+            r = requests.get(url, allow_redirects=True)
+            open(afile, 'wb').write(r.content)
+            os.chmod(afile, 0o777)
+            rc = utils.run_command("sudo %s upgrade" % (afile),
+                                debug=g_debug, result=True, strip=False)
+            return afile
+
+        self.cmdline = fetch()
 
     def check(self):
         # nightly.aws.araalinetworks.com
