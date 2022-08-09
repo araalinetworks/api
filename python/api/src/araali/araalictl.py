@@ -47,8 +47,6 @@ class API:
             r = requests.get(url, allow_redirects=True)
             open(afile, 'wb').write(r.content)
             os.chmod(afile, 0o777)
-            rc = utils.run_command("sudo %s upgrade" % (afile),
-                                debug=g_debug, result=True, strip=False)
             return afile
 
         self.cmdline = fetch()
@@ -57,11 +55,14 @@ class API:
         # nightly.aws.araalinetworks.com
         rc = utils.run_command("%s config InternalCfgBackend" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
-        backend = rc[1].decode().split("=", 1)[1].split(".")[0]
+        try:
+            backend = rc[1].decode().split("=", 1)[1].split(".")[0]
+        except:
+            backend = None
+
         if backend != utils.cfg["backend"]:
             print("*** backend doesnt match, invoking deauth ...")
             subprocess.run(("sudo %s authorize -clean" % (self.cmdline)).split())
-            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
 
         rc = utils.run_command("%s authorize check" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
@@ -72,8 +73,7 @@ class API:
                                 debug=g_debug, result=True, strip=False)
             rc = utils.run_command("sudo rm -rf /tmp/actl* /tmp/av.port",
                                 debug=g_debug, result=True, strip=False)
-            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
-            cmdline = "sudo %s authorize" % (self.cmdline)
+            cmdline = "sudo %s authorize -bend %s" % (self.cmdline, utils.cfg["backend"])
             #cmdline = "sudo %s authorize -local" % (self.cmdline)
             subprocess.run(cmdline.split())
 

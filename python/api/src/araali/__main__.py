@@ -362,7 +362,7 @@ def token(args):
 
 def ctl(args, remaining):
     api = araalictl.API()
-    if remaining and remaining[0] not in ["authorize"]:
+    if remaining and remaining[0] not in ["authorize", "config"]:
         api.check()
 
     if remaining and remaining[0] == "--": remaining = remaining[1:]
