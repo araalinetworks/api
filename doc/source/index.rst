@@ -49,6 +49,7 @@ So let the show begin!
    araalifaq
    araaliprivacypolicy
    complianceapi
+   golangsdk
 
 .. toctree::
    :maxdepth: 2
