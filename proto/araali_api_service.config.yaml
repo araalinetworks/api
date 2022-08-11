@@ -1,0 +1,23 @@
+type: google.api.Service
+config_version: 3
+
+http:
+  rules:
+    - selector: araali_api_service.AraaliAPI.createTenant
+      post: /api/v2/createTenant
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.deleteTenant
+      post: /api/v2/deleteTenant
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.addUser
+      post: /api/v2/addUser
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.deleteUser
+      post: /api/v2/deleteUser
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.listAssets
+      get: /api/v2/listAssets
+    - selector: araali_api_service.AraaliAPI.listAlerts
+      get: /api/v2/listAlerts
+    - selector: araali_api_service.AraaliAPI.listInsights
+      get: /api/v2/listInsights
