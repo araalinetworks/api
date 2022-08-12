@@ -4,31 +4,61 @@ metadata:
   name: goshelly
   labels:
     name: goshelly
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: goshelly
+provisioner: docker.io/hostpath
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: goshelly
+  namespace: goshelly
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/goshelly"
+  storageClassName: goshelly
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: goshelly
+  namespace: goshelly
 spec:
   storageClassName: goshelly
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
+  volumeMode: Filesystem
 ---
 apiVersion: v1
-kind: PersistentVolume
+kind: Pod
 metadata:
   name: goshelly
+  namespace: goshelly
 spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  hostPath:
-    path: "/mnt/goshelly"
-  storageClassName: goshelly
+  volumes:
+    - name: goshelly
+      persistentVolumeClaim:
+        claimName: goshelly
+  containers:
+    - name: goshelly
+      image: ubuntu:latest
+      command: ["/bin/sleep", "3650d"]
+      volumeMounts:
+        - mountPath: "/mnt/goshelly"
+          name: goshelly
 ---
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
@@ -50,7 +80,7 @@ metadata:
   labels:
     app: goshelly
 spec:
-  replicas: 5
+  replicas: 2
   selector:
     matchLabels:
       app: goshelly
@@ -71,3 +101,5 @@ spec:
         - name: goshelly
           persistentVolumeClaim:
             claimName: goshelly
+---
+

@@ -16,7 +16,6 @@ spec:
       port: 9000
       targetPort: 9000
     - name: "api-port2"
-      # nodePort: 32123
       port: 8000
       targetPort: 8000
   selector:
