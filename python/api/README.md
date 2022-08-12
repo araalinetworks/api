@@ -15,6 +15,9 @@ cd ~/
 source araaliapienv/bin/activate
 pip install --upgrade araali
 
+# export your api token
+export ARAALI_API_TOKEN="<your-token-here>"
+
 # usage help - command line
 python -m pydoc araali
 python -m araali -h

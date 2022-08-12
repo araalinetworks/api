@@ -1,5 +1,10 @@
 identities:
 - node:
+    name: acm
+    dns_pattern: .*acm.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: amazonlinux
     dns_pattern: amazonlinux..*.amazonaws.com
     dst_port: 80
@@ -22,7 +27,7 @@ identities:
     zone: .*
     app: kube-system
     pod: aws-load-balancer-controller
-    container: controller
+    container: .*controller
     binary_name: /controller
     parent_process: containerd-shim
     process: controller
@@ -64,6 +69,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: efs
     dns_pattern: .*efs.*.amazonaws.com
     dst_port: 2049
@@ -86,6 +96,21 @@ identities:
 - node:
     name: email
     dns_pattern: .*email.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: es
+    dns_pattern: .*es.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: events
+    dns_pattern: .*events.*.amazonaws.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: kms
+    dns_pattern: .*kms.*.amazonaws.com
     dst_port: 443
   pushdown: []
 - node:
@@ -158,16 +183,21 @@ identities:
 authorizations:
 - name: any
   out:
+  - acm
   - amazonlinux
   - cache
   - cognito_identity
   - connect
   - ec2
   - ec2messages
+  - ecr
   - efs
   - eks
   - elasticfilesystem
   - email
+  - es
+  - events
+  - kms
   - pinpoint
   - pricing
   - rabbitmq

@@ -4,8 +4,7 @@ Compliance via API
 
 Overview
 --------
-Araali can be used internally and by customers to fulfill compliance requirements.
-Some of the areas that intersect with SOC2 compliance are
+Araali also allows you to fulfill your SOC2 compliance requirements. Some of the areas where Araali can help fulfill the SOC2 compliance requirements are:
 
 1. Visibility into your Assets - VMs and Containers
     * :ref:`get_compute()`
@@ -18,7 +17,7 @@ Some of the areas that intersect with SOC2 compliance are
 3. Compensating control for Vulnerability - Araali Shielding
     * :ref:`get_lenses(enforced=True)`
 
-*This API gives a list of Zones and Apps that have been enforced. By using this API with the output of get_compute(), you can understand which assets have been Araali Shielded.*
+*In SOC2 you have to show compensating control for known vulnerability. Araali allows you to shield your vulnerable Apps or Containers to fulfill this obligation. This API gives a list of Zones and Apps that have been shielded/enforced.  Using this API with the output of get_compute(), you can understand which assets have been Araali Shielded.*
 
 4. Alerts generated - Intrusion Detection
     * :ref:`get_alerts()`
@@ -33,7 +32,8 @@ Some of the areas that intersect with SOC2 compliance are
 6. Proactively Shielded Apps - Intrusion Prevention
     * :ref:`get_enforced_links()`
 
-These are enforced processes belonging to certain Zone/Cluster and App/Namespace. Araali will hold application to these policies and will not let intruders exploit them.
+*Araali Shielding is similar to Application Firewall as it enforces both incoming and outgoing traffic from your assets. Once Shielded, Araali will not let your application deviate from these baseline policies making them unexploitable. These are enforced processes belong to a certain Zone/Cluster and App/Namespace which can be tabulated with this API.*
+
 
 .. image:: images/compliance_diagram.png
  :alt: Compliance Diagram

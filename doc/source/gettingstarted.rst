@@ -58,7 +58,7 @@ Authorize your session::
 
    sudo ./araalictl authorize <CORRECT EMAIL ADDRESS>
 
-   **NOTE: To correctly authorize araalictl, please enter the correct and same email used when creating an account in Araali Console.**
+**NOTE: To correctly authorize araalictl, please enter the correct and same email used when creating an account in Araali Console.**
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
   :width: 650
@@ -145,6 +145,43 @@ If araalictl and kubectl are running on the same machine::
 If araalictl and kubectl are not running on the same machine::
 
     kubectl delete -f araali_k8s.yaml
+
+
+Kubernetes - Helm Install
+-------------------------
+
+If you want to use Helm without Araalictl, contact Araali team via Slack or email us at support@araalinetworks.com
+
+We will send you a value.yaml file like the one below for your cluster::
+
+    araali:
+      workload_id: <workload-id>
+      cluster_name: bar
+      fog: foo
+      zone: <poc>
+      app: k8s-nodes
+      enforce: true
+      upgrade: true
+      autok8s_image: quay.io/araalinetworks/autok8s:prod
+      fw_image: quay.io/araalinetworks/araali_fw:prod
+      fw_init_image: quay.io/araalinetworks/araali_fw_init:prod
+
+You **must** change the zone name. Zone is how your cluster will show up in Araali UI.
+
+
+Install Araali Repo and Run the Helm Chart
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Install Araali Repo::
+
+    helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
+
+2. Run the value file::
+
+    helm install -f ./values.yaml my-araali-fw araali-helm/araali-fw
+
+* Uninstall::
+
+    helm uninstall my-araali-fw
 
 
 VM

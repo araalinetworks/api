@@ -20,6 +20,7 @@ const ApiDialTimeout = 30
 
 var backend = "nightly.aws.araalinetworks.com"
 var token = ""
+var verbose = 0
 
 func SetBackend(b string) {
 	backend = b
@@ -308,7 +309,9 @@ func (alertPage *AlertPage) NextPage() ([]*araali_api_service.Link, error) {
 		return listOfLinks, err
 	}
 
-	fmt.Printf("ListAlerts GetNext Response: %v", resp)
+	if verbose > 0 {
+		fmt.Printf("ListAlerts GetNext Response: %v", resp)
+	}
 
 	if resp.Response.Code != araali_api_service.AraaliAPIResponse_SUCCESS {
 		return listOfLinks, fmt.Errorf("ListAlerts API failed")
@@ -370,7 +373,9 @@ func ListAlerts(tenantID string, filter *araali_api_service.AlertFilter,
 		return alertPage, fmt.Errorf("ListAlerts API failed")
 	}
 
-	fmt.Printf("ListAlerts Response: %v", resp)
+	if verbose > 0 {
+		fmt.Printf("ListAlerts Response: %v", resp)
+	}
 
 	alertPage.Alerts = resp.Links
 	token, err := hex.DecodeString(resp.PagingToken)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.14"
+version = "0.0.22"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
@@ -19,12 +19,26 @@ classifiers = [
 ]
 dependencies = [
   "grpcio",
-  "protobuf",
+  "protobuf<4.21.0",
+  "python-dateutil",
   "pyyaml",
+  "requests",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/araalinetworks/api/tree/main/python/api"
 "Bug Tracker" = "https://github.com/araalinetworks/api/issues"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py
+
+[testenv]
+deps = pytest
+commands = pytest -sv
+passenv = HOME ARAALI_API_TOKEN
+"""
 
 [tool]
