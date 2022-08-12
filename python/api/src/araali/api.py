@@ -31,7 +31,7 @@ def init_assetsreq(zone, app, ago, tenant=None):
     req.time.start_time.FromDatetime(datetime.datetime.utcnow() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.utcnow())
     
-    print(req)
+    if g_debug: print(req)
 
     return req
 
@@ -52,7 +52,7 @@ def init_linksreq(zone, app, svc, ago, tenant=None):
     req.time.start_time.FromDatetime(datetime.datetime.utcnow() - datetime.timedelta(**ago))
     req.time.end_time.FromDatetime(datetime.datetime.utcnow())
     
-    print(req)
+    if g_debug: print(req)
 
     return req
 
@@ -83,7 +83,7 @@ def init_alertreq(count, ago, token, tenant=None):
     req.count = count
 
     if token: req.paging_token = token
-    print(req)
+    if g_debug: print(req)
 
     return req
 
@@ -96,7 +96,7 @@ def init_insightsreq(zone, tenant=None):
         req.tenant.id = tenant
     if zone: req.zone = zone
     
-    print(req)
+    if g_debug: print(req)
 
     return req
 

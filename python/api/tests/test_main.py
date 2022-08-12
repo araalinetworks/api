@@ -8,7 +8,8 @@ def api():
     return araali.API()
 
 def test_alerts(api):
-    assert len(api.get_alerts()[0]) > 0
+    alerts = api.get_alerts()
+    assert len(alerts[0]) > 0
 
 def test_assets(api):
     assert len(api.get_assets()[0]) > len(api.get_assets("scale")[0])
@@ -20,11 +21,15 @@ def test_links(api):
 def test_insights(api):
     assert len(api.get_insights()[0]) >= len(api.get_insights("scale")[0])
 
+@pytest.mark.xfail
 def test_templates(api):
     assert len(api.get_templates()[0]) > 0
 
+@pytest.mark.skipif(araali.utils.cfg["token"] is not None, reason="requires araalictl")
 def test_token(api):
-    api.token(op="delete", name="ars_ut")
+    tokens = api.token(op="show")[0]
+    if "ars_ut" in [a["name"] for a in tokens["tokens"]]:
+        api.token(op="delete", name="ars_ut")
 
     api.token(op="add", name="ars_ut")
     tokens = api.token(op="show")[0]
@@ -33,3 +38,8 @@ def test_token(api):
     tokens = api.token(op="delete", name="ars_ut")
     tokens = api.token(op="show")[0]
     assert [a for a in tokens["tokens"] if a["name"] == "ars_ut"] == []
+
+@pytest.mark.skipif(araali.utils.cfg["token"] is not None, reason="requires araalictl")
+def test_rbac(api):
+    users = api.rbac_show_users()[0]
+    assert "meta-tap@araalinetworks.com" in [u["email"] for u in users]

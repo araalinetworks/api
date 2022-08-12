@@ -10,6 +10,7 @@ from . import api
 import datetime
 import os
 import platform
+import requests
 import subprocess
 import sys
 from . import utils
@@ -24,24 +25,44 @@ class API:
             self.api = api.API()
             return
 
-        progdir = os.path.dirname(os.path.abspath(__file__))
-        if os.path.isfile(progdir + "/bin/araalictl"):
-            self.cmdline = progdir + "/bin/araalictl"
-        else:
-            self.cmdline = progdir + "/bin/" + {
-                                                "Linux": "araalictl.linux-amd64",
-                                                "Darwin": "araalictl.darwin-amd64"
-                                               }[platform.system()]
+        def fetch():
+            """For downloading and upgrading araalictl"""
+            progdir = os.path.dirname(os.path.abspath(__file__))
+            afile = progdir + "/bin/araalictl"
+            rc = utils.run_command("mkdir -p %s/bin" % (progdir), debug=g_debug, result=True, strip=False)
+            afile = progdir + "/bin/araalictl"
+            if os.path.isfile(afile):
+                #print("upgrading araalictl ...")
+                #rc = utils.run_command("sudo %s upgrade" % (afile), debug=g_debug, result=True, strip=False)
+                return afile
+
+            url = {
+                    "Linux": "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.linux-amd64",
+                    "Darwin": "https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl-api.darwin-amd64"
+                  }.get(platform.system(), None)
+            if url is None:
+                raise Exception("*** only linux and mac are currently supported: %s" % platform)
+
+            print("Fetching araalictl ...")
+            r = requests.get(url, allow_redirects=True)
+            open(afile, 'wb').write(r.content)
+            os.chmod(afile, 0o777)
+            return afile
+
+        self.cmdline = fetch()
 
     def check(self):
         # nightly.aws.araalinetworks.com
         rc = utils.run_command("%s config InternalCfgBackend" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
-        backend = rc[1].decode().split("=", 1)[1].split(".")[0]
+        try:
+            backend = rc[1].decode().split("=", 1)[1].split(".")[0]
+        except:
+            backend = None
+
         if backend != utils.cfg["backend"]:
             print("*** backend doesnt match, invoking deauth ...")
             subprocess.run(("sudo %s authorize -clean" % (self.cmdline)).split())
-            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
 
         rc = utils.run_command("%s authorize check" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
@@ -52,8 +73,8 @@ class API:
                                 debug=g_debug, result=True, strip=False)
             rc = utils.run_command("sudo rm -rf /tmp/actl* /tmp/av.port",
                                 debug=g_debug, result=True, strip=False)
-            subprocess.run(("%s config InternalCfgBackend=%s.aws.araalinetworks.com" % (self.cmdline, utils.cfg["backend"])).split())
-            cmdline = "sudo %s authorize" % (self.cmdline)
+            cmdline = "sudo %s authorize -bend %s" % (self.cmdline, utils.cfg["backend"])
+            #cmdline = "sudo %s authorize -local" % (self.cmdline)
             subprocess.run(cmdline.split())
 
         if "email" not in utils.cfg:
@@ -61,6 +82,17 @@ class API:
             rc = utils.run_command("%s config DevName" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
             utils.cfg["email"] = rc[1].decode().split("=", 1)[1]
+
+    def get_tenants(self):
+        self.check()
+
+        rc = utils.run_command("%s api -fetch-active-subtenants" % (
+                                self.cmdline),
+                                debug=g_debug, result=True, strip=False)
+
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
     def get_alerts(self, count=None, ago=None, token=None, tenant=None):
         """get alerts"""
@@ -201,7 +233,7 @@ class API:
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
 
     def get_templates(self, public=None, template=None, tenant=None):
-        """Get templates (or public ones"""
+        """Get templates (or public ones)"""
 
         self.check()
 
@@ -215,3 +247,57 @@ class API:
         if rc[0] != 0:
             print("*** failed: %s" % rc[1].decode())
         return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def update_template(self, data, public=False, tenant=None):
+        """Update template"""
+
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+
+        command = "-update-template" if not public else "-export-template"
+        rc = utils.run_command("%s api %s %s" % (
+            self.cmdline, command, tstr), in_text=yaml.dump(data), debug=g_debug, result=True, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_zones_apps(self, full=False, tenant=None):
+        """Get zones and apps"""
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        rc = utils.run_command("%s api -fetch-zone-apps %s %s" % (self.cmdline, "-full" if full else "", tstr),
+                result=True, debug=g_debug, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def get_helm_values(self, zone=None, tenant=None):
+        """Get helm chart"""
+        self.check()
+
+        if tenant is None: tenant = utils.cfg["tenant"]
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        if zone is not None:
+            tstr += " -tags=zone=%s " % zone
+        rc = utils.run_command("%s fortify-k8s -out helm %s" % (self.cmdline, tstr),
+                result=True, debug=g_debug, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+
+    def rbac_show_users(self, tenant=None):
+        """show rbac"""
+
+        self.check()
+                                                     
+        tstr = " -tenant=%s " % (tenant) if tenant else ""
+        rc = utils.run_command("%s user-role -op list-user-roles %s" % (
+                         self.cmdline, tstr), result=True, debug=g_debug, strip=False)
+        if rc[0] != 0:
+            print("*** failed: %s" % rc[1].decode())
+        return yaml.load(rc[1], yaml.SafeLoader), rc[0]
+

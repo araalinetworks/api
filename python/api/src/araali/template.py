@@ -292,7 +292,7 @@ def push(args):
         return
 
     # read a sample template from araali
-    obj = [a for a in api.API().API().get_templates(public=True, template="agent.k8s.araali_fw")[0]][0]
+    obj = [a for a in api.API().get_templates(public=True, template="agent.k8s.araali_fw")[0]][0]
     # name, template, use, author, version
     if args.verbose >= 2: print(obj["name"], obj["use"], obj["author"], obj["version"])
     obj["name"] = args.template
@@ -346,7 +346,7 @@ def push(args):
         tenant = args.tenant
     else:
         tenant = utils.cfg["tenant"]
-    rc = araalictl.update_template([obj], args.public, tenant)
+    rc = api.API().update_template([obj], args.public, tenant)
     print(rc)
 
 def alerts(args):

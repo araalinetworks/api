@@ -1,7 +1,7 @@
 GENDIR=src/araali
 
 # the default, full thing
-all: genpy build install test
+all: genpy build install tox
 
 # publish to pypi
 push: venv
@@ -16,7 +16,16 @@ install: venv
 	source araaliapienv/bin/activate && pip install dist/*.tar.gz
 
 # if you are fixing build
-build: venv
+checkbuild:
+	@echo "*** checking if there are junk files in src ***"
+	git -c color.status=false status src | grep src| wc -l | grep 0
+
+# this is a dangerous command, but safe to do after you review the output of
+# git -c color.status=false status src | grep src
+prepbuild:
+	git -c color.status=false status src | grep src| xargs rm -rf
+
+build: venv checkbuild
 	rm -f dist/*
 	rm -f $(GENDIR)/bin/araalictl
 	rm -f $(GENDIR)/bin/araalictl.*-amd64_*
@@ -39,6 +48,10 @@ araaliapienv/exists.h:
 	source araaliapienv/bin/activate && pip install -r tests/requirements.txt
 	touch araaliapienv/exists.h
 
+# official clean blackbox tessting
+tox:
+	tox
+
 # work in the python enviroment
 shell:
 	-source araaliapienv/bin/activate && bash
@@ -46,3 +59,4 @@ shell:
 # get a new life, wash all karma
 clean:
 	rm -rf araaliapienv
+	rm -rf .tox

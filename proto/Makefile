@@ -19,5 +19,9 @@ $(PROTOWRAP):
 
 gen: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	PATH=${GOPATH}/bin:${PATH} protowrap --go_out=plugins=grpc:../ -I. ./*.proto
+	protoc -I . --openapiv2_out . \
+        --openapiv2_opt logtostderr=true \
+        --openapiv2_opt grpc_api_configuration=./araali_api_service.config.yaml \
+        araali_api_service.proto
 
 .PHONY: 
