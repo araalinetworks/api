@@ -33,7 +33,8 @@ def config(args):
             ./araalictl api -fetch-subtenants -active
         """
         if utils.cfg["backend"] != "prod": utils.config(backend="prod")
-        tracking = [a["id"] for a in utils.cfg.get("tenants", [])]
+        tracking = [a for a in utils.cfg.get("tenants", [])]
+        tracking_ids = [a["id"] for a in tracking]
         obj = araalictl.API().get_tenants()[0]["subtenantlist"]
         # ['tenantid', 'adminemail', 'activevmcount', 'activecontainercount', 'perimeteralertcount', 'homealertcount', 'lastsignedin']
         print("     %-22s %-42s %-7s %-10s %s" % ("tenant-id", "admin-email", "count", "tracked", "last-signed-in"))
@@ -41,10 +42,15 @@ def config(args):
         for i, o in enumerate(obj):
             o["lastsignedin"] = datetime.datetime.fromtimestamp(o["lastsignedin"]/1000) if o["lastsignedin"] else ""
             print("%3s: t=%-20s e=%-40s c=%-5s tr=%-7s s=%s" % (i+1, o["tenantid"],
-                o["adminemail"], o["activevmcount"], o["tenantid"] in tracking,
+                o["adminemail"], o["activevmcount"], o["tenantid"] in tracking_ids,
                 o["lastsignedin"] if o["lastsignedin"] else "nil"))
             agent_count += o["activevmcount"]
+            tracking = [a for a in tracking if o["tenantid"] != a["id"]]
         print("Total agents: %s" % agent_count)
+        if tracking:
+            print("\n=== Tracking but not active ===")
+            for i, t in enumerate(tracking):
+                print("%3s: t=%-20s n=%s" % (i, t["id"], t["name"]))
         return
     return utils.config(args.tenant, args.tenants, args.template_dir, args.backend)
 
