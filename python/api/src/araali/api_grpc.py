@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import datetime
 import grpc
 from google.protobuf.json_format import MessageToJson

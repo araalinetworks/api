@@ -1,6 +1,8 @@
 """Used to execute modeule from the command line
     Fetches alerts and prints the count
 """
+from __future__ import print_function
+
 import argparse
 import datetime
 from dateutil import parser as du_parser
