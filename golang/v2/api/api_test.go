@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"golang/v2/araali_api_service"
+	"github.com/araalinetworks/api/golang/v2/araali_api_service"
 )
 
 func setup(t *testing.T) {
