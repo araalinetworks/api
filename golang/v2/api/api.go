@@ -1,4 +1,4 @@
-package araalictl
+package api
 
 import (
 	"context"
@@ -8,17 +8,17 @@ import (
 	"net"
 	"time"
 
-	"araali.proto/araali_api_service"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"golang/v2/araali_api_service"
 )
 
 const ApiDialTimeout = 30
 
-var backend = "nightly.aws.araalinetworks.com"
+var backend = "prod.aws.araalinetworks.com"
 var token = ""
 var verbose = 0
 
@@ -49,7 +49,7 @@ func getApiClient() (context.Context, context.CancelFunc, araali_api_service.Ara
 	// Get the API FQDN:port
 	url, err := getAPIURL()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Could not get API FQDN. Err: %v", url, token, err))
+        fmt.Printf("Could not get API FQDN. Err: %v", err)
 		return nil, nil, nil
 	}
 
