@@ -1,4 +1,4 @@
-module araalinetworks/api/golang/v2/api
+module github.com/araalinetworks/api/golang/v2/api
 
 go 1.14
 
