@@ -1,11 +1,11 @@
-module github.com/araalinetworks/api/golang/v2/araalictl
+module araalinetworks/api/golang/v2/api
 
 go 1.14
 
 require (
-	araali.proto v0.0.0
-	google.golang.org/grpc v1.47.0
-	google.golang.org/protobuf v1.28.0
+	golang v0.0.0-00010101000000-000000000000
+	google.golang.org/grpc v1.48.0
+	google.golang.org/protobuf v1.28.1
 )
 
-replace araali.proto => ../../../proto/araali
+replace golang => ../../../golang

@@ -4,11 +4,6 @@
     "title": "araali_api_service.proto",
     "version": "version not set"
   },
-  "tags": [
-    {
-      "name": "AraaliAPI"
-    }
-  ],
   "consumes": [
     "application/json"
   ],
@@ -30,7 +25,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -63,7 +58,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -96,7 +91,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -129,7 +124,7 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -162,92 +157,92 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
         "parameters": [
           {
             "name": "tenant.id",
-            "description": "* Id of the tenant",
+            "description": "* Id of the tenant.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "tenant.adminEmail",
+            "name": "tenant.admin_email",
             "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "filter.openAlerts",
-            "description": "* Fetch open alerts",
+            "name": "filter.open_alerts",
+            "description": "* Fetch open alerts.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.closedAlerts",
-            "description": "* Fetch closed alerts",
+            "name": "filter.closed_alerts",
+            "description": "* Fetch closed alerts.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.perimeterEgress",
-            "description": "* Fetch perimeter egress alerts",
+            "name": "filter.perimeter_egress",
+            "description": "* Fetch perimeter egress alerts.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.perimeterIngress",
-            "description": "* Fetch perimeter ingress alerts",
+            "name": "filter.perimeter_ingress",
+            "description": "* Fetch perimeter ingress alerts.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.homeNonAraaliEgress",
-            "description": "* Fetch non araali egress alerts from private subnets",
+            "name": "filter.home_non_araali_egress",
+            "description": "* Fetch non araali egress alerts from private subnets.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.homeNonAraaliIngress",
-            "description": "* Fetch non araali ingress alerts from private subnets",
+            "name": "filter.home_non_araali_ingress",
+            "description": "* Fetch non araali ingress alerts from private subnets.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.araaliToAraali",
-            "description": "* Fetch araali to araali alerts",
+            "name": "filter.araali_to_araali",
+            "description": "* Fetch araali to araali alerts.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.listAllAlerts",
-            "description": "* Fetch all alerts from all lenses, even ones not monitored by current user",
+            "name": "filter.list_all_alerts",
+            "description": "* Fetch all alerts from all lenses, even ones not monitored by current user.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.time.startTime",
-            "description": "* Start time to fetch from. Specify 0 to indicate beginning of time",
+            "name": "filter.time.start_time",
+            "description": "* Start time to fetch from. Specify 0 to indicate beginning of time.",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "date-time"
           },
           {
-            "name": "filter.time.endTime",
-            "description": "* End time to fetch up to",
+            "name": "filter.time.end_time",
+            "description": "* End time to fetch up to.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -255,15 +250,15 @@
           },
           {
             "name": "count",
-            "description": "* Number of alerts to be returned each API call",
+            "description": "* Number of alerts to be returned each API call.",
             "in": "query",
             "required": false,
             "type": "integer",
             "format": "int32"
           },
           {
-            "name": "pagingToken",
-            "description": "* Token to be sent in the next API call to retrieve the next set of alerts (paging)",
+            "name": "paging_token",
+            "description": "* Token to be sent in the next API call to retrieve the next set of alerts (paging).",
             "in": "query",
             "required": false,
             "type": "string"
@@ -288,20 +283,20 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
         "parameters": [
           {
             "name": "tenant.id",
-            "description": "* Id of the tenant",
+            "description": "* Id of the tenant.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "tenant.adminEmail",
+            "name": "tenant.admin_email",
             "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
             "in": "query",
             "required": false,
@@ -309,58 +304,58 @@
           },
           {
             "name": "zone",
-            "description": "* Zone from which to return assets",
+            "description": "* Zone from which to return assets.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "app",
-            "description": "* App/Namespace from which to return assets",
+            "description": "* App/Namespace from which to return assets.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "time.startTime",
-            "description": "* Start time to fetch from. Specify 0 to indicate beginning of time",
+            "name": "time.start_time",
+            "description": "* Start time to fetch from. Specify 0 to indicate beginning of time.",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "date-time"
           },
           {
-            "name": "time.endTime",
-            "description": "* End time to fetch up to",
+            "name": "time.end_time",
+            "description": "* End time to fetch up to.",
             "in": "query",
             "required": false,
             "type": "string",
             "format": "date-time"
           },
           {
-            "name": "filter.listActiveVm",
-            "description": "* Return active virtual machines",
+            "name": "filter.list_active_vm",
+            "description": "* Return active virtual machines.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.listInactiveVm",
-            "description": "* Return inactive virtual machines",
+            "name": "filter.list_inactive_vm",
+            "description": "* Return inactive virtual machines.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.listActiveContainer",
-            "description": "* Return active containers",
+            "name": "filter.list_active_container",
+            "description": "* Return active containers.",
             "in": "query",
             "required": false,
             "type": "boolean"
           },
           {
-            "name": "filter.listInactiveContainer",
-            "description": "* Return inactive containers",
+            "name": "filter.list_inactive_container",
+            "description": "* Return inactive containers.",
             "in": "query",
             "required": false,
             "type": "boolean"
@@ -385,20 +380,20 @@
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
         "parameters": [
           {
             "name": "tenant.id",
-            "description": "* Id of the tenant",
+            "description": "* Id of the tenant.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
-            "name": "tenant.adminEmail",
+            "name": "tenant.admin_email",
             "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
             "in": "query",
             "required": false,
@@ -406,7 +401,7 @@
           },
           {
             "name": "zone",
-            "description": "* Zone where insights are requested",
+            "description": "* Zone where insights are requested.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -419,6 +414,15 @@
     }
   },
   "definitions": {
+    "AlertInfoStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN_STATUS",
+        "OPEN",
+        "CLOSED"
+      ],
+      "default": "UNKNOWN_STATUS"
+    },
     "AraaliAPIResponseReturnCode": {
       "type": "string",
       "enum": [
@@ -532,35 +536,35 @@
     "araali_api_serviceAlertFilter": {
       "type": "object",
       "properties": {
-        "openAlerts": {
+        "open_alerts": {
           "type": "boolean",
           "title": "* Fetch open alerts"
         },
-        "closedAlerts": {
+        "closed_alerts": {
           "type": "boolean",
           "title": "* Fetch closed alerts"
         },
-        "perimeterEgress": {
+        "perimeter_egress": {
           "type": "boolean",
           "title": "* Fetch perimeter egress alerts"
         },
-        "perimeterIngress": {
+        "perimeter_ingress": {
           "type": "boolean",
           "title": "* Fetch perimeter ingress alerts"
         },
-        "homeNonAraaliEgress": {
+        "home_non_araali_egress": {
           "type": "boolean",
           "title": "* Fetch non araali egress alerts from private subnets"
         },
-        "homeNonAraaliIngress": {
+        "home_non_araali_ingress": {
           "type": "boolean",
           "title": "* Fetch non araali ingress alerts from private subnets"
         },
-        "araaliToAraali": {
+        "araali_to_araali": {
           "type": "boolean",
           "title": "* Fetch araali to araali alerts"
         },
-        "listAllAlerts": {
+        "list_all_alerts": {
           "type": "boolean",
           "title": "* Fetch all alerts from all lenses, even ones not monitored by current user"
         },
@@ -574,34 +578,25 @@
     "araali_api_serviceAlertInfo": {
       "type": "object",
       "properties": {
-        "communicationAlertType": {
+        "communication_alert_type": {
           "type": "string",
           "title": "* Alert type"
         },
-        "processAlertType": {
+        "process_alert_type": {
           "type": "string",
           "title": "* Process alert type"
         },
-        "reOpenCount": {
+        "re_open_count": {
           "type": "integer",
           "format": "int64",
           "title": "* Number of times transitioned from SNOOZED -\u003e ALERT"
         },
         "status": {
-          "$ref": "#/definitions/araali_api_serviceAlertInfoStatus",
+          "$ref": "#/definitions/AlertInfoStatus",
           "title": "* Whether OPEN or CLOSED"
         }
       },
       "title": "*\nAdditional information about alerts"
-    },
-    "araali_api_serviceAlertInfoStatus": {
-      "type": "string",
-      "enum": [
-        "UNKNOWN_STATUS",
-        "OPEN",
-        "CLOSED"
-      ],
-      "default": "UNKNOWN_STATUS"
     },
     "araali_api_serviceAraaliAPIResponse": {
       "type": "object",
@@ -628,7 +623,7 @@
           "type": "string",
           "title": "* Mapped app the endpoint belongs to"
         },
-        "unmappedApp": {
+        "unmapped_app": {
           "type": "string",
           "title": "* Original app/namespace the endpoint belongs to"
         },
@@ -640,7 +635,7 @@
           "type": "string",
           "title": "* Pod the endpoint belongs to"
         },
-        "containerName": {
+        "container_name": {
           "type": "string",
           "title": "* Container the endpoint belongs to"
         },
@@ -648,11 +643,11 @@
           "type": "string",
           "title": "* Process of the endpoint belongs to"
         },
-        "binaryName": {
+        "binary_name": {
           "type": "string",
           "title": "* Binary name of the endpoint process"
         },
-        "parentProcess": {
+        "parent_process": {
           "type": "string",
           "title": "* Parent of the endpoint process"
         }
@@ -670,7 +665,7 @@
           "$ref": "#/definitions/AraaliUserRole",
           "title": "* Role of the registering user"
         },
-        "isSiteAdmin": {
+        "is_site_admin": {
           "type": "boolean",
           "description": "* Enables role to have access to zone-apps\n\t\tTRUE  - Enable modify access to zone-apps\n\t\tFALSE - Enable read-only access to zone-apps."
         }
@@ -680,11 +675,11 @@
     "araali_api_serviceAsset": {
       "type": "object",
       "properties": {
-        "hostName": {
+        "host_name": {
           "type": "string",
           "title": "* Host name of asset"
         },
-        "ipAddress": {
+        "ip_address": {
           "type": "string",
           "title": "* IP address assigned to the asset"
         },
@@ -711,7 +706,7 @@
           "$ref": "#/definitions/AssetAssetState",
           "title": "* State of the asset active, inactive etc"
         },
-        "assetType": {
+        "asset_type": {
           "$ref": "#/definitions/AssetAssetType",
           "title": "* Type of the asset"
         },
@@ -726,15 +721,15 @@
           "$ref": "#/definitions/AssetAssetMode",
           "title": "* Visibility/Enforcement mode of the asset"
         },
-        "osName": {
+        "os_name": {
           "type": "string",
           "title": "* OS name of the asset"
         },
-        "iamRole": {
+        "iam_role": {
           "type": "string",
           "title": "* AWS IAM Role assigned to the asset"
         },
-        "dockerPrivileged": {
+        "docker_privileged": {
           "type": "boolean",
           "title": "* Docker privilege assigned to the container (Docker containers only)"
         },
@@ -752,19 +747,19 @@
     "araali_api_serviceAssetFilter": {
       "type": "object",
       "properties": {
-        "listActiveVm": {
+        "list_active_vm": {
           "type": "boolean",
           "title": "* Return active virtual machines"
         },
-        "listInactiveVm": {
+        "list_inactive_vm": {
           "type": "boolean",
           "title": "* Return inactive virtual machines"
         },
-        "listActiveContainer": {
+        "list_active_container": {
           "type": "boolean",
           "title": "* Return active containers"
         },
-        "listInactiveContainer": {
+        "list_inactive_container": {
           "type": "boolean",
           "title": "* Return inactive containers"
         }
@@ -834,7 +829,7 @@
           "$ref": "#/definitions/araali_api_serviceAraaliEndpoint",
           "title": "* Araali endpoint info"
         },
-        "nonAraali": {
+        "non_araali": {
           "$ref": "#/definitions/araali_api_serviceNonAraaliEndpoint",
           "title": "* Non-Araali endpoint info"
         }
@@ -886,7 +881,7 @@
           "type": "string",
           "title": "* Pod of the lens"
         },
-        "containerName": {
+        "container_name": {
           "type": "string",
           "title": "* Container of the lens"
         },
@@ -894,11 +889,11 @@
           "type": "string",
           "title": "* Process of the lens"
         },
-        "parentProcess": {
+        "parent_process": {
           "type": "string",
           "title": "* Parent process of the lens"
         },
-        "binaryName": {
+        "binary_name": {
           "type": "string",
           "title": "* Binary name of the lens"
         },
@@ -929,7 +924,7 @@
           "format": "date-time",
           "title": "* Timestamp when link was discovered"
         },
-        "uniqueId": {
+        "unique_id": {
           "type": "string",
           "title": "* Unique handle to the link"
         },
@@ -941,11 +936,11 @@
           "$ref": "#/definitions/araali_api_servicePorts",
           "title": "* Aggregated active/inactive ports"
         },
-        "alertInfo": {
+        "alert_info": {
           "$ref": "#/definitions/araali_api_serviceAlertInfo",
           "title": "* Additional information for alerts"
         },
-        "policyInfo": {
+        "policy_info": {
           "$ref": "#/definitions/araali_api_servicePolicyInfo",
           "title": "* Additional information for policy links"
         }
@@ -977,7 +972,7 @@
           },
           "title": "* List of alerts"
         },
-        "pagingToken": {
+        "paging_token": {
           "type": "string",
           "title": "* Token to be passed to the next API call (indicating there are more alerts to be retrieved)"
         }
@@ -1052,7 +1047,7 @@
           "$ref": "#/definitions/araali_api_serviceNonAraaliServerEndpoint",
           "title": "* Non araali server"
         },
-        "endpointGroup": {
+        "endpoint_group": {
           "$ref": "#/definitions/NonAraaliEndpointEndpointGroup",
           "description": "* WORLD if public subnet. HOME if private subnet."
         },
@@ -1066,7 +1061,7 @@
     "araali_api_serviceNonAraaliServerEndpoint": {
       "type": "object",
       "properties": {
-        "dnsPattern": {
+        "dns_pattern": {
           "type": "string",
           "title": "* DNS/FQDN of endpoint"
         },
@@ -1074,7 +1069,7 @@
           "$ref": "#/definitions/araali_api_serviceSubnet",
           "title": "* Server subnet"
         },
-        "dstPort": {
+        "dst_port": {
           "type": "integer",
           "format": "int64",
           "title": "* Service destination port"
@@ -1085,15 +1080,15 @@
     "araali_api_servicePolicyInfo": {
       "type": "object",
       "properties": {
-        "templateName": {
+        "template_name": {
           "type": "string",
           "title": "* Template name used to validate the link"
         },
-        "templateUser": {
+        "template_user": {
           "type": "string",
           "title": "* User who created the template to validate the link"
         },
-        "policySkipReason": {
+        "policy_skip_reason": {
           "type": "string",
           "title": "* Reason for skipping policy evaluation at agents when enforced"
         }
@@ -1103,7 +1098,7 @@
     "araali_api_servicePorts": {
       "type": "object",
       "properties": {
-        "activePorts": {
+        "active_ports": {
           "type": "array",
           "items": {
             "type": "integer",
@@ -1111,7 +1106,7 @@
           },
           "title": "* Active aggregated ports in the link"
         },
-        "inactivePorts": {
+        "inactive_ports": {
           "type": "array",
           "items": {
             "type": "integer",
@@ -1128,7 +1123,7 @@
           "type": "string",
           "title": "* Client subnet"
         },
-        "netMask": {
+        "net_mask": {
           "type": "integer",
           "format": "int64",
           "title": "* Client netmask"
@@ -1143,7 +1138,7 @@
           "type": "string",
           "title": "* Id of the tenant"
         },
-        "adminEmail": {
+        "admin_email": {
           "type": "string",
           "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant."
         }
@@ -1153,12 +1148,12 @@
     "araali_api_serviceTimeSlice": {
       "type": "object",
       "properties": {
-        "startTime": {
+        "start_time": {
           "type": "string",
           "format": "date-time",
           "title": "* Start time to fetch from. Specify 0 to indicate beginning of time"
         },
-        "endTime": {
+        "end_time": {
           "type": "string",
           "format": "date-time",
           "title": "* End time to fetch up to"
@@ -1169,11 +1164,11 @@
     "araali_api_serviceVulnerability": {
       "type": "object",
       "properties": {
-        "packageName": {
+        "package_name": {
           "type": "string",
           "title": "* Package name with the vulnerability"
         },
-        "cveId": {
+        "cve_id": {
           "type": "array",
           "items": {
             "type": "string"
@@ -1187,9 +1182,24 @@
       },
       "title": "*\nCaptures an instance of vulnerability package name, cve info etc"
     },
-    "googlerpcStatus": {
+    "protobufAny": {
       "type": "object",
       "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
         "code": {
           "type": "integer",
           "format": "int32"
@@ -1204,15 +1214,6 @@
           }
         }
       }
-    },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
     }
   }
 }
