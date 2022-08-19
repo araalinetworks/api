@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"golang/v2/araali_api_service"
+	"github.com/araalinetworks/api/golang/v2/araali_api_service"
 )
 
 const ApiDialTimeout = 30
@@ -49,7 +49,7 @@ func getApiClient() (context.Context, context.CancelFunc, araali_api_service.Ara
 	// Get the API FQDN:port
 	url, err := getAPIURL()
 	if err != nil {
-        fmt.Printf("Could not get API FQDN. Err: %v", err)
+		fmt.Printf("Could not get API FQDN. Err: %v", err)
 		return nil, nil, nil
 	}
 
