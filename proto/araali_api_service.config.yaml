@@ -19,5 +19,13 @@ http:
       get: /api/v2/listAssets
     - selector: araali_api_service.AraaliAPI.listAlerts
       get: /api/v2/listAlerts
+    - selector: araali_api_service.AraaliAPI.listLinks
+      get: /api/v2/listLinks
     - selector: araali_api_service.AraaliAPI.listInsights
       get: /api/v2/listInsights
+    - selector: araali_api_service.AraaliAPI.createFortifyYaml
+      get: /api/v2/createFortifyYaml
+    - selector: araali_api_service.AraaliAPI.listFortifyYaml
+      get: /api/v2/listFortifyYaml
+    - selector: araali_api_service.AraaliAPI.deleteFortifyYaml
+      get: /api/v2/deleteFortifyYaml
