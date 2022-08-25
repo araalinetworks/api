@@ -29,3 +29,5 @@ http:
       get: /api/v2/listFortifyYaml
     - selector: araali_api_service.AraaliAPI.deleteFortifyYaml
       get: /api/v2/deleteFortifyYaml
+    - selector: araali_api_service.AraaliAPI.listPolicyAndEnforcementStatus
+      get: /api/v2/listPolicyAndEnforcementStatus

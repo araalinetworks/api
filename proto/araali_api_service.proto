@@ -37,6 +37,8 @@ service AraaliAPI {
 	rpc listFortifyYaml(ListFortifyYamlRequest) returns (ListFortifyYamlResponse) {}
 	// Delete existing k8s workload
 	rpc deleteFortifyYaml(DeleteFortifyYamlRequest) returns (AraaliAPIResponse) {}
+        // Download policy and enforcement knobs as code.
+	rpc listPolicyAndEnforcementStatus(ListPolicyAndEnforcementStatusRequest) returns (ListPolicyAndEnforcementStatusResponse) {}
 }
 
 /**
@@ -601,4 +603,22 @@ message DeleteFortifyYamlRequest {
 	Tenant tenant          = 1;
 	/** Unique ID associated with cluster */
 	string workload_name   = 2;
+}
+
+message ListPolicyAndEnforcementStatusRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	/** Zone to which container belongs */
+	string zone = 2;
+	/** App to which container belongs */
+	string app = 3;
+	/** Pod to which container belongs */
+	string pod = 4;
+	/** container name */
+	string container = 5;
+}
+
+message ListPolicyAndEnforcementStatusResponse {
+	/** Policies represented in yaml format. */
+	string policy_and_enforcement_yaml = 1;
 }
