@@ -44,6 +44,85 @@
         ]
       }
     },
+    "/api/v2/createFortifyYaml": {
+      "get": {
+        "summary": "Generate k8s workload/helm values (also registers workloadID)",
+        "operationId": "AraaliAPI_createFortifyYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceCreateFortifyYamlResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workload_name",
+            "description": "* Workload name - Unique name associated with workload. This is also the zone name - Cluster would show up on UI/Araali interfaces with this name.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fog",
+            "description": "* DNS of Fog that communicates with the cluster (Optional, take defaults if empty).",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "disable_upgrade",
+            "description": "* Disable upgrade (Optional - false by default).",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "disable_enforcement",
+            "description": "* Disable enforcement (Optional - false by default).",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "yaml_type",
+            "description": "* Type of yaml file to generate.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "HELM_VALUES_FILE"
+            ],
+            "default": "UNKNOWN"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
     "/api/v2/createTenant": {
       "post": {
         "summary": "Add a tenant",
@@ -70,6 +149,52 @@
             "schema": {
               "$ref": "#/definitions/araali_api_serviceCreateTenantRequest"
             }
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/deleteFortifyYaml": {
+      "get": {
+        "summary": "Delete existing k8s workload",
+        "operationId": "AraaliAPI_deleteFortifyYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "workload_name",
+            "description": "* Unique ID associated with cluster.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -249,6 +374,13 @@
             "format": "date-time"
           },
           {
+            "name": "filter.zone",
+            "description": "* Fetch alerts for given zone.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "count",
             "description": "* Number of alerts to be returned each API call.",
             "in": "query",
@@ -366,6 +498,57 @@
         ]
       }
     },
+    "/api/v2/listFortifyYaml": {
+      "get": {
+        "summary": "List existing k8s workloads",
+        "operationId": "AraaliAPI_listFortifyYaml",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceListFortifyYamlResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "yaml_type",
+            "description": "* Type of yaml to list.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "HELM_VALUES_FILE"
+            ],
+            "default": "UNKNOWN"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
     "/api/v2/listInsights": {
       "get": {
         "summary": "Get tenant wide insights",
@@ -402,6 +585,149 @@
           {
             "name": "zone",
             "description": "* Zone where insights are requested.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/listLinks": {
+      "get": {
+        "summary": "Get links within a zone/app",
+        "operationId": "AraaliAPI_listLinks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceListLinksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "zone",
+            "description": "* Zone for the request.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "app",
+            "description": "* App for the request.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "service",
+            "description": "* Required when zone and app are not specified. Must be in form of ip:port or fqdn:port.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "time.start_time",
+            "description": "* Start time to fetch from. Specify 0 to indicate beginning of time.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "time.end_time",
+            "description": "* End time to fetch up to.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/listPolicyAndEnforcementStatus": {
+      "get": {
+        "summary": "Download policy and enforcement knobs as code.",
+        "operationId": "AraaliAPI_listPolicyAndEnforcementStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceListPolicyAndEnforcementStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "zone",
+            "description": "* Zone to which container belongs.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "app",
+            "description": "* App to which container belongs.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pod",
+            "description": "* Pod to which container belongs.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "container",
+            "description": "* container name.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -571,6 +897,10 @@
         "time": {
           "$ref": "#/definitions/araali_api_serviceTimeSlice",
           "title": "* Time range in which to fetch alerts"
+        },
+        "zone": {
+          "type": "string",
+          "title": "* Fetch alerts for given zone"
         }
       },
       "description": "*\nFields to filter alerts in the ListAlerts API."
@@ -778,6 +1108,19 @@
       },
       "title": "*\nList of capabilities"
     },
+    "araali_api_serviceCreateFortifyYamlResponse": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse",
+          "title": "* CreateFortifyYamlResponse API call response"
+        },
+        "workload_yaml": {
+          "type": "string",
+          "title": "* Yaml formatted string response"
+        }
+      }
+    },
     "araali_api_serviceCreateTenantRequest": {
       "type": "object",
       "properties": {
@@ -835,6 +1178,14 @@
         }
       },
       "title": "*\nRepresents one end of a link/alert_counts"
+    },
+    "araali_api_serviceFortifyYamlType": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "HELM_VALUES_FILE"
+      ],
+      "default": "UNKNOWN"
     },
     "araali_api_serviceInsight": {
       "type": "object",
@@ -994,6 +1345,22 @@
         }
       }
     },
+    "araali_api_serviceListFortifyYamlResponse": {
+      "type": "object",
+      "properties": {
+        "response": {
+          "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse",
+          "title": "* ListWorkloadResponse API call response"
+        },
+        "workloads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "* List of workloads"
+        }
+      }
+    },
     "araali_api_serviceListInsightsResponse": {
       "type": "object",
       "properties": {
@@ -1023,6 +1390,15 @@
             "$ref": "#/definitions/araali_api_serviceLink"
           },
           "title": "* List of links"
+        }
+      }
+    },
+    "araali_api_serviceListPolicyAndEnforcementStatusResponse": {
+      "type": "object",
+      "properties": {
+        "policy_and_enforcement_yaml": {
+          "type": "string",
+          "description": "* Policies represented in yaml format."
         }
       }
     },
