@@ -121,3 +121,13 @@ func TestAlertsFilterInvalidZone(t *testing.T) {
 		t.Fatalf("ListAlerts() = %v, want 0", len(resp.Alerts))
 	}
 }
+
+func TestFortifyK8SCreateHelm(t *testing.T) {
+	setup(t)
+
+	h, err := FortifyK8SCreateHelm("", "myCluster")
+	if err != nil {
+		t.Fatalf("FortifyK8SCreateHelm failed (%v)", err)
+	}
+	t.Logf("helm value string: %v", h)
+}

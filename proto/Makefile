@@ -15,11 +15,11 @@ $(PROTOWRAP):
 
 doc: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	echo "Generating documentation"
-	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=markdown,araali_api.md -I. ./araali_api_service.proto
 	PATH=${GOPATH}/bin:${PATH} protoc -I . --swagger_out . \
         --swagger_opt logtostderr=true \
         --swagger_opt grpc_api_configuration=./araali_api_service.config.yaml \
         araali_api_service.proto
+	PATH=${GOPATH}/bin:${PATH} protowrap --plugin=protoc-gen-doc=./protoc-gen-doc --doc_out=. --doc_opt=markdown,araali_api.md -I. ./araali_api_service.proto
 
 gen: $(PROTOC_GEN_GO) $(PROTOWRAP)
 	PATH=${GOPATH}/bin:${PATH} protowrap --go_out=plugins=grpc:.. -I. ./*.proto
