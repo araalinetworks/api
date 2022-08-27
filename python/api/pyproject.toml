@@ -4,22 +4,20 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.22"
+version = "0.0.23"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
 description = "Araali API"
 readme = "README.md"
 license = { file="LICENSE" }
-requires-python = ">=3.7"
+requires-python = ">=2.7"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "grpcio",
-  "protobuf<4.21.0",
   "python-dateutil",
   "pyyaml",
   "requests",
@@ -33,7 +31,7 @@ dependencies = [
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py
+envlist = py27,py3
 
 [testenv]
 deps = pytest

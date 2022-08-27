@@ -1,4 +1,4 @@
-package araalictl
+package api
 
 import (
 	"context"
@@ -6,21 +6,40 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net"
+	"strings"
 	"time"
-
-	"araali.proto/araali_api_service"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"gopkg.in/yaml.v2"
+
+	"github.com/araalinetworks/api/golang/v2/araali_api_service"
 )
 
 const ApiDialTimeout = 30
 
-var backend = "nightly.aws.araalinetworks.com"
+var backend = "prod.aws.araalinetworks.com"
 var token = ""
 var verbose = 0
+
+// FortifyHelmValues
+type FortifyAraaliHelmValues struct {
+	WorkloadId   string `yaml:"workload_id" json:"workload_id"`
+	Fog          string `yaml:"fog" json:"fog"`
+	Zone         string `yaml:"zone" json:"zone"`
+	App          string `yaml:"app" json:"app"`
+	AutoK8SImage string `yaml:"autok8s_image" json:"autok8s_image"`
+	FwImage      string `yaml:"fw_image" json:"fw_image"`
+	FwInitImage  string `yaml:"fw_init_image" json:"fw_init_image"`
+	Enforce      bool   `yaml:"enforce" json:"enforce"`
+	Upgrade      bool   `yaml:"upgrade" json:"upgrade"`
+}
+
+type FortifyHelmValues struct {
+	AHV FortifyAraaliHelmValues `yaml:"araali" json:"araali"`
+}
 
 func SetBackend(b string) {
 	backend = b
@@ -49,7 +68,7 @@ func getApiClient() (context.Context, context.CancelFunc, araali_api_service.Ara
 	// Get the API FQDN:port
 	url, err := getAPIURL()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Could not get API FQDN. Err: %v", url, token, err))
+		fmt.Printf("Could not get API FQDN. Err: %v", err)
 		return nil, nil, nil
 	}
 
@@ -441,4 +460,41 @@ func ListInsights(tenantID, zone string) (
 		return nil, err
 	}
 	return resp, nil
+}
+
+// FortifyK8SCreateHelm - Generates values.yaml for araali fortification helm chart
+func FortifyK8SCreateHelm(tenantID, clusterName string) (*FortifyHelmValues, error) {
+	if clusterName == "" {
+		return nil, fmt.Errorf("empty clusterName")
+	}
+
+	ctx, cancel, api := getApiClient()
+	if api == nil {
+		return nil, fmt.Errorf("could not get API handle")
+	}
+	defer cancel()
+
+	req := &araali_api_service.CreateFortifyYamlRequest{
+		Tenant:       &araali_api_service.Tenant{Id: tenantID},
+		WorkloadName: clusterName,
+		YamlType:     araali_api_service.FortifyYamlType_HELM_VALUES_FILE,
+	}
+	resp, err := api.CreateFortifyYaml(ctx, req)
+	if err != nil {
+		return nil, err
+	} else if resp.Response.Code != araali_api_service.AraaliAPIResponse_SUCCESS {
+		return nil, fmt.Errorf("create helm failed")
+	}
+	output := strings.TrimSpace(resp.WorkloadYaml)
+	fmt.Println(output)
+	if len(strings.TrimSpace(output)) == 0 {
+		return nil, fmt.Errorf("failed to generate helm emtpy output %v", output)
+	}
+
+	var hv FortifyHelmValues
+	err = yaml.Unmarshal([]byte(output), &hv)
+	if err != nil {
+		return nil, fmt.Errorf("failed unmarshall helm (err: %v)", err)
+	}
+	return &hv, nil
 }
