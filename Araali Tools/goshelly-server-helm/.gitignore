@@ -1,0 +1,8 @@
+
+.helmignore
+Chart.yaml
+templates/NOTES.txt
+templates/_helpers.tpl
+templates/hpa.yaml
+templates/ingress.yaml
+templates/serviceaccount.yaml
