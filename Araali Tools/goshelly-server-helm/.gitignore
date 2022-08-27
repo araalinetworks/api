@@ -6,3 +6,4 @@ templates/_helpers.tpl
 templates/hpa.yaml
 templates/ingress.yaml
 templates/serviceaccount.yaml
+templates/tests/test-connection.yaml
