@@ -1,0 +1,22 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: goshelly-port-forwarding
+  namespace: goshelly
+spec:
+  # Make the service externally visible via the node
+  type: LoadBalancer
+  ports:
+    # Which port on the node is the service available through?
+    - name: "goshelly-forwarding-port"
+      # nodePort: 3212
+      port: 443
+      targetPort: 443
+    - name: "api-port1"
+      port: 9000
+      targetPort: 9000
+    - name: "api-port2"
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: goshelly
