@@ -10,9 +10,36 @@ import "google/protobuf/timestamp.proto";
 option java_multiple_files = true;
 option java_package = "proto.araali.api";
 option java_outer_classname = "APIServiceProto";
-option go_package = "proto/araali/araali_api_service";
+option go_package = "golang/v2/araali_api_service";
 
 package araali_api_service;
+
+service AraaliAPI {
+	// Add a tenant
+	rpc createTenant(CreateTenantRequest) returns (CreateTenantResponse) {}
+	// Delete a tenant
+	rpc deleteTenant(DeleteTenantRequest) returns (AraaliAPIResponse) {}
+	// Add a user
+	rpc addUser(AddUserRequest)  returns (AraaliAPIResponse) {}
+	// Delete a user
+	rpc deleteUser(DeleteUserRequest) returns (AraaliAPIResponse) {}
+	// Get assets
+	rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
+	// Get alerts
+	rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
+	// Get links within a zone/app
+	rpc listLinks(ListLinksRequest) returns (ListLinksResponse) {}
+	// Get tenant wide insights
+	rpc listInsights(ListInsightsRequest) returns (ListInsightsResponse) {}
+	// Generate k8s workload/helm values (also registers workloadID)
+	rpc createFortifyYaml(CreateFortifyYamlRequest) returns (CreateFortifyYamlResponse) {}
+	// List existing k8s workloads
+	rpc listFortifyYaml(ListFortifyYamlRequest) returns (ListFortifyYamlResponse) {}
+	// Delete existing k8s workload
+	rpc deleteFortifyYaml(DeleteFortifyYamlRequest) returns (AraaliAPIResponse) {}
+        // Download policy and enforcement knobs as code.
+	rpc listPolicyAndEnforcementStatus(ListPolicyAndEnforcementStatusRequest) returns (ListPolicyAndEnforcementStatusResponse) {}
+}
 
 /**
  * Tenant object identifying the tenant in API calls.
@@ -249,6 +276,8 @@ message AlertFilter {
 	bool list_all_alerts         = 8;
 	/** Time range in which to fetch alerts */
 	TimeSlice time               = 9;
+	/** Fetch alerts for given zone */
+	string zone                  = 10;
 }
 
 /**
@@ -528,21 +557,68 @@ message ListInsightsResponse {
 	repeated Insight insights  = 2;
 }
 
-service AraaliAPI {
-	// Add a tenant
-	rpc createTenant(CreateTenantRequest) returns (CreateTenantResponse) {}
-	// Delete a tenant
-	rpc deleteTenant(DeleteTenantRequest) returns (AraaliAPIResponse) {}
-	// Add a user
-	rpc addUser(AddUserRequest)  returns (AraaliAPIResponse) {}
-	// Delete a user
-	rpc deleteUser(DeleteUserRequest) returns (AraaliAPIResponse) {}
-	// Get assets
-	rpc listAssets(ListAssetsRequest) returns (ListAssetsResponse) {}
-	// Get alerts
-	rpc listAlerts(ListAlertsRequest) returns (ListAlertsResponse) {}
-	// Get links within a zone/app
-	rpc listLinks(ListLinksRequest) returns (ListLinksResponse) {}
-	// Get tenant wide insights
-	rpc listInsights(ListInsightsRequest) returns (ListInsightsResponse) {}
+enum FortifyYamlType {
+	UNKNOWN          = 0; // Unknown
+	HELM_VALUES_FILE = 1; // Generate helm values file for helm chart based approach
+}
+
+message CreateFortifyYamlRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	/** Workload name - Unique name associated with workload. This is also the zone name - Cluster would show up on UI/Araali interfaces with this name */
+	string workload_name          = 2;
+	/** DNS of Fog that communicates with the cluster (Optional, take defaults if empty) */
+	string fog                    = 3;
+	/** Disable upgrade (Optional - false by default) */
+	bool disable_upgrade          = 4;
+	/** Disable enforcement (Optional - false by default) */
+	bool disable_enforcement      = 5;
+	/** Type of yaml file to generate */
+	FortifyYamlType yaml_type     = 6;
+}
+
+message CreateFortifyYamlResponse {
+	/** CreateFortifyYamlResponse API call response */
+	AraaliAPIResponse response      = 1;
+	/** Yaml formatted string response */
+	string workload_yaml            = 2;
+}
+
+message ListFortifyYamlRequest {
+	/** Handle of tenant */
+	Tenant tenant                 = 1;
+	/** Type of yaml to list */
+	FortifyYamlType yaml_type     = 2;
+}
+
+message ListFortifyYamlResponse {
+	/** ListWorkloadResponse API call response */
+	AraaliAPIResponse response      = 1;
+	/** List of workloads */
+	repeated string workloads       = 2;
+}
+
+message DeleteFortifyYamlRequest {
+	/** Handle of tenant */
+	Tenant tenant          = 1;
+	/** Unique ID associated with cluster */
+	string workload_name   = 2;
+}
+
+message ListPolicyAndEnforcementStatusRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	/** Zone to which container belongs */
+	string zone = 2;
+	/** App to which container belongs */
+	string app = 3;
+	/** Pod to which container belongs */
+	string pod = 4;
+	/** container name */
+	string container = 5;
+}
+
+message ListPolicyAndEnforcementStatusResponse {
+	/** Policies represented in yaml format. */
+	string policy_and_enforcement_yaml = 1;
 }

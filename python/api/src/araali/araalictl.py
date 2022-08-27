@@ -6,6 +6,8 @@
     links, status = api.get_links(args.zone, args.app, args.svc, args.ago)
     insights, status = api.get_insights(args.zone)
 """
+from __future__ import print_function
+
 from . import api
 import datetime
 import os
