@@ -70,9 +70,9 @@ using the following instructions
         Run the below command to make the GoShelly Client dial out to the backdoor server
          If you choose to use Araali's backdoor service, enter **** as the IP in the below command.
             For Linux::
-                ./bin/app-amd64-linux demo --IP=<IP-address-no-port> --SSLEMAIL=<your-email>
+                ./bin/app-amd64-linux assess
             For MacOS::
-                ./bin/app-amd64-darwin demo --IP=<IP-address-no-port> --SSLEMAIL=<your-email>
+                ./bin/app-amd64-darwin assess
        
             
 
