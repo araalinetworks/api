@@ -92,7 +92,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: goshelly
-          image: arorasoham9/goshelly-server:linux
+          image: arorasoham9/goshelly-server:linux_helm_831
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: "/mnt/goshelly"
