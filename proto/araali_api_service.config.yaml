@@ -31,3 +31,8 @@ http:
       get: /api/v2/deleteFortifyYaml
     - selector: araali_api_service.AraaliAPI.listPolicyAndEnforcementStatus
       get: /api/v2/listPolicyAndEnforcementStatus
+    - selector: araali_api_service.AraaliAPI.getFirewallConfig
+      get: /api/v2/getFirewallConfig
+    - selector: araali_api_service.AraaliAPI.updateFirewallConfig
+      post: /api/v2/updateFirewallConfig
+      body: "*"

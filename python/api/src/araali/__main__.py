@@ -344,7 +344,9 @@ def search(args):
             print("Total count: %s" % count)
 
 def helm(args):
-    print(yaml.dump(araalictl.API().get_helm_values(args.zone, args.tenant)[0]))
+    print(api.API().get_helm_values(workload_name=args.zone,
+                                              tenant=args.tenant,
+                                              nanny=args.nanny))
 
 def insights(args):
     insights, status = API().get_insights(args.zone, tenant=args.tenant)
@@ -391,6 +393,17 @@ def ctl(args, remaining):
 def template(args):
     if args.t_subparser_name:
         return getattr(module_template, args.t_subparser_name)(args)
+
+def fw_config(args):
+    if not args.zone or not args.tenant:
+        print("please specify zone and tenant")
+        return
+
+    if args.get:
+        knobs, status = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
+        print(knobs, status)
+    elif args.update:
+        lstatus = api.API().update_fw_config(zone=args.zone, tenant=args.tenant)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
@@ -445,6 +458,18 @@ if __name__ == "__main__":
     parser_helm = subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
     parser_helm.add_argument('-t', '--tenant', help="helm chart for a specific tenant")
     parser_helm.add_argument('-z', '--zone', help="helm for a specific zone")
+    parser_helm.add_argument('-n', '--nanny', help="helm chart for nanny or firewall")
+
+    parser_fw_config = subparsers.add_parser(
+        "fw_config", help="modify araali fw config on the backend")
+    parser_fw_config.add_argument(
+        '-g', '--get', help="get the current config")
+    parser_fw_config.add_argument(
+        '-u', '--update', help="update with json in specified file location")
+    parser_fw_config.add_argument(
+        '-t', '--tenant', help="fw config for a specific tenant")
+    parser_fw_config.add_argument(
+        '-z', '--zone', help="fw config for a specific zone")
 
     parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
 

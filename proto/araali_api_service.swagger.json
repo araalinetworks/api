@@ -268,6 +268,43 @@
         ]
       }
     },
+    "/api/v2/getFirewallConfig": {
+      "get": {
+        "summary": "Get existing Araali firewall config",
+        "operationId": "AraaliAPI_getFirewallConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceFirewallConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "zone",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
     "/api/v2/listAlerts": {
       "get": {
         "summary": "Get alerts",
@@ -737,6 +774,39 @@
           "AraaliAPI"
         ]
       }
+    },
+    "/api/v2/updateFirewallConfig": {
+      "post": {
+        "summary": "Update existing Araali firewall config",
+        "operationId": "AraaliAPI_updateFirewallConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceFirewallConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceUpdateFirewallConfigRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
     }
   },
   "definitions": {
@@ -984,6 +1054,26 @@
       },
       "title": "Represents an araali endpoint"
     },
+    "araali_api_serviceAraaliFwKnobs": {
+      "type": "object",
+      "properties": {
+        "install": {
+          "type": "boolean"
+        },
+        "enable_process_vulnerabilities": {
+          "type": "boolean"
+        },
+        "enable_container_vulnerabilities": {
+          "type": "boolean"
+        },
+        "enable_flow_dedup": {
+          "type": "boolean"
+        },
+        "enable_flow_rate_limit": {
+          "type": "boolean"
+        }
+      }
+    },
     "araali_api_serviceAraaliUser": {
       "type": "object",
       "properties": {
@@ -1178,6 +1268,20 @@
         }
       },
       "title": "*\nRepresents one end of a link/alert_counts"
+    },
+    "araali_api_serviceFirewallConfigResponse": {
+      "type": "object",
+      "properties": {
+        "tenant_id": {
+          "type": "string"
+        },
+        "zone": {
+          "type": "string"
+        },
+        "knobs": {
+          "$ref": "#/definitions/araali_api_serviceAraaliFwKnobs"
+        }
+      }
     },
     "araali_api_serviceFortifyYamlType": {
       "type": "string",
@@ -1536,6 +1640,20 @@
         }
       },
       "description": "*\nObject for specifying start and end time in varous API calls."
+    },
+    "araali_api_serviceUpdateFirewallConfigRequest": {
+      "type": "object",
+      "properties": {
+        "tenant_id": {
+          "type": "string"
+        },
+        "zone": {
+          "type": "string"
+        },
+        "knobs": {
+          "$ref": "#/definitions/araali_api_serviceAraaliFwKnobs"
+        }
+      }
     },
     "araali_api_serviceVulnerability": {
       "type": "object",
