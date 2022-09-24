@@ -5,7 +5,7 @@ Installation
 In this guide, we’ll walk you through how to install Araali software into your Kubernetes cluster or Linux VMs and secure your cloud native runtime.
 We have made it easy for you to **single-click install as well as uninstall Araali.**
 
-**Overview:** Installing Araali is simple. The first step is to self-serve onboard by creating an account on `Araali UI <https://console.araalinetworks.com>`_ . 
+**Overview:** Installing Araali is simple. The first step is to self-serve onboard by creating an account on `Araali UI <https://console.araalinetworks.com>`_. 
 After that, for K8s, helm install Araali software onto your Kubernetes cluster, run the Software you want to secure, and come back to the Araali UI for insights.
 
 Steps for securing workloads running on Linux VMs are similar and described below.
@@ -18,9 +18,8 @@ NOTE: Your Araali account is automatically created on first login. If you want t
 of another person’s (or, team’s shared) account, ask them to add you as a user in their
 account before attempting to login.
 
-Visit the `Araali Console <https://console.araalinetworks.com>`_ in your browser.
- If you have a Gmail or GSuite powered email, click the “Sign in with Google” button 
- to access the Araali UI with single sign on (SSO). There is no need to create a seperate Araali login.
+Visit the `Araali Console <https://console.araalinetworks.com>`_ in your browser. If you have a Gmail or GSuite powered email, click the “Sign in with Google” button
+to access the Araali UI with single sign on (SSO). There is no need to create a seperate Araali login.
 
 If you do not have a Google powered email, use the “Sign up” button to create an Okta powered account using a non-google email. 
 
@@ -28,12 +27,13 @@ If you do not have a Google powered email, use the “Sign up” button to creat
  :alt: Araali Console Sign In
 
 Step 2: Generate values.yaml for Installation
-**************************
+*********************************************
 
 Go to Araali UI and select Administration -> “Cluster Fortification” in the left-hand panel.
 
 .. image:: images/helm_workload.png
-  :width: 650
+  :width: 500
+  :height: 1000
   :alt: Araalictl installation generate values.yaml
 
 Click on “+” and provide a name for your workload template. The generated values.yaml
@@ -48,7 +48,8 @@ can be used for both VMs and K8s clusters:
   :width: 650
   :alt: Helm Workload and download image
 
-Now download the file (example below) and save it as values.yaml file::
+Now download the file (example below) and save it as values.yaml file
+::
     araali:
         workload_id: <wrk-id-variable>
         cluster_name: bar
@@ -62,23 +63,27 @@ Now download the file (example below) and save it as values.yaml file::
         fw_init_image: quay.io/araalinetworks/araali_fw_init:prod
 
 
-Step 3A:Installation for Kubernetes
+Step 3A: Installation for Kubernetes
 ***********************************
 **Add Araali Repo and Install the Helm Chart.**
 
-Add Repo::
+1. Add Repo::
+
     helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
 
-Check if you are fortifying the right cluster by looking at the current context, the name with a “*” is the one you are pointing to right now:: 
+2. Check if you are fortifying the right cluster by looking at the current context, the name with a “*” is the one you are pointing to right now:: 
+
     kubectl config get-contexts
 
-Install by using the generated values.yaml file::
+3. Install by using the generated values.yaml file::
+
     helm install -f ./values.yaml my-araali-fw araali-helm/araali-fw
 
-Uninstall::
+   Uninstall::
+
     helm uninstall my-araali-fw
     
-Step 3A:Installation for VMs
+Step 3B: Installation for VMs
 ****************************
 **NOTE:** If you have already fortified your Kubernetes cluster, you do not need to additionally fortify your VMs.
 These instructions are only for the non-Kubernetes case.
@@ -106,7 +111,7 @@ Any failure conditions are in general recorded in /var/log/cloud-init-output.log
 Review the Results
 ******************
 
-**Araali UI**
+| **Araali UI**
 Go to the `Araali Console <https://console.araalinetworks.com>`_ and log in with the same email that was used to authorize araalictl.
 
 .. image:: images/top_risk_buckets.png
@@ -124,21 +129,25 @@ The Insights section on the Dashboard pull out nuggets of high priority informat
 
 You can click on any of the cards to review the details.
 
-**YAML File**
-Access the assessment report using the following command::
+| **YAML File**
+Access the assessment report using the following command
+::
+
     ./araalictl assessment -report
 
 
 Appendix
 ********
 
-** If you are unable to use Helm for K8s fortification follow the below instructions**
+**If you are unable to use Helm for K8s fortification follow the below instructions**
 
 **Requirements:** You should have access to a modern Kubernetes cluster and a functioning kubectl on your local machine.
 If you don’t already have a Kubernetes cluster (e.g. EKS, GKE, AKS, RancherD), one easy option is to run one on your local machine. 
 There are many ways to do this, including Canonical’s production-ready `microk8s for Ubuntu <https://www.araalinetworks.com/post/use-araali-with-microk8s>`_ .
 
-You can validate you have a working setup by running::
+You can validate you have a working setup by running
+::
+
     kubectl version --short
 
 You should see the output with both a Client Version and a Server Version component.
@@ -220,7 +229,9 @@ First, make your araalictl executable::
    ln -sf araali* araalictl
 
 
-Authorize your session::
+Authorize your session
+::
+
    sudo ./araalictl authorize <CORRECT EMAIL ADDRESS>
 
 **NOTE: To correctly authorize araalictl, please enter the same email that was used to sign into the Araali Console.**
@@ -298,20 +309,26 @@ Remote Fortification
     * It is important that araalictl is downloaded and authorized on the Control VM so that it can remotely install Araali on the rest of the VMs.
     * Remotely Fortify
     ::
+
         ./araalictl fortify-live -fortify -tags=zone=<zone_name>,app=<app_name> <remote_user>@<remote_host>
 
 To update Zone and/or App tags of an already fortified VM
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
+
     ./araalictl fortify-live -add -tags=zone=<updated_zone>,app=<updated_app> <remote_user>@<remote_host>
 
-**We recommend using your Configuration Management VM (Ansible, Salt, Puppet, Chef, etc.) as the control VM**
+**We recommend using your Configuration Management VM (Ansible, Salt, Puppet, Chef, etc.) as the control VM.**
 
 
 Uninstall Araali
 ^^^^^^^^^^^^^^^^^^^
-Self::
+Self:
+::
+
     ./araalictl fortify-live -unfortify localhost
 
-Remote::
+Remote:
+::
+
     ./araalictl fortify-live -unfortify <remote_user>@<remote_host>
