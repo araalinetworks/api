@@ -57,7 +57,8 @@ using the following instructions.
             chmod +x goshelly_*
 
     3.  Run the below command to make the GoShelly Client dial out to the backdoor server
-        If you choose to use Araali's backdoor service use the command as shown below.
+
+        * If you choose to use Araali's backdoor service use the command as shown below.
             For Linux::
 
                 ./goshelly_linux assess
@@ -66,7 +67,7 @@ using the following instructions.
                 ./goshelly_darwin assess
 
 
-        If you choose to use your own backdoor service, include the loadbalancer external IP address, we previously noted, using the IP flag in the assess command as shown below.
+        * If you choose to use your own backdoor service, include the loadbalancer external IP address, we previously noted, using the IP flag in the assess command as shown below.
             For Linux::
 
                 ./goshelly_linux assess --IP <IP_ADDRESS>
