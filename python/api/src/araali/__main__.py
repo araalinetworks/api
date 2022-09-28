@@ -344,9 +344,13 @@ def search(args):
             print("Total count: %s" % count)
 
 def helm(args):
-    print(api.API().get_helm_values(workload_name=args.zone,
-                                              tenant=args.tenant,
-                                              nanny=args.nanny))
+    if args.nanny:
+        print(api.API().get_helm_values(workload_name=args.zone,
+                                        tenant=args.tenant,
+                                        nanny=args.nanny))
+    else:
+        print(yaml.dump(araalictl.API().get_helm_values(
+            args.zone, args.tenant)[0]))
 
 def insights(args):
     insights, status = API().get_insights(args.zone, tenant=args.tenant)
