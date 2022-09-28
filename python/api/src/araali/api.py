@@ -126,7 +126,7 @@ class API:
         ret, status = self.get("api/v2/listLinks", data)
         return ret.get("links", []), status
 
-    def get_insights(self, zone=None, tenant=None):
+    def get_insights(self, zone, tenant=None):
         """Fetches insights
             Usage: insights, status = api.get_insights()
         """
