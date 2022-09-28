@@ -39,6 +39,10 @@ service AraaliAPI {
 	rpc deleteFortifyYaml(DeleteFortifyYamlRequest) returns (AraaliAPIResponse) {}
         // Download policy and enforcement knobs as code.
 	rpc listPolicyAndEnforcementStatus(ListPolicyAndEnforcementStatusRequest) returns (ListPolicyAndEnforcementStatusResponse) {}
+	// Get existing Araali firewall config
+	rpc getFirewallConfig(GetFirewallConfigRequest) returns (FirewallConfigResponse) {}
+	// Update existing Araali firewall config
+	rpc updateFirewallConfig(UpdateFirewallConfigRequest) returns (FirewallConfigResponse) {}
 }
 
 /**
@@ -560,6 +564,7 @@ message ListInsightsResponse {
 enum FortifyYamlType {
 	UNKNOWN          = 0; // Unknown
 	HELM_VALUES_FILE = 1; // Generate helm values file for helm chart based approach
+	HELM_CONTROLLER_VALUES_FILE = 2; // Generate controller helm values file for helm chart
 }
 
 message CreateFortifyYamlRequest {
@@ -621,4 +626,29 @@ message ListPolicyAndEnforcementStatusRequest {
 message ListPolicyAndEnforcementStatusResponse {
 	/** Policies represented in yaml format. */
 	string policy_and_enforcement_yaml = 1;
+}
+
+message AraaliFwKnobs {
+	bool install                          = 1;
+	bool enable_process_vulnerabilities   = 2;
+	bool enable_container_vulnerabilities = 3;
+	bool enable_flow_dedup                = 4;
+	bool enable_flow_rate_limit           = 5;
+}
+
+message GetFirewallConfigRequest {
+	string tenant_id    = 1;
+	string zone         = 2;
+}
+
+message UpdateFirewallConfigRequest {
+	string tenant_id    = 1;
+	string zone         = 2;
+	AraaliFwKnobs knobs = 3;
+}
+
+message FirewallConfigResponse {
+	string tenant_id           = 2;
+	string zone                = 3;
+	AraaliFwKnobs knobs        = 4;
 }

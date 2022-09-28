@@ -9,15 +9,21 @@
     - [AlertInfo](#araali_api_service-AlertInfo)
     - [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse)
     - [AraaliEndpoint](#araali_api_service-AraaliEndpoint)
+    - [AraaliFwKnobs](#araali_api_service-AraaliFwKnobs)
     - [AraaliUser](#araali_api_service-AraaliUser)
     - [Asset](#araali_api_service-Asset)
     - [AssetFilter](#araali_api_service-AssetFilter)
     - [Capabilities](#araali_api_service-Capabilities)
+    - [CreateFortifyYamlRequest](#araali_api_service-CreateFortifyYamlRequest)
+    - [CreateFortifyYamlResponse](#araali_api_service-CreateFortifyYamlResponse)
     - [CreateTenantRequest](#araali_api_service-CreateTenantRequest)
     - [CreateTenantResponse](#araali_api_service-CreateTenantResponse)
+    - [DeleteFortifyYamlRequest](#araali_api_service-DeleteFortifyYamlRequest)
     - [DeleteTenantRequest](#araali_api_service-DeleteTenantRequest)
     - [DeleteUserRequest](#araali_api_service-DeleteUserRequest)
     - [EndPoint](#araali_api_service-EndPoint)
+    - [FirewallConfigResponse](#araali_api_service-FirewallConfigResponse)
+    - [GetFirewallConfigRequest](#araali_api_service-GetFirewallConfigRequest)
     - [Insight](#araali_api_service-Insight)
     - [Lens](#araali_api_service-Lens)
     - [Link](#araali_api_service-Link)
@@ -25,10 +31,14 @@
     - [ListAlertsResponse](#araali_api_service-ListAlertsResponse)
     - [ListAssetsRequest](#araali_api_service-ListAssetsRequest)
     - [ListAssetsResponse](#araali_api_service-ListAssetsResponse)
+    - [ListFortifyYamlRequest](#araali_api_service-ListFortifyYamlRequest)
+    - [ListFortifyYamlResponse](#araali_api_service-ListFortifyYamlResponse)
     - [ListInsightsRequest](#araali_api_service-ListInsightsRequest)
     - [ListInsightsResponse](#araali_api_service-ListInsightsResponse)
     - [ListLinksRequest](#araali_api_service-ListLinksRequest)
     - [ListLinksResponse](#araali_api_service-ListLinksResponse)
+    - [ListPolicyAndEnforcementStatusRequest](#araali_api_service-ListPolicyAndEnforcementStatusRequest)
+    - [ListPolicyAndEnforcementStatusResponse](#araali_api_service-ListPolicyAndEnforcementStatusResponse)
     - [NonAraaliClientEndpoint](#araali_api_service-NonAraaliClientEndpoint)
     - [NonAraaliEndpoint](#araali_api_service-NonAraaliEndpoint)
     - [NonAraaliServerEndpoint](#araali_api_service-NonAraaliServerEndpoint)
@@ -37,6 +47,7 @@
     - [Subnet](#araali_api_service-Subnet)
     - [Tenant](#araali_api_service-Tenant)
     - [TimeSlice](#araali_api_service-TimeSlice)
+    - [UpdateFirewallConfigRequest](#araali_api_service-UpdateFirewallConfigRequest)
     - [Vulnerability](#araali_api_service-Vulnerability)
   
     - [AlertInfo.Status](#araali_api_service-AlertInfo-Status)
@@ -45,6 +56,7 @@
     - [Asset.AssetMode](#araali_api_service-Asset-AssetMode)
     - [Asset.AssetState](#araali_api_service-Asset-AssetState)
     - [Asset.AssetType](#araali_api_service-Asset-AssetType)
+    - [FortifyYamlType](#araali_api_service-FortifyYamlType)
     - [Lens.LensType](#araali_api_service-Lens-LensType)
     - [Link.LinkDirection](#araali_api_service-Link-LinkDirection)
     - [LinkState](#araali_api_service-LinkState)
@@ -97,6 +109,7 @@ Fields to filter alerts in the ListAlerts API.
 | araali_to_araali | [bool](#bool) |  | Fetch araali to araali alerts |
 | list_all_alerts | [bool](#bool) |  | Fetch all alerts from all lenses, even ones not monitored by current user |
 | time | [TimeSlice](#araali_api_service-TimeSlice) |  | Time range in which to fetch alerts |
+| zone | [string](#string) |  | Fetch alerts for given zone |
 
 
 
@@ -154,6 +167,25 @@ Represents an araali endpoint
 | process | [string](#string) |  | Process of the endpoint belongs to |
 | binary_name | [string](#string) |  | Binary name of the endpoint process |
 | parent_process | [string](#string) |  | Parent of the endpoint process |
+
+
+
+
+
+
+<a name="araali_api_service-AraaliFwKnobs"></a>
+
+### AraaliFwKnobs
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| install | [bool](#bool) |  |  |
+| enable_process_vulnerabilities | [bool](#bool) |  |  |
+| enable_container_vulnerabilities | [bool](#bool) |  |  |
+| enable_flow_dedup | [bool](#bool) |  |  |
+| enable_flow_rate_limit | [bool](#bool) |  |  |
 
 
 
@@ -239,6 +271,42 @@ List of capabilities
 
 
 
+<a name="araali_api_service-CreateFortifyYamlRequest"></a>
+
+### CreateFortifyYamlRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant | [Tenant](#araali_api_service-Tenant) |  | Handle of tenant |
+| workload_name | [string](#string) |  | Workload name - Unique name associated with workload. This is also the zone name - Cluster would show up on UI/Araali interfaces with this name |
+| fog | [string](#string) |  | DNS of Fog that communicates with the cluster (Optional, take defaults if empty) |
+| disable_upgrade | [bool](#bool) |  | Disable upgrade (Optional - false by default) |
+| disable_enforcement | [bool](#bool) |  | Disable enforcement (Optional - false by default) |
+| yaml_type | [FortifyYamlType](#araali_api_service-FortifyYamlType) |  | Type of yaml file to generate |
+
+
+
+
+
+
+<a name="araali_api_service-CreateFortifyYamlResponse"></a>
+
+### CreateFortifyYamlResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| response | [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse) |  | CreateFortifyYamlResponse API call response |
+| workload_yaml | [string](#string) |  | Yaml formatted string response |
+
+
+
+
+
+
 <a name="araali_api_service-CreateTenantRequest"></a>
 
 ### CreateTenantRequest
@@ -264,6 +332,22 @@ List of capabilities
 | ----- | ---- | ----- | ----------- |
 | response | [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse) |  | Success/Failure of the API call |
 | tenant | [Tenant](#araali_api_service-Tenant) |  | Handle for the newly created tenant |
+
+
+
+
+
+
+<a name="araali_api_service-DeleteFortifyYamlRequest"></a>
+
+### DeleteFortifyYamlRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant | [Tenant](#araali_api_service-Tenant) |  | Handle of tenant |
+| workload_name | [string](#string) |  | Unique ID associated with cluster |
 
 
 
@@ -311,6 +395,39 @@ Represents one end of a link/alert_counts
 | ----- | ---- | ----- | ----------- |
 | araali | [AraaliEndpoint](#araali_api_service-AraaliEndpoint) |  | Araali endpoint info |
 | non_araali | [NonAraaliEndpoint](#araali_api_service-NonAraaliEndpoint) |  | Non-Araali endpoint info |
+
+
+
+
+
+
+<a name="araali_api_service-FirewallConfigResponse"></a>
+
+### FirewallConfigResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant_id | [string](#string) |  |  |
+| zone | [string](#string) |  |  |
+| knobs | [AraaliFwKnobs](#araali_api_service-AraaliFwKnobs) |  |  |
+
+
+
+
+
+
+<a name="araali_api_service-GetFirewallConfigRequest"></a>
+
+### GetFirewallConfigRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant_id | [string](#string) |  |  |
+| zone | [string](#string) |  |  |
 
 
 
@@ -451,6 +568,38 @@ Request for the list of assets (virtual machines/containers) in a tenant.
 
 
 
+<a name="araali_api_service-ListFortifyYamlRequest"></a>
+
+### ListFortifyYamlRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant | [Tenant](#araali_api_service-Tenant) |  | Handle of tenant |
+| yaml_type | [FortifyYamlType](#araali_api_service-FortifyYamlType) |  | Type of yaml to list |
+
+
+
+
+
+
+<a name="araali_api_service-ListFortifyYamlResponse"></a>
+
+### ListFortifyYamlResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| response | [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse) |  | ListWorkloadResponse API call response |
+| workloads | [string](#string) | repeated | List of workloads |
+
+
+
+
+
+
 <a name="araali_api_service-ListInsightsRequest"></a>
 
 ### ListInsightsRequest
@@ -512,6 +661,40 @@ Request for the list of assets (virtual machines/containers) in a tenant.
 | ----- | ---- | ----- | ----------- |
 | response | [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse) |  | ListLinks API call response |
 | links | [Link](#araali_api_service-Link) | repeated | List of links |
+
+
+
+
+
+
+<a name="araali_api_service-ListPolicyAndEnforcementStatusRequest"></a>
+
+### ListPolicyAndEnforcementStatusRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant | [Tenant](#araali_api_service-Tenant) |  | Handle of tenant |
+| zone | [string](#string) |  | Zone to which container belongs |
+| app | [string](#string) |  | App to which container belongs |
+| pod | [string](#string) |  | Pod to which container belongs |
+| container | [string](#string) |  | container name |
+
+
+
+
+
+
+<a name="araali_api_service-ListPolicyAndEnforcementStatusResponse"></a>
+
+### ListPolicyAndEnforcementStatusResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| policy_and_enforcement_yaml | [string](#string) |  | Policies represented in yaml format. |
 
 
 
@@ -649,6 +832,23 @@ Object for specifying start and end time in varous API calls.
 
 
 
+<a name="araali_api_service-UpdateFirewallConfigRequest"></a>
+
+### UpdateFirewallConfigRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tenant_id | [string](#string) |  |  |
+| zone | [string](#string) |  |  |
+| knobs | [AraaliFwKnobs](#araali_api_service-AraaliFwKnobs) |  |  |
+
+
+
+
+
+
 <a name="araali_api_service-Vulnerability"></a>
 
 ### Vulnerability
@@ -748,6 +948,18 @@ Type of the asset
 
 
 
+<a name="araali_api_service-FortifyYamlType"></a>
+
+### FortifyYamlType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UNKNOWN | 0 | Unknown |
+| HELM_VALUES_FILE | 1 | Generate helm values file for helm chart based approach |
+
+
+
 <a name="araali_api_service-Lens-LensType"></a>
 
 ### Lens.LensType
@@ -842,6 +1054,12 @@ Type of a link Alert or PolicyInfo
 | listAlerts | [ListAlertsRequest](#araali_api_service-ListAlertsRequest) | [ListAlertsResponse](#araali_api_service-ListAlertsResponse) | Get alerts |
 | listLinks | [ListLinksRequest](#araali_api_service-ListLinksRequest) | [ListLinksResponse](#araali_api_service-ListLinksResponse) | Get links within a zone/app |
 | listInsights | [ListInsightsRequest](#araali_api_service-ListInsightsRequest) | [ListInsightsResponse](#araali_api_service-ListInsightsResponse) | Get tenant wide insights |
+| createFortifyYaml | [CreateFortifyYamlRequest](#araali_api_service-CreateFortifyYamlRequest) | [CreateFortifyYamlResponse](#araali_api_service-CreateFortifyYamlResponse) | Generate k8s workload/helm values (also registers workloadID) |
+| listFortifyYaml | [ListFortifyYamlRequest](#araali_api_service-ListFortifyYamlRequest) | [ListFortifyYamlResponse](#araali_api_service-ListFortifyYamlResponse) | List existing k8s workloads |
+| deleteFortifyYaml | [DeleteFortifyYamlRequest](#araali_api_service-DeleteFortifyYamlRequest) | [AraaliAPIResponse](#araali_api_service-AraaliAPIResponse) | Delete existing k8s workload |
+| listPolicyAndEnforcementStatus | [ListPolicyAndEnforcementStatusRequest](#araali_api_service-ListPolicyAndEnforcementStatusRequest) | [ListPolicyAndEnforcementStatusResponse](#araali_api_service-ListPolicyAndEnforcementStatusResponse) | Download policy and enforcement knobs as code. |
+| getFirewallConfig | [GetFirewallConfigRequest](#araali_api_service-GetFirewallConfigRequest) | [FirewallConfigResponse](#araali_api_service-FirewallConfigResponse) | Get existing Araali firewall config |
+| updateFirewallConfig | [UpdateFirewallConfigRequest](#araali_api_service-UpdateFirewallConfigRequest) | [FirewallConfigResponse](#araali_api_service-FirewallConfigResponse) | Update existing Araali firewall config |
 
  
 
