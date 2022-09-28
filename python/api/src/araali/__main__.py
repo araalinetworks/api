@@ -227,7 +227,7 @@ def search(args):
         filters = dict([make_map(a) for a in args.filters.split(",")])
     else:
         filters = {}
-    for k in ["zone", "app", "pod", "container"]:
+    for k in ["zone", "app"]:
         if k not in filters:
             filters[k] = ".*"
 
@@ -235,14 +235,16 @@ def search(args):
     filter_keys = set(filters.keys())
     if set(["process", "binary_name", "parent_process"]) & filter_keys:
         search_type = "workload" # process lens
-        for k in ["process", "binary_name", "parent_process"]:
-            if k not in filters:
-                filters[k] = ".*"
+        if 0:
+            for k in ["process", "binary_name", "parent_process"]:
+                if k not in filters:
+                    filters[k] = ".*"
     elif set(["dns_pattern", "dst_port"]) & filter_keys:
         search_type = "service" # service lens
-        for k in ["dns_pattern", "dst_port"]:
-            if k not in filters:
-                filters[k] = ".*"
+        if 0:
+            for k in ["dns_pattern", "dst_port"]:
+                if k not in filters:
+                    filters[k] = ".*"
 
     if args.verbose: print("filter:", filters)
     if args.verbose: print("search_type:", search_type)
@@ -259,7 +261,7 @@ def search(args):
                 if not re.search(filters["app"], aname):
                     continue
 
-                if search_type == "asset":
+                if 0 and search_type == "asset":
                     wkey = ":".join([zname, aname])
                     if wkey not in workload_dict:
                         print("="*40, i, "="*40)
@@ -277,7 +279,46 @@ def search(args):
                     client = link["client"]
                     server = link["server"]
                     # ['zone', 'app', 'unmapped_app', 'process', 'binary_name', 'parent_process']
-                    if search_type == "workload":
+                    if search_type == "asset":
+                        nfilters = dict([a for a in filters.items()])
+
+                        capp = client.get("app", "").split(".")
+                        if len(capp) == 3:
+                            client["app"] = capp[0]
+                            client["pod"] = capp[1]
+                            client["container"] = capp[2]
+
+                        sapp = server.get("app", "").split(".")
+                        if len(sapp) == 3:
+                            server["app"] = sapp[0]
+                            server["pod"] = sapp[1]
+                            server["container"] = sapp[2]
+
+                        client_m = match_filters(nfilters, client)
+                        server_m = match_filters(nfilters, server)
+                        if client_m:
+                            wkey = [str(client[k]) for k in filters.keys()]
+                            wkey = ":".join(wkey)
+                            if wkey not in workload_dict:
+                                print("="*40, i, "="*40)
+                                i += 1
+                                print(yaml.dump(client))
+                                workload_dict[wkey] = 1
+                            else:
+                                workload_dict[wkey] += 1
+                        
+                        if server_m:
+                            wkey = [str(server[k]) for k in filters.keys()]
+                            wkey = ":".join(wkey)
+                            if wkey not in workload_dict:
+                                print("="*40, i, "="*40)
+                                i += 1
+                                print(yaml.dump(server))
+                                workload_dict[wkey] = 1
+                            else:
+                                workload_dict[wkey] += 1
+
+                    elif search_type == "workload":
                         nfilters = dict([a for a in filters.items() if a[0] not in ["zone", "app", "pod", "container"]])
                         client_m = match_filters(nfilters, client)
                         # {'subnet': '0.0.0.0', 'private_subnet': True} HOME
