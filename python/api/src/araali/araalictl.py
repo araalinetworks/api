@@ -64,7 +64,7 @@ class API:
 
         if backend != utils.cfg["backend"]:
             print("*** backend doesnt match, invoking deauth ...")
-            subprocess.run(("sudo %s authorize -clean" % (self.cmdline)).split())
+            os.system(("sudo %s authorize -clean" % (self.cmdline)))
 
         rc = utils.run_command("%s authorize check" % (self.cmdline),
                                 debug=g_debug, result=True, strip=False)
@@ -77,7 +77,7 @@ class API:
                                 debug=g_debug, result=True, strip=False)
             cmdline = "sudo %s authorize -bend %s" % (self.cmdline, utils.cfg["backend"])
             #cmdline = "sudo %s authorize -local" % (self.cmdline)
-            subprocess.run(cmdline.split())
+            os.system(cmdline)
 
         if "email" not in utils.cfg:
             # DevName=blah@blah.com

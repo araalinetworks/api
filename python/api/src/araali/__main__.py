@@ -432,7 +432,7 @@ def ctl(args, remaining):
     #print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
     #print(auth_stdout.decode())
 
-    rc = subprocess.run(prepend + [api.cmdline] + remaining)
+    rc = os.system(" ".join(prepend + [api.cmdline] + remaining))
     return rc.returncode
 
 def template(args):
