@@ -445,10 +445,13 @@ def fw_config(args):
         return
 
     if args.get:
-        knobs, status = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
-        print(knobs, status)
+        knobs = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
+        print(knobs)
     elif args.update:
-        lstatus = api.API().update_fw_config(zone=args.zone, tenant=args.tenant)
+        status = api.API().update_fw_config(zone=args.zone,
+                                            tenant=args.tenant,
+                                            data_file_location=args.update)
+        print(status)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
@@ -503,12 +506,12 @@ if __name__ == "__main__":
     parser_helm = subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
     parser_helm.add_argument('-t', '--tenant', help="helm chart for a specific tenant")
     parser_helm.add_argument('-z', '--zone', help="helm for a specific zone")
-    parser_helm.add_argument('-n', '--nanny', help="helm chart for nanny or firewall")
+    parser_helm.add_argument('-n', '--nanny', action="store_true", help="helm chart for nanny or firewall")
 
     parser_fw_config = subparsers.add_parser(
         "fw_config", help="modify araali fw config on the backend")
     parser_fw_config.add_argument(
-        '-g', '--get', help="get the current config")
+        '-g', '--get', action="store_true", help="get the current config")
     parser_fw_config.add_argument(
         '-u', '--update', help="update with json in specified file location")
     parser_fw_config.add_argument(
