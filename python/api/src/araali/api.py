@@ -158,7 +158,9 @@ class API:
             print(data)
 
         ret, status = self.get("api/v2/getFirewallConfig", data)
-        return ret["knobs"], status
+        if status == 0:
+            return ret["knobs"]
+        return None
 
     def update_fw_config(self, zone, tenant=None, data_file_location=None):
         """Update firewall knobs for a tenant in the zone
@@ -170,8 +172,13 @@ class API:
             json_file_location = data_file_location
 
         json_data = {}
-        with open(json_file_location) as json_file:
-            json_data = json.load(json_file)
+        try:
+            with open(json_file_location) as json_file:
+                json_data = json.load(json_file)
+        except Exception as ex:
+            print(ex)
+            return "exception parsing json"
+
         if g_debug:
             print(json_data)
 
