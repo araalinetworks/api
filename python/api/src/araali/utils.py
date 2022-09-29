@@ -11,17 +11,17 @@ def read_config():
     if os.path.isfile(cfg_fname):
         with open(cfg_fname, "r") as f:
             cfg = yaml.load(f, Loader=yaml.SafeLoader)
-            if not cfg.get("tenant", None): cfg["tenant"] = None
-            if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
-            if not cfg.get("token", None): cfg["token"] = os.getenv('ARAALI_API_TOKEN')
-            if not cfg.get("backend", None): cfg["backend"] = "prod"
-            return cfg
+    else:
+        cfg = {}
 
-    return {
-            "tenant": None, "template_dir": "../templates",
-            "token": os.getenv('ARAALI_API_TOKEN'),
-            "backend": os.getenv("ARAALI_BACKEND")
-           }
+    if not cfg.get("tenant", None): cfg["tenant"] = None
+    if not cfg.get("template_dir", None): cfg["template_dir"] = "../templates"
+    if not cfg.get("token", None): cfg["token"] = os.getenv('ARAALI_API_TOKEN')
+    if not cfg.get("backend", None): cfg["backend"] = "prod"
+    # env variable overrides on disk config
+    if os.getenv("ARAALI_BACKEND"):
+        cfg["backend"] = os.getenv("ARAALI_BACKEND")
+    return cfg
 
 cfg = read_config()
 

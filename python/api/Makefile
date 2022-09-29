@@ -4,7 +4,7 @@ GENDIR=src/araali
 all: genpy build install tox
 
 # publish to pypi
-push: venv
+publish: venv
 	source araaliapienv/bin/activate && python3 -m twine upload dist/*
 
 # if you want to rerun tests to see if they succeed
