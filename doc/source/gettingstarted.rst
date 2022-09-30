@@ -239,8 +239,8 @@ Authorize your session
 **NOTE: To correctly authorize araalictl, please enter the same email that was used to sign into the Araali Console.**
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
-  :width: 900
-  :height: 250
+  :width: 800
+  :height: 200
   :alt: Araalictl authorize
 
 Now, go to Araali UI and Navigate to Araali Tools, under Administration on the
