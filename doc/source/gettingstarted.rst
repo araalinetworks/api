@@ -25,7 +25,7 @@ If you do not have a Google powered email, use the “Sign up” button to creat
 
 .. image:: images/araali-console-sign-in.png
     :width: 400
-    :height: 800
+    :height: 600
     :alt: Araali Console Sign In
 
 Step 2: Generate values.yaml for Installation
