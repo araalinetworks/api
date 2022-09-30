@@ -24,7 +24,7 @@ to access the Araali UI with single sign on (SSO). There is no need to create a 
 If you do not have a Google powered email, use the “Sign up” button to create an Okta powered account using a non-google email. 
 
 .. image:: images/araali-console-sign-in.png
-    :width: 400
+    :width: 300
     :height: 600
     :alt: Araali Console Sign In
 
