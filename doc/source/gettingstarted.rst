@@ -240,6 +240,7 @@ Authorize your session
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
   :width: 900
+  :height: 250
   :alt: Araalictl authorize
 
 Now, go to Araali UI and Navigate to Araali Tools, under Administration on the
