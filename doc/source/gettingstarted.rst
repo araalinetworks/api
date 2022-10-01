@@ -24,7 +24,10 @@ to access the Araali UI with single sign on (SSO). There is no need to create a 
 If you do not have a Google powered email, use the “Sign up” button to create an Okta powered account using a non-google email. 
 
 .. image:: images/araali-console-sign-in.png
- :alt: Araali Console Sign In
+    :align: center
+    :width: 300
+    :height: 600
+    :alt: Araali Console Sign In
 
 Step 2: Generate values.yaml for Installation
 *********************************************
@@ -32,8 +35,7 @@ Step 2: Generate values.yaml for Installation
 Go to Araali UI and select Administration -> “Cluster Fortification” in the left-hand panel.
 
 .. image:: images/helm_workload.png
-  :width: 500
-  :height: 1000
+  :width: 650
   :alt: Araalictl installation generate values.yaml
 
 Click on “+” and provide a name for your workload template. The generated values.yaml
@@ -237,8 +239,8 @@ Authorize your session
 **NOTE: To correctly authorize araalictl, please enter the same email that was used to sign into the Araali Console.**
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
-  :width: 600
-  :height: 300
+  :width: 900
+  :height: 200
   :alt: Araalictl authorize
 
 Now, go to Araali UI and Navigate to Araali Tools, under Administration on the
