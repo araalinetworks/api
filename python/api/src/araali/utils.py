@@ -48,10 +48,73 @@ def config(tenant=None, tenants=None, template_dir=None, backend=None):
             save(cfg)
     print(yaml.dump(cfg))
 
-def dump_table(objs):
+def get_by_key(o, k):
+    k = k.split(".")
+    for a in k:
+        o = o.get(a, None)
+        if o is None: return "None"
+    return o if o is not None else "None"
+
+def filter_by(o, filterby):
+    k, v = filterby
+    for a in v.split(","): # like an OR
+        if get_by_key(o, k) == a:
+            return True
+    return False
+
+def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
+    if filterby:
+        filterby = filterby.split("=")
+
+    class CountBy(object):
+        def __init__(self, countby, groupby):
+            self.countby = countby.split(",") if countby else countby
+            self.groupby = groupby.split(",") if groupby else groupby
+            if countby:
+                if groupby is None:
+                    self.groupby_dict = {"global": {}}
+                    for c in self.countby:
+                        self.groupby_dict["global"][c] = set()
+                else:
+                    self.groupby_dict = {}
+
+        def count(self, o):
+            if self.countby:
+                if self.groupby:
+                    groupby_key = []
+                    for g in self.groupby:
+                        groupby_key.append(get_by_key(o, g))
+                    groupby_key = ":".join(groupby_key)
+                    if groupby_key not in self.groupby_dict:
+                        self.groupby_dict[groupby_key] = {}
+                        for c in self.countby:
+                            self.groupby_dict[groupby_key][c] = set()
+                else:
+                    groupby_key = "global"
+
+                for k,v in self.groupby_dict[groupby_key].items():
+                    v.add(get_by_key(o, k))
+
+        def show(self):
+            if not self.countby:
+                return
+
+            for g, countby_dict in self.groupby_dict.items():
+                print("\n")
+                print("="*40, "%s" % g, "="*40)
+                if countby:
+                    for k,v in countby_dict.items():
+                        print("%ss: %s" % (k, len(v)))
+
+    countby = CountBy(countby, groupby)
     for idx, o in enumerate(objs):
-        print("%s %s %s" % ("="*40, idx, "="*40))
-        print(yaml.dump(o))
+        if filterby and not filter_by(o, filterby): continue
+        if not quiet:
+            print("%s %s %s" % ("="*40, idx, "="*40))
+            print(yaml.dump(o))
+        countby.count(o)
+    countby.show()
+
 
 def make_map(kvstr):
     k, v = kvstr.split("=")

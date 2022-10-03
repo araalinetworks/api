@@ -21,6 +21,7 @@ from . import api
 from . import araalictl
 from . import utils
 from . import template as module_template
+from . import aws as _aws
 
 def config(args):
     if args.get_tenants:
@@ -453,6 +454,22 @@ def fw_config(args):
                                             data_file_location=args.update)
         print(status)
 
+def aws(args):
+    if args.aws_subparser_name == "cf":
+        if args.aws_cf_subparser_name == "ls":
+            if args.countby is None:
+                args.countby = "id,name"
+            utils.dump_table(_aws.cf_ls(args.all),
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+    elif args.aws_subparser_name == "assets":
+        # account vpc subnet type image platform state public_ip
+        if args.countby is None:
+            args.countby = "instance_id,account,vpc,subnet"
+        utils.dump_table(_aws.assets(args.members),
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
@@ -520,6 +537,29 @@ if __name__ == "__main__":
         '-z', '--zone', help="fw config for a specific zone")
 
     parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
+
+    parser_aws = subparsers.add_parser("aws", help='aws utilities')
+    aws_subparsers = parser_aws.add_subparsers(dest="aws_subparser_name")
+
+    parser_aws_cf = aws_subparsers.add_parser("cf", help="cloudformation management")
+    aws_cf_subparsers = parser_aws_cf.add_subparsers(dest="aws_cf_subparser_name")
+
+    parser_command = aws_cf_subparsers.add_parser("ls", help="list managed cf stacks")
+    parser_opt = parser_command.add_argument("-a", "--all", action="store_true", help="all cloudformation stacks")
+    parser_opt = parser_command.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_opt = parser_command.add_argument("-c", "--countby", help="count by unique values")
+    parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
+
+    parser_aws_cf_add = aws_cf_subparsers.add_parser("add", help="add new cf stack")
+    parser_aws_cf_rm = aws_cf_subparsers.add_parser("rm", help="rm cf stack")
+
+    parser_command = aws_subparsers.add_parser("assets", help="asset management")
+    parser_opt = parser_command.add_argument("-m", "--members", action="store_true", help="scan members")
+    parser_opt = parser_command.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_opt = parser_command.add_argument("-c", "--countby", help="count by unique values")
+    parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
 
     parser_template = subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
     parser.add_argument('-T', '--template', help="apply operation for a specific template")
