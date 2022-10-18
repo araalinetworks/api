@@ -67,7 +67,7 @@ Step 3A: Installation for Kubernetes
 
     #If you have already added the repo, instead run this command periodically to keep you repo up to date:
 
-    helm repo update araali-helm https://araalinetworks.github.io/araali-helm/
+    helm repo update
 
 2. Check if you are fortifying the right cluster by looking at the current context, the name with a “*” is the one you are pointing to right now:: 
 
