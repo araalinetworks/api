@@ -54,24 +54,20 @@ Now download the file (example below) and save it as values.yaml file
 ::
     araali:
         workload_id: <wrk-id-variable>
-        cluster_name: bar
-        fog: foo
-        zone: <name-you-specified>
-        app: k8s-nodes
-        enforce: true
-        upgrade: true
-        autok8s_image: quay.io/araalinetworks/autok8s:prod
-        fw_image: quay.io/araalinetworks/araali_fw:prod
-        fw_init_image: quay.io/araalinetworks/araali_fw_init:prod
+        zone: <zone>
 
 
 Step 3A: Installation for Kubernetes
 ***********************************
 **Add Araali Repo and Install the Helm Chart.**
 
-1. Add Repo::
+1. Add Repo*::
 
     helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
+
+    #If you have already added the repo, instead run this command periodically to keep you repo up to date:
+
+    helm repo update
 
 2. Check if you are fortifying the right cluster by looking at the current context, the name with a “*” is the one you are pointing to right now:: 
 
@@ -79,11 +75,11 @@ Step 3A: Installation for Kubernetes
 
 3. Install by using the generated values.yaml file::
 
-    helm install -f ./values.yaml my-araali-fw araali-helm/araali-fw
+    helm install -f ./values.yaml my-araali-agent araali-helm/araali-agent
 
    Uninstall::
 
-    helm uninstall my-araali-fw
+    helm uninstall my-araali-agent
     
 Step 3B: Installation for VMs
 ****************************
