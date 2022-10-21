@@ -32,7 +32,7 @@ NOTE: These installation steps assume that you have Helm and kubectl - the packa
         Save the external IP to the service named "goshelly-helm-port-forwarding" for later use, when setting up the GoShelly client.
     Uninstall GoShelly Server::
 
-        helm uninstall goshelly-helm -n goshelly-helm
+        helm uninstall goshelly-server
 
 To use Araali's backdoor server
 ++++++++++++++++++++++++++++++++
