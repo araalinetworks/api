@@ -11,6 +11,45 @@
     "application/json"
   ],
   "paths": {
+    "/api/v2/addPodNameMappings": {
+      "get": {
+        "summary": "Add the Pod Name Mappings for given tenant",
+        "operationId": "AraaliAPI_addPodNameMappings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
     "/api/v2/addUser": {
       "post": {
         "summary": "Add a user",
@@ -113,7 +152,8 @@
             "type": "string",
             "enum": [
               "UNKNOWN",
-              "HELM_VALUES_FILE"
+              "HELM_VALUES_FILE",
+              "HELM_CONTROLLER_VALUES_FILE"
             ],
             "default": "UNKNOWN"
           }
@@ -192,6 +232,45 @@
           {
             "name": "workload_name",
             "description": "* Unique ID associated with cluster.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/deletePodNameMappings": {
+      "get": {
+        "summary": "Delete the Pod Name Mappings for given tenant",
+        "operationId": "AraaliAPI_deletePodNameMappings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -576,7 +655,8 @@
             "type": "string",
             "enum": [
               "UNKNOWN",
-              "HELM_VALUES_FILE"
+              "HELM_VALUES_FILE",
+              "HELM_CONTROLLER_VALUES_FILE"
             ],
             "default": "UNKNOWN"
           }
@@ -701,6 +781,52 @@
             "required": false,
             "type": "string",
             "format": "date-time"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/listPodNameMappings": {
+      "get": {
+        "summary": "Get all the Pod Name Mappings for given tenant",
+        "operationId": "AraaliAPI_listPodNameMappings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceListPodNameMappingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "zone",
+            "description": "* Only if interested in getting list a particular Zone.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1287,7 +1413,8 @@
       "type": "string",
       "enum": [
         "UNKNOWN",
-        "HELM_VALUES_FILE"
+        "HELM_VALUES_FILE",
+        "HELM_CONTROLLER_VALUES_FILE"
       ],
       "default": "UNKNOWN"
     },
@@ -1497,6 +1624,18 @@
         }
       }
     },
+    "araali_api_serviceListPodNameMappingsResponse": {
+      "type": "object",
+      "properties": {
+        "pod_name_mapping": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_servicePodNameMapping"
+          },
+          "title": "* one or more mapping of ephemeral pod_names"
+        }
+      }
+    },
     "araali_api_serviceListPolicyAndEnforcementStatusResponse": {
       "type": "object",
       "properties": {
@@ -1556,6 +1695,27 @@
         }
       },
       "title": "Represents a non araali server endpoint"
+    },
+    "araali_api_servicePodNameMapping": {
+      "type": "object",
+      "properties": {
+        "zone": {
+          "type": "string",
+          "title": "* Zone to which pod belongs"
+        },
+        "app": {
+          "type": "string",
+          "title": "* App to which pod belongs"
+        },
+        "pod_name_regex_pattern": {
+          "type": "string",
+          "title": "* Regex pattern identifying the pod"
+        },
+        "translated_pod_name": {
+          "type": "string",
+          "title": "* Pod name to use"
+        }
+      }
     },
     "araali_api_servicePolicyInfo": {
       "type": "object",

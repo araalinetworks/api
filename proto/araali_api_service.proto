@@ -43,6 +43,12 @@ service AraaliAPI {
 	rpc getFirewallConfig(GetFirewallConfigRequest) returns (FirewallConfigResponse) {}
 	// Update existing Araali firewall config
 	rpc updateFirewallConfig(UpdateFirewallConfigRequest) returns (FirewallConfigResponse) {}
+	// Add the Pod Name Mappings for given tenant
+	rpc addPodNameMappings(AddPodNameMappingsRequest) returns (AraaliAPIResponse) {}
+	// Delete the Pod Name Mappings for given tenant
+	rpc deletePodNameMappings(DeletePodNameMappingsRequest) returns (AraaliAPIResponse) {}
+	// Get all the Pod Name Mappings for given tenant
+	rpc listPodNameMappings(ListPodNameMappingsRequest) returns (ListPodNameMappingsResponse) {}
 }
 
 /**
@@ -651,4 +657,41 @@ message FirewallConfigResponse {
 	string tenant_id           = 2;
 	string zone                = 3;
 	AraaliFwKnobs knobs        = 4;
+}
+
+message PodNameMapping {
+	/** Zone to which pod belongs */
+	string zone = 1;
+	/** App to which pod belongs */
+	string app = 2;
+	/** Regex pattern identifying the pod */
+	string pod_name_regex_pattern = 3;
+	/** Pod name to use */
+	string translated_pod_name = 4;
+}
+
+message AddPodNameMappingsRequest {
+	/** Handle of tenant */
+	Tenant tenant                    = 1;
+	/** one or more mapping of ephemeral pod_names */
+	repeated PodNameMapping pod_name_mapping = 2;
+}
+
+message DeletePodNameMappingsRequest {
+	/** Handle of tenant */
+	Tenant tenant                    = 1;
+	/** one or more mapping of ephemeral pod_names */
+	repeated PodNameMapping pod_name_mapping = 2;
+}
+
+message ListPodNameMappingsRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	/** Only if interested in getting list a particular Zone */
+	string zone = 2;
+}
+
+message ListPodNameMappingsResponse {
+	/** one or more mapping of ephemeral pod_names */
+	repeated PodNameMapping pod_name_mapping = 1;
 }
