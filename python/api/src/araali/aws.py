@@ -15,6 +15,12 @@ def cf_ls(get_all):
                             }
             ret = client.list_stacks(NextToken=ret["NextToken"])
 
+def cf_rm(name):
+    print("removing %s" % name)
+
+def cf_add_vm():
+    print("adding vm")
+
 def assets(members):
     curr_account = boto3.client('sts').get_caller_identity().get('Account')
     if members:

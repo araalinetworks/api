@@ -55,16 +55,28 @@ def get_by_key(o, k):
         if o is None: return "None"
     return o if o is not None else "None"
 
-def filter_by(o, filterby):
-    k, v = filterby
-    for a in v.split(","): # like an OR
-        if get_by_key(o, k) == a:
-            return True
-    return False
-
 def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
-    if filterby:
-        filterby = filterby.split("=")
+    class FilterBy(object):
+        def __init__(self, filterby):
+            if filterby:
+                self.filterby = [a.split("=") for a in filterby.split(":")]
+            else:
+                self.filterby = None
+        
+        def filter(self, o):
+            if self.filterby is None: return True
+
+            match_count = 0
+            for f in self.filterby:
+                k, v = f
+                for a in v.split(","): # like an OR
+                    if get_by_key(o, k) == a:
+                        match_count += 1
+                        break
+            # matched all filters, like AND
+            if match_count == len(self.filterby):
+                return True
+            return False
 
     class CountBy(object):
         def __init__(self, countby, groupby):
@@ -107,8 +119,9 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
                         print("%ss: %s" % (k, len(v)))
 
     countby = CountBy(countby, groupby)
+    filterby = FilterBy(filterby)
     for idx, o in enumerate(objs):
-        if filterby and not filter_by(o, filterby): continue
+        if not filterby.filter(o): continue
         if not quiet:
             print("%s %s %s" % ("="*40, idx, "="*40))
             print(yaml.dump(o))

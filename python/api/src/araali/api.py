@@ -3,6 +3,7 @@ from __future__ import print_function
 import datetime
 import requests
 import json
+import yaml
 
 from . import utils
 
@@ -171,16 +172,16 @@ class API:
         if data_file_location:
             json_file_location = data_file_location
 
-        json_data = {}
+        data = {}
         try:
-            with open(json_file_location) as json_file:
-                json_data = json.load(json_file)
+            with open(json_file_location) as f:
+                file_data = yaml.load(f, yaml.SafeLoader)
         except Exception as ex:
             print(ex)
             return "exception parsing json"
 
         if g_debug:
-            print(json_data)
+            print(file_data)
 
         data = {}
         if tenant is None:
@@ -189,7 +190,7 @@ class API:
         else:
             data["tenant_id"] = tenant
         data["zone"] = zone
-        data["knobs"] = json_data
+        data["knobs"] = file_data
 
         json_dump = json.dumps(data, indent=4)
 

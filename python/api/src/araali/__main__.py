@@ -433,8 +433,7 @@ def ctl(args, remaining):
     #print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
     #print(auth_stdout.decode())
 
-    rc = os.system(" ".join(prepend + [api.cmdline] + remaining))
-    return rc.returncode
+    return subprocess.call(" ".join(prepend + [api.cmdline] + remaining), shell=True)
 
 def template(args):
     if args.t_subparser_name:
@@ -442,17 +441,18 @@ def template(args):
 
 def fw_config(args):
     if not args.zone or not args.tenant:
-        print("please specify zone and tenant")
+        print("*** please specify both zone and tenant")
         return
 
-    if args.get:
-        knobs = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
-        print(knobs)
-    elif args.update:
+    if args.update:
         status = api.API().update_fw_config(zone=args.zone,
                                             tenant=args.tenant,
                                             data_file_location=args.update)
         print(status)
+        return
+
+    knobs = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
+    print(yaml.dump(knobs))
 
 def aws(args):
     if args.aws_subparser_name == "cf":
@@ -462,6 +462,12 @@ def aws(args):
             utils.dump_table(_aws.cf_ls(args.all),
                          quiet=args.quiet, filterby=args.filterby,
                          countby=args.countby, groupby=args.groupby)
+        elif args.aws_cf_subparser_name == "add":
+            if args.aws_cf_add_subparser_name == "vm":
+                _aws.cf_add_vm()
+        elif args.aws_cf_subparser_name == "rm":
+            _aws.cf_rm(args.name)
+
     elif args.aws_subparser_name == "assets":
         # account vpc subnet type image platform state public_ip
         if args.countby is None:
@@ -471,29 +477,29 @@ def aws(args):
                          countby=args.countby, groupby=args.groupby)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description = 'Araali Python CLI')
-    parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
-    parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
-    subparsers = parser.add_subparsers(dest="subparser_name")
+    top_parser = argparse.ArgumentParser(description = 'Araali Python CLI')
+    top_parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
+    top_parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
+    top_subparsers = top_parser.add_subparsers(dest="subparser_name")
 
-    parser_config = subparsers.add_parser("config", help="list/change config params")
+    parser_config = top_subparsers.add_parser("config", help="list/change config params")
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
     parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
     parser_config.add_argument('--backend', help="setup a custom backend (internal unit testing)")
     parser_config.add_argument('-g', '--get_tenants', action="store_true", help="get active tenants")
     parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
-    parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
+    parser_alerts = top_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     parser_alerts.add_argument('-c', '--count', type=int, help="dont pull from araali")
     parser_alerts.add_argument('--ago', help="lookback")
 
-    parser_insights = subparsers.add_parser("insights", help="get insights")
+    parser_insights = top_subparsers.add_parser("insights", help="get insights")
     parser_insights.add_argument('-t', '--tenant', help="get insights for a specific tenant")
     parser_insights.add_argument('-z', '--zone', help="insights for a specific zone")
 
-    parser_assets = subparsers.add_parser("assets", help="get assets")
+    parser_assets = top_subparsers.add_parser("assets", help="get assets")
     parser_assets.add_argument('-t', '--tenant', help="get assets for a specific tenant")
     parser_assets.add_argument('-z', '--zone', help="assets for a specific zone")
     parser_assets.add_argument('-a', '--app', help="links for a specific app")
@@ -501,31 +507,31 @@ if __name__ == "__main__":
     parser_assets.add_argument('-f', '--filters', help="query filters. eg: zone=.*,app=.*,cve_sev=4,cve_count=^0$")
     parser_assets.add_argument('--ago', help="lookback")
 
-    parser_token = subparsers.add_parser("token", help="manage api tokens")
+    parser_token = top_subparsers.add_parser("token", help="manage api tokens")
     parser_token.add_argument('-t', '--tenant', help="token management for a specific tenant")
     parser_token.add_argument('-a', '--add', help="create new token")
     parser_token.add_argument('-d', '--delete', help="delete token by name")
     parser_token.add_argument('-e', '--email', help="user email")
     parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
 
-    parser_links = subparsers.add_parser("links", help="get links")
+    parser_links = top_subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")
     parser_links.add_argument('-z', '--zone', help="links for a specific zone")
     parser_links.add_argument('-a', '--app', help="links for a specific app")
     parser_links.add_argument('-s', '--svc', help="links for a specific svc")
     parser_links.add_argument('--ago', help="lookback")
 
-    parser_za = subparsers.add_parser("search", help="search assets, workloads, services")
+    parser_za = top_subparsers.add_parser("search", help="search assets, workloads, services")
     parser_za.add_argument('-t', '--tenant', help="get zones and apps for a specific tenant")
     parser_za.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     parser_za.add_argument('-f', '--filters', help="query filters. eg: zone=.*,app=.*,pod=.*,container=.* process=.*,binary_name=.*,parent_process=.*,dns_pattern=.*,dst_port=.*")
 
-    parser_helm = subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
+    parser_helm = top_subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
     parser_helm.add_argument('-t', '--tenant', help="helm chart for a specific tenant")
     parser_helm.add_argument('-z', '--zone', help="helm for a specific zone")
     parser_helm.add_argument('-n', '--nanny', action="store_true", help="helm chart for nanny or firewall")
 
-    parser_fw_config = subparsers.add_parser(
+    parser_fw_config = top_subparsers.add_parser(
         "fw_config", help="modify araali fw config on the backend")
     parser_fw_config.add_argument(
         '-g', '--get', action="store_true", help="get the current config")
@@ -536,9 +542,9 @@ if __name__ == "__main__":
     parser_fw_config.add_argument(
         '-z', '--zone', help="fw config for a specific zone")
 
-    parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
+    parser_ctl = top_subparsers.add_parser("ctl", help="run araalictl commands")
 
-    parser_aws = subparsers.add_parser("aws", help='aws utilities')
+    parser_aws = top_subparsers.add_parser("aws", help='aws utilities')
     aws_subparsers = parser_aws.add_subparsers(dest="aws_subparser_name")
 
     parser_aws_cf = aws_subparsers.add_parser("cf", help="cloudformation management")
@@ -551,8 +557,13 @@ if __name__ == "__main__":
     parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
     parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
 
-    parser_aws_cf_add = aws_cf_subparsers.add_parser("add", help="add new cf stack")
-    parser_aws_cf_rm = aws_cf_subparsers.add_parser("rm", help="rm cf stack")
+    parser_command = aws_cf_subparsers.add_parser("add", help="add new cf stack")
+    subparsers = parser_command.add_subparsers(dest="aws_cf_add_subparser_name")
+
+    parser_command = subparsers.add_parser("vm", help="add araali protected VM")
+
+    parser_command = aws_cf_subparsers.add_parser("rm", help="rm cf stack")
+    parser_opt = parser_command.add_argument("name", help="name of araali managed cloudformation template")
 
     parser_command = aws_subparsers.add_parser("assets", help="asset management")
     parser_opt = parser_command.add_argument("-m", "--members", action="store_true", help="scan members")
@@ -561,8 +572,8 @@ if __name__ == "__main__":
     parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
     parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
 
-    parser_template = subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
-    parser.add_argument('-T', '--template', help="apply operation for a specific template")
+    parser_template = top_subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
+    top_parser.add_argument('-T', '--template', help="apply operation for a specific template")
 
     t_subparsers = parser_template.add_subparsers(dest="t_subparser_name")
 
@@ -595,7 +606,7 @@ if __name__ == "__main__":
     parser_format = t_subparsers.add_parser("fmt", help="rename template node name/ format into a normalized form")
     parser_format.add_argument('template')
 
-    args, remaining = parser.parse_known_args()
+    args, remaining = top_parser.parse_known_args()
     args.progdir, args.prog = os.path.split(sys.argv[0])
 
     if args.verbose:
