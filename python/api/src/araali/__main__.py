@@ -23,6 +23,21 @@ from . import utils
 from . import template as module_template
 from . import aws as _aws
 
+def podmap(args):
+    if args.podmap_subparser_name == "list":
+        links, status = API().get_pod_mapping(args.zone, tenant=args.tenant)
+        if status == 0:
+            print("Got %s mapping entries" % len(links))
+
+            if not args.countby: args.countby = "translated_pod_name"
+            utils.dump_table(links,
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+    elif args.podmap_subparser_name == "add":
+        links, status = API().add_pod_mapping(args.zone, args.app, args.pattern, args.name, tenant=args.tenant)
+    elif args.podmap_subparser_name == "del":
+        links, status = API().del_pod_mapping(args.zone, args.app, args.pattern, args.name, tenant=args.tenant)
+
 def config(args):
     if args.get_tenants:
         """
@@ -481,6 +496,31 @@ if __name__ == "__main__":
     top_parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     top_parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
     top_subparsers = top_parser.add_subparsers(dest="subparser_name")
+
+    parser_cmd = top_subparsers.add_parser("podmap", help="pod name mapping configuration")
+    subparsers = parser_cmd.add_subparsers(dest="podmap_subparser_name")
+
+    parser_subcmd = subparsers.add_parser("add", help="add a new mapping")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument('-a', '--app', help="app")
+    parser_subcmd.add_argument('-p', '--pattern', help="pattern")
+    parser_subcmd.add_argument('-n', '--name', help="name")
+
+    parser_subcmd = subparsers.add_parser("del", help="add a new mapping")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument('-a', '--app', help="app")
+    parser_subcmd.add_argument('-p', '--pattern', help="pattern")
+    parser_subcmd.add_argument('-n', '--name', help="name")
+
+    parser_subcmd = subparsers.add_parser("list", help="list pod mappings")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_subcmd.add_argument("-c", "--countby", help="count by unique values")
+    parser_subcmd.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_subcmd.add_argument("-f", "--filterby", help="filter by (key)")
 
     parser_config = top_subparsers.add_parser("config", help="list/change config params")
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")

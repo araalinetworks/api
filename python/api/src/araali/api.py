@@ -26,12 +26,9 @@ class API:
         return rc.json(), 0 if rc.status_code == 200 else rc.status_code
 
     def post(self, endpoint, data):
-        self.headers["Content-Type"] = "application/json"
-        if g_debug:
-            print(self.host, self.headers, endpoint)
-
+        if g_debug: print(self.host, self.headers, endpoint)
         rc = requests.post("%s/%s" % (self.host, endpoint),
-                           data=data, headers=self.headers)
+                           json=data, headers=self.headers)
         if g_debug:
             print(rc.request.url)
             print(rc.json())
@@ -141,7 +138,7 @@ class API:
         if g_debug: print(data)
 
         ret, status = self.get("api/v2/listInsights", data)
-        return ret["insights"], status
+        return ret.get("insights", []), status
 
     def get_fw_config(self, zone, tenant=None):
         """Fetches firewall knobs enabled for a tenant in the zone
@@ -160,19 +157,18 @@ class API:
 
         ret, status = self.get("api/v2/getFirewallConfig", data)
         if status == 0:
-            return ret["knobs"]
+            return ret.get("knobs", [])
         return None
 
     def update_fw_config(self, zone, tenant=None, data_file_location=None):
         """Update firewall knobs for a tenant in the zone
             Usage: status = api.update_fw_config()
         """
-
-        json_file_location = "/tmp/fw_cfg.json"
         if data_file_location:
             json_file_location = data_file_location
+        else:
+            json_file_location = "/tmp/fw_cfg.json"
 
-        data = {}
         try:
             with open(json_file_location) as f:
                 file_data = yaml.load(f, yaml.SafeLoader)
@@ -183,35 +179,33 @@ class API:
         if g_debug:
             print(file_data)
 
-        data = {}
+        data = {"knobs": file_data, "zone": zone}
         if tenant is None:
             if utils.cfg["tenant"]:
                 data["tenant_id"] = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
         else:
             data["tenant_id"] = tenant
-        data["zone"] = zone
-        data["knobs"] = file_data
-
-        json_dump = json.dumps(data, indent=4)
 
         if g_debug:
             print(data)
-            print(json_dump)
 
-        ret, status = self.post("api/v2/updateFirewallConfig", json_dump)
+        ret, status = self.post("api/v2/updateFirewallConfig", data)
         return status
 
     def get_helm_values(self, workload_name, nanny=None, tenant=None):
         """Fetches helm values for nanny/controller or firewall chart
             Usage: values_yaml = api.get_helm_values()
         """
-        data = {}
+        data = {"workload_name": workload_name}
         if tenant is None:
             if utils.cfg["tenant"]:
                 data["tenant.id"] = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
         else:
             data["tenant.id"] = tenant
-        data["workload_name"] = workload_name
 
         if nanny is None:
             data["yaml_type"] = "1"
@@ -230,3 +224,87 @@ class API:
             return ""
 
         return ret["workload_yaml"]
+
+    def get_pod_mapping(self, zone, tenant=None):
+        """Get pod name mapping for a zone
+            Usage: values_yaml = api.get_pod_mapping()
+        """
+        data = {}
+        if zone: data["zone"] = zone
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                data["tenant.id"] = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
+        else:
+            data["tenant.id"] = tenant
+
+        if g_debug:
+            print(data)
+
+        ret, status = self.get("api/v2/listPodNameMappings", data)
+        return ret.get("pod_name_mapping", []), status
+
+    def add_pod_mapping(self, zone, app, pattern, name, tenant=None):
+        """Get pod name mapping for a zone
+            Usage: values_yaml = api.get_pod_mapping()
+        """
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                tenant = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
+        else:
+            tenant = tenant
+
+        data = {
+                    "tenant": {
+                        "id": tenant,
+                    },
+                    "pod_name_mapping": [
+                        {
+                            "zone": zone,
+                            "app": app,
+                            "pod_name_regex_pattern": pattern,
+                            "translated_pod_name": name
+                        }
+                    ]
+                }
+
+        if g_debug:
+            print(data)
+
+        ret, status = self.post("api/v2/addPodNameMappings", data)
+        return ret, status
+
+    def del_pod_mapping(self, zone, app, pattern, name, tenant=None):
+        """ Delete pod name mapping entry
+            Usage: values_yaml = api.get_pod_mapping()
+        """
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                tenant = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
+        else:
+            tenant = tenant
+
+        data = {
+                    "tenant": {
+                        "id": tenant,
+                    },
+                    "pod_name_mapping": [
+                        {
+                            "zone": zone,
+                            "app": app,
+                            "pod_name_regex_pattern": pattern,
+                            "translated_pod_name": name
+                        }
+                    ]
+                }
+
+        if g_debug:
+            print(data)
+
+        ret, status = self.post("api/v2/deletePodNameMappings", data)
+        return ret, status
