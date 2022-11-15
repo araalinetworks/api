@@ -106,6 +106,10 @@ Both values.yaml, and araalictl should be accessible to the ec2 instance. Embed 
 On success, araalifw agent should be running on the VM, and providing functionality.
 Any failure conditions are in general recorded in /var/log/cloud-init-output.log.
 
+Uninstall::
+
+    sudo ./araalict.linux-amd64 unfortify-self
+
 Review the Results
 ******************
 
