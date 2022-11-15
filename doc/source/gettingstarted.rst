@@ -96,8 +96,10 @@ what app (e.g. redis, mongoDB, cassandra) will be running on the VM.
 **Example: Install via AWS EC2 Instance UserData**
 The following represents a way to embed araali software into an ec2 instance via UserData at bootup time.
 Both values.yaml, and araalictl should be accessible to the ec2 instance. Embed this script into UserData::
+
     #!/bin/bash
     wget -q https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64
+    # Note: before every command using wget on a file, run the following command: rm -f <filename>
     wget -q https://<resourceAccessUrl>/values.yaml # depending on where customer keeps this file
     chmod u+x araalictl.linux-amd64
     ./araalictl.linux-amd64 editvalues -zone=<zone> -app=<app> -f values.yaml
