@@ -48,6 +48,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: fcm
+    dns_pattern: .*fcm.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: logging
     dns_pattern: .*logging.googleapis.com
     dst_port: 443
@@ -88,6 +93,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: vision
+    dns_pattern: .*vision.googleapis.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: www
     dns_pattern: .*www.googleapis.com
     dst_port: 443
@@ -103,6 +113,7 @@ authorizations:
   - compute
   - container
   - dns
+  - fcm
   - logging
   - maps
   - monitoring
@@ -111,4 +122,5 @@ authorizations:
   - servicecontrol
   - stackdriver
   - storage
+  - vision
   - www

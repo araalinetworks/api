@@ -1,0 +1,18 @@
+identities:
+- node:
+    name: sbin_sftd
+    zone: .*
+    app: .*
+    binary_name: /usr/sbin/sftd
+    parent_process: systemd
+    process: sftd
+  pushdown: []
+- node:
+    name: scaleft_app
+    dns_pattern: app.scaleft.com
+    dst_port: 443
+  pushdown: []
+authorizations:
+- name: scaleft_app
+  in:
+  - sbin_sftd
