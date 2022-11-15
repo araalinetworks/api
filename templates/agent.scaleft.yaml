@@ -1,10 +1,5 @@
 identities:
 - node:
-    name: app_scaleft
-    dns_pattern: app.scaleft.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: sbin_sftd
     zone: .*
     app: .*
@@ -12,7 +7,12 @@ identities:
     parent_process: systemd
     process: sftd
   pushdown: []
+- node:
+    name: scaleft_app
+    dns_pattern: app.scaleft.com
+    dst_port: 443
+  pushdown: []
 authorizations:
-- name: app_scaleft
+- name: scaleft_app
   in:
   - sbin_sftd
