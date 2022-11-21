@@ -10,6 +10,12 @@ identities:
     process: .*
   pushdown: []
 - node:
+    name: ecr
+    dns_pattern: .*ecr.*.amazonaws.com
+    dst_port: 443
+  pushdown:
+  - dns_pattern
+- node:
     name: kubelet
     zone: .*
     app: k8s-nodes
@@ -18,6 +24,7 @@ identities:
     process: kubelet
   pushdown: []
 authorizations:
-- name: any
-  in:
-  - kubelet
+- name: kubelet
+  out:
+  - any
+  - ecr
