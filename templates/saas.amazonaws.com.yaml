@@ -72,7 +72,8 @@ identities:
     name: ecr
     dns_pattern: .*ecr.*.amazonaws.com
     dst_port: 443
-  pushdown: []
+  pushdown:
+  - dns_pattern
 - node:
     name: efs
     dns_pattern: .*efs.*.amazonaws.com
@@ -92,6 +93,11 @@ identities:
     name: elasticloadbalancing
     dns_pattern: .*elasticloadbalancing.*.amazonaws.com
     dst_port: 443
+  pushdown: []
+- node:
+    name: elb
+    dns_pattern: .*.elb.*.amazonaws.com
+    dst_port: 9094
   pushdown: []
 - node:
     name: email
@@ -194,6 +200,7 @@ authorizations:
   - efs
   - eks
   - elasticfilesystem
+  - elb
   - email
   - es
   - events

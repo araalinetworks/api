@@ -23,6 +23,16 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: ghcr
+    dns_pattern: ghcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: githubusercontent_containers_pkg
+    dns_pattern: pkg-containers.githubusercontent.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: quay
     dns_pattern: .*.quay.io
     dst_port: 443
@@ -33,4 +43,6 @@ authorizations:
   - docker
   - docker_cloudflare_prod
   - gcr
+  - ghcr
+  - githubusercontent_containers_pkg
   - quay
