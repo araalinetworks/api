@@ -80,6 +80,7 @@ Step 3A: Installation for Kubernetes
    Uninstall::
 
     helm uninstall my-araali-agent
+    kubectl delete daemonset,namespace,serviceaccount,clusterrole,clusterrolebinding,deployment,service,secret,configmap,crd -l is_agent=true -A
     
 Step 3B: Installation for VMs
 ****************************
