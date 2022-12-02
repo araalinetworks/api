@@ -140,6 +140,51 @@ class API:
         ret, status = self.get("api/v2/listInsights", data)
         return ret.get("insights", []), status
 
+    def get_enforced(self, tenant=None):
+        """Fetches enforced lenses
+            Usage: lenses, status = api.get_enforced()
+        """
+        data = {}
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                data["tenant.id"] = utils.cfg["tenant"]
+        else:
+            data["tenant.id"] = tenant
+
+        if g_debug: print(data)
+
+        ret, status = self.get("api/v2/listShieldedLens", data)
+        return ret.get("shielded_lens", []), status
+
+    def set_enforced(self, op, zone=None, app=None, pod=None, container=None, svc=None, svc_port=None, tenant=None):
+        """Change the enforcement state of a lens
+            Usage: status = api.set_enforced("DEL")
+        """
+        data = {"op": 2 if op=="DEL" else 1}
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                data["tenant"] = {"id": utils.cfg["tenant"]}
+            else:
+                assert False, "*** tenant not specified"
+        else:
+            data["tenant"] = {"id": tenant}
+
+        if zone: data["zone"] = zone
+        if app: data["app"] = app
+        if svc:
+            assert svc_port is not None, "both service and port need to be specified"
+            data["service"] = svc
+            data["service_port"] = int(svc_port)
+        if container:
+            assert None not in [zone, app, pod], "zone, app, and pod must be specified for the container"
+            data["pod"] = pod
+            data["container"] = container
+
+        if g_debug: print(data)
+
+        ret, status = self.post("api/v2/setShieldStatus", data)
+        return ret, status
+
     def get_fw_config(self, zone, tenant=None):
         """Fetches firewall knobs enabled for a tenant in the zone
             Usage: knobs, status = api.get_fw_config()

@@ -23,6 +23,26 @@ from . import utils
 from . import template as module_template
 from . import aws as _aws
 
+def lens(args):
+    if args.set:
+        if args.set in ["enforce", "unenforce"]:
+            op = {"enforce": "ADD", "unenforce": "DEL"}[args.set]
+            if args.svc:
+                sp = args.svc.split(":")
+                assert len(sp) == 2, "svc format is service:port"
+                args.svc, args.svc_port = sp
+            else:
+                args.svc_port = None
+            API().set_enforced(op, args.zone, args.app, args.pod,
+                args.container, args.svc, args.svc_port, args.tenant)
+    else: # get
+        filterby = []
+        if args.zone: filterby.append("lens.zone=%s" % args.zone)
+        if args.app: filterby.append("lens.app=%s" % args.app)
+        if args.pod: filterby.append("lens.pod=%s" % args.pod)
+        if args.container: filterby.append("lens.container_name=%s" % args.container)
+        utils.dump_table(API().get_enforced(args.tenant)[0], filterby=None if filterby == [] else ":".join(filterby))
+
 def podmap(args):
     if args.podmap_subparser_name == "list":
         links, status = API().get_pod_mapping(args.zone, tenant=args.tenant)
@@ -496,6 +516,17 @@ if __name__ == "__main__":
     top_parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     top_parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
     top_subparsers = top_parser.add_subparsers(dest="subparser_name")
+
+    parser_cmd = top_subparsers.add_parser("lens", help="show/manipulate application lenses")
+    parser_opt = parser_cmd.add_argument("-t", "--tenant", help="lenses for a specific tenant")
+    parser_opt = parser_cmd.add_argument("-z", "--zone", help="zone for the lens")
+    parser_opt = parser_cmd.add_argument("-a", "--app", help="app for the lens")
+    parser_opt = parser_cmd.add_argument("-p", "--pod", help="pod for the lens")
+    parser_opt = parser_cmd.add_argument("-c", "--container", help="container for the lens")
+    parser_opt = parser_cmd.add_argument("-s", "--svc", help="service for the lens")
+    parser_opt = parser_cmd.add_argument("-S", "--set",
+            choices=["enforce", "unenforce"],
+            help="service for the lens")
 
     parser_cmd = top_subparsers.add_parser("podmap", help="pod name mapping configuration")
     subparsers = parser_cmd.add_subparsers(dest="podmap_subparser_name")
