@@ -55,7 +55,7 @@ def get_by_key(o, k):
         if o is None: return "None"
     return o if o is not None else "None"
 
-def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
+def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None, dump_yaml=False):
     class FilterBy(object):
         def __init__(self, filterby):
             if filterby:
@@ -70,7 +70,14 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
             for f in self.filterby:
                 k, v = f
                 for a in v.split(","): # like an OR
-                    if get_by_key(o, k) == a:
+                    def get_a(a):
+                        try:
+                            return eval(a)
+                        except:
+                            return a
+                    match_val = get_a(a)
+                    my_val = get_by_key(o, k)
+                    if type(match_val) == str and ".*" in match_val and re.search(match_val, my_val) or my_val == match_val:
                         match_count += 1
                         break
             # matched all filters, like AND
@@ -86,7 +93,7 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
                 if groupby is None:
                     self.groupby_dict = {"global": {}}
                     for c in self.countby:
-                        self.groupby_dict["global"][c] = set()
+                        self.groupby_dict["global"][c] = 0
                 else:
                     self.groupby_dict = {}
 
@@ -95,28 +102,42 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
                 if self.groupby:
                     groupby_key = []
                     for g in self.groupby:
-                        groupby_key.append(get_by_key(o, g))
+                        groupby_key.append(str(get_by_key(o, g)))
                     groupby_key = ":".join(groupby_key)
                     if groupby_key not in self.groupby_dict:
                         self.groupby_dict[groupby_key] = {}
                         for c in self.countby:
-                            self.groupby_dict[groupby_key][c] = set()
+                            self.groupby_dict[groupby_key][c] = 0
                 else:
                     groupby_key = "global"
 
                 for k,v in self.groupby_dict[groupby_key].items():
-                    v.add(get_by_key(o, k))
+                    value = get_by_key(o, k)
+                    if type(value) == int:
+                        self.groupby_dict[groupby_key][k] += value
+                    else:
+                        self.groupby_dict[groupby_key][k] += 1
 
-        def show(self):
+        def show(self, dump_yaml=False):
             if not self.countby:
                 return
 
+            if dump_yaml:
+                print(yaml.dump([{"key": a[0], "count": a[1]} for a in self.groupby_dict.items()]))
+                return
+
+            overall = {}
             for g, countby_dict in self.groupby_dict.items():
                 print("\n")
                 print("="*40, "%s" % g, "="*40)
                 if countby:
                     for k,v in countby_dict.items():
-                        print("%ss: %s" % (k, len(v)))
+                        print("%ss: %s" % (k, v))
+                        overall[k] = overall.get(k, 0) + v
+
+            print("="*40, "%s" % "overall", "="*40)
+            for k,v in overall.items():
+                print("%ss: %s" % (k, v))
 
     countby = CountBy(countby, groupby)
     filterby = FilterBy(filterby)
@@ -126,8 +147,7 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None):
             print("%s %s %s" % ("="*40, idx, "="*40))
             print(yaml.dump(o))
         countby.count(o)
-    countby.show()
-
+    countby.show(dump_yaml)
 
 def make_map(kvstr):
     k, v = kvstr.split("=")

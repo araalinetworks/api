@@ -97,24 +97,30 @@ def alerts(args):
     day_dict = {}
     local_zone = tz.tzlocal()
     if status == 0:
-        print("Got %s alerts" % len(alerts))
-        utils.dump_table(alerts)
+        if args.dump_yaml:
+            print(yaml.dump(alerts))
+        else:
+            print("Got %s alerts" % len(alerts))
+            if args.countby is None: args.countby = "unique_id"
+            utils.dump_table(alerts,
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
 
-        for a in alerts:
-            if type(a["timestamp"]) == str:
-                # '2022-07-15T04:45:18Z'
-                dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
-            else:
-                dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
-            #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
-            dts = dt.strftime("%Y/%m/%d")
-            day_dict.setdefault(dts, []).append(a)
-
-        keys = [a for a in day_dict.keys()]
-        keys.sort()
-        print("frequency count")
-        for k in keys:
-            print("%s %s" % (k, len(day_dict[k])))
+            for a in alerts:
+                if type(a["timestamp"]) == str:
+                    # '2022-07-15T04:45:18Z'
+                    dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
+                else:
+                    dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
+                #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
+                dts = dt.strftime("%Y/%m/%d")
+                day_dict.setdefault(dts, []).append(a)
+            
+            keys = [a for a in day_dict.keys()]
+            keys.sort()
+            print("frequency count")
+            for k in keys:
+                print("%s %s" % (k, len(day_dict[k])))
 
 def make_map(kv):
     k, v = kv.split("=")
@@ -563,7 +569,12 @@ if __name__ == "__main__":
     parser_alerts = top_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
-    parser_alerts.add_argument('-c', '--count', type=int, help="dont pull from araali")
+    parser_alerts.add_argument('-C', '--count', type=int, help="dont pull from araali")
+    parser_alerts.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_alerts.add_argument("-c", "--countby", help="count by unique values")
+    parser_alerts.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_alerts.add_argument("-f", "--filterby", help="filter by (key)")
+    parser_alerts.add_argument("--dump_yaml", action="store_true", help="dump yaml for saving output")
     parser_alerts.add_argument('--ago', help="lookback")
 
     parser_insights = top_subparsers.add_parser("insights", help="get insights")
