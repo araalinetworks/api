@@ -97,14 +97,20 @@ def alerts(args):
     day_dict = {}
     local_zone = tz.tzlocal()
     if status == 0:
-        if args.dump_yaml:
-            print(yaml.dump(alerts))
+        if args.dump_csv:
+            for line in utils.dump_csv(alerts):
+                print(line)
+        elif args.dump_yaml:
+            if args.flatten:
+                print(yaml.dump(list(utils.flatten_table(alerts))))
+            else:
+                print(yaml.dump(alerts))
         else:
             print("Got %s alerts" % len(alerts))
             if args.countby is None: args.countby = "unique_id"
             utils.dump_table(alerts,
                          quiet=args.quiet, filterby=args.filterby,
-                         countby=args.countby, groupby=args.groupby)
+                         countby=args.countby, groupby=args.groupby, flatten=args.flatten)
 
             for a in alerts:
                 if type(a["timestamp"]) == str:
@@ -574,7 +580,9 @@ if __name__ == "__main__":
     parser_alerts.add_argument("-c", "--countby", help="count by unique values")
     parser_alerts.add_argument("-g", "--groupby", help="groub by (key)")
     parser_alerts.add_argument("-f", "--filterby", help="filter by (key)")
+    parser_alerts.add_argument("-F", "--flatten", action="store_true", help="flatten the yaml object")
     parser_alerts.add_argument("--dump_yaml", action="store_true", help="dump yaml for saving output")
+    parser_alerts.add_argument("--dump_csv", action="store_true", help="dump csv for saving output")
     parser_alerts.add_argument('--ago', help="lookback")
 
     parser_insights = top_subparsers.add_parser("insights", help="get insights")

@@ -7,6 +7,34 @@ import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
 
+def flatten_obj(prefix, root):
+    res = []
+    for k, v in root.items():
+        new_prefix = k if not prefix else prefix + "." + k
+        if type(v) == dict:
+            res += flatten_obj(new_prefix, v)
+        else:
+            res += [(new_prefix, str(v))]
+    return res
+
+def flatten_table(alerts):
+    for a in alerts:
+        yield(dict(flatten_obj("", a)))
+
+def dump_csv(alerts):
+    header = set()
+    for a in alerts:
+        header |= set(dict(flatten_obj("", a)).keys())
+    header = list(header)
+    header.sort()
+    yield ",".join(header)
+    for a in alerts:
+        obj = dict(flatten_obj("", a))
+        out = []
+        for h in header:
+            out.append(obj.get(h, ""))
+        yield ",".join(out)
+
 def read_config():
     if os.path.isfile(cfg_fname):
         with open(cfg_fname, "r") as f:
@@ -55,14 +83,14 @@ def get_by_key(o, k):
         if o is None: return "None"
     return o if o is not None else "None"
 
-def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None, dump_yaml=False):
+def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None, dump_yaml=False, flatten=False):
     class FilterBy(object):
         def __init__(self, filterby):
             if filterby:
                 self.filterby = [a.split("=") for a in filterby.split(":")]
             else:
                 self.filterby = None
-        
+
         def filter(self, o):
             if self.filterby is None: return True
 
@@ -145,7 +173,10 @@ def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None, dum
         if not filterby.filter(o): continue
         if not quiet:
             print("%s %s %s" % ("="*40, idx, "="*40))
-            print(yaml.dump(o))
+            if flatten:
+                print(yaml.dump(dict(flatten_obj("", o))))
+            else:
+                print(yaml.dump(o))
         countby.count(o)
     countby.show(dump_yaml)
 
