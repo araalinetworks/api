@@ -93,7 +93,8 @@ def config(args):
     return utils.config(args.tenant, args.tenants, args.template_dir, args.backend)
 
 def alerts(args):
-    alerts, page, status = API().get_alerts(args.count, args.ago, tenant=args.tenant)
+    alerts, page, status = API().get_alerts(args.count, args.ago,
+            closed_alerts=args.closed, all_alerts=args.all, tenant=args.tenant)
     day_dict = {}
     local_zone = tz.tzlocal()
     if status == 0:
@@ -574,6 +575,8 @@ if __name__ == "__main__":
 
     parser_alerts = top_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
+    parser_alerts.add_argument('--closed', action="store_true", help="get closed alerts")
+    parser_alerts.add_argument('--all', action="store_true", help="get all alerts (disregard subscription)")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     parser_alerts.add_argument('-C', '--count', type=int, help="dont pull from araali")
     parser_alerts.add_argument("-q", "--quiet", action="store_true", help="count by unique values")

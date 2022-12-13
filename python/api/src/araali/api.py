@@ -36,14 +36,14 @@ class API:
             print("*** REST api error: %s" % rc.status_code)
         return rc.json(), 0 if rc.status_code == 200 else rc.status_code
 
-    def get_alerts(self, count=None, ago=None, token=None, tenant=None):
+    def get_alerts(self, count=None, ago=None, token=None, closed_alerts=False, all_alerts=False, tenant=None):
         """Fetches alerts
             Usage: alerts, next_page, status = api.get_alerts()
         """
         data = {
                 "filter.openAlerts": True,
-                "filter.closedAlerts": False,
-                "filter.listAllAlerts": False,
+                "filter.closedAlerts": closed_alerts,
+                "filter.listAllAlerts": all_alerts,
                 "filter.perimeterIngress": True,
                 "filter.perimeterEgress": True,
                 "filter.homeNonAraaliIngress": True,
