@@ -270,6 +270,30 @@ class API:
 
         return ret["workload_yaml"]
 
+    def delete_tenant(self, tenant=None):
+        """Get pod name mapping for a zone
+            Usage: values_yaml = api.get_pod_mapping()
+        """
+        if tenant is None:
+            if utils.cfg["tenant"]:
+                tenant = utils.cfg["tenant"]
+            else:
+                assert False, "*** tenant not specified"
+        else:
+            tenant = tenant
+
+        data = {
+            "tenant": {
+              "id": tenant,
+            }
+        }
+
+        if g_debug:
+            print(data)
+
+        ret, status = self.post("api/v2/deleteTenant", data)
+        return ret, status
+
     def get_pod_mapping(self, zone, tenant=None):
         """Get pod name mapping for a zone
             Usage: values_yaml = api.get_pod_mapping()

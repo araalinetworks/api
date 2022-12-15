@@ -23,6 +23,10 @@ from . import utils
 from . import template as module_template
 from . import aws as _aws
 
+def tenant(args):
+    if args.tenant_subparser_name == "delete":
+        print(API().delete_tenant(tenant=args.tenant))
+
 def lens(args):
     if args.set:
         if args.set in ["enforce", "unenforce"]:
@@ -606,6 +610,11 @@ if __name__ == "__main__":
     parser_token.add_argument('-d', '--delete', help="delete token by name")
     parser_token.add_argument('-e', '--email', help="user email")
     parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
+
+    parser_cmd = top_subparsers.add_parser("tenant", help="tenant management")
+    subparsers = parser_cmd.add_subparsers(dest="tenant_subparser_name")
+    parser_cmd = subparsers.add_parser("delete", help="delete tenant")
+    parser_cmd.add_argument('-t', '--tenant', help="tenant id to delete")
 
     parser_links = top_subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")
