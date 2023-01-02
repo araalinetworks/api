@@ -40,7 +40,7 @@ identities:
   - dns_pattern
 - node:
     name: cassandra
-    dns_pattern: cassandra.*amazonaws.com
+    dns_pattern: .*cassandra.*.amazonaws.com
     dst_port: 9142
   pushdown:
   - dns_pattern
@@ -92,7 +92,7 @@ identities:
   pushdown: []
 - node:
     name: eks2
-    dns_pattern: .*eks.amazonaws.com
+    dns_pattern: .*eks.*.amazonaws.com
     dst_port: 443
   pushdown:
   - dns_pattern
@@ -114,14 +114,8 @@ identities:
 - node:
     name: email
     dns_pattern: .*email.*.amazonaws.com
-    dst_port: 443
+    dst_port: 587
   pushdown: []
-- node:
-    name: email-smtp
-    dns_pattern: email-smtp.*amazonaws.com
-    dst_port: 443
-  pushdown:
-  - dns_pattern
 - node:
     name: es
     dns_pattern: .*es.*.amazonaws.com
@@ -139,7 +133,7 @@ identities:
   pushdown: []
 - node:
     name: lambda
-    dns_pattern: lambda.*amazonaws.com
+    dns_pattern: .*lambda.*.amazonaws.com
     dst_port: 443
   pushdown:
   - dns_pattern
@@ -234,7 +228,6 @@ authorizations:
   - elasticfilesystem
   - elb
   - email
-  - email-smtp
   - es
   - events
   - kms
