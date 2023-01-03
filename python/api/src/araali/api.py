@@ -156,7 +156,8 @@ class API:
         ret, status = self.get("api/v2/listShieldedLens", data)
         return ret.get("shielded_lens", []), status
 
-    def set_enforced(self, op, zone=None, app=None, pod=None, container=None, svc=None, svc_port=None, tenant=None):
+    def set_enforced(self, op, zone=None, app=None, pod=None, container=None,
+            process=None, parent=None, binpath=None, svc=None, svc_port=None, tenant=None):
         """Change the enforcement state of a lens
             Usage: status = api.set_enforced("DEL")
         """
@@ -179,6 +180,11 @@ class API:
             assert None not in [zone, app, pod], "zone, app, and pod must be specified for the container"
             data["pod"] = pod
             data["container"] = container
+        if process:
+            assert None not in [zone, app, process, parent, binpath], "zone, app, process, parent, binpath must be specified"
+            data["process"] = process
+            data["parentProcess"] = parent
+            data["binaryName"] = binpath
 
         if g_debug: print(data)
 

@@ -38,13 +38,17 @@ def lens(args):
             else:
                 args.svc_port = None
             API().set_enforced(op, args.zone, args.app, args.pod,
-                args.container, args.svc, args.svc_port, args.tenant)
+                args.container, args.process, args.parent, args.binpath,
+                args.svc, args.svc_port, args.tenant)
     else: # get
         filterby = []
         if args.zone: filterby.append("lens.zone=%s" % args.zone)
         if args.app: filterby.append("lens.app=%s" % args.app)
         if args.pod: filterby.append("lens.pod=%s" % args.pod)
         if args.container: filterby.append("lens.container_name=%s" % args.container)
+        if args.process: filterby.append("lens.process=%s" % args.process)
+        if args.parent: filterby.append("lens.parent_process=%s" % args.parent)
+        if args.binpath: filterby.append("lens.binary_name=%s" % args.binpath)
         utils.dump_table(API().get_enforced(args.tenant)[0], filterby=None if filterby == [] else ":".join(filterby))
 
 def podmap(args):
@@ -540,6 +544,9 @@ if __name__ == "__main__":
     parser_opt = parser_cmd.add_argument("-a", "--app", help="app for the lens")
     parser_opt = parser_cmd.add_argument("-p", "--pod", help="pod for the lens")
     parser_opt = parser_cmd.add_argument("-c", "--container", help="container for the lens")
+    parser_opt = parser_cmd.add_argument("--process", help="process for the lens")
+    parser_opt = parser_cmd.add_argument("--parent", help="parent process for the lens")
+    parser_opt = parser_cmd.add_argument("--binpath", help="binary path for the lens")
     parser_opt = parser_cmd.add_argument("-s", "--svc", help="service for the lens")
     parser_opt = parser_cmd.add_argument("-S", "--set",
             choices=["enforce", "unenforce"],
