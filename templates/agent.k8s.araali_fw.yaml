@@ -144,6 +144,7 @@ identities:
   pushdown: []
 - node:
     name: node_12
+    rename: helm
     zone: .*
     app: .*
     pod: .*
@@ -154,11 +155,13 @@ identities:
   pushdown: []
 - node:
     name: node_13
+    rename: github_araalinetworks
     dns_pattern: araalinetworks.github.io
     dst_port: 443
   pushdown: []
 - node:
     name: node_5
+    rename: araali_agent
     zone: .*
     app: .*
     pod: .*
@@ -169,11 +172,13 @@ identities:
   pushdown: []
 - node:
     name: node_6
+    rename: araalinetworks_aws_prod
     dns_pattern: prod.aws.araalinetworks.com
     dst_port: 443
   pushdown: []
 - node:
     name: node_7
+    rename: araalinetworks_aws_ss_prod
     dns_pattern: prod.ss.aws.araalinetworks.com
     dst_port: 443
   pushdown: []
