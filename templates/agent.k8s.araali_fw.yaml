@@ -143,6 +143,41 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: node_12
+    zone: .*
+    app: .*
+    pod: .*
+    container: araali-agent
+    binary_name: /usr/local/bin/helm
+    parent_process: sh
+    process: helm
+  pushdown: []
+- node:
+    name: node_13
+    dns_pattern: araalinetworks.github.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_5
+    zone: .*
+    app: .*
+    pod: .*
+    container: araali-agent
+    binary_name: /app/araali-agent
+    parent_process: bash
+    process: araali-agent
+  pushdown: []
+- node:
+    name: node_6
+    dns_pattern: prod.aws.araalinetworks.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: node_7
+    dns_pattern: prod.ss.aws.araalinetworks.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
@@ -212,6 +247,13 @@ authorizations:
   - github
   - github_objects_usercontent
   - github_releases_usercontent
+- name: node_13
+  in:
+  - node_12
+- name: node_5
+  out:
+  - node_6
+  - node_7
 - name: sh_owasp_dependency_check
   out:
   - maven_repo1

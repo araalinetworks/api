@@ -113,7 +113,7 @@ Any failure conditions are in general recorded in /var/log/cloud-init-output.log
 
 Uninstall::
 
-    sudo ./araalict.linux-amd64 unfortify-self
+    sudo ./araalictl.linux-amd64 unfortify-self
 
 Review the Results
 ******************
