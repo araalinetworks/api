@@ -15,6 +15,16 @@ identities:
     process: http
   pushdown: []
 - node:
+    name: araali_agent
+    zone: .*
+    app: .*
+    pod: .*
+    container: araali-agent
+    binary_name: /app/araali-agent
+    parent_process: bash
+    process: araali-agent
+  pushdown: []
+- node:
     name: araali_cni
     zone: .*
     app: k8s-nodes
@@ -31,6 +41,16 @@ identities:
     binary_name: /opt/araali/bin/grype
     parent_process: sh
     process: grype
+  pushdown: []
+- node:
+    name: araalinetworks_aws_prod
+    dns_pattern: prod.aws.araalinetworks.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: araalinetworks_aws_ss_prod
+    dns_pattern: prod.ss.aws.araalinetworks.com
+    dst_port: 443
   pushdown: []
 - node:
     name: aws_ecr
@@ -63,6 +83,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: github_araalinetworks
+    dns_pattern: araalinetworks.github.io
+    dst_port: 443
+  pushdown: []
+- node:
     name: github_objects_usercontent
     dns_pattern: objects.githubusercontent.com
     dst_port: 443
@@ -91,6 +116,16 @@ identities:
     binary_name: /opt/araali/bin/guarantor.current
     parent_process: araalictl
     process: guarantor
+  pushdown: []
+- node:
+    name: helm
+    zone: .*
+    app: .*
+    pod: .*
+    container: araali-agent
+    binary_name: /usr/local/bin/helm
+    parent_process: sh
+    process: helm
   pushdown: []
 - node:
     name: helper_grype
@@ -143,46 +178,6 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
-    name: node_12
-    rename: helm
-    zone: .*
-    app: .*
-    pod: .*
-    container: araali-agent
-    binary_name: /usr/local/bin/helm
-    parent_process: sh
-    process: helm
-  pushdown: []
-- node:
-    name: node_13
-    rename: github_araalinetworks
-    dns_pattern: araalinetworks.github.io
-    dst_port: 443
-  pushdown: []
-- node:
-    name: node_5
-    rename: araali_agent
-    zone: .*
-    app: .*
-    pod: .*
-    container: araali-agent
-    binary_name: /app/araali-agent
-    parent_process: bash
-    process: araali-agent
-  pushdown: []
-- node:
-    name: node_6
-    rename: araalinetworks_aws_prod
-    dns_pattern: prod.aws.araalinetworks.com
-    dst_port: 443
-  pushdown: []
-- node:
-    name: node_7
-    rename: araalinetworks_aws_ss_prod
-    dns_pattern: prod.ss.aws.araalinetworks.com
-    dst_port: 443
-  pushdown: []
-- node:
     name: quay_io
     dns_pattern: quay.io
     dst_port: 443
@@ -222,11 +217,18 @@ authorizations:
   out:
   - gcp_packages
   - ubuntu_archive
+- name: araali_agent
+  out:
+  - araalinetworks_aws_prod
+  - araalinetworks_aws_ss_prod
 - name: araalifw_grype
   out:
   - anchore_io
   - aws_ecr
   - aws_ecr_public
+- name: github_araalinetworks
+  in:
+  - helm
 - name: guarantor
   in:
   - araali_cni
@@ -252,13 +254,6 @@ authorizations:
   - github
   - github_objects_usercontent
   - github_releases_usercontent
-- name: node_13
-  in:
-  - node_12
-- name: node_5
-  out:
-  - node_6
-  - node_7
 - name: sh_owasp_dependency_check
   out:
   - maven_repo1
