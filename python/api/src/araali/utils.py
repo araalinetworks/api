@@ -7,6 +7,14 @@ import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
 
+def update_kubeconfig(cluster_name):
+    rc = run_command("aws eks update-kubeconfig --name %s" % (
+        cluster_name), debug=False, result=True, strip=False)
+    if rc[0] != 0:
+        print("*** failed: %s" % rc[1].decode())
+        return False, None
+    return True, rc[1]
+
 def flatten_obj(prefix, root):
     res = []
     for k, v in root.items():

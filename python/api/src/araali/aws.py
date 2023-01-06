@@ -1,5 +1,5 @@
 import boto3
-from . import utils
+import utils
 
 def cf_ls(get_all):
         client = boto3.client("cloudformation")
@@ -20,6 +20,38 @@ def cf_rm(name):
 
 def cf_add_vm():
     print("adding vm")
+
+def cf_launch_fortified_vm(stack_name, email, key_pair):
+    template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartStack.template.json"
+    rc = utils.run_command("aws cloudformation create-stack --stack-name %s --template-url %s\
+        --parameters ParameterKey=KeyName,ParameterValue=%s ParameterKey=email,ParameterValue=%s" % (
+        stack_name, template_url, key_pair, email), debug=False, result=True, strip=False)
+    if rc[0] != 0:
+        print("*** failed: %s" % rc[1].decode())
+        return False, None
+    return True, rc[1]
+
+def cf_launch_eks_cluster(stack_name, cluster_name, availability_zones):
+    template_url = "https://s3.amazonaws.com/aws-quickstart/quickstart-amazon-eks/templates/amazon-eks-entrypoint-new-vpc.template.yaml"
+    availability_zone_str = ""
+    for zone in availability_zones:
+        availability_zone_str += "\\\\," + zone
+    availability_zone_str = availability_zone_str.strip("\\,")
+    rc = utils.run_command("aws cloudformation create-stack --stack-name %s --template-url %s --parameters ParameterKey=AvailabilityZones,ParameterValue=%s\
+     ParameterKey=EKSClusterName,ParameterValue=%s ParameterKey=NumberOfAZs,ParameterValue=2 --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND" % (
+        stack_name, template_url, availability_zone_str, cluster_name), debug=False, result=True, strip=False)
+    if rc[0] != 0:
+        print("*** failed: %s" % rc[1].decode())
+        return False, None
+    return True, rc[1]
+
+def cf_validate_stack_creation(stack_name):
+    cf_client = boto3.client('cloudformation')
+    cf_response = cf_client.describe_stacks(StackName=stack_name)
+    cf_stacks = cf_response["Stacks"]
+    cf_stack = cf_stacks[0]
+    stack_status = cf_stack["StackStatus"]
+    return stack_status ==  "CREATE_COMPLETE" or stack_status == "UPDATE_COMPLETE"
 
 def assets(members):
     curr_account = boto3.client('sts').get_caller_identity().get('Account')
