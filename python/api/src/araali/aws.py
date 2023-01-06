@@ -1,5 +1,5 @@
 import boto3
-import utils
+from . import utils
 
 def cf_ls(get_all):
         client = boto3.client("cloudformation")
