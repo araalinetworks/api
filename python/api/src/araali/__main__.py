@@ -513,20 +513,20 @@ def fw_config(args):
     print(yaml.dump(knobs))
 
 def quickstart(args):
+    # TODO(rsn): Till we handle subtenants properly, maybe add a check for whether user exists at this point itself
     timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
-        print(args)
-        success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack-%s"%timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
+        success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack-%s" % timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
             sys.exit(1)
     elif args.quickstart_subparser_name == "eks":
         eks_client = boto3.client('eks')
-        EKS_STACK_NAME = "araali-quickstart-stack-%s"%timestamp_str
-        EKS_CLUSTER_NAME = "araali-quickstart-eks-%s"%timestamp_str
+        EKS_STACK_NAME = "araali-quickstart-stack-%s" % timestamp_str
+        EKS_CLUSTER_NAME = "araali-quickstart-eks-%s" % timestamp_str
         cluster_name = args.name
         launch_cluster = True
-        if cluster_name == "":
+        if cluster_name == None or cluster_name == "":
             launch_cluster = True
             cluster_name = EKS_CLUSTER_NAME
         else:
@@ -578,10 +578,10 @@ def quickstart(args):
         success, _ = utils.run_command_logfailure("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
         if not success:
             sys.exit(1)
-        success, _ = utils.run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s"%(args.email,cluster_arn))
+        success, _ = utils.run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s" % (args.email, cluster_arn))
         if not success:
             sys.exit(1)
-        print("Quickstart initialized successfully...")
+    print("Quickstart initialized successfully...")
 
 def aws(args):
     if args.aws_subparser_name == "cf":
@@ -736,7 +736,7 @@ if __name__ == "__main__":
 
     parser_quickstart_eks = quickstart_subparsers.add_parser("eks", help="Launch Araali Quickstart for EKS")
     parser_quickstart_eks.add_argument('-e', '--email', help="email of quickstart user")
-    parser_quickstart_eks.add_argument('-n', '--name', default="araali-quickstart-eks", help="name of quickstart EKS cluster")
+    parser_quickstart_eks.add_argument('-n', '--name', default="", help="name of quickstart EKS cluster")
     parser_quickstart_eks.add_argument('-a', '--availabilityzones', default=["us-west-2a", "us-west-2b"], help="Availability Zones within Region to deploy Araali quickstart")
 
     parser_aws = top_subparsers.add_parser("aws", help='aws utilities')
