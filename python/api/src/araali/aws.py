@@ -23,21 +23,18 @@ def cf_add_vm():
 
 def cf_launch_fortified_vm(stack_name, email, key_pair, ami_id):
     if ami_id is None or ami_id == "":
-        # Launch latest AmazonLinux AMI
-        template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartStack.template.json"
-        return utils.run_command_logfailure(
-            "aws cloudformation create-stack --stack-name %s --template-url %s\
-            --parameters ParameterKey=KeyName,ParameterValue=%s ParameterKey=email,ParameterValue=%s" % (
-            stack_name, template_url, key_pair, email)
-        )
-    else:
-        # Use custom AMI ID (For internal usage)
-        template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartInternalStack.template.json"
-        return utils.run_command_logfailure(
-            "aws cloudformation create-stack --stack-name %s --template-url %s\
-            --parameters ParameterKey=KeyName,ParameterValue=%s ParameterKey=email,ParameterValue=%s ParameterKey=AmiId,ParameterValue=%s" % (
-            stack_name, template_url, key_pair, email, ami_id)
-        )
+        ssm_client = boto3.client('ssm')
+        response = ssm_client.get_parameter(Name='/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2')
+        if "Parameter" not in response and "Value" not in response["Parameter"]:
+            print("Error: Failed to fetch latest AmazonLinux2 AMI ID from SSM")
+            return False, None
+        ami_id = response["Parameter"]["Value"]
+    template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartInternalStack.template.json"
+    return utils.run_command_logfailure(
+        "aws cloudformation create-stack --stack-name %s --template-url %s\
+        --parameters ParameterKey=KeyName,ParameterValue=%s ParameterKey=email,ParameterValue=%s ParameterKey=AmiId,ParameterValue=%s" % (
+        stack_name, template_url, key_pair, email, ami_id)
+    )
 
 def cf_launch_eks_cluster(stack_name, cluster_name, availability_zones):
     template_url = "https://s3.amazonaws.com/aws-quickstart/quickstart-amazon-eks/templates/amazon-eks-entrypoint-new-vpc.template.yaml"
