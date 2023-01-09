@@ -3,9 +3,13 @@ from __future__ import print_function
 import os
 import shlex
 import subprocess
+import sys
 import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
+
+def update_kubeconfig(cluster_name):
+    return run_command_logfailure("aws eks update-kubeconfig --name %s" % cluster_name)
 
 def flatten_obj(prefix, root):
     res = []
@@ -187,6 +191,13 @@ def make_map(kvstr):
 def eprint(*args, **kwargs):
     args = [a.decode() for a in args]
     print(*args, file=sys.stderr, **kwargs)
+
+def run_command_logfailure(cmd):
+    rc = run_command(cmd, debug=False, result=True, strip=False)
+    if rc[0] != 0:
+        print("*** failed: %s" % rc[1].decode())
+        return False, None
+    return True, rc[1]
 
 def run_command(command, result=False, strip=True, in_text=None, debug=False, env=os.environ):
     def collect_output(ret, output):
