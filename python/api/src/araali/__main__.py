@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import argparse
+import boto3
 import datetime
 import time
 from dateutil import parser as du_parser
@@ -512,49 +513,74 @@ def fw_config(args):
     print(yaml.dump(knobs))
 
 def quickstart(args):
+    timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
-        success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack", email=args.email, key_pair=args.key)
+        print(args)
+        success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack-%s"%timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
         if not success:
-            print("Quickstart setup failed")
-            return
-        return result
+            print("Error: Quickstart setup failed, message: %s"%result)
+            sys.exit(1)
     elif args.quickstart_subparser_name == "eks":
-        EKS_STACK_NAME = "araali-quickstart-stack"
-        EKS_CLUSTER_NAME = "araali-quickstart-eks"
+        eks_client = boto3.client('eks')
+        EKS_STACK_NAME = "araali-quickstart-stack-%s"%timestamp_str
+        EKS_CLUSTER_NAME = "araali-quickstart-eks-%s"%timestamp_str
         cluster_name = args.name
-        launch_cluster = args.launchcluster
+        launch_cluster = True
         if cluster_name == "":
             launch_cluster = True
             cluster_name = EKS_CLUSTER_NAME
+        else:
+            # Check if cluster exists
+            response = eks_client.list_clusters()
+            if "clusters" not in response:
+                print("Error: list_clusters returned invalid response")  
+                sys.exit(1)  
+            launch_cluster = cluster_name not in response["clusters"]
         # Launch cluster is requested
         if launch_cluster:
             success, result = _aws.cf_launch_eks_cluster(stack_name=EKS_STACK_NAME, cluster_name=cluster_name, availability_zones=args.availabilityzones)
             if not success:
                 print("Error: Quickstart EKS cluster setup failed")
-                return
+                sys.exit(1)
             # Wait until cluster is set up
             counter = 0
             while(True):
-                print("Waiting for cluster create - %d/20" %counter)
+                if counter % 10 == 0:
+                    print("Waiting for cluster create - %d/120" %counter)
                 if _aws.cf_validate_stack_creation(EKS_STACK_NAME):
                     break
-                if counter >= 20:
+                if counter >= 120:
                     print("Error: Quickstart EKS cluster setup failed")
-                    return
+                    sys.exit(1)
                 counter += 1
-                time.sleep(60 * 3)
-        # Update kubeconfig to point to newly created cluster
+                time.sleep(30)
+        # Update kubeconfig to point to newly created cluster and fetch ARN
         utils.update_kubeconfig(cluster_name)
+        response = eks_client.describe_cluster(name=cluster_name)
+        if "cluster" not in response and "arn" not in response["cluster"]:
+            sys.exit(1)
+        cluster_arn = response["cluster"]["arn"]
+        # Install Helm on machine if not present
+        # Verify if Helm is present on machine
+        rc = utils.run_command("which helm", debug=False, result=True, strip=False)
+        if rc[0]:
+            # Helm is not present. Download Helm on machine
+            success, _ = utils.run_command_logfailure("curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3")
+            if not success:
+                sys.exit(1)
+            success, _ = utils.run_command_logfailure("chmod 700 get_helm.sh")
+            if not success:
+                sys.exit(1)
+            success, _ = utils.run_command_logfailure("./get_helm.sh")
+            if not success:
+                sys.exit(1)
         # Run helm install command
-        rc = utils.run_command("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
-        if rc[0] != 0:
-            print("*** failed: %s" % rc[1].decode())
-            return
-        rc = utils.run_command("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny" % (
-        args.email), debug=False, result=True, strip=False)
-        if rc[0] != 0:
-            print("*** failed: %s" % rc[1].decode())
-            return
+        success, _ = utils.run_command_logfailure("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
+        if not success:
+            sys.exit(1)
+        success, _ = utils.run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s"%(args.email,cluster_arn))
+        if not success:
+            sys.exit(1)
         print("Quickstart initialized successfully...")
 
 def aws(args):
@@ -700,18 +726,18 @@ if __name__ == "__main__":
 
     parser_ctl = top_subparsers.add_parser("ctl", help="run araalictl commands")
 
-    parser_quickstart = top_subparsers.add_parser("quickstart", help="launch quickstart for given email")
+    parser_quickstart = top_subparsers.add_parser("quickstart", help="Launch Araali Quickstart")
     quickstart_subparsers = parser_quickstart.add_subparsers(dest="quickstart_subparser_name")
 
-    parser_quickstart_vm = quickstart_subparsers.add_parser("vm", help="launch VM quickstart")
+    parser_quickstart_vm = quickstart_subparsers.add_parser("vm", help="Launch Araali VM quickstart")
     parser_quickstart_vm.add_argument('-e', '--email', help="email of quickstart user")
     parser_quickstart_vm.add_argument('-k', '--key', help="ssh key to use")
+    parser_quickstart_vm.add_argument('-a', '--ami', help="ami ID of VM to be launched")
 
-    parser_quickstart_eks = quickstart_subparsers.add_parser("eks", help="launch EKS quickstart")
+    parser_quickstart_eks = quickstart_subparsers.add_parser("eks", help="Launch Araali Quickstart for EKS")
     parser_quickstart_eks.add_argument('-e', '--email', help="email of quickstart user")
-    parser_quickstart_eks.add_argument('-lC', '--launchcluster', action="store_true", help="need to launch a new cluster if set to true")
     parser_quickstart_eks.add_argument('-n', '--name', default="araali-quickstart-eks", help="name of quickstart EKS cluster")
-    parser_quickstart_eks.add_argument('-az', '--availabilityzones', default=["us-west-2a", "us-west-2b"], help="Availability Zones within Region to deploy Araali quickstart")
+    parser_quickstart_eks.add_argument('-a', '--availabilityzones', default=["us-west-2a", "us-west-2b"], help="Availability Zones within Region to deploy Araali quickstart")
 
     parser_aws = top_subparsers.add_parser("aws", help='aws utilities')
     aws_subparsers = parser_aws.add_subparsers(dest="aws_subparser_name")
