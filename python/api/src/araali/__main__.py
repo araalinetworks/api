@@ -513,9 +513,15 @@ def fw_config(args):
     print(yaml.dump(knobs))
 
 def quickstart(args):
+    if args.email == None or args.email == "":
+        print("Email must be specified to run quickstart")
+        sys.exit(1)
     # TODO(rsn): Till we handle subtenants properly, maybe add a check for whether user exists at this point itself
     timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
+        if args.key == None or args.key == "":
+            print("Key must be specified for VM case")
+            sys.exit(1)
         success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack-%s" % timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
