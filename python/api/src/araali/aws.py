@@ -8,7 +8,7 @@ from . import utils
 def cf_ls(get_all):
         client = boto3.client("cloudformation")
         ret = client.list_stacks()
-        while "NextToken" in ret:
+        while True:
             for stack in ret["StackSummaries"]:
                 if get_all or "araaliapicf-" in stack["StackName"]:
                     if stack["StackStatus"] in ["DELETE_COMPLETE"]: continue
@@ -21,6 +21,8 @@ def cf_ls(get_all):
                     if "Outputs" in outputs:
                         obj["Outputs"] = outputs["Outputs"]
                     yield obj
+            if "NextToken" not in ret:
+                break
             ret = client.list_stacks(NextToken=ret["NextToken"])
 
 def cf_rm(name):
