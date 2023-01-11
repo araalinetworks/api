@@ -555,6 +555,49 @@ def pull(args):
     if not found:
         print("No template found")
 
+def search(args):
+    def print_non_araali_egress(a):
+        if "subnet" in a["server"]["non_araali"]["server"]:
+            server_ip = a["server"]["non_araali"]["server"]["subnet"]
+            org = a["server"]["non_araali"]["server"].get("subnet", "None")
+            print("-> %s(%s)" % (server_ip, org))
+        if "dns_pattern" in a["server"]["non_araali"]["server"]:
+            try:
+             print("%s.%s.%s -> %s:%s" % (a["client"]["araali"]["parent_process"],
+              a["client"]["araali"]["process"], a["client"]["araali"]["binary_name"],
+              a["server"]["non_araali"]["server"]["dns_pattern"],
+              a["server"]["non_araali"]["server"]["dst_port"]))
+            except:
+                print("server", yaml.dump(a))
+                raise Exception("faied")
+            dns = a["server"]["non_araali"]["server"]["dns_pattern"].split(":")[1:-1]
+            rc = utils.run_command("ls %s/" % (utils.cfg["template_dir"]),
+                    debug=g_debug, result=True, strip=False)[1].decode().strip().split("\n")
+            if "saas.%s.yaml" % ".".join(dns[0].rsplit(".", 2)[-2:]) in rc:
+                print("\tInstall saas.%s.yaml" % ".".join(dns[0].rsplit(".", 2)[-2:]))
+            else:
+                print("\t*** no template exists for saas.%s.yaml" % ".".join(dns[0].rsplit(".", 2)[-2:]))
+
+    alerts = yaml.load(sys.stdin.read(), yaml.SafeLoader)
+    for a in alerts:
+        if a["alert_info"]["communication_alert_type"] == "EXTERNAL_COMMUNICATION_ATTEMPTED":
+            print_non_araali_egress(a)
+        elif a["alert_info"]["communication_alert_type"] == "NEW_PERIMETER_INGRESS_SERVICE":
+            if args.server: # non-araali ingress
+                print("-> %s.%s.%s" % (a["server"]["araali"]["parent_process"],
+                    a["server"]["araali"]["process"], a["server"]["araali"]["binary_name"]))
+        elif a["alert_info"]["communication_alert_type"] == "LATERAL_MOVEMENT_ATTEMPTED":
+            if a["direction"] == "NON_ARAALI_EGRESS":
+                print_non_araali_egress(a)
+            else: # araali
+                print("%s.%s.%s -> %s.%s%s" % (a["client"]["araali"]["parent_process"],
+                  a["client"]["araali"]["process"], a["client"]["araali"]["binary_name"],
+                  a["server"]["araali"]["parent_process"],
+                  a["server"]["araali"]["process"], a["server"]["araali"]["binary_name"]))
+        else:
+            print("server", yaml.dump(a))
+            raise Exception("unhandled: %s" % a["alert_info"]["communication_alert_type"])
+
 def fmt(args):
     if args.verbose >= 1: print(args.template, args.dirname)
     graph = Graph(args.template)

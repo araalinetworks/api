@@ -513,23 +513,19 @@ def fw_config(args):
     print(yaml.dump(knobs))
 
 def quickstart(args):
-    if args.email == None or args.email == "":
-        print("Email must be specified to run quickstart")
-        sys.exit(1)
     # TODO(rsn): Till we handle subtenants properly, maybe add a check for whether user exists at this point itself
     timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
-        if args.key == None or args.key == "":
-            print("Key must be specified for VM case")
-            sys.exit(1)
-        success, result = _aws.cf_launch_fortified_vm(stack_name="araali-quickstart-vm-stack-%s" % timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
+        success, result = _aws.cf_launch_fortified_vm(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
             sys.exit(1)
+        else:
+            print(result)
     elif args.quickstart_subparser_name == "eks":
         eks_client = boto3.client('eks')
-        EKS_STACK_NAME = "araali-quickstart-stack-%s" % timestamp_str
-        EKS_CLUSTER_NAME = "araali-quickstart-eks-%s" % timestamp_str
+        EKS_STACK_NAME = "araaliapicfg-quickstart-stack-%s" % timestamp_str
+        EKS_CLUSTER_NAME = "araaliapicfg-quickstart-eks-%s" % timestamp_str
         cluster_name = args.name
         launch_cluster = True
         if cluster_name == None or cluster_name == "":
@@ -777,6 +773,9 @@ if __name__ == "__main__":
     top_parser.add_argument('-T', '--template', help="apply operation for a specific template")
 
     t_subparsers = parser_template.add_subparsers(dest="t_subparser_name")
+
+    parser_alerts = t_subparsers.add_parser("search", help="search for match in existing templates")
+    parser_alerts.add_argument('-s', '--server', help="show exposed servers")
 
     parser_alerts = t_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")

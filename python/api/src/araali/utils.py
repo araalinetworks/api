@@ -197,7 +197,7 @@ def run_command_logfailure(cmd):
     if rc[0] != 0:
         print("*** failed: %s" % rc[1].decode())
         return False, None
-    return True, rc[1]
+    return True, rc[1].decode()
 
 def run_command(command, result=False, strip=True, in_text=None, debug=False, env=os.environ):
     def collect_output(ret, output):
