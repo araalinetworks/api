@@ -21,6 +21,7 @@ import yaml
 from araali import API
 from . import api
 from . import araalictl
+from . import quickstart_bend
 from . import utils
 from . import template as module_template
 from . import aws as _aws
@@ -516,12 +517,23 @@ def quickstart(args):
     # TODO(rsn): Till we handle subtenants properly, maybe add a check for whether user exists at this point itself
     timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
-        success, result = _aws.cf_launch_fortified_vm(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, email=args.email, key_pair=args.key, ami_id=args.ami)
+        # Generate tenant_id and token
+        success, tenant_id, api_token = quickstart_bend.create_tenant_and_token(args.email)
+        if not success:
+            print("Failed to create quickstart tenant")
+            sys.exit(1)
+        # Generate workload yaml
+        workload_id, success = quickstart_bend.generate_workload_yaml(api_token, "quickstartdemo_vm", tenant_id)
+        if not success:
+            print("Failed to generate workloadID")
+            sys.exit(1)
+        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, workload_id=workload_id, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id, api_token=api_token)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
             sys.exit(1)
         else:
             print(result)
+            print("Araali tenant_id: %s" % tenant_id)
     elif args.quickstart_subparser_name == "eks":
         eks_client = boto3.client('eks')
         EKS_STACK_NAME = "araaliapicfg-quickstart-stack-%s" % timestamp_str
