@@ -28,7 +28,6 @@ def generate_workload_yaml(api_token, workload_name, tenant_id):
     host = "https://api-%s.aws.araalinetworks.com" % utils.cfg["backend"]
     headers = {"Authorization": "Bearer %s" % api_token}
     data = {"workload_name": workload_name, "tenant.id": tenant_id, "yaml_type": "2"}
-    print(data)
     try:
         rc = requests.get("%s/%s" % (host, "api/v2/createFortifyYaml"), params=data, headers=headers)
         if rc.status_code != 200:
@@ -38,7 +37,6 @@ def generate_workload_yaml(api_token, workload_name, tenant_id):
             print("Invalid response from apiserver, workload_yaml not present")
             return None, False
         dct = yaml.safe_load(resp_json["workload_yaml"])
-        print(dct)
         if dct is None or "araali" not in dct or "workload-id" not in dct["araali"] or "zone" not in dct["araali"]:
             return None, False
         return dct["araali"]["workload-id"], True
