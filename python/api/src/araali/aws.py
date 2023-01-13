@@ -56,15 +56,53 @@ def verify_key_pair(key_pair):
         sys.exit(1)
     return key_pair, key_pair in [a["KeyName"] for a in ret["KeyPairs"]]
 
-def cf_launch_fortified_vm(stack_name, email, key_pair, ami_id):
+def cf_launch_fortified_vm_with_workload_id(stack_name, workload_yaml, key_pair, ami_id, tenant_id):
+    key_pair, kp_valid = verify_key_pair(key_pair)
+    if not kp_valid:
+        print("*** key-pair: %s not valid" % key_pair)
+        return False, None
+    if ami_id is None:
+        ssm_client = boto3.client('ssm')
+        response = ssm_client.get_parameter(Name='/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2')
+        if "Parameter" not in response and "Value" not in response["Parameter"]:
+            print("Error: Failed to fetch latest AmazonLinux2 AMI ID from SSM")
+            return False, None
+        ami_id = response["Parameter"]["Value"]
+
+    template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartWorkloadIdStack.template.json"
+    response = boto3.client('cloudformation').create_stack(
+        StackName=stack_name,
+        TemplateURL=template_url,
+        Parameters=[
+            {
+                'ParameterKey': 'KeyName',
+                'ParameterValue': key_pair,
+            },
+            {
+                'ParameterKey': 'workloadYaml',
+                'ParameterValue': repr(workload_yaml),
+            },
+            {
+                'ParameterKey': 'araaliTenant',
+                'ParameterValue': tenant_id,
+            },
+            {
+                'ParameterKey': 'AmiId',
+                'ParameterValue': ami_id,
+            },
+        ]
+    )
+    return True, response
+
+def cf_launch_fortified_vm_with_email(stack_name, email, key_pair, ami_id):
     if not verify_email(email):
         print("*** email: %s not valid" % email)
-        sys.exit(1)
+        return False, None
 
     key_pair, kp_valid = verify_key_pair(key_pair)
     if not kp_valid:
         print("*** key-pair: %s not valid" % key_pair)
-        sys.exit(1)
+        return False, None
 
     if ami_id is None:
         ssm_client = boto3.client('ssm')
