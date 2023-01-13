@@ -21,7 +21,7 @@ import yaml
 from araali import API
 from . import api
 from . import araalictl
-from . import quickstart_bend
+from . import quickstart_api
 from . import utils
 from . import template as module_template
 from . import aws as _aws
@@ -518,22 +518,30 @@ def quickstart(args):
     timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     if args.quickstart_subparser_name == "vm":
         # Generate tenant_id and token
-        success, tenant_id, api_token = quickstart_bend.create_tenant_and_token(args.email)
+        success, tenant_id, api_token = quickstart_api.create_tenant_and_token(args.email)
         if not success:
             print("Failed to create quickstart tenant")
             sys.exit(1)
         # Generate workload yaml
-        workload_id, success = quickstart_bend.generate_workload_yaml(api_token, "quickstartdemo_vm", tenant_id)
+        workload_yaml, success = quickstart_api.generate_workload_yaml(api_token, "quickstartdemo_vm", tenant_id)
         if not success:
             print("Failed to generate workloadID")
             sys.exit(1)
-        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, workload_id=workload_id, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id, api_token=api_token)
+        # Set app
+        workload_dict = yaml.load(workload_yaml, Loader=yaml.Loader)
+        workload_dict['araali']['app'] = ":demo_vm:"
+        # Need to modify values yaml for non-prod backends
+        if 'prod' != utils.cfg["backend"]:
+            workload_dict['araali']['backend'] = "%s.aws.araalinetworks.com" % utils.cfg["backend"]
+        workload_yaml = yaml.dump(workload_dict)
+        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, workload_yaml=workload_yaml, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
             sys.exit(1)
         else:
-            print(result)
-            print("Araali tenant_id: %s" % tenant_id)
+            print("Quickstart initialized for %s" % args.email)
+            print("\tAraali Tenant ID: %s" % tenant_id)
+            print("\tCloudformation Stack ID: %s" % result["StackId"])
     elif args.quickstart_subparser_name == "eks":
         eks_client = boto3.client('eks')
         EKS_STACK_NAME = "araaliapicfg-quickstart-stack-%s" % timestamp_str
@@ -595,7 +603,7 @@ def quickstart(args):
         success, _ = utils.run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s" % (args.email, cluster_arn))
         if not success:
             sys.exit(1)
-    print("Quickstart initialized successfully...")
+        print("Quickstart initialized successfully...")
 
 def aws(args):
     if args.aws_subparser_name == "cf":

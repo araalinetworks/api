@@ -1,6 +1,5 @@
 from . import utils
 import requests
-import yaml
 
 MAX_RETRIES = 5
 
@@ -28,18 +27,11 @@ def generate_workload_yaml(api_token, workload_name, tenant_id):
     host = "https://api-%s.aws.araalinetworks.com" % utils.cfg["backend"]
     headers = {"Authorization": "Bearer %s" % api_token}
     data = {"workload_name": workload_name, "tenant.id": tenant_id, "yaml_type": "2"}
-    try:
-        rc = requests.get("%s/%s" % (host, "api/v2/createFortifyYaml"), params=data, headers=headers)
-        if rc.status_code != 200:
-            return None, False
-        resp_json = rc.json()
-        if "workload_yaml" not in resp_json:
-            print("Invalid response from apiserver, workload_yaml not present")
-            return None, False
-        dct = yaml.safe_load(resp_json["workload_yaml"])
-        if dct is None or "araali" not in dct or "workload-id" not in dct["araali"] or "zone" not in dct["araali"]:
-            return None, False
-        return dct["araali"]["workload-id"], True
-    except Exception as ex:
-        print(ex)
+    rc = requests.get("%s/%s" % (host, "api/v2/createFortifyYaml"), params=data, headers=headers)
+    if rc.status_code != 200:
         return None, False
+    resp_json = rc.json()
+    if "workload_yaml" not in resp_json:
+        print("Invalid response from apiserver, workload_yaml not present")
+        return None, False
+    return resp_json["workload_yaml"], True

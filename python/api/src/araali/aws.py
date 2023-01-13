@@ -56,7 +56,7 @@ def verify_key_pair(key_pair):
         sys.exit(1)
     return key_pair, key_pair in [a["KeyName"] for a in ret["KeyPairs"]]
 
-def cf_launch_fortified_vm_with_workload_id(stack_name, workload_id, key_pair, ami_id, tenant_id, api_token):
+def cf_launch_fortified_vm_with_workload_id(stack_name, workload_yaml, key_pair, ami_id, tenant_id):
     key_pair, kp_valid = verify_key_pair(key_pair)
     if not kp_valid:
         print("*** key-pair: %s not valid" % key_pair)
@@ -70,11 +70,29 @@ def cf_launch_fortified_vm_with_workload_id(stack_name, workload_id, key_pair, a
         ami_id = response["Parameter"]["Value"]
 
     template_url = "https://s3.us-west-1.amazonaws.com/araalinetworks.test/quickstart_vm/AraaliVMQuickstartWorkloadIdStack.template.json"
-    return utils.run_command_logfailure(
-        "aws cloudformation create-stack --stack-name %s --template-url %s\
-        --parameters ParameterKey=KeyName,ParameterValue=%s ParameterKey=workloadID,ParameterValue=%s ParameterKey=araaliTenant,ParameterValue=%s ParameterKey=apiToken,ParameterValue=%s ParameterKey=AmiId,ParameterValue=%s" % (
-        stack_name, template_url, key_pair, workload_id, tenant_id, api_token, ami_id)
-    ) 
+    response = boto3.client('cloudformation').create_stack(
+        StackName=stack_name,
+        TemplateURL=template_url,
+        Parameters=[
+            {
+                'ParameterKey': 'KeyName',
+                'ParameterValue': key_pair,
+            },
+            {
+                'ParameterKey': 'workloadYaml',
+                'ParameterValue': repr(workload_yaml),
+            },
+            {
+                'ParameterKey': 'araaliTenant',
+                'ParameterValue': tenant_id,
+            },
+            {
+                'ParameterKey': 'AmiId',
+                'ParameterValue': ami_id,
+            },
+        ]
+    )
+    return True, response
 
 def cf_launch_fortified_vm_with_email(stack_name, email, key_pair, ami_id):
     if not verify_email(email):
