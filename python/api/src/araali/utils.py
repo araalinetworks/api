@@ -192,8 +192,8 @@ def eprint(*args, **kwargs):
     args = [a.decode() for a in args]
     print(*args, file=sys.stderr, **kwargs)
 
-def run_command_logfailure(cmd):
-    rc = run_command(cmd, debug=False, result=True, strip=False)
+def run_command_logfailure(cmd, debug=False):
+    rc = run_command(cmd, debug=debug, result=True, strip=False)
     if rc[0] != 0:
         print("*** failed: %s" % rc[1].decode())
         return False, None

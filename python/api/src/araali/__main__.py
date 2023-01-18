@@ -21,10 +21,11 @@ import yaml
 from araali import API
 from . import api
 from . import araalictl
-from . import quickstart_api
-from . import utils
-from . import template as module_template
 from . import aws as _aws
+from . import quickstart_api
+from . import teleport as _teleport
+from . import template as module_template
+from . import utils
 
 def tenant(args):
     if args.tenant_subparser_name == "delete":
@@ -133,7 +134,7 @@ def alerts(args):
                 #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
                 dts = dt.strftime("%Y/%m/%d")
                 day_dict.setdefault(dts, []).append(a)
-            
+
             keys = [a for a in day_dict.keys()]
             keys.sort()
             print("frequency count")
@@ -366,7 +367,7 @@ def search(args):
                                 workload_dict[wkey] = 1
                             else:
                                 workload_dict[wkey] += 1
-                        
+
                         if server_m:
                             wkey = [str(server[k]) for k in filters.keys()]
                             wkey = ":".join(wkey)
@@ -555,8 +556,8 @@ def quickstart(args):
             # Check if cluster exists
             response = eks_client.list_clusters()
             if "clusters" not in response:
-                print("Error: list_clusters returned invalid response")  
-                sys.exit(1)  
+                print("Error: list_clusters returned invalid response")
+                sys.exit(1)
             launch_cluster = cluster_name not in response["clusters"]
         # Launch cluster is requested
         if launch_cluster:
@@ -627,11 +628,55 @@ def aws(args):
                          quiet=args.quiet, filterby=args.filterby,
                          countby=args.countby, groupby=args.groupby)
 
+def teleport(args):
+    if args.t_subparser_name == "login":
+        if args.app:
+            _teleport.app_login(args.app)
+            return
+        _teleport.login()
+        return
+    elif args.t_subparser_name == "logout":
+        if args.app:
+            _teleport.app_logout(args.app)
+            return
+        _teleport.logout()
+        return
+    elif args.t_subparser_name == "install":
+        _teleport.install(args.server)
+        return
+    elif args.t_subparser_name == "svc":
+        _teleport.add_svc(args.server, args.svc, args.uri)
+        return
+    elif args.apps:
+        return os.system("tsh apps ls")
+    elif args.servers:
+        return os.system("tsh ls")
+    return os.system("tsh apps ls")
+
 if __name__ == "__main__":
     top_parser = argparse.ArgumentParser(description = 'Araali Python CLI')
     top_parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
     top_parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
     top_subparsers = top_parser.add_subparsers(dest="subparser_name")
+
+    parser_cmd = top_subparsers.add_parser("teleport", help="teleport commands")
+    parser_cmd.add_argument('--apps', action="store_true", help="list apps")
+    parser_cmd.add_argument('--servers', action="store_true", help="list servers")
+    subparsers = parser_cmd.add_subparsers(dest="t_subparser_name")
+
+    parser_subcmd = subparsers.add_parser("login", help="teleport login")
+    parser_subcmd.add_argument('-a', '--app', help="app login")
+
+    parser_subcmd = subparsers.add_parser("logout", help="teleport logout")
+    parser_subcmd.add_argument('-a', '--app', help="app logout")
+
+    parser_subcmd = subparsers.add_parser("install", help="install teleport on server")
+    parser_subcmd.add_argument('server', help="user@server to use for ssh")
+
+    parser_subcmd = subparsers.add_parser("svc", help="add service to server config")
+    parser_subcmd.add_argument('server', help="user@server to use for ssh")
+    parser_subcmd.add_argument('svc', help="servcie name")
+    parser_subcmd.add_argument('uri', help="uri for service, e.g. http://localhost:8080/")
 
     parser_cmd = top_subparsers.add_parser("lens", help="show/manipulate application lenses")
     parser_opt = parser_cmd.add_argument("-t", "--tenant", help="lenses for a specific tenant")
