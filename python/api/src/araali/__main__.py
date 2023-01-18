@@ -534,7 +534,7 @@ def quickstart(args):
         if 'prod' != utils.cfg["backend"]:
             workload_dict['araali']['backend'] = "%s.aws.araalinetworks.com" % utils.cfg["backend"]
         workload_yaml = yaml.dump(workload_dict)
-        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="araaliapicf-quickstart-vm-stack-%s" % timestamp_str, workload_yaml=workload_yaml, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id)
+        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="acp-qsvm-stack-%s" % timestamp_str, workload_yaml=workload_yaml, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id)
         if not success:
             print("Error: Quickstart setup failed, message: %s"%result)
             sys.exit(1)
@@ -544,8 +544,8 @@ def quickstart(args):
             print("\tCloudformation Stack ID: %s" % result["StackId"])
     elif args.quickstart_subparser_name == "eks":
         eks_client = boto3.client('eks')
-        EKS_STACK_NAME = "araaliapicfg-quickstart-stack-%s" % timestamp_str
-        EKS_CLUSTER_NAME = "araaliapicfg-quickstart-eks-%s" % timestamp_str
+        EKS_STACK_NAME = "acp-qseks-stack-%s" % timestamp_str
+        EKS_CLUSTER_NAME = "acp-qseks-%s" % timestamp_str
         cluster_name = args.name
         launch_cluster = True
         if cluster_name == None or cluster_name == "":
