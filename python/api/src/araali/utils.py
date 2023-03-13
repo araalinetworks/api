@@ -11,6 +11,43 @@ cfg_fname = os.environ['HOME']+"/.araalirc"
 def update_kubeconfig(cluster_name):
     return run_command_logfailure("aws eks update-kubeconfig --name %s" % cluster_name)
 
+def update_gke_kubeconfig(cluster_name):
+    return run_command_logfailure("gcloud container clusters get-credentials %s" % cluster_name)
+
+def update_azure_kubeconfig(resource_group_name, cluster_name):
+    return run_command_logfailure("az aks get-credentials --resource-group %s --name %s" % (resource_group_name, cluster_name))
+
+def install_helm():
+    # Verify if Helm is present on machine
+    rc = run_command("which helm", debug=False, result=True, strip=False)
+    if rc[0]:
+        # Helm is not present. Download Helm on machine
+        success, _ = run_command_logfailure("curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3")
+        if not success:
+            return False
+        success, _ = run_command_logfailure("chmod 700 get_helm.sh")
+        if not success:
+            return False
+        success, _ = run_command_logfailure("./get_helm.sh")
+        if not success:
+            return False
+        return True
+    return False
+        
+
+def launch_quickstart_nanny(email, cluster_arn): 
+    # Run helm install command
+    success, _ = run_command_logfailure("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
+    if not success:
+        return False
+    success, _ = run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s" % (email, cluster_arn))
+    if not success:
+        return False
+    return True
+
+def get_current_kube_context():
+    return run_command_logfailure("kubectl config current-context")
+
 def flatten_obj(prefix, root):
     res = []
     for k, v in root.items():

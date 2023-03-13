@@ -578,31 +578,41 @@ def quickstart(args):
                 counter += 1
                 time.sleep(30)
         # Update kubeconfig to point to newly created cluster and fetch ARN
-        utils.update_kubeconfig(cluster_name)
+        utils.update_eks_kubeconfig(cluster_name)
         response = eks_client.describe_cluster(name=cluster_name)
         if "cluster" not in response and "arn" not in response["cluster"]:
             sys.exit(1)
         cluster_arn = response["cluster"]["arn"]
         # Install Helm on machine if not present
-        # Verify if Helm is present on machine
-        rc = utils.run_command("which helm", debug=False, result=True, strip=False)
-        if rc[0]:
-            # Helm is not present. Download Helm on machine
-            success, _ = utils.run_command_logfailure("curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3")
-            if not success:
-                sys.exit(1)
-            success, _ = utils.run_command_logfailure("chmod 700 get_helm.sh")
-            if not success:
-                sys.exit(1)
-            success, _ = utils.run_command_logfailure("./get_helm.sh")
-            if not success:
-                sys.exit(1)
-        # Run helm install command
-        success, _ = utils.run_command_logfailure("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
+        success = utils.install_helm()
         if not success:
+            print("Failed to setup Helm")
             sys.exit(1)
-        success, _ = utils.run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s" % (args.email, cluster_arn))
+        # Launch quickstart-nanny
+        success = utils.launch_quickstart_nanny(args.email, cluster_arn)
         if not success:
+            print("Failed to launch Quickstart")
+            sys.exit(1)
+        print("Quickstart initialized successfully...")
+    elif args.quickstart_subparser_name == "gke":
+        # Update kubeconfig to point to target cluster
+        cluster_name = args.name
+        utils.update_gke_kubeconfig(cluster_name)
+        # Get cluster-arn
+        success, cluster_arn = utils.get_current_kube_context()
+        if not success:
+            print("Failed to fetch kubeconfig")
+            sys.exit(1)
+        print("ClusterArn - %s" %cluster_arn)
+        # Install Helm on machine if not present
+        success = utils.install_helm()
+        if not success:
+            print("Failed to setup Helm")
+            sys.exit(1)
+        # Launch quickstart-nanny
+        success = utils.launch_quickstart_nanny(args.email, cluster_arn)
+        if not success:
+            print("Failed to launch Quickstart")
             sys.exit(1)
         print("Quickstart initialized successfully...")
 
@@ -805,6 +815,10 @@ if __name__ == "__main__":
     parser_quickstart_eks.add_argument('-e', '--email', help="email of quickstart user")
     parser_quickstart_eks.add_argument('-n', '--name', default="", help="name of quickstart EKS cluster")
     parser_quickstart_eks.add_argument('-a', '--availabilityzones', default=["us-west-2a", "us-west-2b"], help="Availability Zones within Region to deploy Araali quickstart")
+
+    parser_quickstart_gke = quickstart_subparsers.add_parser("gke", help="Launch Araali Quickstart for GKE")
+    parser_quickstart_gke.add_argument('-e', '--email', help="email of quickstart user")
+    parser_quickstart_gke.add_argument('-n', '--name', help="name of quickstart GKE cluster")
 
     parser_aws = top_subparsers.add_parser("aws", help='aws utilities')
     aws_subparsers = parser_aws.add_subparsers(dest="aws_subparser_name")
