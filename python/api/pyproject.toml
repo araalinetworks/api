@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.34"
+version = "0.0.36"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
