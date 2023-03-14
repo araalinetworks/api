@@ -603,7 +603,6 @@ def quickstart(args):
         if not success:
             print("Failed to fetch kubeconfig")
             sys.exit(1)
-        print("ClusterArn - %s" %cluster_arn)
         # Install Helm on machine if not present
         success = utils.install_helm()
         if not success:
