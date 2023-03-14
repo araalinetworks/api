@@ -8,7 +8,7 @@ import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
 
-def update_kubeconfig(cluster_name):
+def update_eks_kubeconfig(cluster_name):
     return run_command_logfailure("aws eks update-kubeconfig --name %s" % cluster_name)
 
 def update_gke_kubeconfig(cluster_name):
@@ -32,7 +32,7 @@ def install_helm():
         if not success:
             return False
         return True
-    return False
+    return True
         
 
 def launch_quickstart_nanny(email, cluster_arn): 
