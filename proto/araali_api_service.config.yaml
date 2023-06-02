@@ -37,8 +37,18 @@ http:
       post: /api/v2/updateFirewallConfig
       body: "*"
     - selector: araali_api_service.AraaliAPI.addPodNameMappings
-      get: /api/v2/addPodNameMappings
+      post: /api/v2/addPodNameMappings
+      body: "*"
     - selector: araali_api_service.AraaliAPI.listPodNameMappings
       get: /api/v2/listPodNameMappings
     - selector: araali_api_service.AraaliAPI.deletePodNameMappings
-      get: /api/v2/deletePodNameMappings
+      post: /api/v2/deletePodNameMappings
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.setShieldStatus
+      post: /api/v2/setShieldStatus
+      body: "*"
+    - selector: araali_api_service.AraaliAPI.listShieldedLens
+      get: /api/v2/listShieldedLens
+    - selector: araali_api_service.AraaliAPI.subscribeToSlackAlerts
+      post: /api/v2/subscribeToSlackAlerts
+      body: "*"

@@ -12,7 +12,7 @@
   ],
   "paths": {
     "/api/v2/addPodNameMappings": {
-      "get": {
+      "post": {
         "summary": "Add the Pod Name Mappings for given tenant",
         "operationId": "AraaliAPI_addPodNameMappings",
         "responses": {
@@ -31,18 +31,12 @@
         },
         "parameters": [
           {
-            "name": "tenant.id",
-            "description": "* Id of the tenant.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "tenant.admin_email",
-            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAddPodNameMappingsRequest"
+            }
           }
         ],
         "tags": [
@@ -115,6 +109,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           },
           {
             "name": "workload_name",
@@ -230,6 +231,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "workload_name",
             "description": "* Unique ID associated with cluster.",
             "in": "query",
@@ -243,7 +251,7 @@
       }
     },
     "/api/v2/deletePodNameMappings": {
-      "get": {
+      "post": {
         "summary": "Delete the Pod Name Mappings for given tenant",
         "operationId": "AraaliAPI_deletePodNameMappings",
         "responses": {
@@ -262,18 +270,12 @@
         },
         "parameters": [
           {
-            "name": "tenant.id",
-            "description": "* Id of the tenant.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "tenant.admin_email",
-            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
-            "in": "query",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceDeletePodNameMappingsRequest"
+            }
           }
         ],
         "tags": [
@@ -418,6 +420,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "filter.open_alerts",
             "description": "* Fetch open alerts.",
             "in": "query",
@@ -551,6 +560,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "zone",
             "description": "* Zone from which to return assets.",
             "in": "query",
@@ -648,6 +664,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "yaml_type",
             "description": "* Type of yaml to list.",
             "in": "query",
@@ -700,6 +723,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "zone",
             "description": "* Zone where insights are requested.",
             "in": "query",
@@ -744,6 +774,13 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           },
           {
             "name": "zone",
@@ -822,6 +859,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "zone",
             "description": "* Only if interested in getting list a particular Zone.",
             "in": "query",
@@ -868,6 +912,13 @@
             "type": "string"
           },
           {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
             "name": "zone",
             "description": "* Zone to which container belongs.",
             "in": "query",
@@ -894,6 +945,118 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/listShieldedLens": {
+      "get": {
+        "summary": "List shielded zone/app/container/service  lenses",
+        "operationId": "AraaliAPI_listShieldedLens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceListShieldedLensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.id",
+            "description": "* Id of the tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.admin_email",
+            "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "tenant.is_quickstart",
+            "description": "* Set to true if tenant is only for quickstart/demo purposes.",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/setShieldStatus": {
+      "post": {
+        "summary": "Enable or Disable enforcement for zone/app/container/service",
+        "operationId": "AraaliAPI_setShieldStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceShieldRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AraaliAPI"
+        ]
+      }
+    },
+    "/api/v2/subscribeToSlackAlerts": {
+      "post": {
+        "summary": "Update slack webhook for the given Tenant",
+        "operationId": "AraaliAPI_subscribeToSlackAlerts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/araali_api_serviceSubscribeToSlackAlertsRequest"
+            }
           }
         ],
         "tags": [
@@ -995,6 +1158,16 @@
       "default": "UNKNOWN_ASSET",
       "title": "* Type of the asset"
     },
+    "FIMPolicyControlAction": {
+      "type": "string",
+      "enum": [
+        "ALL",
+        "DELETE",
+        "RENAME",
+        "SECURITY"
+      ],
+      "default": "ALL"
+    },
     "LensLensType": {
       "type": "string",
       "enum": [
@@ -1031,6 +1204,24 @@
       ],
       "default": "UNKNOWN_GROUP"
     },
+    "ShieldRequestShieldOp": {
+      "type": "string",
+      "enum": [
+        "SHOW",
+        "ENABLE",
+        "DISABLE"
+      ],
+      "default": "SHOW"
+    },
+    "ShieldedLensState": {
+      "type": "string",
+      "enum": [
+        "DISABLED",
+        "TRANSITIONING",
+        "ENABLED"
+      ],
+      "default": "DISABLED"
+    },
     "VulnerabilitySeverity": {
       "type": "string",
       "enum": [
@@ -1041,6 +1232,22 @@
         "CRITICAL"
       ],
       "default": "NONE"
+    },
+    "araali_api_serviceAddPodNameMappingsRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/araali_api_serviceTenant",
+          "title": "* Handle of tenant"
+        },
+        "pod_name_mapping": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_servicePodNameMapping"
+          },
+          "title": "* one or more mapping of ephemeral pod_names"
+        }
+      }
     },
     "araali_api_serviceAddUserRequest": {
       "type": "object",
@@ -1120,6 +1327,14 @@
         "status": {
           "$ref": "#/definitions/AlertInfoStatus",
           "title": "* Whether OPEN or CLOSED"
+        },
+        "user": {
+          "type": "string",
+          "title": "* User who updated alert last"
+        },
+        "reason": {
+          "type": "string",
+          "title": "* Reason for updating alert"
         }
       },
       "title": "*\nAdditional information about alerts"
@@ -1197,6 +1412,75 @@
         },
         "enable_flow_rate_limit": {
           "type": "boolean"
+        },
+        "enforce": {
+          "type": "boolean"
+        },
+        "upgrade": {
+          "type": "boolean"
+        },
+        "k8s_req_cpu": {
+          "type": "string"
+        },
+        "k8s_limits_cpu": {
+          "type": "string"
+        },
+        "k8s_req_mem": {
+          "type": "string"
+        },
+        "k8s_limits_mem": {
+          "type": "string"
+        },
+        "autok8s_image": {
+          "type": "string"
+        },
+        "fw_image": {
+          "type": "string"
+        },
+        "fw_init_image": {
+          "type": "string"
+        },
+        "agent_cpu_limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "agent_limited_resources": {
+          "type": "boolean"
+        },
+        "agent_nice_enabled": {
+          "type": "boolean"
+        },
+        "agent_nice_value": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cluster_name": {
+          "type": "string"
+        },
+        "cpu_limit_enabled": {
+          "type": "boolean"
+        },
+        "enter_mini_shell": {
+          "type": "boolean"
+        },
+        "fog": {
+          "type": "string"
+        },
+        "sys_cpu_threshold": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vuln_idle_duty_cycles": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vuln_image_size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vuln_min_cores": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -1359,6 +1643,22 @@
         }
       }
     },
+    "araali_api_serviceDeletePodNameMappingsRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/araali_api_serviceTenant",
+          "title": "* Handle of tenant"
+        },
+        "pod_name_mapping": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_servicePodNameMapping"
+          },
+          "title": "* one or more mapping of ephemeral pod_names"
+        }
+      }
+    },
     "araali_api_serviceDeleteTenantRequest": {
       "type": "object",
       "properties": {
@@ -1395,9 +1695,80 @@
       },
       "title": "*\nRepresents one end of a link/alert_counts"
     },
+    "araali_api_serviceFIMPolicies": {
+      "type": "object",
+      "properties": {
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_serviceFIMPolicy"
+          }
+        }
+      }
+    },
+    "araali_api_serviceFIMPolicy": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "* name of the policy"
+        },
+        "controls": {
+          "$ref": "#/definitions/araali_api_serviceFIMPolicyControls"
+        },
+        "selectors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "araali_api_serviceFIMPolicyControl": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FIMPolicyControlAction"
+          }
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "araali_api_serviceFIMPolicyControls": {
+      "type": "object",
+      "properties": {
+        "control": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_serviceFIMPolicyControl"
+          }
+        }
+      }
+    },
+    "araali_api_serviceFIMPolicyResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "fim_policy_yaml": {
+          "type": "string"
+        },
+        "is_enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "araali_api_serviceFirewallConfigResponse": {
       "type": "object",
       "properties": {
+        "response": {
+          "$ref": "#/definitions/araali_api_serviceAraaliAPIResponse"
+        },
         "tenant_id": {
           "type": "string"
         },
@@ -1576,6 +1947,18 @@
         }
       }
     },
+    "araali_api_serviceListFIMPoliciesResponse": {
+      "type": "object",
+      "properties": {
+        "fim_policy_yamls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_serviceFIMPolicyResponse"
+          },
+          "title": "* one or more rules with yaml format are returned"
+        }
+      }
+    },
     "araali_api_serviceListFortifyYamlResponse": {
       "type": "object",
       "properties": {
@@ -1642,6 +2025,18 @@
         "policy_and_enforcement_yaml": {
           "type": "string",
           "description": "* Policies represented in yaml format."
+        }
+      }
+    },
+    "araali_api_serviceListShieldedLensResponse": {
+      "type": "object",
+      "properties": {
+        "shielded_lens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/araali_api_serviceShieldedLens"
+          },
+          "title": "* List of shielded lens"
         }
       }
     },
@@ -1756,6 +2151,61 @@
         }
       }
     },
+    "araali_api_serviceShieldRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/araali_api_serviceTenant",
+          "title": "* Handle of tenant"
+        },
+        "op": {
+          "$ref": "#/definitions/ShieldRequestShieldOp"
+        },
+        "zone": {
+          "type": "string"
+        },
+        "app": {
+          "type": "string"
+        },
+        "pod": {
+          "type": "string",
+          "title": "* If pod is specified, then container must be specified, as enforcement is allowed on zone/app/container grain, but not pod grain"
+        },
+        "container": {
+          "type": "string"
+        },
+        "process": {
+          "type": "string",
+          "title": "* If process ingress shield is required please specify below"
+        },
+        "parent_process": {
+          "type": "string"
+        },
+        "binary_name": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string",
+          "title": "* Fqdn or IP address of service"
+        },
+        "service_port": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "araali_api_serviceShieldedLens": {
+      "type": "object",
+      "properties": {
+        "lens": {
+          "$ref": "#/definitions/araali_api_serviceLens"
+        },
+        "shield_state": {
+          "$ref": "#/definitions/ShieldedLensState",
+          "title": "* Shield state - ENABLED implies both ingress and egress are enforced on this lens"
+        }
+      }
+    },
     "araali_api_serviceSubnet": {
       "type": "object",
       "properties": {
@@ -1771,6 +2221,23 @@
       },
       "title": "*\nRepresents the subnet/mask"
     },
+    "araali_api_serviceSubscribeToSlackAlertsRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/araali_api_serviceTenant",
+          "title": "* Handle of tenant"
+        },
+        "unsubscribe": {
+          "type": "boolean",
+          "title": "* true for unsubscribe and false for subscribe by passing the webhook for given tenant"
+        },
+        "webhook": {
+          "type": "string",
+          "title": "* webhook value. given value will be set when unsubscribe is false or not set"
+        }
+      }
+    },
     "araali_api_serviceTenant": {
       "type": "object",
       "properties": {
@@ -1781,6 +2248,10 @@
         "admin_email": {
           "type": "string",
           "description": "* Admin e-mail of the tenant.\n Also adds an ADMIN role user in this tenant."
+        },
+        "is_quickstart": {
+          "type": "boolean",
+          "description": "* Set to true if tenant is only for quickstart/demo purposes."
         }
       },
       "description": "*\nTenant object identifying the tenant in API calls."
