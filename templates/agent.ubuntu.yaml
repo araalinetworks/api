@@ -38,6 +38,22 @@ identities:
     process: fwupdmgr
   pushdown: []
 - node:
+    name: http
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: python
+    process: http
+  pushdown: []
+- node:
+    name: https
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: python.*
+    process: https
+  pushdown: []
+- node:
     name: license_check
     zone: .*
     app: .*
@@ -88,20 +104,25 @@ identities:
     name: snapd
     zone: .*
     app: .*
-    binary_name: /snap/.*/usr/lib/snapd/snapd
+    binary_name: .*/usr/lib/snapd/snapd
     parent_process: systemd
     process: snapd
   pushdown:
   - binary_name
 - node:
     name: ubuntu_archive
-    dns_pattern: archive.ubuntu.com
+    dns_pattern: .*.archive.ubuntu.com
     dst_port: 80
   pushdown:
   - dns_pattern
 - node:
     name: ubuntu_changlogs
     dns_pattern: changelogs.ubuntu.com
+    dst_port: 443
+  pushdown: []
+- node:
+    name: ubuntu_esm
+    dns_pattern: esm.ubuntu.com
     dst_port: 443
   pushdown: []
 - node:
@@ -149,6 +170,10 @@ authorizations:
   out:
   - ubuntu_archive
   - ubuntu_security
+- name: apt_get_https
+  out:
+  - mongodb_repo
+  - ubuntu_esm
 - name: dnf
   out:
   - world_443
@@ -156,16 +181,21 @@ authorizations:
 - name: fwupd_cdn
   in:
   - fwupdmgr
+- name: http
+  out:
+  - ubuntu_archive
+  - ubuntu_security
+- name: https
+  out:
+  - ubuntu_esm
 - name: meta_data
   in:
   - license_check
-- name: mongodb_repo
-  in:
-  - apt_get_https
 - name: snapd
   out:
   - snapcraft_api
   - snapcraftcontent
+  - ubuntu_archive
 - name: ubuntu_changlogs
   in:
   - upgrade_check

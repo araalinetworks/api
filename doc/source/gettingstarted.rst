@@ -24,7 +24,10 @@ to access the Araali UI with single sign on (SSO). There is no need to create a 
 If you do not have a Google powered email, use the “Sign up” button to create an Okta powered account using a non-google email. 
 
 .. image:: images/araali-console-sign-in.png
- :alt: Araali Console Sign In
+    :align: center
+    :width: 300
+    :height: 600
+    :alt: Araali Console Sign In
 
 Step 2: Generate values.yaml for Installation
 *********************************************
@@ -32,8 +35,7 @@ Step 2: Generate values.yaml for Installation
 Go to Araali UI and select Administration -> “Cluster Fortification” in the left-hand panel.
 
 .. image:: images/helm_workload.png
-  :width: 500
-  :height: 1000
+  :width: 650
   :alt: Araalictl installation generate values.yaml
 
 Click on “+” and provide a name for your workload template. The generated values.yaml
@@ -52,24 +54,20 @@ Now download the file (example below) and save it as values.yaml file
 ::
     araali:
         workload_id: <wrk-id-variable>
-        cluster_name: bar
-        fog: foo
-        zone: <name-you-specified>
-        app: k8s-nodes
-        enforce: true
-        upgrade: true
-        autok8s_image: quay.io/araalinetworks/autok8s:prod
-        fw_image: quay.io/araalinetworks/araali_fw:prod
-        fw_init_image: quay.io/araalinetworks/araali_fw_init:prod
+        zone: <zone>
 
 
 Step 3A: Installation for Kubernetes
 ***********************************
 **Add Araali Repo and Install the Helm Chart.**
 
-1. Add Repo::
+1. Add Repo*::
 
     helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
+
+    #If you have already added the repo, instead run this command periodically to keep you repo up to date:
+
+    helm repo update
 
 2. Check if you are fortifying the right cluster by looking at the current context, the name with a “*” is the one you are pointing to right now:: 
 
@@ -77,11 +75,14 @@ Step 3A: Installation for Kubernetes
 
 3. Install by using the generated values.yaml file::
 
-    helm install -f ./values.yaml my-araali-fw araali-helm/araali-fw
+    helm install -f ./values.yaml my-araali-agent araali-helm/araali-agent
 
    Uninstall::
 
-    helm uninstall my-araali-fw
+    helm uninstall my-araali-agent
+    # The above only uninstalls the installer(due to a bug). Use the command below to uninstall all araali components
+    kubectl delete daemonset,namespace,serviceaccount,clusterrole,clusterrolebinding,deployment,service,secret,configmap,crd -l is_agent=true -A
+    kubectl delete daemonset,namespace,serviceaccount,clusterrole,clusterrolebinding,deployment,service,secret,configmap,crd -l is_araali=true -A
     
 Step 3B: Installation for VMs
 ****************************
@@ -98,7 +99,10 @@ what app (e.g. redis, mongoDB, cassandra) will be running on the VM.
 **Example: Install via AWS EC2 Instance UserData**
 The following represents a way to embed araali software into an ec2 instance via UserData at bootup time.
 Both values.yaml, and araalictl should be accessible to the ec2 instance. Embed this script into UserData::
+
     #!/bin/bash
+    # Note: before every command using wget on a file, run the following command: rm -f <filename>
+    # Otherwise wget will name the file as .1, and you will be working off a stale copy
     wget -q https://s3-us-west-2.amazonaws.com/araalinetworks.cf/araalictl.linux-amd64
     wget -q https://<resourceAccessUrl>/values.yaml # depending on where customer keeps this file
     chmod u+x araalictl.linux-amd64
@@ -107,6 +111,10 @@ Both values.yaml, and araalictl should be accessible to the ec2 instance. Embed 
 
 On success, araalifw agent should be running on the VM, and providing functionality.
 Any failure conditions are in general recorded in /var/log/cloud-init-output.log.
+
+Uninstall::
+
+    sudo ./araalictl.linux-amd64 unfortify-self
 
 Review the Results
 ******************
@@ -237,8 +245,8 @@ Authorize your session
 **NOTE: To correctly authorize araalictl, please enter the same email that was used to sign into the Araali Console.**
 
 .. image:: https://publicimageproduct.s3-us-west-2.amazonaws.com/AraalictlAuthorize.png
-  :width: 600
-  :height: 300
+  :width: 900
+  :height: 200
   :alt: Araalictl authorize
 
 Now, go to Araali UI and Navigate to Araali Tools, under Administration on the

@@ -44,12 +44,14 @@ So let the show begin!
    araalipolicy
    policy_as_code
    template_as_code
+   setting_up_araali_cloud_integration
    araalislackwebhook
    remapping_apps
    araalifaq
    araaliprivacypolicy
    complianceapi
    golangsdk
+   restapi
 
 .. toctree::
    :maxdepth: 2

@@ -3,9 +3,78 @@ from __future__ import print_function
 import os
 import shlex
 import subprocess
+import sys
 import yaml
 
 cfg_fname = os.environ['HOME']+"/.araalirc"
+
+def update_eks_kubeconfig(cluster_name):
+    return run_command_logfailure("aws eks update-kubeconfig --name %s" % cluster_name)
+
+def update_gke_kubeconfig(cluster_name):
+    return run_command_logfailure("gcloud container clusters get-credentials %s" % cluster_name)
+
+def update_azure_kubeconfig(resource_group_name, cluster_name):
+    return run_command_logfailure("az aks get-credentials --resource-group %s --name %s" % (resource_group_name, cluster_name))
+
+def install_helm():
+    # Verify if Helm is present on machine
+    rc = run_command("which helm", debug=False, result=True, strip=False)
+    if rc[0]:
+        # Helm is not present. Download Helm on machine
+        success, _ = run_command_logfailure("curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3")
+        if not success:
+            return False
+        success, _ = run_command_logfailure("chmod 700 get_helm.sh")
+        if not success:
+            return False
+        success, _ = run_command_logfailure("./get_helm.sh")
+        if not success:
+            return False
+        return True
+    return True
+        
+
+def launch_quickstart_nanny(email, cluster_arn): 
+    # Run helm install command
+    success, _ = run_command_logfailure("helm repo add araali-helm https://araalinetworks.github.io/araali-helm/")
+    if not success:
+        return False
+    success, _ = run_command_logfailure("helm install araali-quickstart-nanny --set email=%s araali-helm/araali-quickstartnanny --kube-context=%s" % (email, cluster_arn))
+    if not success:
+        return False
+    return True
+
+def get_current_kube_context():
+    return run_command_logfailure("kubectl config current-context")
+
+def flatten_obj(prefix, root):
+    res = []
+    for k, v in root.items():
+        new_prefix = k if not prefix else prefix + "." + k
+        if type(v) == dict:
+            res += flatten_obj(new_prefix, v)
+        else:
+            res += [(new_prefix, str(v))]
+    return res
+
+def flatten_table(alerts):
+    for a in alerts:
+        yield(dict(flatten_obj("", a)))
+
+def dump_csv(alerts):
+    header = set()
+    for a in alerts:
+        header |= set(dict(flatten_obj("", a)).keys())
+    header = list(header)
+    header.sort()
+    yield ",".join(header)
+    for a in alerts:
+        obj = dict(flatten_obj("", a))
+        out = []
+        for h in header:
+            out.append(obj.get(h, ""))
+        yield ",".join(out)
 
 def read_config():
     if os.path.isfile(cfg_fname):
@@ -48,10 +117,109 @@ def config(tenant=None, tenants=None, template_dir=None, backend=None):
             save(cfg)
     print(yaml.dump(cfg))
 
-def dump_table(objs):
+def get_by_key(o, k):
+    k = k.split(".")
+    for a in k:
+        o = o.get(a, None)
+        if o is None: return "None"
+    return o if o is not None else "None"
+
+def dump_table(objs, quiet=False, filterby=None, countby=None, groupby=None, dump_yaml=False, flatten=False):
+    class FilterBy(object):
+        def __init__(self, filterby):
+            if filterby:
+                self.filterby = [a.split("=") for a in filterby.split(":")]
+            else:
+                self.filterby = None
+
+        def filter(self, o):
+            if self.filterby is None: return True
+
+            match_count = 0
+            for f in self.filterby:
+                k, v = f
+                for a in v.split(","): # like an OR
+                    def get_a(a):
+                        try:
+                            return eval(a)
+                        except:
+                            return a
+                    match_val = get_a(a)
+                    my_val = get_by_key(o, k)
+                    if type(match_val) == str and ".*" in match_val and re.search(match_val, my_val) or my_val == match_val:
+                        match_count += 1
+                        break
+            # matched all filters, like AND
+            if match_count == len(self.filterby):
+                return True
+            return False
+
+    class CountBy(object):
+        def __init__(self, countby, groupby):
+            self.countby = countby.split(",") if countby else countby
+            self.groupby = groupby.split(",") if groupby else groupby
+            if countby:
+                if groupby is None:
+                    self.groupby_dict = {"global": {}}
+                    for c in self.countby:
+                        self.groupby_dict["global"][c] = 0
+                else:
+                    self.groupby_dict = {}
+
+        def count(self, o):
+            if self.countby:
+                if self.groupby:
+                    groupby_key = []
+                    for g in self.groupby:
+                        groupby_key.append(str(get_by_key(o, g)))
+                    groupby_key = ":".join(groupby_key)
+                    if groupby_key not in self.groupby_dict:
+                        self.groupby_dict[groupby_key] = {}
+                        for c in self.countby:
+                            self.groupby_dict[groupby_key][c] = 0
+                else:
+                    groupby_key = "global"
+
+                for k,v in self.groupby_dict[groupby_key].items():
+                    value = get_by_key(o, k)
+                    if type(value) == int:
+                        self.groupby_dict[groupby_key][k] += value
+                    else:
+                        self.groupby_dict[groupby_key][k] += 1
+
+        def show(self, dump_yaml=False):
+            if not self.countby:
+                return
+
+            if dump_yaml:
+                print(yaml.dump([{"key": a[0], "count": a[1]} for a in self.groupby_dict.items()]))
+                return
+
+            overall = {}
+            for g, countby_dict in self.groupby_dict.items():
+                print("\n")
+                print("="*40, "%s" % g, "="*40)
+                if countby:
+                    for k,v in countby_dict.items():
+                        print("%ss: %s" % (k, v))
+                        overall[k] = overall.get(k, 0) + v
+
+            print("="*40, "%s" % "overall", "="*40)
+            for k,v in overall.items():
+                print("%ss: %s" % (k, v))
+
+    countby = CountBy(countby, groupby)
+    filterby = FilterBy(filterby)
     for idx, o in enumerate(objs):
-        print("%s %s %s" % ("="*40, idx, "="*40))
-        print(yaml.dump(o))
+        if not filterby.filter(o): continue
+        if not quiet:
+            print("%s %s %s" % ("="*40, idx, "="*40))
+            if flatten:
+                print(yaml.dump(dict(flatten_obj("", o))))
+            else:
+                print(yaml.dump(o))
+        countby.count(o)
+    countby.show(dump_yaml)
 
 def make_map(kvstr):
     k, v = kvstr.split("=")
@@ -60,6 +228,13 @@ def make_map(kvstr):
 def eprint(*args, **kwargs):
     args = [a.decode() for a in args]
     print(*args, file=sys.stderr, **kwargs)
+
+def run_command_logfailure(cmd, debug=False):
+    rc = run_command(cmd, debug=debug, result=True, strip=False)
+    if rc[0] != 0:
+        print("*** failed: %s" % rc[1].decode())
+        return False, None
+    return True, rc[1].decode()
 
 def run_command(command, result=False, strip=True, in_text=None, debug=False, env=os.environ):
     def collect_output(ret, output):

@@ -5,6 +5,11 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: grafana.com
+    dns_pattern: grafana.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: grafana_server
     zone: .*
     app: .*
@@ -27,6 +32,16 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: loki
+    zone: .*
+    app: .*
+    pod: .*
+    container: .*
+    binary_name: /usr/bin/loki
+    parent_process: containerd-shim
+    process: loki
+  pushdown: []
+- node:
     name: slack
     dns_pattern: hooks.slack.com
     dst_port: 443
@@ -36,6 +51,10 @@ authorizations:
 - name: grafana_server
   out:
   - githubusercontent
+  - grafana.com
   - grafana_stats
   - gravatar_secure
   - slack
+- name: loki
+  out:
+  - grafana_stats

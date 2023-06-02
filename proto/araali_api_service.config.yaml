@@ -36,3 +36,9 @@ http:
     - selector: araali_api_service.AraaliAPI.updateFirewallConfig
       post: /api/v2/updateFirewallConfig
       body: "*"
+    - selector: araali_api_service.AraaliAPI.addPodNameMappings
+      get: /api/v2/addPodNameMappings
+    - selector: araali_api_service.AraaliAPI.listPodNameMappings
+      get: /api/v2/listPodNameMappings
+    - selector: araali_api_service.AraaliAPI.deletePodNameMappings
+      get: /api/v2/deletePodNameMappings

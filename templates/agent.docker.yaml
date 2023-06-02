@@ -28,6 +28,11 @@ identities:
   pushdown:
   - dns_pattern
 - node:
+    name: docker_download
+    dns_pattern: download.docker.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: docker_io
     dns_pattern: .*docker.io
     dst_port: 443
@@ -62,24 +67,28 @@ identities:
     dst_port: 443
   pushdown: []
 - node:
+    name: ghcr
+    dns_pattern: ghcr.io
+    dst_port: 443
+  pushdown: []
+- node:
+    name: githubusercontent_containers_pkg
+    dns_pattern: pkg-containers.githubusercontent.com
+    dst_port: 443
+  pushdown: []
+- node:
     name: googleapis_storage
     dns_pattern: .*storage.googleapis.com
     dst_port: 443
-  pushdown: []
+  pushdown:
+  - dns_pattern
 - node:
-    name: gcr_io
-    dns_pattern: gcr.io
-    dst_port: 443
-  pushdown: []
-- node:
-    name: gcr_io_asia
-    dns_pattern: asia.gcr.io
-    dst_port: 443
-  pushdown: []
-- node:
-    name: amazonaws_ecr
-    dns_pattern: .*ecr.*.amazonaws.com
-    dst_port: 443
+    name: https
+    zone: .*
+    app: .*
+    binary_name: /usr/lib/apt/methods/http
+    parent_process: apt-get
+    process: https
   pushdown: []
 - node:
     name: quay
@@ -87,6 +96,9 @@ identities:
     dst_port: 443
   pushdown: []
 authorizations:
+- name: docker_download
+  in:
+  - https
 - name: dockerd
   out:
   - amazonaws_docker
@@ -99,8 +111,7 @@ authorizations:
   - gcr_io
   - gcr_io_asia
   - gcr_k8s
+  - ghcr
+  - githubusercontent_containers_pkg
   - googleapis_storage
   - quay
-  - gcr_io
-  - gcr_io_asia
-  - amazonaws_ecr

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "araali"
-version = "0.0.25"
+version = "0.0.36"
 authors = [
   { name="Abhishek R. Singh", email="abhishek@araalinetworks.com" },
 ]
@@ -18,6 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+  "boto3",
   "python-dateutil",
   "pyyaml",
   "requests",
@@ -35,6 +36,11 @@ envlist = py27,py3
 
 [testenv]
 deps = pytest
+   boto3
+   python-dateutil
+   pyyaml
+   requests
+
 commands = pytest -sv
 passenv = HOME ARAALI_API_TOKEN
 """

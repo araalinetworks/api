@@ -9,6 +9,8 @@ publish: venv
 
 # if you want to rerun tests to see if they succeed
 test: venv
+	env | grep ARAALI_BACKEND | grep nightly
+	env | grep ARAALI_API_TOKEN
 	-source araaliapienv/bin/activate && pytest -vs
 
 # if you are fixing install

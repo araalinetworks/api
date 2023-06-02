@@ -1,8 +1,10 @@
 build
+boto3
 grpcio
 grpcio-tools
 pytest
 python-dateutil
+pyyaml
 requests
 tox
 twine

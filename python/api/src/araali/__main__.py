@@ -4,7 +4,9 @@
 from __future__ import print_function
 
 import argparse
+import boto3
 import datetime
+import time
 from dateutil import parser as du_parser
 from dateutil import tz
 import json
@@ -19,8 +21,54 @@ import yaml
 from araali import API
 from . import api
 from . import araalictl
-from . import utils
+from . import aws as _aws
+from . import quickstart_api
+from . import teleport as _teleport
 from . import template as module_template
+from . import utils
+
+def tenant(args):
+    if args.tenant_subparser_name == "delete":
+        print(API().delete_tenant(tenant=args.tenant))
+
+def lens(args):
+    if args.set:
+        if args.set in ["enforce", "unenforce"]:
+            op = {"enforce": "ADD", "unenforce": "DEL"}[args.set]
+            if args.svc:
+                sp = args.svc.split(":")
+                assert len(sp) == 2, "svc format is service:port"
+                args.svc, args.svc_port = sp
+            else:
+                args.svc_port = None
+            API().set_enforced(op, args.zone, args.app, args.pod,
+                args.container, args.process, args.parent, args.binpath,
+                args.svc, args.svc_port, args.tenant)
+    else: # get
+        filterby = []
+        if args.zone: filterby.append("lens.zone=%s" % args.zone)
+        if args.app: filterby.append("lens.app=%s" % args.app)
+        if args.pod: filterby.append("lens.pod=%s" % args.pod)
+        if args.container: filterby.append("lens.container_name=%s" % args.container)
+        if args.process: filterby.append("lens.process=%s" % args.process)
+        if args.parent: filterby.append("lens.parent_process=%s" % args.parent)
+        if args.binpath: filterby.append("lens.binary_name=%s" % args.binpath)
+        utils.dump_table(API().get_enforced(args.tenant)[0], filterby=None if filterby == [] else ":".join(filterby))
+
+def podmap(args):
+    if args.podmap_subparser_name == "list":
+        links, status = API().get_pod_mapping(args.zone, tenant=args.tenant)
+        if status == 0:
+            print("Got %s mapping entries" % len(links))
+
+            if not args.countby: args.countby = "translated_pod_name"
+            utils.dump_table(links,
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+    elif args.podmap_subparser_name == "add":
+        links, status = API().add_pod_mapping(args.zone, args.app, args.pattern, args.name, tenant=args.tenant)
+    elif args.podmap_subparser_name == "del":
+        links, status = API().del_pod_mapping(args.zone, args.app, args.pattern, args.name, tenant=args.tenant)
 
 def config(args):
     if args.get_tenants:
@@ -57,28 +105,41 @@ def config(args):
     return utils.config(args.tenant, args.tenants, args.template_dir, args.backend)
 
 def alerts(args):
-    alerts, page, status = API().get_alerts(args.count, args.ago, tenant=args.tenant)
+    alerts, page, status = API().get_alerts(args.count, args.ago,
+            closed_alerts=args.closed, all_alerts=args.all, tenant=args.tenant)
     day_dict = {}
     local_zone = tz.tzlocal()
     if status == 0:
-        print("Got %s alerts" % len(alerts))
-        utils.dump_table(alerts)
-
-        for a in alerts:
-            if type(a["timestamp"]) == str:
-                # '2022-07-15T04:45:18Z'
-                dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
+        if args.dump_csv:
+            for line in utils.dump_csv(alerts):
+                print(line)
+        elif args.dump_yaml:
+            if args.flatten:
+                print(yaml.dump(list(utils.flatten_table(alerts))))
             else:
-                dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
-            #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
-            dts = dt.strftime("%Y/%m/%d")
-            day_dict.setdefault(dts, []).append(a)
+                print(yaml.dump(alerts))
+        else:
+            print("Got %s alerts" % len(alerts))
+            if args.countby is None: args.countby = "unique_id"
+            utils.dump_table(alerts,
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby, flatten=args.flatten)
 
-        keys = [a for a in day_dict.keys()]
-        keys.sort()
-        print("frequency count")
-        for k in keys:
-            print("%s %s" % (k, len(day_dict[k])))
+            for a in alerts:
+                if type(a["timestamp"]) == str:
+                    # '2022-07-15T04:45:18Z'
+                    dt = du_parser.parse(a["timestamp"]).astimezone(local_zone)
+                else:
+                    dt = datetime.datetime.fromtimestamp(a["timestamp"]/1000)
+                #dts = dt.strftime("%m/%d/%Y, %H:%M:%S")
+                dts = dt.strftime("%Y/%m/%d")
+                day_dict.setdefault(dts, []).append(a)
+
+            keys = [a for a in day_dict.keys()]
+            keys.sort()
+            print("frequency count")
+            for k in keys:
+                print("%s %s" % (k, len(day_dict[k])))
 
 def make_map(kv):
     k, v = kv.split("=")
@@ -306,7 +367,7 @@ def search(args):
                                 workload_dict[wkey] = 1
                             else:
                                 workload_dict[wkey] += 1
-                        
+
                         if server_m:
                             wkey = [str(server[k]) for k in filters.keys()]
                             wkey = ":".join(wkey)
@@ -432,8 +493,7 @@ def ctl(args, remaining):
     #print("echo %s | sudo %s authorize -token=-" % (api.cfg["token"], cmdline))
     #print(auth_stdout.decode())
 
-    rc = os.system(" ".join(prepend + [api.cmdline] + remaining))
-    return rc.returncode
+    return subprocess.call(" ".join(prepend + [api.cmdline] + remaining), shell=True)
 
 def template(args):
     if args.t_subparser_name:
@@ -441,42 +501,258 @@ def template(args):
 
 def fw_config(args):
     if not args.zone or not args.tenant:
-        print("please specify zone and tenant")
+        print("*** please specify both zone and tenant")
         return
 
-    if args.get:
-        knobs = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
-        print(knobs)
-    elif args.update:
+    if args.update:
         status = api.API().update_fw_config(zone=args.zone,
                                             tenant=args.tenant,
                                             data_file_location=args.update)
         print(status)
+        return
+
+    knobs = api.API().get_fw_config(zone=args.zone, tenant=args.tenant)
+    print(yaml.dump(knobs))
+
+def quickstart(args):
+    # TODO(rsn): Till we handle subtenants properly, maybe add a check for whether user exists at this point itself
+    timestamp_str = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
+    if args.quickstart_subparser_name == "vm":
+        # Generate tenant_id and token
+        success, tenant_id, api_token = quickstart_api.create_tenant_and_token(args.email)
+        if not success:
+            print("Failed to create quickstart tenant")
+            sys.exit(1)
+        # Generate workload yaml
+        workload_yaml, success = quickstart_api.generate_workload_yaml(api_token, "quickstartdemo_vm", tenant_id)
+        if not success:
+            print("Failed to generate workloadID")
+            sys.exit(1)
+        # Set app
+        workload_dict = yaml.load(workload_yaml, Loader=yaml.Loader)
+        workload_dict['araali']['app'] = ":demo_vm:"
+        # Need to modify values yaml for non-prod backends
+        if 'prod' != utils.cfg["backend"]:
+            workload_dict['araali']['backend'] = "%s.aws.araalinetworks.com" % utils.cfg["backend"]
+        workload_yaml = yaml.dump(workload_dict)
+        success, result = _aws.cf_launch_fortified_vm_with_workload_id(stack_name="acp-qsvm-stack-%s" % timestamp_str, workload_yaml=workload_yaml, key_pair=args.key, ami_id=args.ami, tenant_id=tenant_id)
+        if not success:
+            print("Error: Quickstart setup failed, message: %s"%result)
+            sys.exit(1)
+        else:
+            print("Quickstart initialized for %s" % args.email)
+            print("\tAraali Tenant ID: %s" % tenant_id)
+            print("\tCloudformation Stack ID: %s" % result["StackId"])
+    elif args.quickstart_subparser_name == "eks":
+        eks_client = boto3.client('eks')
+        EKS_STACK_NAME = "acp-qseks-stack-%s" % timestamp_str
+        EKS_CLUSTER_NAME = "acp-qseks-%s" % timestamp_str
+        cluster_name = args.name
+        launch_cluster = True
+        if cluster_name == None or cluster_name == "":
+            launch_cluster = True
+            cluster_name = EKS_CLUSTER_NAME
+        else:
+            # Check if cluster exists
+            response = eks_client.list_clusters()
+            if "clusters" not in response:
+                print("Error: list_clusters returned invalid response")
+                sys.exit(1)
+            launch_cluster = cluster_name not in response["clusters"]
+        # Launch cluster is requested
+        if launch_cluster:
+            success, result = _aws.cf_launch_eks_cluster(stack_name=EKS_STACK_NAME, cluster_name=cluster_name, availability_zones=args.availabilityzones)
+            if not success:
+                print("Error: Quickstart EKS cluster setup failed")
+                sys.exit(1)
+            # Wait until cluster is set up
+            counter = 0
+            while(True):
+                if counter % 10 == 0:
+                    print("Waiting for cluster create - %d/120" %counter)
+                if _aws.cf_validate_stack_creation(EKS_STACK_NAME):
+                    break
+                if counter >= 120:
+                    print("Error: Quickstart EKS cluster setup failed")
+                    sys.exit(1)
+                counter += 1
+                time.sleep(30)
+        # Update kubeconfig to point to newly created cluster and fetch ARN
+        utils.update_eks_kubeconfig(cluster_name)
+        response = eks_client.describe_cluster(name=cluster_name)
+        if "cluster" not in response and "arn" not in response["cluster"]:
+            sys.exit(1)
+        cluster_arn = response["cluster"]["arn"]
+        # Install Helm on machine if not present
+        success = utils.install_helm()
+        if not success:
+            print("Failed to setup Helm")
+            sys.exit(1)
+        # Launch quickstart-nanny
+        success = utils.launch_quickstart_nanny(args.email, cluster_arn)
+        if not success:
+            print("Failed to launch Quickstart")
+            sys.exit(1)
+        print("Quickstart initialized successfully...")
+    elif args.quickstart_subparser_name == "gke":
+        # Update kubeconfig to point to target cluster
+        cluster_name = args.name
+        utils.update_gke_kubeconfig(cluster_name)
+        # Get cluster-arn
+        success, cluster_arn = utils.get_current_kube_context()
+        if not success:
+            print("Failed to fetch kubeconfig")
+            sys.exit(1)
+        # Install Helm on machine if not present
+        success = utils.install_helm()
+        if not success:
+            print("Failed to setup Helm")
+            sys.exit(1)
+        # Launch quickstart-nanny
+        success = utils.launch_quickstart_nanny(args.email, cluster_arn)
+        if not success:
+            print("Failed to launch Quickstart")
+            sys.exit(1)
+        print("Quickstart initialized successfully...")
+
+def aws(args):
+    if args.aws_subparser_name == "cf":
+        if args.aws_cf_subparser_name == "ls":
+            if args.countby is None:
+                args.countby = "id,name"
+            utils.dump_table(_aws.cf_ls(args.all),
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+        elif args.aws_cf_subparser_name == "add":
+            if args.aws_cf_add_subparser_name == "vm":
+                _aws.cf_add_vm()
+        elif args.aws_cf_subparser_name == "rm":
+            _aws.cf_rm(args.name)
+
+    elif args.aws_subparser_name == "assets":
+        # account vpc subnet type image platform state public_ip
+        if args.countby is None:
+            args.countby = "instance_id,account,vpc,subnet"
+        utils.dump_table(_aws.assets(args.members),
+                         quiet=args.quiet, filterby=args.filterby,
+                         countby=args.countby, groupby=args.groupby)
+
+def teleport(args):
+    if args.t_subparser_name == "login":
+        if args.app:
+            _teleport.app_login(args.app)
+            return
+        _teleport.login()
+        return
+    elif args.t_subparser_name == "logout":
+        if args.app:
+            _teleport.app_logout(args.app)
+            return
+        _teleport.logout()
+        return
+    elif args.t_subparser_name == "install":
+        _teleport.install(args.server)
+        return
+    elif args.t_subparser_name == "svc":
+        _teleport.add_svc(args.server, args.svc, args.uri)
+        return
+    elif args.apps:
+        return os.system("tsh apps ls")
+    elif args.servers:
+        return os.system("tsh ls")
+    return os.system("tsh apps ls")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description = 'Araali Python CLI')
-    parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
-    parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
-    subparsers = parser.add_subparsers(dest="subparser_name")
+    top_parser = argparse.ArgumentParser(description = 'Araali Python CLI')
+    top_parser.add_argument('--verbose', '-v', action='count', default=0, help="specify multiple times to increase verbosity (-vvv)")
+    top_parser.add_argument('--use_api', '-u', action='store_true', help="user api instead of araalictl")
+    top_subparsers = top_parser.add_subparsers(dest="subparser_name")
 
-    parser_config = subparsers.add_parser("config", help="list/change config params")
+    parser_cmd = top_subparsers.add_parser("teleport", help="teleport commands")
+    parser_cmd.add_argument('--apps', action="store_true", help="list apps")
+    parser_cmd.add_argument('--servers', action="store_true", help="list servers")
+    subparsers = parser_cmd.add_subparsers(dest="t_subparser_name")
+
+    parser_subcmd = subparsers.add_parser("login", help="teleport login")
+    parser_subcmd.add_argument('-a', '--app', help="app login")
+
+    parser_subcmd = subparsers.add_parser("logout", help="teleport logout")
+    parser_subcmd.add_argument('-a', '--app', help="app logout")
+
+    parser_subcmd = subparsers.add_parser("install", help="install teleport on server")
+    parser_subcmd.add_argument('server', help="user@server to use for ssh")
+
+    parser_subcmd = subparsers.add_parser("svc", help="add service to server config")
+    parser_subcmd.add_argument('server', help="user@server to use for ssh")
+    parser_subcmd.add_argument('svc', help="servcie name")
+    parser_subcmd.add_argument('uri', help="uri for service, e.g. http://localhost:8080/")
+
+    parser_cmd = top_subparsers.add_parser("lens", help="show/manipulate application lenses")
+    parser_opt = parser_cmd.add_argument("-t", "--tenant", help="lenses for a specific tenant")
+    parser_opt = parser_cmd.add_argument("-z", "--zone", help="zone for the lens")
+    parser_opt = parser_cmd.add_argument("-a", "--app", help="app for the lens")
+    parser_opt = parser_cmd.add_argument("-p", "--pod", help="pod for the lens")
+    parser_opt = parser_cmd.add_argument("-c", "--container", help="container for the lens")
+    parser_opt = parser_cmd.add_argument("--process", help="process for the lens")
+    parser_opt = parser_cmd.add_argument("--parent", help="parent process for the lens")
+    parser_opt = parser_cmd.add_argument("--binpath", help="binary path for the lens")
+    parser_opt = parser_cmd.add_argument("-s", "--svc", help="service for the lens")
+    parser_opt = parser_cmd.add_argument("-S", "--set",
+            choices=["enforce", "unenforce"],
+            help="service for the lens")
+
+    parser_cmd = top_subparsers.add_parser("podmap", help="pod name mapping configuration")
+    subparsers = parser_cmd.add_subparsers(dest="podmap_subparser_name")
+
+    parser_subcmd = subparsers.add_parser("add", help="add a new mapping")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument('-a', '--app', help="app")
+    parser_subcmd.add_argument('-p', '--pattern', help="pattern")
+    parser_subcmd.add_argument('-n', '--name', help="name")
+
+    parser_subcmd = subparsers.add_parser("del", help="add a new mapping")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument('-a', '--app', help="app")
+    parser_subcmd.add_argument('-p', '--pattern', help="pattern")
+    parser_subcmd.add_argument('-n', '--name', help="name")
+
+    parser_subcmd = subparsers.add_parser("list", help="list pod mappings")
+    parser_subcmd.add_argument('-t', '--tenant', help="pod mapping for a specific tenant")
+    parser_subcmd.add_argument('-z', '--zone', help="zone")
+    parser_subcmd.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_subcmd.add_argument("-c", "--countby", help="count by unique values")
+    parser_subcmd.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_subcmd.add_argument("-f", "--filterby", help="filter by (key)")
+
+    parser_config = top_subparsers.add_parser("config", help="list/change config params")
     parser_config.add_argument('-t', '--tenant', help="setup sub-tenant param (sticky)")
     parser_config.add_argument('--tenants', help="setup a list of sub-tenants (for managing alerts)")
     parser_config.add_argument('--backend', help="setup a custom backend (internal unit testing)")
     parser_config.add_argument('-g', '--get_tenants', action="store_true", help="get active tenants")
     parser_config.add_argument('-d', '--template_dir', help="custom template directory")
 
-    parser_alerts = subparsers.add_parser("alerts", help="get alerts (to create templates for)")
+    parser_alerts = top_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
+    parser_alerts.add_argument('--closed', action="store_true", help="get closed alerts")
+    parser_alerts.add_argument('--all', action="store_true", help="get all alerts (disregard subscription)")
     parser_alerts.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
-    parser_alerts.add_argument('-c', '--count', type=int, help="dont pull from araali")
+    parser_alerts.add_argument('-C', '--count', type=int, help="dont pull from araali")
+    parser_alerts.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_alerts.add_argument("-c", "--countby", help="count by unique values")
+    parser_alerts.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_alerts.add_argument("-f", "--filterby", help="filter by (key)")
+    parser_alerts.add_argument("-F", "--flatten", action="store_true", help="flatten the yaml object")
+    parser_alerts.add_argument("--dump_yaml", action="store_true", help="dump yaml for saving output")
+    parser_alerts.add_argument("--dump_csv", action="store_true", help="dump csv for saving output")
     parser_alerts.add_argument('--ago', help="lookback")
 
-    parser_insights = subparsers.add_parser("insights", help="get insights")
+    parser_insights = top_subparsers.add_parser("insights", help="get insights")
     parser_insights.add_argument('-t', '--tenant', help="get insights for a specific tenant")
     parser_insights.add_argument('-z', '--zone', help="insights for a specific zone")
 
-    parser_assets = subparsers.add_parser("assets", help="get assets")
+    parser_assets = top_subparsers.add_parser("assets", help="get assets")
     parser_assets.add_argument('-t', '--tenant', help="get assets for a specific tenant")
     parser_assets.add_argument('-z', '--zone', help="assets for a specific zone")
     parser_assets.add_argument('-a', '--app', help="links for a specific app")
@@ -484,31 +760,36 @@ if __name__ == "__main__":
     parser_assets.add_argument('-f', '--filters', help="query filters. eg: zone=.*,app=.*,cve_sev=4,cve_count=^0$")
     parser_assets.add_argument('--ago', help="lookback")
 
-    parser_token = subparsers.add_parser("token", help="manage api tokens")
+    parser_token = top_subparsers.add_parser("token", help="manage api tokens")
     parser_token.add_argument('-t', '--tenant', help="token management for a specific tenant")
     parser_token.add_argument('-a', '--add', help="create new token")
     parser_token.add_argument('-d', '--delete', help="delete token by name")
     parser_token.add_argument('-e', '--email', help="user email")
     parser_token.add_argument('-l', '--list', action="store_true", help="list all tokens")
 
-    parser_links = subparsers.add_parser("links", help="get links")
+    parser_cmd = top_subparsers.add_parser("tenant", help="tenant management")
+    subparsers = parser_cmd.add_subparsers(dest="tenant_subparser_name")
+    parser_cmd = subparsers.add_parser("delete", help="delete tenant")
+    parser_cmd.add_argument('-t', '--tenant', help="tenant id to delete")
+
+    parser_links = top_subparsers.add_parser("links", help="get links")
     parser_links.add_argument('-t', '--tenant', help="get links for a specific tenant")
     parser_links.add_argument('-z', '--zone', help="links for a specific zone")
     parser_links.add_argument('-a', '--app', help="links for a specific app")
     parser_links.add_argument('-s', '--svc', help="links for a specific svc")
     parser_links.add_argument('--ago', help="lookback")
 
-    parser_za = subparsers.add_parser("search", help="search assets, workloads, services")
+    parser_za = top_subparsers.add_parser("search", help="search assets, workloads, services")
     parser_za.add_argument('-t', '--tenant', help="get zones and apps for a specific tenant")
     parser_za.add_argument('-n', '--nopull', action="store_true", help="dont pull from araali")
     parser_za.add_argument('-f', '--filters', help="query filters. eg: zone=.*,app=.*,pod=.*,container=.* process=.*,binary_name=.*,parent_process=.*,dns_pattern=.*,dst_port=.*")
 
-    parser_helm = subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
+    parser_helm = top_subparsers.add_parser("helm", help="generate values for araaly firewall helm chart")
     parser_helm.add_argument('-t', '--tenant', help="helm chart for a specific tenant")
     parser_helm.add_argument('-z', '--zone', help="helm for a specific zone")
     parser_helm.add_argument('-n', '--nanny', action="store_true", help="helm chart for nanny or firewall")
 
-    parser_fw_config = subparsers.add_parser(
+    parser_fw_config = top_subparsers.add_parser(
         "fw_config", help="modify araali fw config on the backend")
     parser_fw_config.add_argument(
         '-g', '--get', action="store_true", help="get the current config")
@@ -519,12 +800,60 @@ if __name__ == "__main__":
     parser_fw_config.add_argument(
         '-z', '--zone', help="fw config for a specific zone")
 
-    parser_ctl = subparsers.add_parser("ctl", help="run araalictl commands")
+    parser_ctl = top_subparsers.add_parser("ctl", help="run araalictl commands")
 
-    parser_template = subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
-    parser.add_argument('-T', '--template', help="apply operation for a specific template")
+    parser_quickstart = top_subparsers.add_parser("quickstart", help="Launch Araali Quickstart")
+    quickstart_subparsers = parser_quickstart.add_subparsers(dest="quickstart_subparser_name")
+
+    parser_quickstart_vm = quickstart_subparsers.add_parser("vm", help="Launch Araali VM quickstart")
+    parser_quickstart_vm.add_argument('-e', '--email', help="email of quickstart user")
+    parser_quickstart_vm.add_argument('-k', '--key', help="ssh key to use")
+    parser_quickstart_vm.add_argument('-a', '--ami', help="ami ID of VM to be launched")
+
+    parser_quickstart_eks = quickstart_subparsers.add_parser("eks", help="Launch Araali Quickstart for EKS")
+    parser_quickstart_eks.add_argument('-e', '--email', help="email of quickstart user")
+    parser_quickstart_eks.add_argument('-n', '--name', default="", help="name of quickstart EKS cluster")
+    parser_quickstart_eks.add_argument('-a', '--availabilityzones', default=["us-west-2a", "us-west-2b"], help="Availability Zones within Region to deploy Araali quickstart")
+
+    parser_quickstart_gke = quickstart_subparsers.add_parser("gke", help="Launch Araali Quickstart for GKE")
+    parser_quickstart_gke.add_argument('-e', '--email', help="email of quickstart user")
+    parser_quickstart_gke.add_argument('-n', '--name', help="name of quickstart GKE cluster")
+
+    parser_aws = top_subparsers.add_parser("aws", help='aws utilities')
+    aws_subparsers = parser_aws.add_subparsers(dest="aws_subparser_name")
+
+    parser_aws_cf = aws_subparsers.add_parser("cf", help="cloudformation management")
+    aws_cf_subparsers = parser_aws_cf.add_subparsers(dest="aws_cf_subparser_name")
+
+    parser_command = aws_cf_subparsers.add_parser("ls", help="list managed cf stacks")
+    parser_opt = parser_command.add_argument("-a", "--all", action="store_true", help="all cloudformation stacks")
+    parser_opt = parser_command.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_opt = parser_command.add_argument("-c", "--countby", help="count by unique values")
+    parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
+
+    parser_command = aws_cf_subparsers.add_parser("add", help="add new cf stack")
+    subparsers = parser_command.add_subparsers(dest="aws_cf_add_subparser_name")
+
+    parser_command = subparsers.add_parser("vm", help="add araali protected VM")
+
+    parser_command = aws_cf_subparsers.add_parser("rm", help="rm cf stack")
+    parser_opt = parser_command.add_argument("name", help="name of araali managed cloudformation template")
+
+    parser_command = aws_subparsers.add_parser("assets", help="asset management")
+    parser_opt = parser_command.add_argument("-m", "--members", action="store_true", help="scan members")
+    parser_opt = parser_command.add_argument("-q", "--quiet", action="store_true", help="count by unique values")
+    parser_opt = parser_command.add_argument("-c", "--countby", help="count by unique values")
+    parser_opt = parser_command.add_argument("-g", "--groupby", help="groub by (key)")
+    parser_opt = parser_command.add_argument("-f", "--filterby", help="filter by (key)")
+
+    parser_template = top_subparsers.add_parser("template", help='Manage Templates as Code (in Git)')
+    top_parser.add_argument('-T', '--template', help="apply operation for a specific template")
 
     t_subparsers = parser_template.add_subparsers(dest="t_subparser_name")
+
+    parser_alerts = t_subparsers.add_parser("search", help="search for match in existing templates")
+    parser_alerts.add_argument('-s', '--server', help="show exposed servers")
 
     parser_alerts = t_subparsers.add_parser("alerts", help="get alerts (to create templates for)")
     parser_alerts.add_argument('-t', '--tenant', help="get alert for a specific tenant")
@@ -555,7 +884,7 @@ if __name__ == "__main__":
     parser_format = t_subparsers.add_parser("fmt", help="rename template node name/ format into a normalized form")
     parser_format.add_argument('template')
 
-    args, remaining = parser.parse_known_args()
+    args, remaining = top_parser.parse_known_args()
     args.progdir, args.prog = os.path.split(sys.argv[0])
 
     if args.verbose:

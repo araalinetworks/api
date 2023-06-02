@@ -19,10 +19,10 @@ To use your own backdoor server
 +++++++++++++++++++++++++++++++
 On a k8s cluster install and configure GoShelly server using the following instructions.
 NOTE: These installation steps assume that you have Helm and kubectl - the package manager and command line tool for k8s - installed and setup already.
-    1.  Add Helm repository
+    1.  Add Araali's Helm repository
         ::
             helm repo add araali-helm https://araalinetworks.github.io/araali-helm/
-    2.  Install GoShelly
+    2.  Install GoShelly Server
         ::
             helm install goshelly-server araali-helm/goshelly-server
 
@@ -32,7 +32,7 @@ NOTE: These installation steps assume that you have Helm and kubectl - the packa
         Save the external IP to the service named "goshelly-helm-port-forwarding" for later use, when setting up the GoShelly client.
     Uninstall GoShelly Server::
 
-        helm uninstall goshelly-helm -n goshelly-helm
+        helm uninstall goshelly-server
 
 To use Araali's backdoor server
 ++++++++++++++++++++++++++++++++
@@ -43,7 +43,7 @@ Setup GoShelly Client
 _____________________
 On the machine, you wish to test the attack response readiness for, install and configure GoShelly Client 
 using the following instructions.
-    1.  Download Araalictl
+    1.  Download GoShelly Client
         On Linux::
 
             curl -O https://s3-us-west-2.amazonaws.com/araalinetworks.cf/goshelly_linux 
