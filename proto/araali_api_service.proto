@@ -37,18 +37,34 @@ service AraaliAPI {
 	rpc listFortifyYaml(ListFortifyYamlRequest) returns (ListFortifyYamlResponse) {}
 	// Delete existing k8s workload
 	rpc deleteFortifyYaml(DeleteFortifyYamlRequest) returns (AraaliAPIResponse) {}
-        // Download policy and enforcement knobs as code.
+	// Enable or Disable enforcement for zone/app/container/service
+	rpc setShieldStatus(ShieldRequest) returns (AraaliAPIResponse) {}
+	// List shielded zone/app/container/service  lenses
+	rpc listShieldedLens(ListShieldedLensRequest) returns (ListShieldedLensResponse) {}
+	// Download policy and enforcement knobs as code.
 	rpc listPolicyAndEnforcementStatus(ListPolicyAndEnforcementStatusRequest) returns (ListPolicyAndEnforcementStatusResponse) {}
 	// Get existing Araali firewall config
 	rpc getFirewallConfig(GetFirewallConfigRequest) returns (FirewallConfigResponse) {}
 	// Update existing Araali firewall config
 	rpc updateFirewallConfig(UpdateFirewallConfigRequest) returns (FirewallConfigResponse) {}
+	// Add the FIM Policies for given tenant
+	rpc addFIMPolicies(AddFIMPoliciesRequest) returns (AraaliAPIResponse) {}
+	// Delete the FIM Policies for given tenant
+	rpc deleteFIMPolicies(DeleteFIMPoliciesRequest) returns (AraaliAPIResponse) {}
+	// Get all the FIM Polices for given tenant
+	rpc listFIMPolicies(ListFIMPoliciesRequest) returns (ListFIMPoliciesResponse) {}
 	// Add the Pod Name Mappings for given tenant
 	rpc addPodNameMappings(AddPodNameMappingsRequest) returns (AraaliAPIResponse) {}
 	// Delete the Pod Name Mappings for given tenant
 	rpc deletePodNameMappings(DeletePodNameMappingsRequest) returns (AraaliAPIResponse) {}
 	// Get all the Pod Name Mappings for given tenant
 	rpc listPodNameMappings(ListPodNameMappingsRequest) returns (ListPodNameMappingsResponse) {}
+	// Update slack webhook for the given Tenant
+	rpc subscribeToSlackAlerts(SubscribeToSlackAlertsRequest) returns (AraaliAPIResponse) {}
+	// Update the Policy Status for given FIM policy name
+	rpc updateFIMPolicyStatus(UpdateFIMPolicyStatusRequest) returns (AraaliAPIResponse) {}
+	// Edit the FIM Policy
+	rpc updateFIMPolicy(UpdateFIMPolicyRequest) returns (AraaliAPIResponse) {}
 }
 
 /**
@@ -61,6 +77,8 @@ message Tenant {
 	 *  Also adds an ADMIN role user in this tenant.
 	 */
 	string admin_email = 2;
+	/** Set to true if tenant is only for quickstart/demo purposes. */
+	bool is_quickstart = 3;
 }
 
 /**
@@ -419,6 +437,10 @@ message AlertInfo {
 	uint32 re_open_count           = 3;
 	/** Whether OPEN or CLOSED */
 	Status status              = 4;
+	/** User who updated alert last */
+	string user = 5;
+	/** Reason for updating alert */
+	string reason = 6;
 }
 
 /**
@@ -520,23 +542,23 @@ message Lens {
 		TENANT       = 6;	// Tenant level
 	}
 	/** Lens type */
-	LensType type         = 1;
+	LensType type = 1;
 	/** Zone of the lens */
-	string zone           = 2;
+	string zone = 2;
 	/** App lens */
-	string app            = 3;
+	string app = 3;
 	/** Pod of the lens */
-	string pod            = 4;
+	string pod = 4;
 	/** Container of the lens */
 	string container_name = 5;
 	/** Process of the lens */
-	string process        = 6;
+	string process = 6;
 	/** Parent process of the lens */
 	string parent_process = 7;
 	/** Binary name of the lens */
-	string binary_name    = 8;
+	string binary_name = 8;
 	/** Service lens */
-	string service        = 9;
+	string service = 9;
 }
 
 /**
@@ -544,7 +566,7 @@ message Lens {
  */
 message Insight {
 	/** The kind of insight captured */
-	string reason        = 1;
+	string reason = 1;
 	/** The URL to view the insights */
 	string url           = 2;
 	/** Number of insights */
@@ -634,12 +656,50 @@ message ListPolicyAndEnforcementStatusResponse {
 	string policy_and_enforcement_yaml = 1;
 }
 
+message SyscallRulesRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	/** one or more rules with yaml format are passed */
+	repeated string syscall_rule_yaml = 2;
+}
+
+message ListSyscallRulesRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+}
+
+message ListSyscallRulesResponse {
+	/** one or more rules with yaml format are returned */
+	repeated string syscall_rule_yaml = 1;
+}
+
 message AraaliFwKnobs {
 	bool install                          = 1;
 	bool enable_process_vulnerabilities   = 2;
 	bool enable_container_vulnerabilities = 3;
 	bool enable_flow_dedup                = 4;
 	bool enable_flow_rate_limit           = 5;
+	bool enforce                          = 6;
+	bool upgrade                          = 7;
+	string k8s_req_cpu                    = 8;
+	string k8s_limits_cpu                 = 9;
+	string k8s_req_mem                    = 10;
+	string k8s_limits_mem                 = 11;
+	string autok8s_image                  = 12;
+	string fw_image                       = 13;
+	string fw_init_image                  = 14;
+	int32 agent_cpu_limit                 = 15;
+	bool agent_limited_resources          = 16;
+	bool agent_nice_enabled               = 17;
+	int32 agent_nice_value                = 18;
+	string cluster_name                   = 19;
+	bool cpu_limit_enabled                = 20;
+	bool enter_mini_shell                 = 21;
+	string fog                            = 22;
+	int32 sys_cpu_threshold               = 23;
+	int32 vuln_idle_duty_cycles           = 24;
+	int32 vuln_image_size                 = 25;
+	int32 vuln_min_cores                  = 26;
 }
 
 message GetFirewallConfigRequest {
@@ -654,9 +714,69 @@ message UpdateFirewallConfigRequest {
 }
 
 message FirewallConfigResponse {
+	AraaliAPIResponse response = 1;
 	string tenant_id           = 2;
 	string zone                = 3;
 	AraaliFwKnobs knobs        = 4;
+}
+
+message FIMPolicyControl {
+	enum Action {
+		ALL = 0;
+		DELETE = 1;
+		RENAME = 2;
+		SECURITY = 3;
+	}
+	repeated Action actions = 1;
+	string path = 2;
+}
+
+message FIMPolicyControls {
+	repeated FIMPolicyControl control = 1;
+}
+
+message FIMPolicy {
+	/** name of the policy */
+	string name                       = 1;
+	FIMPolicyControls controls        = 2;
+	map<string, string> selectors     = 3;
+}
+
+message FIMPolicies {
+	repeated FIMPolicy policies = 1;
+}
+
+message AddFIMPoliciesRequest {
+	/** Handle of tenant */
+	Tenant tenant                 = 1;
+	oneof rules {
+		/** one or more policies with yaml format */
+		string fim_policies_yaml    = 2;
+		/** one or more policies with proto format */
+		FIMPolicies fim_policies    = 3;
+	}
+}
+
+message DeleteFIMPoliciesRequest {
+	/** Handle of tenant */
+	Tenant tenant                    = 1;
+	repeated string fim_policy_names = 2;
+}
+
+message ListFIMPoliciesRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+}
+
+message FIMPolicyResponse {
+	string name                = 1;
+	string fim_policy_yaml     = 2;
+	bool is_enabled            = 3;
+}
+
+message ListFIMPoliciesResponse {
+	/** one or more rules with yaml format are returned */
+	repeated FIMPolicyResponse fim_policy_yamls = 1;
 }
 
 message PodNameMapping {
@@ -694,4 +814,77 @@ message ListPodNameMappingsRequest {
 message ListPodNameMappingsResponse {
 	/** one or more mapping of ephemeral pod_names */
 	repeated PodNameMapping pod_name_mapping = 1;
+}
+
+message ShieldRequest {
+	enum ShieldOp {
+		SHOW = 0;
+		ENABLE = 1;
+		DISABLE = 2;
+	}
+	/** Handle of tenant */
+	Tenant tenant = 1;
+	ShieldOp op = 2;
+	string zone = 3;
+	string app = 4;
+	/** If pod is specified, then container must be specified, as enforcement is allowed on zone/app/container grain, but not pod grain */
+	string pod = 5;
+	string container = 6;
+	/** If process ingress shield is required please specify below */
+	string process = 9;
+	string parent_process = 10;
+	string binary_name = 11;
+	/** Fqdn or IP address of service */
+	string service = 7;
+	int32 service_port = 8;
+}
+
+message ListShieldedLensRequest {
+	/** Handle of tenant */
+	Tenant tenant = 1;
+}
+
+message ListShieldedLensResponse {
+	/** List of shielded lens */
+	repeated ShieldedLens shielded_lens = 1;
+}
+
+message ShieldedLens {
+	enum State {
+		DISABLED = 0;
+		TRANSITIONING = 1;
+		ENABLED = 2;
+	}
+	Lens lens = 1;
+	/** Shield state - ENABLED implies both ingress and egress are enforced on this lens */
+	State shield_state = 2;
+}
+
+message SubscribeToSlackAlertsRequest {
+	/** Handle of tenant */
+	Tenant tenant  = 1;
+	/** true for unsubscribe and false for subscribe by passing the webhook for given tenant */
+	bool unsubscribe = 2;
+	/** webhook value. given value will be set when unsubscribe is false or not set */
+	string webhook = 3;
+}
+
+message UpdateFIMPolicyStatusRequest {
+	/** Handle of tenant */
+	Tenant tenant      = 1;
+	/** FIM Policy names to get updated */
+	repeated string policy_names = 2;
+	/** FIM Policy Status */
+	bool disable_policy = 3;
+}
+
+message UpdateFIMPolicyRequest {
+	/** Handle of tenant */
+	Tenant tenant      = 1;
+	/** FIM Policy in the YAML format */
+	string fim_policy_yaml    = 2;
+	/** Name of the Policy */
+	string policy_name = 3;
+	/** Status of the Policy */
+	bool policy_status = 4;
 }
